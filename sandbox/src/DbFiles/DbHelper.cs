@@ -1,0 +1,404 @@
+using EFModeling.EntityProperties.FluentAPI.Required;
+using Microsoft.EntityFrameworkCore;
+
+public class DbHelper
+{
+    public async Task EnsureDeletedCreated()    //todo delete this for obvious safety reasons before production
+    {
+        using (var db = new MyContext())
+        {
+            await db.Database.EnsureDeletedAsync();
+            await db.Database.EnsureCreatedAsync();
+        }
+    }
+    public async Task<List<CustomerScript>> GetAllCustomerScripts(bool includeCaches = false)
+    {
+        if (includeCaches == false)
+        {
+            using (var db = new MyContext())
+            {
+                var scripts = await db.CustomerScripts.ToListAsync();
+                // Console.WriteLine("Db Helper getAllCustomerScripts executed!");
+                return scripts;
+            }
+        }
+        else
+        {
+            using (var db = new MyContext())
+            {
+                var scripts = await db.CustomerScripts.Include(s => s.CompiledCaches).ToListAsync();
+                // Console.WriteLine("Db Helper getAllCustomerScripts executed!");
+                return scripts;
+            }
+        }
+
+
+    }
+    public async Task<List<ScriptCompiledCache>> GetAllCompiledScriptCaches()
+    {
+        using (var db = new MyContext())
+        {
+            var caches = await db.ScriptCompiledCaches
+            .Include(c => c.CustomerScript) //added might be bad for performance
+            .ToListAsync();
+            // Console.WriteLine("Db Helper getAllCompiledScriptCaches executed!");
+            return caches;
+        }
+    }
+
+    public async Task AutomaticCompilationOnVersionUpdate(int currentApiVersion)
+    {
+        try
+        {
+            foreach (var item in await GetAllCustomerScripts(includeCaches: true))
+            {
+                bool flagIfNoCurrentImplementation = false;
+                foreach (var itemN in item.CompiledCaches)
+                {
+                    int start = item.MinApiVersion;
+                    int count = currentApiVersion - start + 1;  //check if correct
+
+                    int[] versions = Enumerable.Range(start, count).ToArray();
+                    if (versions.Contains(itemN.ApiVersion) == false)
+                    {
+                        // await CreateAndInsertCompiledCache(item, currentApiVersion); //todo create a method to compile to all older versions also
+                    }
+
+                    if (itemN.ApiVersion == currentApiVersion)
+                    {
+                        flagIfNoCurrentImplementation = true;
+                    }
+                    if (itemN.ApiVersion < item.MinApiVersion)
+                    {
+                        await DeleteScriptCache(itemN.ScriptId, currentApiVersion);
+                        Console.WriteLine("Deleted an old Script Cache!");
+                    }
+                }
+
+                if (flagIfNoCurrentImplementation == false)
+                {
+                    await CreateAndInsertCompiledCache(item, currentApiVersion);
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e.ToString());
+            throw new Exception();
+        }
+
+    }
+    public async Task<CustomerScript> CreateAndInsertCustomerScript(string scriptString, Guid randomGUID, string createdBy, int currentApiVersion, DateTime? createdAt = null)
+    //todo make sure compiling happens after verification of isDuplicate
+    {
+        using (var db = new MyContext())
+        {
+            if (createdAt == null)
+            {
+                createdAt = DateTime.UtcNow;
+            }
+            ScriptCompiler compiler = new ScriptCompiler();
+            var getTupleFromVal = compiler.BasicValidationBeforeCompiling(scriptString);
+
+            CustomerScript randomTestScript2 = new CustomerScript
+            {
+                Id = randomGUID,
+                ScriptName = getTupleFromVal.className,
+                ScriptType = getTupleFromVal.baseTypeName,
+                SourceCode = scriptString,
+                MinApiVersion = getTupleFromVal.versionInt,
+                CreatedAt = createdAt,
+                ModifiedAt = DateTime.UtcNow,
+                CreatedBy = createdBy
+            };
+
+            bool testBool = false;      // try ensure compilat not added twice
+            // testBool = await IsDuplicateScript(randomTestScript2);  //uncomment this if you dont want to check for duplicate existing in db when inserting
+
+
+            if (testBool == false)
+            {
+                byte[] tempComp = compiler.RunCompilation(scriptString);
+
+                randomTestScript2.CompiledCaches.Add(new ScriptCompiledCache
+                {
+                    ScriptId = randomGUID,
+                    ApiVersion = currentApiVersion,    //todo figure out how to do this
+                    AssemblyBytes = tempComp,
+                    CompilationDate = DateTime.UtcNow,
+                    CompilationSuccess = true,
+                    CompilationErrors = ""
+                });
+                db.CustomerScripts.Add(randomTestScript2);
+                await db.SaveChangesAsync();
+                // Console.WriteLine("Db Helper CreateAndInsertCustomerScript executed!");
+                return randomTestScript2;
+            }
+            else
+            {
+                return randomTestScript2;   //todo maybe throw error idk
+            }
+        }
+    }
+    public async Task CreateAndInsertCompiledCache(CustomerScript script, int currentApiVersion)   //could change to take Guid instead
+    {
+        using (var db = new MyContext())
+        {
+            ScriptCompiler compiler = new ScriptCompiler();
+            var getTupleFromVal = compiler.BasicValidationBeforeCompiling(script.SourceCode);
+
+            if (await db.ScriptCompiledCaches.AnyAsync(c => c.ScriptId == script.Id && c.ApiVersion == currentApiVersion))
+            {
+                Console.WriteLine("Skipping insert of: " + getTupleFromVal.className + " because it already exists already exists.");
+                return;
+            }
+            else
+            {
+
+                byte[] tempComp = compiler.RunCompilation(script.SourceCode);
+                ScriptCompiledCache tempCache = new ScriptCompiledCache
+                {
+                    ScriptId = script.Id,
+                    ApiVersion = currentApiVersion,
+                    AssemblyBytes = tempComp,
+                    CompilationDate = DateTime.UtcNow,
+                    CompilationSuccess = true,
+                    CompilationErrors = ""
+                };
+                // Console.WriteLine("API Version Compiled Cache: " + getTupleFromVal.versionInt);
+                await InsertScriptCompiledCache(tempCache);
+                await db.SaveChangesAsync();
+            }
+        }
+    }
+    public async Task DeleteCustomerScript(Guid id)
+    {
+        using (var db = new MyContext())
+        {
+            CustomerScript temp = await GetCustomerScript(id);
+            db.Remove(temp);
+            await db.SaveChangesAsync();
+            // Console.WriteLine("Db Helper deleteCustomerScript executed!");
+        }
+    }
+    public async Task DeleteScriptCache(Guid id, int currentApiVersion)
+    {
+        using (var db = new MyContext())
+        {
+            ScriptCompiledCache temp = await GetCompiledScripCache(id, currentApiVersion);
+            db.Remove(temp);
+            await db.SaveChangesAsync();
+            // Console.WriteLine("Db Helper deleteScriptCache executed!");
+        }
+    }
+    public async Task UpdateCustomerScript(CustomerScript customerScript)
+    {
+        using (var db = new MyContext())
+        {
+            //todo
+        }
+    }
+    public async Task InsertScriptCompiledCache(ScriptCompiledCache scriptCompiledCache)
+    {
+        using (var db = new MyContext())
+        {
+            // Option 1: If scriptCompiledCache.ScriptId is already set correctly
+            // Just add it directly. EF Core will see it has a foreign key and insert it.
+            // Ensure scriptCompiledCache.CustomerScript is NULL to avoid EF trying to re-insert the parent.
+            scriptCompiledCache.CustomerScript = null;
+
+            db.ScriptCompiledCaches.Add(scriptCompiledCache);
+            await db.SaveChangesAsync();
+            // Console.WriteLine("Db Helper insertScriptCompiledCache executed!");
+        }
+
+    }
+
+    public async Task<ScriptCompiledCache> GetCompiledScripCache(Guid id, int currentApiVersion)
+    {
+        using (var db = new MyContext())
+        {
+            // Console.WriteLine("GetCompiledScriptCacheReached");
+            var cache = await db.ScriptCompiledCaches.SingleAsync(b => b.ScriptId == id && b.ApiVersion == currentApiVersion);
+            // Console.WriteLine("Db Helper GetCompiledScriptCache executed!");
+            return cache;
+        }
+    }
+    public async Task<CustomerScript> GetCustomerScript(Guid id)
+    {
+        using (var db = new MyContext())
+        {
+            var script = await db.CustomerScripts.SingleAsync(b => b.Id == id);
+            // Console.WriteLine("Db Helper GetCustomerScript executed!");
+            return script;
+        }
+    }
+
+
+    public async Task CompileAllStoredScripts(int currentApiVersion)
+    {
+        try
+        {
+            using (var db = new MyContext())
+            {
+                List<CustomerScript> allScriptSC = await GetAllCustomerScripts();
+                for (int i = 0; i < allScriptSC.Count(); i++)
+                {
+                    await CreateAndInsertCompiledCache(allScriptSC[i], currentApiVersion);
+                    await db.SaveChangesAsync();
+                    // Console.WriteLine("DbHelper CompileAllStoredScripts Executed!");
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e.ToString());
+        }
+    }
+    public async Task DeleteAllCachedScripts()
+    {
+        try
+        {
+            using (var db = new MyContext())
+            {
+                List<ScriptCompiledCache> allCaches = await GetAllCompiledScriptCaches();
+                for (int i = 0; i < allCaches.Count(); i++) //this could lead to a bottleneck on large datasets
+                {
+                    db.Remove(allCaches[i]);
+                }
+                await db.SaveChangesAsync();
+                // Console.WriteLine("Db Helper DeleteAllCachedScripts executed!");
+            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e.ToString());
+        }
+    }
+    public async Task<bool> IsDuplicateScript(CustomerScript script)
+    {
+        List<CustomerScript> allScripts = await GetAllCustomerScripts(includeCaches: true);
+        ScriptCompiler compiler = new ScriptCompiler();
+        foreach (var item in allScripts)
+        {
+            if (item.Id == script.Id
+                || item.ScriptName == script.ScriptName
+                || item.SourceCode == script.SourceCode
+                || compiler.IsTheSameTree(item.SourceCode, script.SourceCode))
+            {
+                return true;
+            }
+
+        }
+        return false;
+    }
+    public async Task<(List<Guid> scriptGUIDs, List<Guid> cacheGUIDs, bool isDuplicate)> DetectDuplicates(CustomerScript? script = null)
+    {
+        bool isDuplicate = false;
+        if (script == null)
+        {
+
+        }
+        try
+        {
+            List<CustomerScript> allScripts = await GetAllCustomerScripts(includeCaches: true);
+            List<Guid> duplicateGuids = [];
+            ScriptCompiler compiler = new ScriptCompiler();
+            for (int i = 0; i < allScripts.Count(); i++)
+            {
+                for (int j = 0; j < allScripts.Count(); j++)
+                {
+                    if (i != j && j > i)
+                    {
+                        if (allScripts[i].Id == allScripts[j].Id
+                        || allScripts[i].ScriptName == allScripts[j].ScriptName
+                        || allScripts[i].SourceCode == allScripts[j].SourceCode
+                        || compiler.IsTheSameTree(allScripts[i].SourceCode, allScripts[j].SourceCode)
+                        )
+                        {
+                            if (duplicateGuids.Contains(allScripts[j].Id) == false)
+                            {
+                                duplicateGuids.Add(allScripts[j].Id);
+                            }
+                        }
+                    }
+                }
+            }
+            List<ScriptCompiledCache> allCaches = await GetAllCompiledScriptCaches();
+            List<Guid> cachesToDelete = [];
+            for (int i = 0; i < allCaches.Count(); i++)
+            {
+                Guid cacheID = allCaches[i].ScriptId;
+                bool found = false;
+                for (int j = 0; j < allScripts.Count(); j++)
+                {
+                    if (allScripts[j].Id == cacheID)
+                    {
+                        found = true;
+                    }
+                }
+                if (found == false)
+                {
+                    try
+                    {
+                        cachesToDelete.Add(cacheID);
+                        // await DeleteScriptCache(cacheID);   //deletes if there is a cache without a script attached to it
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(e.ToString());
+                        throw new Exception();
+                    }
+
+                }
+            }
+            return (scriptGUIDs: duplicateGuids, cacheGUIDs: cachesToDelete, isDuplicate: isDuplicate);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e.ToString());
+            throw new Exception();
+        }
+    }
+    public async Task RemoveDuplicates(int currentApiVersion)
+    {
+        try
+        {
+            List<Guid> duplicateGuids = (await DetectDuplicates()).scriptGUIDs;
+            List<Guid> cachesWithoutScript = (await DetectDuplicates()).cacheGUIDs;
+
+            for (int i = 0; i < duplicateGuids.Count(); i++)
+            {
+                // Console.WriteLine("if 4 reached");
+                if (duplicateGuids.Contains(duplicateGuids[i]))
+                {
+                    try
+                    {
+                        await DeleteCustomerScript(duplicateGuids[i]);
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine("Error when deleting index: " + i + " the GUID: " + duplicateGuids[i]);   //todo fix why it throws this error all the time but still works?
+                    }
+                }
+            }
+            foreach (var item in cachesWithoutScript)
+            {
+                try { await DeleteScriptCache(item, currentApiVersion); }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e.ToString());
+                    throw new Exception();
+                }
+
+            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e.ToString());
+            throw new Exception();
+        }
+
+
+    }
+}

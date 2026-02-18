@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "scripting", "scripting\scripting.csproj", "{47AAEEFF-E71D-4385-AFDD-AC71C5951144}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "sandbox", "sandbox\sandbox.csproj", "{2942B720-2128-434C-8BD0-EB157699C44B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{47AAEEFF-E71D-4385-AFDD-AC71C5951144}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{47AAEEFF-E71D-4385-AFDD-AC71C5951144}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{47AAEEFF-E71D-4385-AFDD-AC71C5951144}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{47AAEEFF-E71D-4385-AFDD-AC71C5951144}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2942B720-2128-434C-8BD0-EB157699C44B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2942B720-2128-434C-8BD0-EB157699C44B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2942B720-2128-434C-8BD0-EB157699C44B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2942B720-2128-434C-8BD0-EB157699C44B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
