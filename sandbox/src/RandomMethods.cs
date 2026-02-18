@@ -27,8 +27,12 @@ public class RandomMethods
         for (int i = 0; i < sourceCodes.Count; i++)
         {
             // Console.WriteLine(i + 1 + ". " + sourceCodes[i].ToString());
-            Console.WriteLine(i + 1 + ". " + sourceCodes[i].ToStringShorter());
+            // Console.WriteLine(i + 1 + ". " + sourceCodes[i].ToStringShorter());
+            string str = (i + 1).ToString() + ". Name: " + sourceCodes[i].ScriptName + ", Created by: " + sourceCodes[i].CreatedBy
+            + ", Created at: " + sourceCodes[i].CreatedAt + ", MinApiVersion: " + sourceCodes[i].MinApiVersion + ", Modified at: " + sourceCodes[i].ModifiedAt
+            + ", Compiled count [" + sourceCodes[i].CompiledCaches.Count() + "]";
             sourceDict.Add(i + 1, sourceCodes[i].Id);
+            Console.WriteLine(str);
         }
         if (sourceDict.Count() == 0)
         {

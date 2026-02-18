@@ -9,11 +9,11 @@ using Microsoft.EntityFrameworkCore;
 
 class MainProgram
 {
-    private static string scriptFolderPath = @"C:\Users\Gilles\Desktop\UNI\Semester 6\Testing\testing2\labsolutionlu-ember-scripting-fb966c220f60\sandbox\src\Scripts";
-    // private static string scriptFolderPath =@"C:\Users\Gilles\Desktop\ScriptsForProject\V2";    //out of scope to test errors
+    // private static string scriptFolderPath = @"C:\Users\Gilles\Desktop\UNI\Semester 6\Testing\testing2\labsolutionlu-ember-scripting-fb966c220f60\sandbox\src\Scripts";
+    private static string scriptFolderPath = @"C:\Users\Gilles\Desktop\ScriptsForProject\V2";    //out of scope to test errors
     private static string userName = "Gilles";
 
-    private static int currentApiVersion = 3;
+    private static int currentApiVersion = 6;
     private static int currentSdkVersion = 1;
     static async Task Main(string[] args)
     {
@@ -29,9 +29,9 @@ class MainProgram
             var db = new DbHelper();
 
             // await RandomMethods.CompileAllScriptsInFolderAndSaveToDB(scriptFolderPath);   //main precompilation act
-            Dictionary<int, Guid> cacheDict = await RandomMethods.ListAllCompiledFromDB();
+            // Dictionary<int, Guid> cacheDict = await RandomMethods.ListAllCompiledFromDB();
             // Dictionary<int, Guid> sourceDict = await RandomMethods.ListAllStoredSourceCodes();
-            Dictionary<int, Guid> sourceDict = [];
+            // Dictionary<int, Guid> sourceDict = [];
 
             await db.AutomaticCompilationOnVersionUpdate(currentApiVersion);    //todo make this "background job that is run automatically periodically"
 
@@ -40,66 +40,74 @@ class MainProgram
             {
                 try
                 {
-                    Console.WriteLine("Enter the id of the script you want to run: ");
-                    string userInput = Console.ReadLine();
-                    switch (userInput)
-                    {
-                        case null:
-                        case "":
-                        case " ":
-                            Console.WriteLine("You entered nothing try again.");
-                            break;
-                        case "exit":
-                            running = false;
-                            break;
-                        case "source":
+                    await UsefulMethods.FacadeTestingSwitch(currentApiVersion, userName, scriptFolderPath);
+                    break;
 
-                            await RandomMethods.GetSourceCodeInSwitch();
-                            break;
-                        case "reset":
-                            await new DbHelper().EnsureDeletedCreated();
-                            cacheDict = await RandomMethods.ListAllCompiledFromDB();
-                            break;
-                        case "edit":
-                            Console.WriteLine("Enter the id of the script you want to edit: ");
-                            string userInputForEdit = Console.ReadLine();
-                            Guid idEdit = cacheDict[Int32.Parse(userInputForEdit)];
-                            await RandomMethods.EditScriptInSwitch(idEdit, userName, currentApiVersion);
+                    // Console.WriteLine("Enter the id of the script you want to run: ");
+                    // string userInput = Console.ReadLine();
 
-                            break;
-                        case "comp":    //doesnt compile if isDuplicate is eneblaed bc scripts are already in db so no cache is created maybe todo
-                            await RandomMethods.CompileAllScriptsInFolderAndSaveToDB(scriptFolderPath, userName, currentApiVersion);   //main precompilation act
-                            cacheDict = await RandomMethods.ListAllCompiledFromDB();
-                            break;
-                        case "comp source":
-                            await new DbHelper().CompileAllStoredScripts(currentApiVersion);
-                            break;
-                        case "ls":
-                            cacheDict = await RandomMethods.ListAllCompiledFromDB();
-                            break;
-                        case "ls source":
-                            sourceDict = await RandomMethods.ListAllStoredSourceCodes();
-                            break;
-                        case "dupes":
-                            await new DbHelper().RemoveDuplicates(currentApiVersion);
-                            break;
-                        case "deleteCache":
-                            await new DbHelper().DeleteAllCachedScripts();
-                            break;
-                        default:
-                            if (userInput.Length > 5)
-                            {
-                                var compiledScript = await db.GetCompiledScripCache(Guid.Parse(userInput), currentApiVersion);
-                                new ScriptExecutor(compiledScript.AssemblyBytes, UsefulMethods.GetTestingContext()).RunScriptExecution<object>();
-                            }
-                            else
-                            {
-                                Guid id = cacheDict[Int32.Parse(userInput)];
-                                var compiledScript = await db.GetCompiledScripCache(id, currentApiVersion);
-                                new ScriptExecutor(compiledScript.AssemblyBytes, UsefulMethods.GetTestingContext()).RunScriptExecution<object>();
-                            }
-                            break;
-                    }
+                    // switch (userInput)
+                    // {
+                    //     case null:
+                    //     case "":
+                    //     case " ":
+                    //         Console.WriteLine("You entered nothing try again.");
+                    //         break;
+                    //     case "exit":
+                    //         running = false;
+                    //         break;
+                    //     case "source":
+
+                    //         await RandomMethods.GetSourceCodeInSwitch();
+                    //         break;
+                    //     case "reset":
+                    //         await new DbHelper().EnsureDeletedCreated();
+                    //         cacheDict = await RandomMethods.ListAllCompiledFromDB();
+                    //         break;
+                    //     case "edit":
+                    //         Console.WriteLine("Enter the id of the script you want to edit: ");
+                    //         string userInputForEdit = Console.ReadLine();
+                    //         Guid idEdit = cacheDict[Int32.Parse(userInputForEdit)];
+                    //         await RandomMethods.EditScriptInSwitch(idEdit, userName, currentApiVersion);
+
+                    //         break;
+                    //     case "comp":    //doesnt compile if isDuplicate is eneblaed bc scripts are already in db so no cache is created maybe todo
+                    //         await RandomMethods.CompileAllScriptsInFolderAndSaveToDB(scriptFolderPath, userName, currentApiVersion);   //main precompilation act
+                    //         cacheDict = await RandomMethods.ListAllCompiledFromDB();
+                    //         break;
+                    //     case "comp source":
+                    //         await new DbHelper().CompileAllStoredScripts(currentApiVersion);
+                    //         break;
+                    //     case "ls":
+                    //         cacheDict = await RandomMethods.ListAllCompiledFromDB();
+                    //         break;
+                    //     case "ls source":
+                    //         sourceDict = await RandomMethods.ListAllStoredSourceCodes();
+                    //         break;
+                    //     case "dupes":
+                    //         await new DbHelper().RemoveDuplicates(currentApiVersion);
+                    //         break;
+                    //     case "deleteCache":
+                    //         await new DbHelper().DeleteAllCachedScripts();
+                    //         break;
+                    //     case "facade":
+                    //         await UsefulMethods.FacadeTestingSwitch(currentApiVersion, userName, scriptFolderPath);
+                    //         running = false;
+                    //         break;
+                    //     default:
+                    //         if (userInput.Length > 5)
+                    //         {
+                    //             var compiledScript = await db.GetCompiledScripCache(Guid.Parse(userInput), currentApiVersion);
+                    //             new ScriptExecutor(compiledScript.AssemblyBytes, UsefulMethods.GetTestingContext()).RunScriptExecution<object>();
+                    //         }
+                    //         else
+                    //         {
+                    //             Guid id = cacheDict[Int32.Parse(userInput)];
+                    //             var compiledScript = await db.GetCompiledScripCache(id, currentApiVersion);
+                    //             new ScriptExecutor(compiledScript.AssemblyBytes, UsefulMethods.GetTestingContext()).RunScriptExecution<object>();
+                    //         }
+                    //         break;
+                    // }
                 }
                 catch (DbUpdateException e)
                 {

@@ -58,9 +58,9 @@ public class CustomerScript
     }
     public string ToStringShorter()
     {
-        string str = "Script Name: " + ScriptName + "Script Type: " + ScriptType + " MinApiVersion: "
-        + MinApiVersion.ToString() + " Created at: " + CreatedAt.ToString() + " Modified at: "
-        + ModifiedAt.ToString() + " Created by " + CreatedBy;
+        string str = "Script Name: " + ScriptName + ", Script Type: " + ScriptType + ", MinApiVersion: "
+        + MinApiVersion.ToString() + ", Created at: " + CreatedAt.ToString() + ", Modified at: "
+        + ModifiedAt.ToString() + ", Created by " + CreatedBy;
 
         string compiledCachesString = "@ Compiled Caches: { @";
         for (int i = 0; i < CompiledCaches.Count(); i++)

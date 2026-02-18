@@ -31,17 +31,17 @@ public class ScriptCompiledCache
 
     public override string ToString()
     {
-        string str = "Compiled Script: Script Name: " + CustomerScript.ScriptName + "Script ID: " + ScriptId.ToString() +
-        // " Created: "+CompilationDate
-        " Script Created: " + CustomerScript.CreatedAt
+        string str = "Compiled Script: Script Name: " + CustomerScript.ScriptName + ", Script ID: " + ScriptId.ToString() +
+        ", Compiled: " + CompilationDate + ", Version: " + ApiVersion
+        // " Script Created: " + CustomerScript.CreatedAt
         ;
         // str = str.Replace("@", Environment.NewLine);
         return str;
     }
     public string ToStringBetter()
     {
-        string str = "Compiled Script: Script Name: " + CustomerScript.ScriptName + " Compiled for V" + ApiVersion + " Created: " + CompilationDate +
-        " Script Created: " + CustomerScript.CreatedAt;
+        string str = "Compiled Script: Script Name: " + CustomerScript.ScriptName + ", Compiled for V" + ApiVersion + ", Created: " + CompilationDate +
+        ", Script Created: " + CustomerScript.CreatedAt;
         return str;
     }
 }
