@@ -13,7 +13,7 @@ public class ScriptCompiler
     //     script = pScript;
     // }
 
-    public byte[] RunCompilation(string script, MetadataReference[]? references = null,int apiVersion=-1) //references param there to enable later on users to define custom references
+    public byte[] RunCompilation(string script, MetadataReference[]? references = null, int apiVersion = -1) //references param there to enable later on users to define custom references
     {
         try
         {
@@ -22,7 +22,7 @@ public class ScriptCompiler
 
             //create list of "external assamblies" that the script needs in oder to be able to compile and run, you need to manually add file paths
             // if (references == null)
-            if (apiVersion==-1)
+            if (apiVersion == -1)
             {
                 Console.WriteLine("Added default references!");
                 references = new MetadataReference[]
@@ -40,7 +40,7 @@ public class ScriptCompiler
             if (apiVersion != -1)
             {
                 Console.WriteLine("Added custom references!");  //if this works remove the if references is null if stat above
-                references=GetReferencesForVersion(apiVersion);
+                references = GetReferencesForVersion(apiVersion);
             }
 
             //this initiates the process of the compilation (does not produce bytes yet), it binds the source code with the refrences and the config options
@@ -156,7 +156,12 @@ public class ScriptCompiler
 
         // 1. Define path to the specific version folder
         // string versionPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "OldVersions", version.ToString());
-        string tempPath = @"C:\Users\Gilles\Desktop\UNI\Semester 6\Code";
+        // string tempPath = @"C:\Users\Gilles\Desktop\UNI\Semester 6\Code";
+        string tempPath = Path.GetFullPath(
+            Path.Combine(AppDomain.CurrentDomain.BaseDirectory,
+                         "..", "..", "..", "..", "..", "..")
+        );
+
         string versionPath = Path.Combine(tempPath, "OldVersions", version.ToString());
 
         if (!Directory.Exists(versionPath))
