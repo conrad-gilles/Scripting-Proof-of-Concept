@@ -23,6 +23,7 @@ public class ScriptCompiler
             //create list of "external assamblies" that the script needs in oder to be able to compile and run, you need to manually add file paths
             if (references == null)
             {
+                Console.WriteLine("Added default references!");
                 references = new MetadataReference[]
                      {
                         MetadataReference.CreateFromFile(typeof(object).Assembly.Location), // System.Private.CoreLib
@@ -148,7 +149,9 @@ public class ScriptCompiler
         var references = new List<MetadataReference>();
 
         // 1. Define path to the specific version folder
-        string versionPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "OldVersions", version.ToString());
+        // string versionPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "OldVersions", version.ToString());
+        string tempPath = @"C:\Users\Gilles\Desktop\UNI\Semester 6\Code";
+        string versionPath = Path.Combine(tempPath, "OldVersions", version.ToString());
 
         if (!Directory.Exists(versionPath))
         {

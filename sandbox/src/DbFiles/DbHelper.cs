@@ -1,4 +1,5 @@
 using EFModeling.EntityProperties.FluentAPI.Required;
+using Microsoft.CodeAnalysis;
 using Microsoft.EntityFrameworkCore;
 
 public class DbHelper
@@ -121,8 +122,9 @@ public class DbHelper
         }
 
     }
-    public async Task<CustomerScript> CreateAndInsertCustomerScript(string scriptString, Guid randomGUID, string createdBy, int currentApiVersion, DateTime? createdAt = null)
+    public async Task<CustomerScript> CreateAndInsertCustomerScript(string scriptString, Guid randomGUID, string createdBy, int currentApiVersion, int oldApiV = -1, DateTime? createdAt = null)
     //todo make sure compiling happens after verification of isDuplicate
+    //todo remove currentapi
     {
         using (var db = new MyContext())
         {
@@ -151,7 +153,20 @@ public class DbHelper
 
             if (testBool == false)
             {
-                byte[] tempComp = compiler.RunCompilation(scriptString);
+                byte[] tempComp;
+                if (oldApiV != -1)
+                {
+                    // Console.WriteLine("trying to add refs in dbhelper");
+                    MetadataReference[] refs = compiler.GetReferencesForVersion(oldApiV);
+                    // Console.WriteLine("Added refs in DbHelper!");
+                    tempComp = compiler.RunCompilation(scriptString, refs);
+                    // Console.WriteLine("Comp ran in db helper with refs!");
+                    currentApiVersion = oldApiV;
+                }
+                else
+                {
+                    tempComp = compiler.RunCompilation(scriptString);
+                }
 
                 randomTestScript2.CompiledCaches.Add(new ScriptCompiledCache
                 {
@@ -173,7 +188,8 @@ public class DbHelper
             }
         }
     }
-    public async Task CreateAndInsertCompiledCache(CustomerScript script, int currentApiVersion)   //could change to take Guid instead
+    public async Task CreateAndInsertCompiledCache(CustomerScript script, int currentApiVersion, int oldApiV = -1)   //could change to take Guid instead
+    //remove currenetAPivers, by adding version detection in .compile function in compiler, so you just give version, myabe detection?
     {
         using (var db = new MyContext())
         {
@@ -188,7 +204,18 @@ public class DbHelper
             else
             {
 
-                byte[] tempComp = compiler.RunCompilation(script.SourceCode);
+                byte[] tempComp;
+                if (oldApiV != -1)
+                {
+                    MetadataReference[] refs = compiler.GetReferencesForVersion(oldApiV);
+                    tempComp = compiler.RunCompilation(script.SourceCode, refs);
+                    currentApiVersion = oldApiV;
+                }
+                else
+                {
+                    tempComp = compiler.RunCompilation(script.SourceCode);
+                }
+                // byte[] tempComp = compiler.RunCompilation(script.SourceCode);
                 ScriptCompiledCache tempCache = new ScriptCompiledCache
                 {
                     ScriptId = script.Id,

@@ -1,4 +1,6 @@
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Scripting;
+using Microsoft.EntityFrameworkCore.Infrastructure.Internal;
 
 public class ScriptManagerFacade
 {
@@ -13,21 +15,32 @@ public class ScriptManagerFacade
     #region Script Lifecycle
 
     /// Validates, compiles, and stores a new script
-    public async Task CreateScript(string sourceCode, string scriptType, string userName)    //maybe minApiVersion is better?
+    public async Task CreateScript(string sourceCode, string scriptType, string userName, int apiVersion = -1)    //maybe minApiVersion is better?
     {
         int currentApiVersion = await GetRecentApiVersion();
         Guid id = Guid.NewGuid();
-        await db.CreateAndInsertCustomerScript(sourceCode, id, userName, currentApiVersion);
+        if (apiVersion == -1)
+        {
+            await db.CreateAndInsertCustomerScript(sourceCode, id, userName, currentApiVersion);
+        }
+        else
+        {
+            await db.CreateAndInsertCustomerScript(sourceCode, id, userName, currentApiVersion, apiVersion);
+        }
+
     }
 
     // Updates existing script source code and recompiles for all compatible API versions
-    public async Task UpdateScript(Guid scriptId, string newSourceCode, string userName)
+    public async Task UpdateScript(Guid scriptId, string newSourceCode, string userName, int apiVersion = -1)
     {
-        int currentApiVersion = await GetRecentApiVersion();
+        if (apiVersion == -1)
+        {
+            apiVersion = await GetRecentApiVersion();
+        }
         var customerScript = await db.GetCustomerScript(scriptId);
         var creationDate = customerScript.CreatedAt;
         await db.DeleteCustomerScript(scriptId);    //todo update is still inefficient 
-        await db.CreateAndInsertCustomerScript(newSourceCode, scriptId, userName, currentApiVersion, createdAt: (DateTime)creationDate); //todo unsafe af
+        await db.CreateAndInsertCustomerScript(newSourceCode, scriptId, userName, apiVersion, createdAt: (DateTime)creationDate); //todo unsafe af
     }
 
     // Removes script and all associated compiled caches
@@ -95,13 +108,18 @@ public class ScriptManagerFacade
     }
 
     // Retrieves compilation error details
-    public async Task<string> GetCompilationErrors(Guid scriptId, int apiVersion)   //the apiVersion param is there for the future when i eventually add the functionality to add compilation for older versions todo
+    public async Task<string> GetCompilationErrors(Guid scriptId, int apiVersion=-1)   //the apiVersion param is there for the future when i eventually add the functionality to add compilation for older versions todo
     {
         try
         {
+            if (apiVersion == -1)
+            {
+                apiVersion=await GetRecentApiVersion();
+            }
             CustomerScript script = await GetScript(scriptId);
+            MetadataReference[] refs=compiler.GetReferencesForVersion(apiVersion);
             // compiler.BasicValidationBeforeCompiling(script.SourceCode);
-            compiler.RunCompilation(script.SourceCode);
+            compiler.RunCompilation(script.SourceCode,refs);
             return "Successful Compilation!";
         }
         catch (Exception e)

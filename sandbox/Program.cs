@@ -9,8 +9,8 @@ using Microsoft.EntityFrameworkCore;
 
 class MainProgram
 {
-    // private static string scriptFolderPath = @"C:\Users\Gilles\Desktop\UNI\Semester 6\Testing\testing2\labsolutionlu-ember-scripting-fb966c220f60\sandbox\src\Scripts";
-    private static string scriptFolderPath = @"C:\Users\Gilles\Desktop\ScriptsForProject\V2";    //out of scope to test errors
+    private static string scriptFolderPath = @"C:\Users\Gilles\Desktop\UNI\Semester 6\Code\Codebase\labsolutionlu-ember-scripting-fb966c220f60\sandbox\src\Scripts";
+    // private static string scriptFolderPath = @"C:\Users\Gilles\Desktop\ScriptsForProject\V2";    //out of scope to test errors
     private static string userName = "Gilles";
 
     // private static int currentApiVersion = 6;   //get rid of this and name todo
@@ -99,8 +99,12 @@ class MainProgram
                         #region Script Lifecycle
 
                         case "CreateScript":
-                            string sourceCode = UsefulMethods.CreateStringFromCsFile(@"C:\Users\Gilles\Desktop\UNI\Semester 6\Testing\testing2\labsolutionlu-ember-scripting-fb966c220f60\sandbox\src\Scripts\ConditionScripts\PediatricCondition.cs");
+                            string sourceCode = UsefulMethods.CreateStringFromCsFile(@"C:\Users\Gilles\Desktop\UNI\Semester 6\Code\Codebase\labsolutionlu-ember-scripting-fb966c220f60\sandbox\src\Scripts\ConditionScripts\PediatricCondition.cs");
                             await facade.CreateScript(sourceCode, "ConditionScriptTest", "Gilles");
+                            break;
+                        case "CreateScriptWithOld":
+                            string sourceCodeOld = UsefulMethods.CreateStringFromCsFile(@"C:\Users\Gilles\Desktop\UNI\Semester 6\Code\Codebase\labsolutionlu-ember-scripting-fb966c220f60\sandbox\src\Scripts\ConditionScripts\PediatricCondition.cs");
+                            await facade.CreateScript(sourceCodeOld, "ConditionScriptTest", "Gilles", 1);
                             break;
 
                         case "UpdateScript":
