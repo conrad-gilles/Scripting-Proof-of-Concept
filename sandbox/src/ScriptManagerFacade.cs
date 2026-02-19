@@ -37,9 +37,9 @@ public class ScriptManagerFacade
     }
 
     // Retrieves script metadata and source code
-    public async Task<CustomerScript> GetScript(Guid scriptId)
+    public async Task<CustomerScript> GetScript(Guid scriptId, bool includeCaches = false)
     {
-        CustomerScript script = await db.GetCustomerScript(scriptId);
+        CustomerScript script = await db.GetCustomerScript(scriptId, includeCaches);
         return script;
     }
 
@@ -115,39 +115,103 @@ public class ScriptManagerFacade
     #region Execution Operations
 
     // Executes a Generator Action script with provided context, realisitcally not needed 
-    public async Task<ActionResult> ExecuteActionScript(Guid scriptId, GeneratorContext context)
+    public async Task<ActionResult> ExecuteActionScript(Guid scriptId, GeneratorContext context)    //lowkey so many errors better to have one 
     {
-        int currentApiVersion = await GetRecentApiVersion();
-        var temp = await db.GetCompiledScripCache(scriptId, currentApiVersion);
-        byte[] compiledScript = temp.AssemblyBytes;
+        try
+        {
+            int currentApiVersion = await GetRecentApiVersion();
+            byte[] compiledScript = null;
+            try
+            {
+                var temp = await db.GetCompiledScripCache(scriptId, currentApiVersion);
+                compiledScript = temp.AssemblyBytes;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Retrieval failed jit comp launched:");
+                await CompileScript(scriptId, await GetRecentApiVersion());
+                //try again, if fails again we catch error outside
+                var temp = await db.GetCompiledScripCache(scriptId, currentApiVersion);
+                compiledScript = temp.AssemblyBytes;
+            }
 
-        ScriptExecutor executor = new ScriptExecutor(compiledScript, context);
-        ActionResult result = (ActionResult)executor.RunScriptExecution<object>();  //todo maybe better handling than casting although the error will be thrown in the class itself
-        return result;
+            //possibly add a null check for compiledScript
+            ScriptExecutor executor = new ScriptExecutor(compiledScript, context);
+            ActionResult result = (ActionResult)executor.RunScriptExecution<object>();  //todo maybe better handling than casting although the error will be thrown in the class itself
+            return result;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e.ToString());
+            throw new Exception();
+        }
+
     }
 
     // Executes a Generator Condition script and returns boolean result, realisitcally not needed 
     public async Task<bool> ExecuteConditionScript(Guid scriptId, GeneratorContext context)
     {
-        int currentApiVersion = await GetRecentApiVersion();
-        var temp = await db.GetCompiledScripCache(scriptId, currentApiVersion);
-        byte[] compiledScript = temp.AssemblyBytes;
+        try
+        {
+            int currentApiVersion = await GetRecentApiVersion();
+            byte[] compiledScript = null;
+            try
+            {
+                var temp = await db.GetCompiledScripCache(scriptId, currentApiVersion);
+                compiledScript = temp.AssemblyBytes;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Retrieval failed jit comp launched:");
+                await CompileScript(scriptId, await GetRecentApiVersion());
+                //try again, if fails again we catch error outside
+                var temp = await db.GetCompiledScripCache(scriptId, currentApiVersion);
+                compiledScript = temp.AssemblyBytes;
+            }
 
-        ScriptExecutor executor = new ScriptExecutor(compiledScript, context);
-        bool result = (bool)executor.RunScriptExecution<object>();  //todo maybe better handling than casting although the error will be thrown in the class itself
-        return result;
+            //possibly add a null check for compiledScript
+            ScriptExecutor executor = new ScriptExecutor(compiledScript, context);
+            bool result = (bool)executor.RunScriptExecution<object>();  //todo maybe better handling than casting although the error will be thrown in the class itself
+            return result;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e.ToString());
+            throw new Exception();
+        }
     }
 
     // Generic execution that detects script type automatically
     public async Task<object> ExecuteScriptById(Guid scriptId, GeneratorContext context)
     {
-        int currentApiVersion = await GetRecentApiVersion();
-        var temp = await db.GetCompiledScripCache(scriptId, currentApiVersion);
-        byte[] compiledScript = temp.AssemblyBytes;
+        try
+        {
+            int currentApiVersion = await GetRecentApiVersion();
+            byte[] compiledScript = null;
+            try
+            {
+                var temp = await db.GetCompiledScripCache(scriptId, currentApiVersion);
+                compiledScript = temp.AssemblyBytes;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Retrieval failed jit comp launched:");
+                await CompileScript(scriptId, await GetRecentApiVersion());
+                //try again, if fails again we catch error outside
+                var temp = await db.GetCompiledScripCache(scriptId, currentApiVersion);
+                compiledScript = temp.AssemblyBytes;
+            }
 
-        ScriptExecutor executor = new ScriptExecutor(compiledScript, context);
-        object result = executor.RunScriptExecution<object>();  //returns either bool or action result todo maybe add checks if thats the case but normally should be
-        return result;
+            //possibly add a null check for compiledScript
+            ScriptExecutor executor = new ScriptExecutor(compiledScript, context);
+            object result = executor.RunScriptExecution<object>();  //returns either bool or action result todo maybe add checks if thats the case but normally should be
+            return result;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e.ToString());
+            throw new Exception();
+        }
     }
 
     #endregion
@@ -204,9 +268,10 @@ public class ScriptManagerFacade
 
     public async Task<int> GetRecentApiVersion() //todo implement
     {
-        var versions = await GetActiveApiVersions();
-        int last = versions[versions.Count() - 1];
-        return last;
+        // var versions = await GetActiveApiVersions();
+        // int last = versions[versions.Count() - 1];
+        // return last;
+        return 4;
     }
 
     // Returns which API versions a script is compatible with
@@ -257,7 +322,7 @@ public class ScriptManagerFacade
     public async Task CleanupOrphanedCaches()
     {
         int currentApiVersion = await GetRecentApiVersion();
-        await db.AutomaticCompilationOnVersionUpdate(currentApiVersion);
+        await db.AutomaticCompilationOnVersionUpdate(currentApiVersion);    //this also does this maybe implement real funcion later
     }
 
     #endregion
@@ -283,9 +348,11 @@ public class ScriptManagerFacade
     }
 
     // Extracts className, baseTypeName, and version from script
-    public async Task GetScriptMetadata(Guid scriptId)
+    public async Task<string> GetScriptMetadata(Guid scriptId)
     {
-        // TODO
+        CustomerScript script = await db.GetCustomerScript(scriptId, includeCaches: true);
+        string str = "Metadata for script: " + script.ToString();
+        return str;
     }
 
     #endregion
