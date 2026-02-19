@@ -13,7 +13,7 @@ public class ScriptCompiler
     //     script = pScript;
     // }
 
-    public byte[] RunCompilation(string script, MetadataReference[]? references = null) //references param there to enable later on users to define custom references
+    public byte[] RunCompilation(string script, MetadataReference[]? references = null,int apiVersion=-1) //references param there to enable later on users to define custom references
     {
         try
         {
@@ -21,7 +21,8 @@ public class ScriptCompiler
             SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(script);
 
             //create list of "external assamblies" that the script needs in oder to be able to compile and run, you need to manually add file paths
-            if (references == null)
+            // if (references == null)
+            if (apiVersion==-1)
             {
                 Console.WriteLine("Added default references!");
                 references = new MetadataReference[]
@@ -35,6 +36,11 @@ public class ScriptCompiler
                         MetadataReference.CreateFromFile(typeof(IGeneratorConditionScript).Assembly.Location),    //todo check if runs
                         MetadataReference.CreateFromFile(typeof(IGeneratorReadOnlyContext).Assembly.Location)
                      };
+            }
+            if (apiVersion != -1)
+            {
+                Console.WriteLine("Added custom references!");  //if this works remove the if references is null if stat above
+                references=GetReferencesForVersion(apiVersion);
             }
 
             //this initiates the process of the compilation (does not produce bytes yet), it binds the source code with the refrences and the config options

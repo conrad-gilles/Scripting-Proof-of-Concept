@@ -76,7 +76,7 @@ class MainProgram
                         case "comp source":
                             await new DbHelper().CompileAllStoredScripts(currentApiVersion);
                             break;
-                        case "comp mv":
+                        case "comp mv": //no functioality just for testing
                             scriptId = await UsefulMethods.GetIdInConsoleAsync(fromSrc: true);
                             for (int i = 0; i < 5; i++)
                             {
@@ -90,7 +90,7 @@ class MainProgram
                             sourceDict = await RandomMethods.ListAllStoredSourceCodes();
                             break;
                         case "dupes":
-                            await new DbHelper().RemoveDuplicates(currentApiVersion);
+                            await new DbHelper().RemoveDuplicates();
                             break;
                         case "deleteCache":
                             await new DbHelper().DeleteAllCachedScripts();
@@ -150,7 +150,7 @@ class MainProgram
 
                         case "CompileScript":   //todo check
                             scriptId = await UsefulMethods.GetIdInConsoleAsync(fromSrc: true);
-                            await facade.CompileScript(scriptId, currentApiVersion);    //should not compile if already present in db;
+                            await facade.CompileScript(scriptId);    //should not compile if already present in db;
                             break;
 
                         case "CompileAllScripts":
@@ -171,7 +171,7 @@ class MainProgram
 
                         case "GetCompilationErrors":    //todo test by turning off auto check when adding same with above
                             scriptId = await UsefulMethods.GetIdInConsoleAsync(fromSrc: true);
-                            string compAnswer = await facade.GetCompilationErrors(scriptId, currentApiVersion);
+                            string compAnswer = await facade.GetCompilationErrors(scriptId);
                             Console.WriteLine(compAnswer);
                             break;
 
@@ -221,7 +221,7 @@ class MainProgram
 
                         case "ClearScriptCache":
                             scriptId = await UsefulMethods.GetIdInConsoleAsync(fromSrc: true);
-                            await facade.ClearScriptCache(scriptId, currentApiVersion);
+                            await facade.ClearScriptCache(scriptId);
                             break;
 
                         case "ClearAllCaches":
@@ -269,7 +269,7 @@ class MainProgram
                         case "DetectDuplicates":
                             var dupes = await facade.DetectDuplicates();
                             List<Guid> scriptGUIDs = dupes.scriptGUIDs;
-                            List<Guid> cacheGUIDs = dupes.cacheGUIDs;
+                            Dictionary<Guid, int> cacheGUIDs = dupes.cacheGUIDs;
                             string rtrnStr1 = "Script Guids to remove: ";
                             foreach (var item in scriptGUIDs)
                             {
@@ -309,7 +309,13 @@ class MainProgram
                             break;
 
                         case "GetScriptMetadata":
-                            // await facade.GetScriptMetadata(scriptId);
+                            scriptId = await UsefulMethods.GetIdInConsoleAsync(fromSrc: true);
+                            string strr = await facade.GetScriptMetadata(scriptId);
+                            Console.WriteLine(strr);
+                            break;
+                        case "GetUserName":
+                            string strrr = facade.GetUserName();
+                            Console.WriteLine(strrr);
                             break;
 
                         #endregion

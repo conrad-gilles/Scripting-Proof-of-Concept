@@ -46,28 +46,37 @@ public class DbHelper
             return caches;
         }
     }
-    public async Task RecompileScript(Guid scriptId, int currentApiVersion)  //todo maybe get rid of the currentapi and create global var in dbhelper class
+    public async Task RecompileScript(Guid scriptId, bool deleteAlso = false)  //todo maybe get rid of the currentapi and create global var in dbhelper class
     {
         try
         {
+            ScriptManagerFacade facade = new ScriptManagerFacade();
+            int currentApiVersion = await facade.GetRecentApiVersion();
             CustomerScript script = await GetCustomerScript(scriptId, includeCaches: true);  //maybe this is inefficient better to pass object maybe
 
             int start = script.MinApiVersion;
             int count = currentApiVersion - start + 1;  //check if correct
             int[] versions = Enumerable.Range(start, count).ToArray();
-
+            if (deleteAlso)
+            {
+                await facade.ClearScriptCache(scriptId);
+            }
             foreach (var itemN in script.CompiledCaches)
             {
                 if (versions.Contains(itemN.ApiVersion) == false)
                 {
-                    // await DeleteScriptCache(scriptId, itemN.ApiVersion);
-                    // await CreateAndInsertCompiledCache(item, currentApiVersion); //todo create a method to compile to all older versions also
-                    Console.WriteLine("Mock recompilation of old V" + itemN.ApiVersion);
+                    try
+                    { // await DeleteScriptCache(scriptId, itemN.ApiVersion);
+                        await CreateAndInsertCompiledCache(script, itemN.ApiVersion); //todo error check this
+                        Console.WriteLine("Mock recompilation of old V" + itemN.ApiVersion);
+                    }
+                    catch (Exception e) { Console.WriteLine("Compilation of old version failed"); }
+
                 }
                 if (itemN.ApiVersion == currentApiVersion)  //this is only temporary until the if statement above works
                 {
-                    await DeleteScriptCache(scriptId, currentApiVersion);
-                    await CreateAndInsertCompiledCache(script, currentApiVersion);
+                    // await DeleteScriptCache(scriptId, currentApiVersion);
+                    await CreateAndInsertCompiledCache(script);
                     Console.WriteLine("Real recompilation of new V" + itemN.ApiVersion + " , normal if twice");
                     break;
                 }
@@ -111,7 +120,7 @@ public class DbHelper
 
                 if (currentImplementation == false)
                 {
-                    await CreateAndInsertCompiledCache(item, currentApiVersion);
+                    await CreateAndInsertCompiledCache(item);
                 }
             }
         }
@@ -122,12 +131,15 @@ public class DbHelper
         }
 
     }
-    public async Task<CustomerScript> CreateAndInsertCustomerScript(string scriptString, Guid randomGUID, string createdBy, int currentApiVersion, int oldApiV = -1, DateTime? createdAt = null)
+    public async Task<CustomerScript> CreateAndInsertCustomerScript(string scriptString, Guid randomGUID, string createdBy, int oldApiV = -1, DateTime? createdAt = null)
     //todo make sure compiling happens after verification of isDuplicate
     //todo remove currentapi
     {
+
         using (var db = new MyContext())
         {
+            ScriptManagerFacade facade = new ScriptManagerFacade();
+            int currentApiVersion = await facade.GetRecentApiVersion();
             if (createdAt == null)
             {
                 createdAt = DateTime.UtcNow;
@@ -157,14 +169,15 @@ public class DbHelper
                 if (oldApiV != -1)
                 {
                     // Console.WriteLine("trying to add refs in dbhelper");
-                    MetadataReference[] refs = compiler.GetReferencesForVersion(oldApiV);
+                    // MetadataReference[] refs = compiler.GetReferencesForVersion(oldApiV);
                     // Console.WriteLine("Added refs in DbHelper!");
-                    tempComp = compiler.RunCompilation(scriptString, refs);
+                    tempComp = compiler.RunCompilation(scriptString, apiVersion: oldApiV);
                     // Console.WriteLine("Comp ran in db helper with refs!");
                     currentApiVersion = oldApiV;
                 }
                 else
                 {
+                    currentApiVersion = await facade.GetRecentApiVersion();
                     tempComp = compiler.RunCompilation(scriptString);
                 }
 
@@ -188,11 +201,13 @@ public class DbHelper
             }
         }
     }
-    public async Task CreateAndInsertCompiledCache(CustomerScript script, int currentApiVersion, int oldApiV = -1)   //could change to take Guid instead
+    public async Task CreateAndInsertCompiledCache(CustomerScript script, int oldApiV = -1)   //could change to take Guid instead
     //remove currenetAPivers, by adding version detection in .compile function in compiler, so you just give version, myabe detection?
     {
         using (var db = new MyContext())
         {
+            ScriptManagerFacade facade = new ScriptManagerFacade();
+            int currentApiVersion = await facade.GetRecentApiVersion();
             ScriptCompiler compiler = new ScriptCompiler();
             var getTupleFromVal = compiler.BasicValidationBeforeCompiling(script.SourceCode);
 
@@ -241,13 +256,13 @@ public class DbHelper
             // Console.WriteLine("Db Helper deleteCustomerScript executed!");
         }
     }
-    public async Task DeleteScriptCache(Guid id, int currentApiVersion)
+    public async Task DeleteScriptCache(Guid id, int ApiVersion)
     {
         using (var db = new MyContext())
         {
             try
             {
-                ScriptCompiledCache temp = await GetCompiledScripCache(id, currentApiVersion);
+                ScriptCompiledCache temp = await GetCompiledScripCache(id, ApiVersion);
                 db.Remove(temp);
                 await db.SaveChangesAsync();
                 // Console.WriteLine("Db Helper deleteScriptCache executed!");
@@ -282,12 +297,12 @@ public class DbHelper
 
     }
 
-    public async Task<ScriptCompiledCache> GetCompiledScripCache(Guid id, int currentApiVersion)
+    public async Task<ScriptCompiledCache> GetCompiledScripCache(Guid id, int ApiVersion)
     {
         using (var db = new MyContext())
         {
             // Console.WriteLine("GetCompiledScriptCacheReached");
-            var cache = await db.ScriptCompiledCaches.SingleAsync(b => b.ScriptId == id && b.ApiVersion == currentApiVersion);
+            var cache = await db.ScriptCompiledCaches.SingleAsync(b => b.ScriptId == id && b.ApiVersion == ApiVersion);
             // Console.WriteLine("Db Helper GetCompiledScriptCache executed!");
             return cache;
         }
@@ -327,7 +342,7 @@ public class DbHelper
                 List<CustomerScript> allScriptSC = await GetAllCustomerScripts();
                 for (int i = 0; i < allScriptSC.Count(); i++)
                 {
-                    await CreateAndInsertCompiledCache(allScriptSC[i], currentApiVersion);
+                    await CreateAndInsertCompiledCache(allScriptSC[i]);
                     await db.SaveChangesAsync();
                     // Console.WriteLine("DbHelper CompileAllStoredScripts Executed!");
                 }
@@ -375,7 +390,7 @@ public class DbHelper
         }
         return false;
     }
-    public async Task<(List<Guid> scriptGUIDs, List<Guid> cacheGUIDs)> DetectDuplicates()
+    public async Task<(List<Guid> scriptGUIDs, Dictionary<Guid, int> cacheGUIDs)> DetectDuplicates()
     {
         // bool isDuplicate = false;
         // if (script == null)
@@ -408,7 +423,7 @@ public class DbHelper
                 }
             }
             List<ScriptCompiledCache> allCaches = await GetAllCompiledScriptCaches();
-            List<Guid> cachesToDelete = [];
+            Dictionary<Guid, int> cachesToDelete = [];
             for (int i = 0; i < allCaches.Count(); i++)
             {
                 Guid cacheID = allCaches[i].ScriptId;
@@ -424,7 +439,7 @@ public class DbHelper
                 {
                     try
                     {
-                        cachesToDelete.Add(cacheID);
+                        cachesToDelete.Add(cacheID, allCaches[i].ApiVersion);        //also add the version 
                         // await DeleteScriptCache(cacheID);   //deletes if there is a cache without a script attached to it
                     }
                     catch (Exception e)
@@ -456,12 +471,12 @@ public class DbHelper
         }
         return ls;
     }
-    public async Task RemoveDuplicates(int currentApiVersion)
+    public async Task RemoveDuplicates()
     {
         try
         {
             List<Guid> duplicateGuids = (await DetectDuplicates()).scriptGUIDs;
-            List<Guid> cachesWithoutScript = (await DetectDuplicates()).cacheGUIDs;
+            Dictionary<Guid, int> cachesWithoutScript = (await DetectDuplicates()).cacheGUIDs;
 
             for (int i = 0; i < duplicateGuids.Count(); i++)
             {
@@ -478,9 +493,9 @@ public class DbHelper
                     }
                 }
             }
-            foreach (var item in cachesWithoutScript)
+            foreach (var item in cachesWithoutScript.Keys)
             {
-                try { await DeleteScriptCache(item, currentApiVersion); }
+                try { await DeleteScriptCache(item, cachesWithoutScript[item]); }
                 catch (Exception e)
                 {
                     Console.WriteLine(e.ToString());

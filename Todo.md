@@ -1,0 +1,2 @@
+-fix Recompile dosnt compile old versions yet
+- i thing getcompilationErros saves to db after compiling

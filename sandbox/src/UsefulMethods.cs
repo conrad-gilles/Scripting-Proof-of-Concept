@@ -3,6 +3,14 @@ using Microsoft.VisualBasic;
 
 class UsefulMethods
 {
+    public static int GetRecentApiVersion()
+    {
+        return 6;
+    }
+    public static string GetUserName()
+    {
+        return "Gilles";
+    }
     public static GeneratorContext GetTestingContext()
     {
         LabOrder labOrder = new LabOrder("1", "Pediatrics");
@@ -149,7 +157,7 @@ class UsefulMethods
                         sourceDict = await RandomMethods.ListAllStoredSourceCodes();
                         break;
                     case "dupes":
-                        await new DbHelper().RemoveDuplicates(currentApiVersion);
+                        await new DbHelper().RemoveDuplicates();
                         break;
                     case "deleteCache":
                         await new DbHelper().DeleteAllCachedScripts();
@@ -276,7 +284,7 @@ class UsefulMethods
 
                     case "ClearScriptCache":
                         scriptId = await GetIdInConsoleAsync(fromSrc: true);
-                        await facade.ClearScriptCache(scriptId, currentApiVersion);
+                        await facade.ClearScriptCache(scriptId);
                         break;
 
                     case "ClearAllCaches":
@@ -324,7 +332,7 @@ class UsefulMethods
                     case "DetectDuplicates":
                         var dupes = await facade.DetectDuplicates();
                         List<Guid> scriptGUIDs = dupes.scriptGUIDs;
-                        List<Guid> cacheGUIDs = dupes.cacheGUIDs;
+                        Dictionary<Guid, int> cacheGUIDs = dupes.cacheGUIDs;
                         string rtrnStr1 = "Script Guids to remove: ";
                         foreach (var item in scriptGUIDs)
                         {

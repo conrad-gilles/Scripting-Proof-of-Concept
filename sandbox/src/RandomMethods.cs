@@ -53,7 +53,7 @@ public class RandomMethods
                 var db = new DbHelper();
                 string scriptString = UsefulMethods.CreateStringFromCsFile(files[i]);
                 Guid id = Guid.NewGuid();
-                CustomerScript randomTestScript2 = await db.CreateAndInsertCustomerScript(scriptString, id, userName, currentApiVersion);
+                CustomerScript randomTestScript2 = await db.CreateAndInsertCustomerScript(scriptString, id, userName);
                 // Console.WriteLine(randomTestScript2.ScriptName + "Added script N" + i + ". to both tables.");
 
             }
@@ -89,7 +89,7 @@ public class RandomMethods
         // Console.WriteLine("Copy paste your new version now:");
         // string userInput2 = Console.ReadLine();
 
-        await db.CreateAndInsertCustomerScript(str, id, userName, currentApiVersion, createdAt: (DateTime)creationDate); //todo unsafe af
+        await db.CreateAndInsertCustomerScript(str, id, userName, createdAt: (DateTime)creationDate); //todo unsafe af
 
 
     }
