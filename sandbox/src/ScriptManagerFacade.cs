@@ -15,7 +15,7 @@ public class ScriptManagerFacade
     #region Script Lifecycle
 
     /// Validates, compiles, and stores a new script
-    public async Task CreateScript(string sourceCode, string scriptType, string userName, int apiVersion = -1)    //maybe minApiVersion is better?
+    public async Task<Guid> CreateScript(string sourceCode, string scriptType, string userName, int apiVersion = -1)    //maybe minApiVersion is better?
     {
         int currentApiVersion = await GetRecentApiVersion();
         Guid id = Guid.NewGuid();
@@ -27,6 +27,7 @@ public class ScriptManagerFacade
         {
             await db.CreateAndInsertCustomerScript(sourceCode, id, userName, apiVersion);
         }
+        return id;
 
     }
 

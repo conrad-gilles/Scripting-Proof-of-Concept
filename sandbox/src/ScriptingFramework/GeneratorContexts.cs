@@ -120,3 +120,7 @@ public class GeneratorContextV3 : GeneratorContextV2, IGeneratorContext_V3  //to
     ILabOrderInterfaceV3 IGeneratorContext_V3.LabOrder => labOrderV3;
 
 }
+
+
+
+//context not always backwards comp, make sure right context passed factory 

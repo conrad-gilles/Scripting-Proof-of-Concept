@@ -1,5 +1,9 @@
-- fix Recompile dosnt compile old versions yet
+
 - i thing getcompilationErros saves to db after compiling
+- context not always backwards comp, make sure right context passed factory, yes this will break old scripts with old features
+- todo version of cond script and action script v2 and son on, dont inherit implement empty interface
+- upgrade methode vun action res 1 ob 2
+- make sure references are safe, more for future
 
 
 

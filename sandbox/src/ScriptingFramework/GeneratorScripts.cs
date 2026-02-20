@@ -26,5 +26,6 @@ where TContext : IGeneratorContext   //todo i changed this from v2
         return ExecuteAsync((TContext)context);
     }
 }
-
+//todo version of cond script and action script v2 and son on, dont inherit implement empty interface
+//upgrade methode vun action res 1 ob 2
 
