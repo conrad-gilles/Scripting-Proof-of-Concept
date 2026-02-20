@@ -150,11 +150,10 @@ public class ScriptCompiler
         return areSame;
     }
 
-    public MetadataReference[] GetReferencesForVersion(int version, string[]? customDlls = null)
+    public MetadataReference[] GetReferencesForVersion(int version, string[]? customDlls = null, bool loadCurrentRT = true)
     {
         var references = new List<MetadataReference>();
 
-        // 1. Define path to the specific version folder
         // string versionPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "OldVersions", version.ToString());
         // string tempPath = @"C:\Users\Gilles\Desktop\UNI\Semester 6\Code";
         string tempPath = Path.GetFullPath(
@@ -169,17 +168,31 @@ public class ScriptCompiler
             throw new Exception($"References for version {version} not found at {versionPath}");
         }
 
-        // 2. Identify the core DLLs your scripts need. 
-        // You likely need your main app executable/dll and standard .NET libs.
         List<string> dllsToLoad =
         [
-        "Ember.dll",               // Your application assembly
-        "System.Private.CoreLib.dll", // Core .NET types
+        "Ember.dll",               // application assembly
+        "System.Private.CoreLib.dll",
         "System.Runtime.dll",
         "System.Console.dll",
         "System.Collections.dll"
         ];
 
+        if (loadCurrentRT)
+        {
+            dllsToLoad = ["Ember.dll"];
+            var stdRefs = new MetadataReference[]
+            {
+                        MetadataReference.CreateFromFile(typeof(object).Assembly.Location), // System.Private.CoreLib
+                        MetadataReference.CreateFromFile(typeof(Console).Assembly.Location), // System.Console
+                        MetadataReference.CreateFromFile(Assembly.Load("System.Runtime").Location), // System.Runtime
+                        MetadataReference.CreateFromFile(typeof(Task<>).Assembly.Location), // System.Threading.Tasks
+                        MetadataReference.CreateFromFile(typeof(DateTime).Assembly.Location), // System.DateTime
+            };
+            foreach (var item in stdRefs)
+            {
+                references.Add(item);
+            }
+        }
         if (customDlls != null)
         {
             foreach (var item in customDlls)
