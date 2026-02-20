@@ -1,7 +1,7 @@
 using System.Threading.Tasks;
 using Microsoft.VisualBasic;
 
-class UsefulMethods
+public class UsefulMethods
 {
     public static int GetRecentApiVersion()
     {

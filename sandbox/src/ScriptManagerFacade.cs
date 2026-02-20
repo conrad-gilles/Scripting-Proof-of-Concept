@@ -15,7 +15,7 @@ public class ScriptManagerFacade
     #region Script Lifecycle
 
     /// Validates, compiles, and stores a new script
-    public async Task<Guid> CreateScript(string sourceCode, string scriptType, string userName, int apiVersion = -1)    //maybe minApiVersion is better?
+    public async Task<Guid> CreateScript(string sourceCode, string? scriptType = null, string userName = "Default", int apiVersion = -1)    //maybe minApiVersion is better?
     {
         int currentApiVersion = await GetRecentApiVersion();
         Guid id = Guid.NewGuid();
@@ -32,7 +32,7 @@ public class ScriptManagerFacade
     }
 
     // Updates existing script source code and recompiles for all compatible API versions
-    public async Task UpdateScript(Guid scriptId, string newSourceCode, string userName, int apiVersion = -1)
+    public async Task UpdateScript(Guid scriptId, string newSourceCode, string userName = "Default", int apiVersion = -1)
     {
         if (apiVersion == -1)
         {
@@ -62,15 +62,7 @@ public class ScriptManagerFacade
     public async Task<List<CustomerScript>> ListScripts(object? filters = null, bool includeCaches = false)
     {
         List<CustomerScript> scripts;
-        if (includeCaches)
-        {
-            scripts = await db.GetAllCustomerScripts(includeCaches: true);    //todo implement filtering   
-        }
-        else
-        {
-            scripts = await db.GetAllCustomerScripts();
-        }
-
+        scripts = await db.GetAllCustomerScripts(includeCaches: includeCaches);    //todo implement filtering   
         return scripts;
     }
 
@@ -122,7 +114,7 @@ public class ScriptManagerFacade
         }
         catch (Exception e)
         {
-            return e.ToString();
+            return "Error: " + e.ToString();
         }
 
     }

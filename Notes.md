@@ -56,3 +56,5 @@ dotnet build -c Release
 
 dotnet publish -c Release -f net9.0 -r win-x64 --self-contained -o ./TempPublish
 
+dotnet run --project sandbox          # runs your app normally
+dotnet test sandbox.Tests             # runs only tests

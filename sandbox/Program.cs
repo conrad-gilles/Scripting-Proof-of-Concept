@@ -102,12 +102,12 @@ class MainProgram
                         case "CreateScript":
                             // string sourceCode = UsefulMethods.CreateStringFromCsFile(@"C:\Users\Gilles\Desktop\UNI\Semester 6\Code\Codebase\labsolutionlu-ember-scripting-fb966c220f60\sandbox\src\Scripts\ConditionScripts\PediatricCondition.cs");
                             string sourceCode = UsefulMethods.CreateStringFromCsFile(Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "src", "Scripts", "ConditionScripts", "PediatricCondition.cs")));
-                            await facade.CreateScript(sourceCode, "ConditionScriptTest", "Gilles");
+                            await facade.CreateScript(sourceCode, scriptType: "ConditionScriptTest", "Gilles");
                             break;
                         case "CreateScriptWithOld":
                             // string sourceCodeOld = UsefulMethods.CreateStringFromCsFile(@"C:\Users\Gilles\Desktop\UNI\Semester 6\Code\Codebase\labsolutionlu-ember-scripting-fb966c220f60\sandbox\src\Scripts\ConditionScripts\PediatricCondition.cs");
                             string sourceCodeOld = UsefulMethods.CreateStringFromCsFile(Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "src", "Scripts", "ConditionScripts", "PediatricCondition.cs")));
-                            await facade.CreateScript(sourceCodeOld, "ConditionScriptTest", "Gilles", 1);
+                            await facade.CreateScript(sourceCodeOld, scriptType: "ConditionScriptTest", "Gilles", 1);
                             break;
 
                         case "UpdateScript":

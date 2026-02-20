@@ -4,6 +4,7 @@
 - todo version of cond script and action script v2 and son on, dont inherit implement empty interface
 - upgrade methode vun action res 1 ob 2
 - make sure references are safe, more for future
+- add a constructor to the customerScript class maybe add 2, 1 empty one so stuff dont break
 
 
 
