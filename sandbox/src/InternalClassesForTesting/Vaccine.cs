@@ -7,16 +7,23 @@ public interface IReadOnlyVaccince
 }
 public interface IReadOnlyVaccineContext
 {
-    IReadOnlyVaccince Vaccince { get; }
+    // IReadOnlyVaccince Vaccince { get; }
+    string Name { get; }
+    void SetName(string name);
+}
+public interface IVaccineInterface
+{
+    int Id { get; }
+    string GetName();
 }
 
 internal class Vaccine :
-IReadOnlyVaccince
+IReadOnlyVaccince, IVaccineInterface
 {
     public string Name;
     public int Id;
     public DateTime ReleaseDate;
-
+    int IVaccineInterface.Id => Id;
     public Vaccine(string name, int id, DateTime releaseDate)
     {
         Name = name;

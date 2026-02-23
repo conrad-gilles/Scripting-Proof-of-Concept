@@ -2,8 +2,9 @@
 using Microsoft.Extensions.Logging;
 
 public abstract class GeneratorContext { }
+public interface IGeneratorBaseInterface { }
 
-public interface IGeneratorReadOnlyContext
+public interface IGeneratorReadOnlyContext : IGeneratorBaseInterface
 {
     ILabOrderInterface LabOrder { get; }      // Read current order data
     PatientInterface Patient { get; }     // Read patient data
@@ -26,6 +27,25 @@ public interface IGeneratorContext_V2 : IGeneratorContext
 public interface IGeneratorContext_V3 : IGeneratorContext_V2
 {
     new ILabOrderInterfaceV3 LabOrder { get; }
+}
+public interface IGeneratorContextNoInherVaccine : IGeneratorBaseInterface
+{
+    new ILabOrderInterfaceV4NoInheritence LabOrder { get; }
+    new IVaccineInterface Vaccine { get; }
+}
+public class GeneratorContextNoInherVaccine : GeneratorContext, IGeneratorContextNoInherVaccine
+{
+    ILabOrderInterfaceV4NoInheritence LabOrder;
+    IVaccineInterface Vaccine;
+    public GeneratorContextNoInherVaccine(ILabOrderInterfaceV4NoInheritence labOrder, IVaccineInterface vaccine)
+    {
+        LabOrder = labOrder;
+        Vaccine = vaccine;
+    }
+
+    ILabOrderInterfaceV4NoInheritence IGeneratorContextNoInherVaccine.LabOrder => LabOrder;
+
+    IVaccineInterface IGeneratorContextNoInherVaccine.Vaccine => Vaccine;
 }
 public class ReadOnlyContext : GeneratorContext, IGeneratorReadOnlyContext
 {

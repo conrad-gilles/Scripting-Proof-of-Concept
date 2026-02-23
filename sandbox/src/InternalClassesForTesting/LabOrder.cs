@@ -2,15 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-// Interface for Action Scripts (Read/Write)
-public interface ILabOrderRWInterface : ILabOrderInterface
-{
-    void SetCustomField(string name, object value);
-    bool AddTest(string testCode);
-    void SetPriority(string priority);
-    void RemoveTest(string testCode);
-}
-
 // Interface for Condition Scripts (Read Only)
 public interface ILabOrderInterface
 {
@@ -22,6 +13,15 @@ public interface ILabOrderInterface
     bool HasTest(string testCode);
     object GetCustomField(string name);
 }
+// Interface for Action Scripts (Read/Write)
+public interface ILabOrderRWInterface : ILabOrderInterface
+{
+    void SetCustomField(string name, object value);
+    bool AddTest(string testCode);
+    void SetPriority(string priority);
+    void RemoveTest(string testCode);
+}
+
 // V2 adds functionality
 public interface ILabOrderInterfaceV2 : ILabOrderRWInterface
 {
@@ -33,8 +33,15 @@ public interface ILabOrderInterfaceV3 : ILabOrderInterfaceV2
 {
     string randomNewFunctionInV3(string funcName);
 }
+public interface ILabOrderInterfaceV4NoInheritence  //where acces gets defined in get set
+{
+    string OrderNumber { get; }
+    string Department { get; }
+    bool AddTest(string testCode);
+    string randomNewFunctionInV3(string funcName);
+}
 // Full Implementation
-internal class LabOrder : ILabOrderRWInterface, ILabOrderInterface, ILabOrderInterfaceV2, ILabOrderInterfaceV3    //todo issues has to implement loads of interfaces, test if removing one is fine
+internal class LabOrder : ILabOrderRWInterface, ILabOrderInterface, ILabOrderInterfaceV2, ILabOrderInterfaceV3, ILabOrderInterfaceV4NoInheritence    //todo issues has to implement loads of interfaces, test if removing one is fine
 {
     public string OrderNumber { get; private set; }
     public string Department { get; private set; } // e.g., "Pediatrics", "Cardiology"
@@ -68,8 +75,6 @@ internal class LabOrder : ILabOrderRWInterface, ILabOrderInterface, ILabOrderInt
     {
         if (HasTest(testCode)) return false; // Already exists
 
-        // In a real system, you'd look up the test definition here. 
-        // For PoC, we just create a generic test.
         _tests.Add(new Test(testCode, $"Test {testCode}"));
         return true;
     }
@@ -82,7 +87,7 @@ internal class LabOrder : ILabOrderRWInterface, ILabOrderInterface, ILabOrderInt
 
     public void SetPriority(string priority)
     {
-        // Add validation logic if needed
+
         Priority = priority;
     }
 

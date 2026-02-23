@@ -126,7 +126,7 @@ public class ScriptCompiler
                 throw new ClassNameOrBaseNameNullException();
             }
             // Console.WriteLine("Class Name = " + className);
-            // Console.WriteLine("BaseClass Name = " + baseTypeName);
+            Console.WriteLine("BaseClass Name = " + baseTypeName);
             // Console.WriteLine("Version Int = " + versionInt);
 
             return (className, baseTypeName, versionInt);

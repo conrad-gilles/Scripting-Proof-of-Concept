@@ -324,8 +324,10 @@ class MainProgram
                         #endregion
 
                         default:
+                            sourceDict = await RandomMethods.ListAllStoredSourceCodes(dontPrint: true);
                             scriptId = sourceDict[Int32.Parse(userInput)];
-                            object resultObj2 = await facade.ExecuteScriptById(scriptId, UsefulMethods.GetTestingContext<GeneratorContextV3>());
+                            CustomerScript justForTesting = await db.GetCustomerScript(scriptId);
+                            object resultObj2 = await facade.ExecuteScriptById(scriptId, UsefulMethods.GetTestingContext<GeneratorContextNoInherVaccine>(justForTesting: justForTesting));
 
                             if (typeof(bool).IsAssignableFrom(resultObj2.GetType()))       //good idea to check what type was returne, you could also just check the property from db normally
                             {

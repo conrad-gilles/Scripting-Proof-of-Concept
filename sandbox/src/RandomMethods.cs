@@ -18,7 +18,7 @@ public class RandomMethods
         return cacheDict;
     }
 
-    public static async Task<Dictionary<int, Guid>> ListAllStoredSourceCodes()
+    public static async Task<Dictionary<int, Guid>> ListAllStoredSourceCodes(bool dontPrint = false)
     {
         var db = new DbHelper();
         List<CustomerScript> sourceCodes = await db.GetAllCustomerScripts(includeCaches: true);
@@ -32,7 +32,7 @@ public class RandomMethods
             + ", Created at: " + sourceCodes[i].CreatedAt + ", MinApiVersion: " + sourceCodes[i].MinApiVersion + ", Modified at: " + sourceCodes[i].ModifiedAt
             + ", Compiled count [" + sourceCodes[i].CompiledCaches.Count() + "]";
             sourceDict.Add(i + 1, sourceCodes[i].Id);
-            Console.WriteLine(str);
+            if (dontPrint == false) { Console.WriteLine(str); }
         }
         if (sourceDict.Count() == 0)
         {

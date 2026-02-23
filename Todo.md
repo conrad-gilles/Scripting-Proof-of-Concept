@@ -5,6 +5,7 @@
 - upgrade methode vun action res 1 ob 2
 - make sure references are safe, more for future
 - add a constructor to the customerScript class maybe add 2, 1 empty one so stuff dont break
+- make sure when calling executebyid that you dont have to pass the required context in the useful method its super stupid rn
 
 
 

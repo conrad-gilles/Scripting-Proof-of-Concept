@@ -12,23 +12,70 @@ public class UsefulMethods
         // GeneratorContext ctx = GetTestingContext();
         return "Gilles";
     }
-    public static GeneratorContext GetTestingContext<T>() where T : GeneratorContext
+    public static GeneratorContext GetTestingContext<T>(CustomerScript? justForTesting = null) where T : GeneratorContext
     {
-        LabOrder labOrder = new LabOrder("1", "Pediatrics");
-        Patient patient = new Patient("1", "TestFirst", "TestLast", new DateTime(2010, 6, 1, 7, 47, 0), "M");   //mfu
-        ConsoleLogger logger = new ConsoleLogger();
-        DataAccess testDataAccess = new DataAccess();
-
-        GeneratorContext ctx = typeof(T) switch
+        try
         {
-            var t when t == typeof(ReadOnlyContext) => new ReadOnlyContext(labOrder, patient, logger, testDataAccess),
-            var t when t == typeof(RWContext) => new RWContext(labOrder, patient, logger, testDataAccess),
-            var t when t == typeof(GeneratorContextV2) => new GeneratorContextV2(labOrder, patient, logger, testDataAccess),
-            var t when t == typeof(GeneratorContextV3) => new GeneratorContextV3(labOrder, patient, logger, testDataAccess),
-            _ => throw new ArgumentException($"Unsupported context type: {typeof(T).Name}")
-        };
+            LabOrder labOrder = new LabOrder("1", "Pediatrics");
+            Patient patient = new Patient("1", "TestFirst", "TestLast", new DateTime(2010, 6, 1, 7, 47, 0), "M");   //mfu
+            ConsoleLogger logger = new ConsoleLogger();
+            DataAccess testDataAccess = new DataAccess();
+            Vaccine vaccine = new Vaccine("Polio", 1, DateTime.UtcNow);
 
-        return (T)ctx;
+            GeneratorContext ctx = typeof(T) switch
+            {
+                var t when t == typeof(ReadOnlyContext) => new ReadOnlyContext(labOrder, patient, logger, testDataAccess),
+                var t when t == typeof(RWContext) => new RWContext(labOrder, patient, logger, testDataAccess),
+                var t when t == typeof(GeneratorContextV2) => new GeneratorContextV2(labOrder, patient, logger, testDataAccess),
+                var t when t == typeof(GeneratorContextV3) => new GeneratorContextV3(labOrder, patient, logger, testDataAccess),
+                var t when t == typeof(GeneratorContextNoInherVaccine) => new GeneratorContextNoInherVaccine(labOrder, vaccine),
+                _ => throw new ArgumentException($"Unsupported context type: {typeof(T).Name}")
+            };
+            if (justForTesting != null) //this is ofc just for testing purposes in the real application you would never automatically distribute the context because it is unsafe you want to be able to control who gets which context precisely
+            {
+                ScriptCompiler compiler = new ScriptCompiler();
+                string implementedInterface = compiler.BasicValidationBeforeCompiling(justForTesting.SourceCode).baseTypeName;
+                switch (implementedInterface)
+                {
+                    case "IGeneratorActionScript":
+                        // ctx = new RWContext(labOrder, patient, logger, testDataAccess);
+                        int v = compiler.BasicValidationBeforeCompiling(justForTesting.SourceCode).versionInt;
+                        ctx = v switch
+                        {
+                            1 => new RWContext(labOrder, patient, logger, testDataAccess),
+                            2 => new GeneratorContextV2(labOrder, patient, logger, testDataAccess),
+                            3 => new GeneratorContextV3(labOrder, patient, logger, testDataAccess),
+                            // _ => new RWContext(labOrder, patient, logger, testDataAccess)
+                        };
+                        break;
+                    case "IGeneratorActionScriptV2":
+                        ctx = new GeneratorContextV2(labOrder, patient, logger, testDataAccess);
+                        break;
+                    case "IGeneratorActionScriptV3":
+                        ctx = new GeneratorContextV3(labOrder, patient, logger, testDataAccess);
+                        break;
+                    case "IGeneratorActionScriptV4Vaccine":
+                        ctx = new GeneratorContextNoInherVaccine(labOrder, vaccine);
+                        break;
+                    case "IGeneratorConditionScript":
+                        ctx = new ReadOnlyContext(labOrder, patient, logger, testDataAccess);
+                        break;
+                    default:
+                        Console.WriteLine("Error in testing switch");
+                        throw new Exception();
+                }
+            }
+
+            // return (T)ctx;
+            return ctx;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine("GetTestingContext failed");
+            Console.WriteLine(e.ToString());
+            throw new Exception();
+        }
+
     }
 
 
