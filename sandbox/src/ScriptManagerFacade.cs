@@ -151,7 +151,7 @@ public class ScriptManagerFacade
     #region Execution Operations
 
     // Executes a Generator Action script with provided context, realisitcally not needed 
-    public async Task<ActionResult> ExecuteActionScript(Guid scriptId, GeneratorContext context, int currentApiVersion = -1)    //lowkey so many errors better to have one 
+    public async Task<ActionResultBaseClass> ExecuteActionScript(Guid scriptId, GeneratorContext context, int currentApiVersion = -1)    //lowkey so many errors better to have one 
     {
         try
         {
@@ -177,7 +177,7 @@ public class ScriptManagerFacade
 
             //possibly add a null check for compiledScript
             ScriptExecutor executor = new ScriptExecutor(compiledScript, context);
-            ActionResult result = (ActionResult)executor.RunScriptExecution<object>();  //todo maybe better handling than casting although the error will be thrown in the class itself
+            ActionResultBaseClass result = (ActionResultBaseClass)executor.RunScriptExecution<object>();  //todo maybe better handling than casting although the error will be thrown in the class itself
             return result;
         }
         catch (Exception e)

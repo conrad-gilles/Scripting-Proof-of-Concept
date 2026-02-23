@@ -4,7 +4,7 @@ public interface IGeneratorConditionScript
 }
 public interface IGeneratorActionScript
 {
-    Task<ActionResult> ExecuteAsync(IGeneratorContext context);
+    Task<ActionResultBaseClass> ExecuteAsync(IGeneratorContext context);
 }
 public interface IGeneratorConditionScript<TContext> : IGeneratorConditionScript    //todo this needs to get tested still
 where TContext : IGeneratorReadOnlyContext
@@ -16,14 +16,26 @@ where TContext : IGeneratorReadOnlyContext
     }
 }
 public interface IGeneratorActionScript<TContext> : IGeneratorActionScript
-where TContext : IGeneratorContext   //todo i changed this from v2
+where TContext : IGeneratorContext
 {
-    new Task<ActionResult> ExecuteAsync(TContext context);
+    new Task<ActionResultBaseClass> ExecuteAsync(TContext context);
 
     //explicit default implementation for the base interface
-    Task<ActionResult> IGeneratorActionScript.ExecuteAsync(IGeneratorContext context)
+    Task<ActionResultBaseClass> IGeneratorActionScript.ExecuteAsync(IGeneratorContext context)
     {
         return ExecuteAsync((TContext)context);
+    }
+}
+public interface IGeneratorActionScript<TContext, TActionResult> : IGeneratorActionScript
+where TContext : IGeneratorContext
+where TActionResult : ActionResultBaseClass
+{
+    new Task<TActionResult> ExecuteAsync(TContext context);
+
+    //explicit default implementation for the base interface
+    async Task<ActionResultBaseClass> IGeneratorActionScript.ExecuteAsync(IGeneratorContext context)
+    {
+        return await ExecuteAsync((TContext)context);
     }
 }
 //todo version of cond script and action script v2 and son on, dont inherit implement empty interface

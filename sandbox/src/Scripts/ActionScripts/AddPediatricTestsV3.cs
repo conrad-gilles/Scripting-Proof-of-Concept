@@ -2,10 +2,10 @@ using System;   //todo this is possible to default in compiler
 using System.Threading.Tasks;
 using System.Collections.Generic;   //todo same for them
 
-public class AddPediatricTestsV3 : IGeneratorActionScript<IGeneratorContext_V3>
+public class AddPediatricTestsV3 : IGeneratorActionScript<IGeneratorContext_V3, ActionResultV3NoInheritance>
 {
     // public async Task<ActionResult> ExecuteAsync(IGeneratorContext context)
-    public async Task<ActionResult> ExecuteAsync(IGeneratorContext_V3 context)
+    public async Task<ActionResultV3NoInheritance> ExecuteAsync(IGeneratorContext_V3 context)
     {
         context.Logger.Info("Adding pediatric standard tests");
 
@@ -19,11 +19,11 @@ public class AddPediatricTestsV3 : IGeneratorActionScript<IGeneratorContext_V3>
 
         double versionExample = context.LabOrder.RandomNewDouble;    //example of newer version
         Console.WriteLine(versionExample);
-        
-        string exampleV3 = context.LabOrder.randomNewFunctionInV3("Gilles");
-        Console.WriteLine("Return also works if here:"+exampleV3);
 
-        return ActionResult.Success("Pediatric tests added");
+        string exampleV3 = context.LabOrder.randomNewFunctionInV3("Gilles");
+        Console.WriteLine("Return also works if here:" + exampleV3);
+
+        return ActionResultV3NoInheritance.Success("Pediatric tests added V3");
         // return null; //just for compiler
     }
 }

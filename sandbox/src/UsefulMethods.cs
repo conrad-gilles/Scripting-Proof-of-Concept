@@ -9,21 +9,26 @@ public class UsefulMethods
     }
     public static string GetUserName()
     {
+        // GeneratorContext ctx = GetTestingContext();
         return "Gilles";
     }
-    public static GeneratorContext GetTestingContext()
+    public static GeneratorContext GetTestingContext<T>() where T : GeneratorContext
     {
         LabOrder labOrder = new LabOrder("1", "Pediatrics");
         Patient patient = new Patient("1", "TestFirst", "TestLast", new DateTime(2010, 6, 1, 7, 47, 0), "M");   //mfu
         ConsoleLogger logger = new ConsoleLogger();
         DataAccess testDataAccess = new DataAccess();
 
-        // ReadOnlyContext tempContext = new ReadOnlyContext(labOrder, patient, logger, testDataAccess);
-        // RWContext tempContext = new RWContext(labOrder, patient, logger, testDataAccess);
-        // GeneratorContextV2 tempContext = new GeneratorContextV2(labOrder, patient, logger, testDataAccess);
-        GeneratorContextV3 tempContext = new GeneratorContextV3(labOrder, patient, logger, testDataAccess);
+        GeneratorContext ctx = typeof(T) switch
+        {
+            var t when t == typeof(ReadOnlyContext) => new ReadOnlyContext(labOrder, patient, logger, testDataAccess),
+            var t when t == typeof(RWContext) => new RWContext(labOrder, patient, logger, testDataAccess),
+            var t when t == typeof(GeneratorContextV2) => new GeneratorContextV2(labOrder, patient, logger, testDataAccess),
+            var t when t == typeof(GeneratorContextV3) => new GeneratorContextV3(labOrder, patient, logger, testDataAccess),
+            _ => throw new ArgumentException($"Unsupported context type: {typeof(T).Name}")
+        };
 
-        return tempContext;
+        return (T)ctx;
     }
 
 

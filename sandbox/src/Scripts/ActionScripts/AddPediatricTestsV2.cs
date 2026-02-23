@@ -2,10 +2,10 @@ using System;   //todo this is possible to default in compiler
 using System.Threading.Tasks;
 using System.Collections.Generic;   //todo same for them
 
-public class AddPediatricTestsV2 : IGeneratorActionScript<IGeneratorContext_V2>
+public class AddPediatricTestsV2 : IGeneratorActionScript<IGeneratorContext_V2, ActionResultV2>
 {
     // public async Task<ActionResult> ExecuteAsync(IGeneratorContext context)
-    public async Task<ActionResult> ExecuteAsync(IGeneratorContext_V2 context)
+    public async Task<ActionResultV2> ExecuteAsync(IGeneratorContext_V2 context)
     {
         context.Logger.Info("Adding pediatric standard tests");
 
@@ -23,7 +23,7 @@ public class AddPediatricTestsV2 : IGeneratorActionScript<IGeneratorContext_V2>
         // string exampleV3 = context.LabOrder.randomNewFunctionInV3("Gilles");
         // Console.WriteLine("Return also works if here:" + exampleV3);
 
-        return ActionResult.Success("Pediatric tests added");
+        return ActionResultV2.Success("Pediatric tests added");
         // return null; //just for compiler
     }
 }

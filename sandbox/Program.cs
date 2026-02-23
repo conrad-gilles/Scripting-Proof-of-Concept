@@ -184,31 +184,31 @@ class MainProgram
 
                         case "ExecuteActionScript":
                             scriptId = await UsefulMethods.GetIdInConsoleAsync(fromSrc: true);
-                            ActionResult result = await facade.ExecuteActionScript(scriptId, UsefulMethods.GetTestingContext());
+                            ActionResultBaseClass result = await facade.ExecuteActionScript(scriptId, UsefulMethods.GetTestingContext<GeneratorContextV3>());
                             Console.WriteLine(result.ToString());   //you could do whatever with it
                             break;
 
                         case "ExecuteConditionScript":
                             scriptId = await UsefulMethods.GetIdInConsoleAsync(fromSrc: true);
-                            bool resultCond = await facade.ExecuteConditionScript(scriptId, UsefulMethods.GetTestingContext());
+                            bool resultCond = await facade.ExecuteConditionScript(scriptId, UsefulMethods.GetTestingContext<GeneratorContextV3>());
                             Console.WriteLine(resultCond);
                             break;
 
                         case "ExecuteScriptById":
                             scriptId = await UsefulMethods.GetIdInConsoleAsync(fromSrc: true);
-                            object resultObj = await facade.ExecuteScriptById(scriptId, UsefulMethods.GetTestingContext());
+                            object resultObj = await facade.ExecuteScriptById(scriptId, UsefulMethods.GetTestingContext<GeneratorContextV3>());
 
                             if (typeof(bool).IsAssignableFrom(resultObj.GetType()))       //good idea to check what type was returne, you could also just check the property from db normally
                             {
                                 Console.WriteLine("Script returned a bool: " + resultObj.ToString());
                             }
-                            else if (typeof(ActionResult).IsAssignableFrom(resultObj.GetType()))
+                            else if (typeof(ActionResultBaseClass).IsAssignableFrom(resultObj.GetType()))
                             {
                                 Console.WriteLine("Script returned an ActionResult: " + resultObj.ToString());
                             }
                             else
                             {
-                                Console.WriteLine("Script was neither returned a bool nor an ActionResult, it was a: " + resultObj.GetType().ToString());
+                                Console.WriteLine("Script was neither returned a bool nor an ActionResultBaseClass, it was a: " + resultObj.GetType().ToString());
                             }
                             break;
 
@@ -324,7 +324,21 @@ class MainProgram
                         #endregion
 
                         default:
-                            Console.WriteLine("Unknown command");
+                            scriptId = sourceDict[Int32.Parse(userInput)];
+                            object resultObj2 = await facade.ExecuteScriptById(scriptId, UsefulMethods.GetTestingContext<GeneratorContextV3>());
+
+                            if (typeof(bool).IsAssignableFrom(resultObj2.GetType()))       //good idea to check what type was returne, you could also just check the property from db normally
+                            {
+                                Console.WriteLine("Script returned a bool: " + resultObj2.ToString());
+                            }
+                            else if (typeof(ActionResultBaseClass).IsAssignableFrom(resultObj2.GetType()))
+                            {
+                                Console.WriteLine("Script returned an ActionResult: " + resultObj2.ToString());
+                            }
+                            else
+                            {
+                                Console.WriteLine("Script was neither returned a bool nor an ActionResult, it was a: " + resultObj2.GetType().ToString());
+                            }
                             break;
                     }
 

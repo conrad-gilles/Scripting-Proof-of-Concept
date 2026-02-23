@@ -2,6 +2,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Scripting;
 using System.Reflection;
+using System.Threading.Tasks;
 public class ScriptExecutor
 {
     public byte[] compiledScript;
@@ -52,12 +53,12 @@ public class ScriptExecutor
             // if (typeof(IGeneratorConditionScript).IsAssignableFrom(type))
             if (typeof(IGeneratorConditionScript).IsAssignableFrom(type))    //checks if type implements the generator specific interface  //check if runs
             {
-                var result = runConditionScript(type, scriptInstance);
+                var result = RunConditionScript(type, scriptInstance);
                 return (T)(object)result;
             }
             else if (typeof(IGeneratorActionScript).IsAssignableFrom(type))
             {
-                var result = runActionScript(type, scriptInstance);
+                var result = RunActionScript(type, scriptInstance);
                 return (T)(object)result;
             }
             else
@@ -76,7 +77,7 @@ public class ScriptExecutor
         }
 
     }
-    public bool runConditionScript(Type type, object scriptInstance)
+    public bool RunConditionScript(Type type, object scriptInstance)
     {
         try
         {
@@ -102,7 +103,7 @@ public class ScriptExecutor
         }
 
     }
-    public ActionResult runActionScript(Type type, object scriptInstance)
+    public ActionResultBaseClass RunActionScript(Type type, object scriptInstance)
     {
         try
         {
@@ -122,8 +123,8 @@ public class ScriptExecutor
             var resultValue = resultProperty.GetValue(resultTask);
 
             Console.WriteLine($"Result in 86 sExecuter: {resultValue}");    //todo probably unnessesary but good for debugging
-            return (ActionResult)resultValue; // todo very important error handling
-                                              // return resultValue; // todo very important error handling
+            // return (ActionResult)resultValue; 
+            return UpgradeActionResult(resultValue);
         }
         catch (Exception e)
         {
@@ -132,6 +133,33 @@ public class ScriptExecutor
             throw new ActionScriptExecutionException();
         }
 
+    }
+
+    public ActionResultV3NoInheritance UpgradeActionResult(object resultValue)
+    {
+        var facade = new ScriptManagerFacade();
+        // var newestVersion = await facade.GetRecentApiVersion();
+        object finalActionResult = resultValue;
+        while (finalActionResult is not ActionResultV3NoInheritance)
+        {
+            if (finalActionResult is ActionResultV2 v2Script)
+            {
+                finalActionResult = ActionResultV3NoInheritance.UpgradeV2(v2Script);
+            }
+            else if (finalActionResult is ActionResult v1Script)
+            {
+                List<string> loggedActions = [];
+                finalActionResult = ActionResultV2.UpgradeV1(v1Script, loggedActions);
+            }
+        }
+        if (finalActionResult is ActionResultV3NoInheritance v3Script)
+        {
+            return (ActionResultV3NoInheritance)v3Script;
+        }
+        else
+        {
+            throw new Exception(message: "UpgradeActionResult in ScriptExecutor failed.");
+        }
     }
 
 }
