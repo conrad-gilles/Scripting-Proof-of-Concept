@@ -45,6 +45,7 @@ public class UsefulMethods
                             1 => new RWContext(labOrder, patient, logger, testDataAccess),
                             2 => new GeneratorContextV2(labOrder, patient, logger, testDataAccess),
                             3 => new GeneratorContextV3(labOrder, patient, logger, testDataAccess),
+                            4 => new GeneratorContextNoInherVaccine(labOrder, vaccine),
                             // _ => new RWContext(labOrder, patient, logger, testDataAccess)
                         };
                         break;

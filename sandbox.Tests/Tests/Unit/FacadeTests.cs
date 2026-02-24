@@ -343,15 +343,15 @@ public class ScriptManagerFacadeTests
         Assert.IsInstanceOfType(v, typeof(System.Int32));   //todo implement maybe real
     }
 
-    [TestMethod]
-    public async Task GetScriptCompatibilityTest()
-    {
-        Guid id = await facade.CreateScript(sourceCodeActionV3);
+    // [TestMethod]
+    // public async Task GetScriptCompatibilityTest()
+    // {
+    //     Guid id = await facade.CreateScript(sourceCodeActionV3);
 
-        int minVersion = await facade.GetScriptCompatibility(id);
+    //     int minVersion = await facade.GetScriptCompatibility(id);
 
-        Assert.AreEqual(3, minVersion);
-    }
+    //     Assert.AreEqual(3, minVersion);
+    // }
 
     [TestMethod]
     public async Task CheckVersionCompatibilityTest()

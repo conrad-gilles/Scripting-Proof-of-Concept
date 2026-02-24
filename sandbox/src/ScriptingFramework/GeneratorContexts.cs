@@ -28,7 +28,7 @@ public interface IGeneratorContext_V3 : IGeneratorContext_V2
 {
     new ILabOrderInterfaceV3 LabOrder { get; }
 }
-public interface IGeneratorContextNoInheritance : IGeneratorBaseInterface
+public interface IGeneratorContextNoInheritance_V4 : IGeneratorBaseInterface
 {
     new ILabOrderInterfaceV4NoInheritence LabOrder { get; }
     new IVaccineInterface Vaccine { get; }
@@ -132,7 +132,7 @@ public class GeneratorContextV3 : GeneratorContextV2, IGeneratorContext_V3  //to
 
 }
 
-public class GeneratorContextNoInherVaccine : GeneratorContext, IGeneratorContextNoInheritance
+public class GeneratorContextNoInherVaccine : GeneratorContext, IGeneratorContextNoInheritance_V4
 {
     ILabOrderInterfaceV4NoInheritence LabOrder;
     IVaccineInterface Vaccine;
@@ -142,9 +142,9 @@ public class GeneratorContextNoInherVaccine : GeneratorContext, IGeneratorContex
         Vaccine = vaccine;
     }
 
-    ILabOrderInterfaceV4NoInheritence IGeneratorContextNoInheritance.LabOrder => LabOrder;
+    ILabOrderInterfaceV4NoInheritence IGeneratorContextNoInheritance_V4.LabOrder => LabOrder;
 
-    IVaccineInterface IGeneratorContextNoInheritance.Vaccine => Vaccine;
+    IVaccineInterface IGeneratorContextNoInheritance_V4.Vaccine => Vaccine;
 }
 
 //context not always backwards comp, make sure right context passed factory 

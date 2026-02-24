@@ -43,7 +43,7 @@ where TContext : IGeneratorContext
 /// </summary>
 
 public interface IGeneratorActionScript<TContext, TActionResult> : IGeneratorActionScript
-where TContext : IGeneratorContext
+where TContext : IGeneratorBaseInterface    //changed from IGeneratorContext
 where TActionResult : ActionResultBaseClass
 {
     new Task<TActionResult> ExecuteAsync(TContext context);
@@ -68,9 +68,18 @@ public interface IGeneratorActionScriptV2 : IGeneratorActionScript
         return ExecuteAsync(context);
     }
 }
+public interface IGeneratorActionScriptV3 : IGeneratorActionScript
+{
+    Task<ActionResultV3NoInheritance> ExecuteAsync(IGeneratorContext_V3 context);
+
+    Task<ActionResultBaseClass> IGeneratorActionScript.ExecuteAsync(IGeneratorBaseInterface context)     //if bugs maybe put as async and await ExecuteAsync
+    {
+        return ExecuteAsync(context);
+    }
+}
 public interface IGeneratorActionScriptV4Vaccine : IGeneratorActionScript
 {
-    Task<ActionResultV3NoInheritance> ExecuteAsync(IGeneratorContextNoInheritance context);
+    Task<ActionResultV3NoInheritance> ExecuteAsync(IGeneratorContextNoInheritance_V4 context);
 
     Task<ActionResultBaseClass> IGeneratorActionScript.ExecuteAsync(IGeneratorBaseInterface context)     //if bugs maybe put as async and await ExecuteAsync
     {
