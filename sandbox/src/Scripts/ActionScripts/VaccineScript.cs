@@ -2,7 +2,7 @@ using System.Threading.Tasks;
 using System;
 public class VaccineScript : IGeneratorActionScriptV4Vaccine
 {
-    public async Task<ActionResultV3NoInheritance> ExecuteAsync(IGeneratorContextNoInherVaccine context)
+    public async Task<ActionResultV3NoInheritance> ExecuteAsync(IGeneratorContextNoInheritance context)
     {
         string number = context.LabOrder.OrderNumber;
         if (number == "1")

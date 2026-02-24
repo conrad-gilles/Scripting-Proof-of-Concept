@@ -5,7 +5,6 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 public class ScriptTests
 {
     ScriptManagerFacade facade = new ScriptManagerFacade();
-    UsefulMethods usefulMethods = new UsefulMethods();
     string ActionResultVersionSpecific = "[Message contains either failure or succes: ] ";  //change this if action result version changes it will thraow cause of message contains
     string sourceCodeActionV1 = UsefulMethods.CreateStringFromCsFile(
         Path.GetFullPath(Path.Combine(
@@ -111,6 +110,24 @@ public class ScriptTests
         Assert.IsInstanceOfType(result, typeof(bool));
         Assert.IsTrue(result.ToString().Contains(shouldReturn));
 
+        //todo make negative test
+    }
+    [TestMethod]
+    public async Task RunAllScripts()
+    {
+        await facade.ClearAllCaches();
+        await facade.CompileAllScripts();
+        var allScripts = await facade.ListScripts();
+        Assert.IsTrue(allScripts.Count() == 5);
+        foreach (var item in allScripts)
+        {
+            Guid id = item.Id;
+            CustomerScript retrievedScript = await facade.GetScript(id);
+            var context = UsefulMethods.GetTestingContext<GeneratorContextNoInherVaccine>(justForTesting: retrievedScript);
+            object result = await facade.ExecuteScriptById(id, context);
+            Assert.IsTrue(result != null);
+            Assert.IsTrue(result is bool || result is ActionResultBaseClass);
+        }
         //todo make negative test
     }
 }

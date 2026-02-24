@@ -1,7 +1,9 @@
-//all from confluence
 using Microsoft.Extensions.Logging;
 
-public abstract class GeneratorContext { }
+/// <summary>
+/// Interfaces first classes are defined a bit down in the file,
+/// There is one empty interface IGeneratorBaseInterface, and one empty abstract class GeneratorContext
+/// </summary>
 public interface IGeneratorBaseInterface { }
 
 public interface IGeneratorReadOnlyContext : IGeneratorBaseInterface
@@ -17,36 +19,25 @@ public interface IGeneratorContext : IGeneratorReadOnlyContext
     new ILabOrderRWInterface LabOrder { get; }
 
 }
-// API V2 extends V1
 public interface IGeneratorContext_V2 : IGeneratorContext
 {
     new ILabOrderInterfaceV2 LabOrder { get; }
 }
 
-// API V3 extends V2
 public interface IGeneratorContext_V3 : IGeneratorContext_V2
 {
     new ILabOrderInterfaceV3 LabOrder { get; }
 }
-public interface IGeneratorContextNoInherVaccine : IGeneratorBaseInterface
+public interface IGeneratorContextNoInheritance : IGeneratorBaseInterface
 {
     new ILabOrderInterfaceV4NoInheritence LabOrder { get; }
     new IVaccineInterface Vaccine { get; }
 }
-public class GeneratorContextNoInherVaccine : GeneratorContext, IGeneratorContextNoInherVaccine
-{
-    ILabOrderInterfaceV4NoInheritence LabOrder;
-    IVaccineInterface Vaccine;
-    public GeneratorContextNoInherVaccine(ILabOrderInterfaceV4NoInheritence labOrder, IVaccineInterface vaccine)
-    {
-        LabOrder = labOrder;
-        Vaccine = vaccine;
-    }
 
-    ILabOrderInterfaceV4NoInheritence IGeneratorContextNoInherVaccine.LabOrder => LabOrder;
-
-    IVaccineInterface IGeneratorContextNoInherVaccine.Vaccine => Vaccine;
-}
+/// <summary>
+/// Classes of context come here
+/// </summary>
+public abstract class GeneratorContext { }
 public class ReadOnlyContext : GeneratorContext, IGeneratorReadOnlyContext
 {
     public ILabOrderInterface labOrder;
@@ -141,6 +132,19 @@ public class GeneratorContextV3 : GeneratorContextV2, IGeneratorContext_V3  //to
 
 }
 
+public class GeneratorContextNoInherVaccine : GeneratorContext, IGeneratorContextNoInheritance
+{
+    ILabOrderInterfaceV4NoInheritence LabOrder;
+    IVaccineInterface Vaccine;
+    public GeneratorContextNoInherVaccine(ILabOrderInterfaceV4NoInheritence labOrder, IVaccineInterface vaccine)
+    {
+        LabOrder = labOrder;
+        Vaccine = vaccine;
+    }
 
+    ILabOrderInterfaceV4NoInheritence IGeneratorContextNoInheritance.LabOrder => LabOrder;
+
+    IVaccineInterface IGeneratorContextNoInheritance.Vaccine => Vaccine;
+}
 
 //context not always backwards comp, make sure right context passed factory 

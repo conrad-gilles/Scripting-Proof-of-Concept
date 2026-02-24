@@ -1,3 +1,6 @@
+/// <summary>
+/// Simplest implementation of the Condition script probably should make them private in real application to prevent user from using
+/// </summary>
 public interface IGeneratorConditionScript
 {
     Task<bool> EvaluateAsync(IGeneratorReadOnlyContext context);
@@ -7,6 +10,12 @@ public interface IGeneratorActionScript
     // Task<ActionResultBaseClass> ExecuteAsync(IGeneratorContext context);
     Task<ActionResultBaseClass> ExecuteAsync(IGeneratorBaseInterface context);
 }
+
+/// <summary>
+/// Implementation using 1 generic for Context
+/// </summary>
+
+
 public interface IGeneratorConditionScript<TContext> : IGeneratorConditionScript    //todo this needs to get tested still
 where TContext : IGeneratorReadOnlyContext
 {
@@ -28,6 +37,11 @@ where TContext : IGeneratorContext
         return ExecuteAsync((TContext)context);
     }
 }
+
+/// <summary>
+/// Implementation using 2 generics, one for context and one additional for ActionResult
+/// </summary>
+
 public interface IGeneratorActionScript<TContext, TActionResult> : IGeneratorActionScript
 where TContext : IGeneratorContext
 where TActionResult : ActionResultBaseClass
@@ -40,6 +54,11 @@ where TActionResult : ActionResultBaseClass
         return await ExecuteAsync((TContext)context);
     }
 }
+
+/// <summary>
+/// Implementation using versioning of Generator scripts good for string control over what version of context and what version of the return type the user uses
+/// </summary>
+
 public interface IGeneratorActionScriptV2 : IGeneratorActionScript
 {
     Task<ActionResultV2> ExecuteAsync(IGeneratorContext_V2 context);
@@ -51,13 +70,12 @@ public interface IGeneratorActionScriptV2 : IGeneratorActionScript
 }
 public interface IGeneratorActionScriptV4Vaccine : IGeneratorActionScript
 {
-    Task<ActionResultV3NoInheritance> ExecuteAsync(IGeneratorContextNoInherVaccine context);
+    Task<ActionResultV3NoInheritance> ExecuteAsync(IGeneratorContextNoInheritance context);
 
     Task<ActionResultBaseClass> IGeneratorActionScript.ExecuteAsync(IGeneratorBaseInterface context)     //if bugs maybe put as async and await ExecuteAsync
     {
         return ExecuteAsync(context);
     }
 }
-//todo version of cond script and action script v2 and son on, dont inherit implement empty interface
-//upgrade methode vun action res 1 ob 2
+
 
