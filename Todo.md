@@ -1,8 +1,5 @@
 
 - i thing getcompilationErros saves to db after compiling
-- context not always backwards comp, make sure right context passed factory, yes this will break old scripts with old features
-- todo version of cond script and action script v2 and son on, dont inherit implement empty interface
-- upgrade methode vun action res 1 ob 2
 - make sure references are safe, more for future
 - add a constructor to the customerScript class maybe add 2, 1 empty one so stuff dont break
 - make sure when calling executebyid that you dont have to pass the required context in the useful method its super stupid rn

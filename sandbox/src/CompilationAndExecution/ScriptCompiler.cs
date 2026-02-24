@@ -6,13 +6,6 @@ using System.Reflection;
 
 public class ScriptCompiler
 {
-    // public string script;
-
-    // public ScriptCompiler(string pScript)
-    // {
-    //     script = pScript;
-    // }
-
     public byte[] RunCompilation(string script, MetadataReference[]? references = null, int apiVersion = -1) //references param there to enable later on users to define custom references
     {
         try
@@ -78,6 +71,7 @@ public class ScriptCompiler
     {
         try
         {
+
             //Does basic validation such as correct interface usage, or if only one class is in the script file.
             //Also extracts class name, type of the scrip(ex. Action) and verison of interface.
 
@@ -89,7 +83,6 @@ public class ScriptCompiler
             var compilation = CSharpCompilation.Create("MyCompilation",
                 syntaxTrees: new[] { tree }, references: new[] { Mscorlib });   // i might be able to use this method to init the refrences also above?
             var model = compilation.GetSemanticModel(tree);
-
             var classesInTree = tree.GetRoot().DescendantNodes().OfType<ClassDeclarationSyntax>();
             if (classesInTree.Count() > 1)
             {
@@ -119,7 +112,6 @@ public class ScriptCompiler
                 versionInt = 1;
             }
 
-
             if (baseTypeName == null || className == null)
             {
                 Console.WriteLine("BaseTypeName or classname null in BasicValidationBeforeCompiling.");
@@ -129,6 +121,7 @@ public class ScriptCompiler
             Console.WriteLine("BaseClass Name = " + baseTypeName);
             // Console.WriteLine("Version Int = " + versionInt);
 
+            ValidateNamespaceUsage(tree, model);
             return (className, baseTypeName, versionInt);
         }
         catch (Exception e)
@@ -139,6 +132,55 @@ public class ScriptCompiler
         }
 
     }
+    private void ValidateNamespaceUsage(SyntaxTree tree, SemanticModel model)    //todo check
+    {
+        HashSet<string> illegalNamespaces = new() //no duplicates unlike list
+            {
+                "System.IO",
+                "System.Net",
+                "System.Net.Http",
+                "System.Reflection",
+                "System.Diagnostics",
+                "System.Runtime.InteropServices",
+
+                "System.Threading.Thread",
+                "System.Threading.ThreadPool",
+                "System.Threading.Timer",
+                "System.Threading.Mutex",
+                "System.Threading.Semaphore",
+                "System.Threading.SemaphoreSlim",
+            };
+        var usings = tree.GetRoot()
+            .DescendantNodes()
+            .OfType<UsingDirectiveSyntax>()
+            .Select(s => s.Name.ToString());
+
+        IEnumerable<IdentifierNameSyntax> identifiers = tree.GetRoot().DescendantNodes().OfType<IdentifierNameSyntax>();
+
+        foreach (var illegal in illegalNamespaces)
+        {
+            foreach (var usingItem in usings)
+            {
+                if (illegal == usingItem || usingItem.StartsWith(illegal + "."))  //to prevent usage of for example System.IO and then System.IO.Compression
+                {
+                    throw new ForbiddenNamespaceException($"Script uses forbidden namespace: {illegal}");
+                }
+            }
+            foreach (var id in identifiers) //to prevent system.io.file stuff like that
+            {
+                var symbol = model.GetSymbolInfo(id).Symbol;
+                if (symbol != null)
+                {
+                    var nameSpaceEx = symbol.ContainingNamespace?.ToString();
+                    if (nameSpaceEx != null && (illegal == nameSpaceEx || nameSpaceEx.StartsWith(illegal + ".")))
+                    {
+                        throw new ForbiddenNamespaceException($"Usage of forbidden type: {symbol.ToDisplayString()}");
+                    }
+                }
+            }
+        }
+    }
+
     public bool IsTheSameTree(string script1, string script2)
     {
         SyntaxTree tree1 = CSharpSyntaxTree.ParseText(script1);

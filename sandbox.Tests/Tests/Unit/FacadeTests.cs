@@ -116,6 +116,33 @@ public class ScriptManagerFacadeTests
         Assert.IsNotNull(scripts);
         Assert.IsTrue(scripts.Count == 2);
     }
+    [TestMethod]
+    public async Task ListScriptsTestWithFilter()
+    {
+        string scriptFolderPath = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "..",
+                "sandbox", "src", "Scripts"));
+        await db.EnsureDeletedCreated();
+        await RandomMethods.CompileAllScriptsInFolderAndSaveToDB(scriptFolderPath, "Gilles", 4);
+        List<CustomerScript> scripts = await facade.ListScripts(includeCaches: true);
+        Assert.IsNotNull(scripts);
+        Assert.IsTrue(scripts.Count == 5);
+
+        CustomerScriptFilter filters = new CustomerScriptFilter(scriptName: "VaccineScript");
+        List<CustomerScript> scriptsFiltered = await facade.ListScripts(includeCaches: true, filters: filters);
+        Assert.IsNotNull(scriptsFiltered);
+        Assert.IsTrue(scriptsFiltered.Count == 1);
+
+        CustomerScriptFilter filters2 = new CustomerScriptFilter(scriptName: "VaccineScript", minApiVersion: 4);
+        List<CustomerScript> scriptsFiltered2 = await facade.ListScripts(includeCaches: true, filters: filters2);
+        Assert.IsNotNull(scriptsFiltered2);
+        Assert.IsTrue(scriptsFiltered2.Count == 1);
+
+        CustomerScriptFilter filters3 = new CustomerScriptFilter(scriptType: "IGeneratorActionScript");
+        List<CustomerScript> scriptsFiltered3 = await facade.ListScripts(includeCaches: true, filters: filters3);
+        Console.WriteLine("Count is: " + scriptsFiltered3.Count());
+        Assert.IsNotNull(scriptsFiltered3);
+        Assert.IsTrue(scriptsFiltered3.Count == 2); //why 2 todo
+    }
 
     #endregion
 

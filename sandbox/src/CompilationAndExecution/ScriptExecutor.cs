@@ -7,6 +7,8 @@ public class ScriptExecutor
 {
     public byte[] compiledScript;
     public GeneratorContext genContext;
+    private static int ScriptTimeout = 5000;
+    // private static readonly TimeSpan ScriptTimeout = TimeSpan.FromSeconds(5);
     public ScriptExecutor(byte[] pCompiledScript, GeneratorContext pGenContext)
     {
         compiledScript = pCompiledScript;
@@ -18,6 +20,11 @@ public class ScriptExecutor
     {
         try
         {
+            if (compiledScript.Length > 5 * 1024 * 1024) // 5 mb maximum size
+            {
+                throw new ScriptExecutionException();
+            }
+
             Assembly assembly = Assembly.Load(compiledScript);
 
             Type[] unfilteredTypeArray = assembly.GetTypes();   //even though there can be only one class defined in the script file, the compiler adds classes making the array.lenght over 1 which is unsafe so it is better to filer based on our predefined classes for scripts
@@ -86,8 +93,15 @@ public class ScriptExecutor
             // Note: EvaluateAsync returns a Task<bool>, so 'result' will be a Task
             var resultTask = (Task)method.Invoke(scriptInstance, new object[] { genContext });
 
-            // 3. Wait for the task to complete and get the result
-            resultTask.Wait();
+            // // 3. Wait for the task to complete and get the result
+            // resultTask.Wait();
+
+            // Wait with timeout — throws OperationCanceledException if exceeded
+            // if (!resultTask.Wait((int)ScriptTimeout.TotalMilliseconds))
+            if (!resultTask.Wait(ScriptTimeout))
+            {
+                throw new ScriptTimeoutException("Condition script exceeded time limit.");
+            }
 
             // access the "Result" property of the Task
             var resultProperty = resultTask.GetType().GetProperty("Result");
@@ -116,7 +130,12 @@ public class ScriptExecutor
             var resultTask = (Task)method.Invoke(scriptInstance, new object[] { genContext });
 
             // 3. Wait for the task to complete and get the result
-            resultTask.Wait();
+            // resultTask.Wait();
+
+            if (!resultTask.Wait(ScriptTimeout))
+            {
+                throw new ScriptTimeoutException("Action script exceeded time limit.");
+            }
 
             // access the "Result" property of the Task
             var resultProperty = resultTask.GetType().GetProperty("Result");
@@ -140,21 +159,43 @@ public class ScriptExecutor
         var facade = new ScriptManagerFacade();
         // var newestVersion = await facade.GetRecentApiVersion();
         object finalActionResult = resultValue;
-        while (finalActionResult is not ActionResultV3NoInheritance)
+        int loopBreaker = 0;   //I am assuming not 1000 versions will be written                // will probably fail in real application todo fix mabe with reflection i heard?
+        while (finalActionResult is not ActionResultV3NoInheritance && loopBreaker < 1000)    //could fail if loaded from diffrent assembly should probably replace the is statements with something like get type.name 
         {
-            if (finalActionResult is ActionResultV2 v2Script)
+            loopBreaker++;
+            // if (finalActionResult is ActionResultV2 v2Script)
+            if (finalActionResult.GetType().Name == "ActionResultV2")
             {
-                finalActionResult = ActionResultV3NoInheritance.UpgradeV2(v2Script);
+                try
+                {
+                    ActionResultV2 v2Script2 = (ActionResultV2)finalActionResult;
+                    finalActionResult = ActionResultV3NoInheritance.UpgradeV2(v2Script2);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e.ToString());
+                }
             }
-            else if (finalActionResult is ActionResult v1Script)
+            // else if (finalActionResult is ActionResult v1Script)
+            else if (finalActionResult.GetType().Name == "ActionResult")
             {
-                List<string> loggedActions = [];
-                finalActionResult = ActionResultV2.UpgradeV1(v1Script, loggedActions);
+                try
+                {
+                    ActionResult v1Script2 = (ActionResult)finalActionResult;
+                    List<string> loggedActions = [];
+                    finalActionResult = ActionResultV2.UpgradeV1(v1Script2, loggedActions);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e.ToString());
+                }
             }
         }
-        if (finalActionResult is ActionResultV3NoInheritance v3Script)
+        // if (finalActionResult is ActionResultV3NoInheritance v3Script)
+        if (finalActionResult.GetType().Name == "ActionResultV3NoInheritance")
         {
-            return (ActionResultV3NoInheritance)v3Script;
+            ActionResultV3NoInheritance v3Script2 = (ActionResultV3NoInheritance)finalActionResult;
+            return (ActionResultV3NoInheritance)v3Script2;
         }
         else
         {

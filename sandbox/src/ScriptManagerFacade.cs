@@ -59,10 +59,10 @@ public class ScriptManagerFacade
     }
 
     // Returns all scripts with optional filtering by type, API version, or creation date
-    public async Task<List<CustomerScript>> ListScripts(object? filters = null, bool includeCaches = false)
+    public async Task<List<CustomerScript>> ListScripts(CustomerScriptFilter filters = null, bool includeCaches = false)
     {
         List<CustomerScript> scripts;
-        scripts = await db.GetAllCustomerScripts(includeCaches: includeCaches);    //todo implement filtering   
+        scripts = await db.GetAllCustomerScripts(includeCaches: includeCaches, filters: filters);
         return scripts;
     }
 
@@ -408,6 +408,7 @@ public class ScriptManagerFacade
     public async Task HealthCheck()
     {
         // TODO
+        await db.HealthCheck();
     }
 
     // Extracts className, baseTypeName, and version from script

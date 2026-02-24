@@ -1,7 +1,6 @@
 using EFModeling.EntityProperties.FluentAPI.Required;
 using Microsoft.CodeAnalysis;
 using Microsoft.EntityFrameworkCore;
-
 public class DbHelper
 {
     public async Task EnsureDeletedCreated()    //todo delete this for obvious safety reasons before production
@@ -12,8 +11,50 @@ public class DbHelper
             await db.Database.EnsureCreatedAsync();
         }
     }
-    public async Task<List<CustomerScript>> GetAllCustomerScripts(bool includeCaches = false)
+    public async Task<List<CustomerScript>> GetAllCustomerScripts(bool includeCaches = false, CustomerScriptFilter filters = null)
     {
+
+        if (filters != null)
+        {
+            using (var db = new MyContext())
+            {
+                IQueryable<CustomerScript> query = db.CustomerScripts;
+                if (includeCaches)
+                {
+                    query = query.Include(s => s.CompiledCaches);
+                }
+                if (filters.ScriptName != null && filters.ScriptName != "")
+                {
+                    query = query.Where(s => s.ScriptName == filters.ScriptName);
+                }
+                if (filters.ScriptType != null && filters.ScriptType != "")
+                {
+                    query = query.Where(s => s.ScriptType == filters.ScriptType);
+                }
+                if (filters.SourceCode != null && filters.SourceCode != "")
+                {
+                    query = query.Where(s => s.SourceCode == filters.SourceCode);
+                }
+                if (filters.MinApiVersion != null)
+                {
+                    query = query.Where(s => s.MinApiVersion == filters.MinApiVersion);
+                }
+                if (filters.CreatedAt != null)
+                {
+                    query = query.Where(s => s.CreatedAt == filters.CreatedAt);
+                }
+                if (filters.ModifiedAt != null)
+                {
+                    query = query.Where(s => s.ModifiedAt == filters.ModifiedAt);
+                }
+                if (filters.CreatedBy != null && filters.CreatedBy != "")
+                {
+                    query = query.Where(s => s.CreatedBy == filters.CreatedBy);
+                }
+
+                return await query.ToListAsync();
+            }
+        }
         if (includeCaches == false)
         {
             using (var db = new MyContext())
@@ -511,5 +552,60 @@ public class DbHelper
         }
 
 
+    }
+    public async Task HealthCheck() //todo verify
+    {
+        ScriptManagerFacade facade = new ScriptManagerFacade();
+        ScriptCompiler compiler = new ScriptCompiler();
+        // 1. Validate Database Connectivity
+        // We create a short-lived context to verify the connection is open and working.
+        using (var context = new MyContext())
+        {
+            bool canConnect = await context.Database.CanConnectAsync();
+            if (!canConnect)
+            {
+                throw new InvalidOperationException("HealthCheck Failed: Unable to connect to the database.");
+            }
+
+            // 2. Validate System State
+            // Verify critical tables (EmberInstances) exist and are readable.
+            try
+            {
+                // We don't need the result, just to ensure the query doesn't throw (Schema validation)
+                await context.EmberInstances.FirstOrDefaultAsync();
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException($"HealthCheck Failed: System state invalid. Unable to query critical tables (EmberInstances). Error: {ex.Message}", ex);
+            }
+        }
+
+        // 3. Validate API Version Consistency
+        try
+        {
+            // Ensure the current runtime version is valid (positive integer)
+            int currentApiVersion = await facade.GetRecentApiVersion();
+            if (currentApiVersion <= 0)
+            {
+                throw new InvalidOperationException($"HealthCheck Failed: Invalid Current API Version configured ({currentApiVersion}).");
+            }
+
+            // Ensure we can retrieve active API versions from the database (Consistency check)
+            var activeVersions = await facade.GetActiveApiVersions();
+            if (activeVersions == null)
+            {
+                throw new InvalidOperationException("HealthCheck Failed: Active API versions list is null.");
+            }
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException($"HealthCheck Failed: API Version consistency check encountered an error. {ex.Message}", ex);
+        }
+
+        // 4. Validate Compiler State
+        if (compiler == null)
+        {
+            throw new InvalidOperationException("HealthCheck Failed: ScriptCompiler is not correctly initialized.");
+        }
     }
 }
