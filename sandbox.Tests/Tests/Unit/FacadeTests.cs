@@ -468,7 +468,7 @@ public class ScriptManagerFacadeTests
     [TestMethod]
     public async Task HealthCheckTest() //todo
     {
-        // await facade.HealthCheck(); // TODO/no-op currently
+        await db.HealthCheck();
         Assert.IsTrue(true);
     }
 

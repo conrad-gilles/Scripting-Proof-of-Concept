@@ -553,12 +553,13 @@ public class DbHelper
 
 
     }
-    public async Task HealthCheck() //todo verify
+    //Ai generated
+    public async Task HealthCheck() //todo verify 
     {
         ScriptManagerFacade facade = new ScriptManagerFacade();
         ScriptCompiler compiler = new ScriptCompiler();
-        // 1. Validate Database Connectivity
-        // We create a short-lived context to verify the connection is open and working.
+
+        //checking if can connect to db
         using (var context = new MyContext())
         {
             bool canConnect = await context.Database.CanConnectAsync();
@@ -566,13 +567,10 @@ public class DbHelper
             {
                 throw new InvalidOperationException("HealthCheck Failed: Unable to connect to the database.");
             }
-
-            // 2. Validate System State
-            // Verify critical tables (EmberInstances) exist and are readable.
+            //verify if db tables exist
             try
             {
-                // We don't need the result, just to ensure the query doesn't throw (Schema validation)
-                await context.EmberInstances.FirstOrDefaultAsync();
+                await context.EmberInstances.FirstOrDefaultAsync(); //if it fail it will throw
             }
             catch (Exception ex)
             {
@@ -580,7 +578,6 @@ public class DbHelper
             }
         }
 
-        // 3. Validate API Version Consistency
         try
         {
             // Ensure the current runtime version is valid (positive integer)

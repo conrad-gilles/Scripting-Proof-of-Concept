@@ -308,7 +308,7 @@ class MainProgram
                             break;
 
                         case "HealthCheck":
-                            // await facade.HealthCheck();
+                            await facade.HealthCheck();
                             break;
 
                         case "GetScriptMetadata":

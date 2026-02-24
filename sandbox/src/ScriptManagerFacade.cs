@@ -1,428 +1,241 @@
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.Scripting;
-using Microsoft.EntityFrameworkCore.Infrastructure.Internal;
-
-public class ScriptManagerFacade
+public interface IScriptManager
 {
-    DbHelper db;
-    ScriptCompiler compiler;
-    public ScriptManagerFacade()
-    {
-        db = new DbHelper();
-        compiler = new ScriptCompiler();
-    }
-
     #region Script Lifecycle
 
+    /// <summary>
     /// Validates, compiles, and stores a new script
-    public async Task<Guid> CreateScript(string sourceCode, string? scriptType = null, string userName = "Default", int apiVersion = -1)    //maybe minApiVersion is better?
-    {
-        int currentApiVersion = await GetRecentApiVersion();
-        Guid id = Guid.NewGuid();
-        if (apiVersion == -1)
-        {
-            await db.CreateAndInsertCustomerScript(sourceCode, id, userName);
-        }
-        else
-        {
-            await db.CreateAndInsertCustomerScript(sourceCode, id, userName, apiVersion);
-        }
-        return id;
+    /// </summary>
+    /// <param name="sourceCode"></param>
+    /// <param name="scriptType"></param>
+    /// <param name="userName"></param>
+    /// <param name="apiVersion"></param>
+    /// <returns></returns>
+    Task<Guid> CreateScript(string sourceCode, string? scriptType = null, string userName = "Default", int apiVersion = -1);
 
-    }
+    /// <summary>
+    /// Updates existing script source code and recompiles for all compatible API versions
+    /// </summary>
+    /// <param name="scriptId"></param>
+    /// <param name="newSourceCode"></param>
+    /// <param name="userName"></param>
+    /// <param name="apiVersion"></param>
+    /// <returns></returns>
+    Task UpdateScript(Guid scriptId, string newSourceCode, string userName = "Default", int apiVersion = -1);
 
-    // Updates existing script source code and recompiles for all compatible API versions
-    public async Task UpdateScript(Guid scriptId, string newSourceCode, string userName = "Default", int apiVersion = -1)
-    {
-        if (apiVersion == -1)
-        {
-            apiVersion = await GetRecentApiVersion();
-        }
-        var customerScript = await db.GetCustomerScript(scriptId);
-        var creationDate = customerScript.CreatedAt;
-        await db.DeleteCustomerScript(scriptId);    //todo update is still inefficient 
-        await db.CreateAndInsertCustomerScript(newSourceCode, scriptId, userName, createdAt: (DateTime)creationDate); //todo unsafe af
-        // await RecompileScript(scriptId);    //todo inefficient also untested, ineff because compiles 2 for 1 api v
-    }
+    /// <summary>
+    /// Removes script and all associated compiled caches
+    /// </summary>
+    /// <param name="scriptId"></param>
+    /// <returns></returns>
+    Task DeleteScript(Guid scriptId);
 
-    // Removes script and all associated compiled caches
-    public async Task DeleteScript(Guid scriptId)
-    {
-        await db.DeleteCustomerScript(scriptId);    //todo check if this also deletes the caches
-    }
+    /// <summary>
+    /// Retrieves script metadata and source code
+    /// </summary>
+    /// <param name="scriptId"></param>
+    /// <param name="includeCaches"></param>
+    /// <returns></returns>
+    Task<CustomerScript> GetScript(Guid scriptId, bool includeCaches = false);
 
-    // Retrieves script metadata and source code
-    public async Task<CustomerScript> GetScript(Guid scriptId, bool includeCaches = false)
-    {
-        CustomerScript script = await db.GetCustomerScript(scriptId, includeCaches);
-        return script;
-    }
-
-    // Returns all scripts with optional filtering by type, API version, or creation date
-    public async Task<List<CustomerScript>> ListScripts(CustomerScriptFilter filters = null, bool includeCaches = false)
-    {
-        List<CustomerScript> scripts;
-        scripts = await db.GetAllCustomerScripts(includeCaches: includeCaches, filters: filters);
-        return scripts;
-    }
+    /// <summary>
+    /// Returns all scripts with optional filtering by type, API version, or creation date
+    /// </summary>
+    /// <param name="filters"></param>
+    /// <param name="includeCaches"></param>
+    /// <returns></returns>
+    Task<List<CustomerScript>> ListScripts(CustomerScriptFilter filters = null, bool includeCaches = false);
 
     #endregion
 
     #region Compilation Operations
 
-    // Compiles a specific script for a target API version, if target version not specified just takes the recent one
-    public async Task CompileScript(Guid scriptId, int targetApiVersion = -1)
-    {
-        if (targetApiVersion == -1)
-        {
-            CustomerScript script = await db.GetCustomerScript(scriptId);
-            await db.CreateAndInsertCompiledCache(script);
-        }
-        else
-        {
-            targetApiVersion = await GetRecentApiVersion();
-            CustomerScript script = await db.GetCustomerScript(scriptId);
-            await db.CreateAndInsertCompiledCache(script, oldApiV: targetApiVersion);
-        }
+    /// <summary>
+    /// Compiles a specific script for a target API version, if target version not specified just takes the recent one
+    /// </summary>
+    /// <param name="scriptId"></param>
+    /// <param name="targetApiVersion"></param>
+    /// <returns></returns>
+    Task CompileScript(Guid scriptId, int targetApiVersion = -1);
 
-    }
+    /// <summary>
+    /// Compiles all compatible scripts for a new API version
+    /// </summary>
+    /// <returns></returns>
+    Task CompileAllScripts();
 
-    // Compiles all compatible scripts for a new API version
-    public async Task CompileAllScripts()
-    {
-        int currentApiVersion = await GetRecentApiVersion();
-        await db.CompileAllStoredScripts(currentApiVersion);
-    }
+    /// <summary>
+    /// Recompiles script for all active API versions
+    /// </summary>
+    /// <param name="scriptId"></param>
+    /// <returns></returns>
+    Task RecompileScript(Guid scriptId);
 
-    // Recompiles script for all active API versions
-    public async Task RecompileScript(Guid scriptId)  //todo maybe get rid of the currentapi and create global var in dbhelper class
-    {
-        await db.RecompileScript(scriptId, deleteAlso: true);  //todo fix this i need old version dlls or something like that which will need to be passed maybe as fodler path or file path
-    }
-
+    /// <summary>
     /// Performs syntax and interface validation without saving
-    public async Task<string> ValidateScript(string sourceCode)
-    {
-        try
-        {
-            var validation = compiler.BasicValidationBeforeCompiling(sourceCode);
-            string className = validation.className;    //figure out if i should do something with this
-            string baseTypeName = validation.baseTypeName;
-            int versionInt = validation.versionInt;
+    /// </summary>
+    /// <param name="sourceCode"></param>
+    /// <returns></returns>
+    Task<string> ValidateScript(string sourceCode);
 
-            return "Success: ClassName: " + className + ", BaseTypeName: " + baseTypeName + ", VersionInt: " + versionInt;
-        }
-        catch (Exception e)
-        {
-            return "Error: " + e.ToString();
-        }
-
-    }
-
-    // Retrieves compilation error details
-    public async Task<string> GetCompilationErrors(Guid scriptId, int apiVersion = -1)
-    {
-        try
-        {
-            CustomerScript script = await GetScript(scriptId);
-
-            // compiler.BasicValidationBeforeCompiling(script.SourceCode);
-            if (apiVersion == -1)
-            {
-                apiVersion = await GetRecentApiVersion();
-                compiler.RunCompilation(script.SourceCode);
-            }
-            else
-            {
-                MetadataReference[] refs = compiler.GetReferencesForVersion(apiVersion);
-                compiler.RunCompilation(script.SourceCode, refs);
-            }
-
-            return "Successful Compilation!";
-        }
-        catch (Exception e)
-        {
-            return "Failed to compilate script:" + scriptId + " " + e.ToString();
-        }
-    }
+    /// <summary>
+    /// Retrieves compilation error details
+    /// </summary>
+    /// <param name="scriptId"></param>
+    /// <param name="apiVersion"></param>
+    /// <returns></returns>
+    Task<string> GetCompilationErrors(Guid scriptId, int apiVersion = -1);
 
     #endregion
 
     #region Execution Operations
 
-    // Executes a Generator Action script with provided context, realisitcally not needed 
-    public async Task<ActionResultBaseClass> ExecuteActionScript(Guid scriptId, GeneratorContext context, int currentApiVersion = -1)    //lowkey so many errors better to have one 
-    {
-        try
-        {
-            if (currentApiVersion == -1)
-            {
-                currentApiVersion = await GetRecentApiVersion();
-            }
+    /// <summary>
+    /// Executes a Generator Action script with provided context, realisitcally not needed 
+    /// </summary>
+    /// <param name="scriptId"></param>
+    /// <param name="context"></param>
+    /// <param name="apiVersion"></param>
+    /// <returns></returns>
+    Task<ActionResultBaseClass> ExecuteActionScript(Guid scriptId, GeneratorContext context, int apiVersion = -1);
 
-            byte[] compiledScript = null;
-            try
-            {
-                var temp = await db.GetCompiledScripCache(scriptId, currentApiVersion);
-                compiledScript = temp.AssemblyBytes;
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine("Retrieval failed jit comp launched:");
-                await CompileScript(scriptId, currentApiVersion);
-                //try again, if fails again we catch error outside
-                var temp = await db.GetCompiledScripCache(scriptId, currentApiVersion);
-                compiledScript = temp.AssemblyBytes;
-            }
+    /// <summary>
+    /// Executes a Generator Condition script and returns boolean result, realisitcally not needed 
+    /// </summary>
+    /// <param name="scriptId"></param>
+    /// <param name="context"></param>
+    /// <param name="apiVersion"></param>
+    /// <returns></returns>
+    Task<bool> ExecuteConditionScript(Guid scriptId, GeneratorContext context, int apiVersion = -1);
 
-            //possibly add a null check for compiledScript
-            ScriptExecutor executor = new ScriptExecutor(compiledScript, context);
-            ActionResultBaseClass result = (ActionResultBaseClass)executor.RunScriptExecution<object>();  //todo maybe better handling than casting although the error will be thrown in the class itself
-            return result;
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(e.ToString());
-            throw new Exception();
-        }
-
-    }
-
-    // Executes a Generator Condition script and returns boolean result, realisitcally not needed 
-    public async Task<bool> ExecuteConditionScript(Guid scriptId, GeneratorContext context, int ApiVersion = -1)
-    {
-        try
-        {
-            if (ApiVersion == -1)
-            {
-                ApiVersion = await GetRecentApiVersion();
-            }
-
-            byte[] compiledScript = null;
-            try
-            {
-                var temp = await db.GetCompiledScripCache(scriptId, ApiVersion);
-                compiledScript = temp.AssemblyBytes;
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine("Retrieval failed jit comp launched:");
-                await CompileScript(scriptId, await GetRecentApiVersion());
-                //try again, if fails again we catch error outside
-                var temp = await db.GetCompiledScripCache(scriptId, ApiVersion);
-                compiledScript = temp.AssemblyBytes;
-            }
-
-            //possibly add a null check for compiledScript
-            ScriptExecutor executor = new ScriptExecutor(compiledScript, context);
-            bool result = (bool)executor.RunScriptExecution<object>();  //todo maybe better handling than casting although the error will be thrown in the class itself
-            return result;
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(e.ToString());
-            throw new Exception();
-        }
-    }
-
-    // Generic execution that detects script type automatically
-    public async Task<object> ExecuteScriptById(Guid scriptId, GeneratorContext context, int currentApiVersion = -1)
-    {
-        try
-        {
-            if (currentApiVersion == -1)
-            {
-                currentApiVersion = await GetRecentApiVersion();
-            }
-            byte[] compiledScript = null;
-            try
-            {
-                var temp = await db.GetCompiledScripCache(scriptId, currentApiVersion);
-                compiledScript = temp.AssemblyBytes;
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine("Retrieval failed jit comp launched:");
-                await CompileScript(scriptId, await GetRecentApiVersion());
-                //try again, if fails again we catch error outside
-                var temp = await db.GetCompiledScripCache(scriptId, currentApiVersion);
-                compiledScript = temp.AssemblyBytes;
-            }
-
-            //possibly add a null check for compiledScript
-            ScriptExecutor executor = new ScriptExecutor(compiledScript, context);
-            object result = executor.RunScriptExecution<object>();  //returns either bool or action result todo maybe add checks if thats the case but normally should be
-            return result;
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(e.ToString());
-            throw new Exception();
-        }
-    }
+    /// <summary>
+    /// Generic execution that detects script type automatically
+    /// </summary>
+    /// <param name="scriptId"></param>
+    /// <param name="context"></param>
+    /// <param name="currentApiVersion"></param>
+    /// <returns></returns>
+    Task<object> ExecuteScriptById(Guid scriptId, GeneratorContext context, int currentApiVersion = -1);
 
     #endregion
 
     #region Cache Management
 
-    // Retrieves compiled assembly bytes from cache
-    public async Task<byte[]> GetCompiledCache(Guid scriptId, int currentApiVersion = -1)
-    {
-        if (currentApiVersion == -1)
-        {
-            currentApiVersion = await GetRecentApiVersion();
-        }
-        try
-        {
-            var temp = await db.GetCompiledScripCache(scriptId, currentApiVersion);
-            byte[] compiledScript = temp.AssemblyBytes;
-            return compiledScript;
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(e.ToString());
-            throw new Exception();
-        }
+    /// <summary>
+    /// Retrieves compiled assembly bytes from cache
+    /// </summary>
+    /// <param name="scriptId"></param>
+    /// <param name="currentApiVersion"></param>
+    /// <returns></returns>
+    Task<byte[]> GetCompiledCache(Guid scriptId, int currentApiVersion = -1);
 
-    }
+    /// <summary>
+    /// Removes all compiled versions of a script
+    /// </summary>
+    /// <param name="scriptId"></param>
+    /// <returns></returns>
+    Task ClearScriptCache(Guid scriptId);
 
-    // Removes all compiled versions of a script
-    public async Task ClearScriptCache(Guid scriptId)
-    {
-        int currentApiVersion = await GetRecentApiVersion();
-        for (int i = 0; i <= currentApiVersion; i++)    //this only works if currentApiVersion is the highest
-        {
-            try
-            {
-                await db.DeleteScriptCache(scriptId, i);
-                Console.WriteLine("Deleted: " + i);
-            }   //todo check if doesnt throw something  
-            catch (Exception e)
-            { Console.WriteLine(e.ToString()); }
+    /// <summary>
+    /// Removes all compiled caches (maintenance operation)
+    /// </summary>
+    /// <returns></returns>
+    Task ClearAllCaches();
 
-        }
-
-    }
-
-    // Removes all compiled caches (maintenance operation)
-    public async Task ClearAllCaches()
-    {
-        await db.DeleteAllCachedScripts();
-    }
-
-    // Background job to precompile all compatible scripts
-    public async Task PrecompileForApiVersion()
-    {
-        int currentApiVersion = await GetRecentApiVersion();
-        await db.AutomaticCompilationOnVersionUpdate(currentApiVersion);
-    }
+    /// <summary>
+    /// Background job to precompile all compatible scripts
+    /// </summary>
+    /// <returns></returns>
+    Task PrecompileForApiVersion();
 
     #endregion
 
     #region Version Management
 
-    // Returns list of currently active API versions from Ember instances
-    public async Task<List<int>> GetActiveApiVersions() //todo implement
-    {
-        return await db.GetActiveApiVersions(); //shit implementation not really functional in rl
-    }
+    /// <summary>
+    /// Returns list of currently active API versions from Ember instances
+    /// </summary>
+    /// <returns></returns>
+    Task<List<int>> GetActiveApiVersions();
 
-    public async Task<int> GetRecentApiVersion() //todo implement
-    {
-        // var versions = await GetActiveApiVersions();
-        // int last = versions[versions.Count() - 1];
-        // return last;
-        // return UsefulMethods.GetRecentApiVersion();
-        return 6;
-    }
+    Task<int> GetRecentApiVersion();
 
-    // Returns which API versions a script is compatible with
-    public async Task<int> GetScriptCompatibility(Guid scriptId)
-    {
-        CustomerScript script = await db.GetCustomerScript(scriptId);
-        return script.MinApiVersion;
-    }
+    /// <summary>
+    /// Returns which API versions a script is compatible with
+    /// </summary>
+    /// <param name="scriptId"></param>
+    /// <returns></returns>
+    Task<int> GetScriptCompatibility(Guid scriptId);
 
-    // Validates if script can run on target version
-    public async Task<bool> CheckVersionCompatibility(Guid scriptId, int targetApiVersion)
-    {
-        CustomerScript script = await db.GetCustomerScript(scriptId);
-        // int minV = script.MinApiVersion;
-        int minV = targetApiVersion;
-        var ls = await GetActiveApiVersions();
-        if (ls.Contains(minV))
-        {
-            return true;
-        }
-        return false;
-    }
+    /// <summary>
+    /// Validates if script can run on target version
+    /// </summary>
+    /// <param name="scriptId"></param>
+    /// <param name="targetApiVersion"></param>
+    /// <returns></returns>
+    Task<bool> CheckVersionCompatibility(Guid scriptId, int targetApiVersion);
 
-    // Registers a new Ember instance in the system
-    public async Task RegisterEmberInstance(Guid instanceId, string emberVersion, int apiVersion)
-    {
-        // TODO
-    }
+    /// <summary>
+    /// Registers a new Ember instance in the system
+    /// </summary>
+    /// <param name="instanceId"></param>
+    /// <param name="emberVersion"></param>
+    /// <param name="apiVersion"></param>
+    /// <returns></returns>
+    Task RegisterEmberInstance(Guid instanceId, string emberVersion, int apiVersion);
 
     #endregion
 
     #region Duplicate Detection & Cleanup
 
-    // Identifies duplicate scripts based on source code equivalence
-    public async Task<(List<Guid> scriptGUIDs, Dictionary<Guid, int> cacheGUIDs)> DetectDuplicates()
-    {
-        var dupes = await db.DetectDuplicates();
-        return (scriptGUIDs: dupes.scriptGUIDs, cacheGUIDs: dupes.cacheGUIDs);
-    }
+    /// <summary>
+    /// Identifies duplicate scripts based on source code equivalence
+    /// </summary>
+    /// <returns></returns>
+    Task<(List<Guid> scriptGUIDs, Dictionary<Guid, int> cacheGUIDs)> DetectDuplicates();
 
-    // Removes duplicate scripts and orphaned caches
-    public async Task RemoveDuplicates()
-    {
-        int currentApiVersion = await GetRecentApiVersion();
-        await db.RemoveDuplicates();   //automatically get dupes from function in dbhelper dont have to pass therefore
-    }
+    /// <summary>
+    /// Removes duplicate scripts and orphaned caches
+    /// </summary>
+    /// <returns></returns>
+    Task RemoveDuplicates();
 
-    // Removes caches without associated scripts
-    public async Task CleanupOrphanedCaches()
-    {
-        int currentApiVersion = await GetRecentApiVersion();
-        await db.AutomaticCompilationOnVersionUpdate(currentApiVersion);    //this also does this maybe implement real funcion later
-    }
+    /// <summary>
+    /// Removes caches without associated scripts
+    /// </summary>
+    /// <returns></returns>
+    Task CleanupOrphanedCaches();
 
     #endregion
 
     #region Monitoring & Diagnostics
 
-    // Returns execution logs and metrics
-    public async Task GetScriptExecutionHistory(Guid scriptId)
-    {
-        // TODO
-    }
+    /// <summary>
+    /// Returns execution logs and metrics
+    /// </summary>
+    /// <param name="scriptId"></param>
+    /// <returns></returns>
+    Task GetScriptExecutionHistory(Guid scriptId);
 
-    // Returns compilation success/failure rates and performance metrics
-    public async Task GetCompilationStatistics()
-    {
-        // TODO
-    }
+    /// <summary>
+    /// Returns compilation success/failure rates and performance metrics
+    /// </summary>
+    /// <returns></returns>
+    Task GetCompilationStatistics();
 
-    // Validates database connectivity, API version consistency, and system state
-    public async Task HealthCheck()
-    {
-        // TODO
-        await db.HealthCheck();
-    }
+    /// <summary>
+    /// Validates database connectivity, API version consistency, and system state
+    /// </summary>
+    /// <returns></returns>
+    Task HealthCheck();
 
-    // Extracts className, baseTypeName, and version from script
-    public async Task<string> GetScriptMetadata(Guid scriptId)
-    {
-        CustomerScript script = await db.GetCustomerScript(scriptId, includeCaches: true);
-        string str = "Metadata for script: " + script.ToString();
-        return str;
-    }
+    /// <summary>
+    /// Extracts className, baseTypeName, and version from script
+    /// </summary>
+    /// <param name="scriptId"></param>
+    /// <returns></returns>
+    Task<string> GetScriptMetadata(Guid scriptId);
 
-    public string GetUserName()
-    {
-        return UsefulMethods.GetUserName();
-    }
+    string GetUserName();
 
     #endregion
 }
