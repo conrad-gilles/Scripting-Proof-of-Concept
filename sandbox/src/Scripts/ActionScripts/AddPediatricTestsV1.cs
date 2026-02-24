@@ -15,7 +15,6 @@ public class AddPediatricTestsV1 : IGeneratorActionScript<IGeneratorContext, Act
         // double versionExample = context.LabOrder.RandomNewDouble;    //example of newer version
         // Console.WriteLine(versionExample);
         context.LabOrder.SetCustomField("ProcessedByGenerator", true);
-
         return ActionResult.Success("Pediatric tests added");   //todo check what happens if you return this object without calling the function on it
         // return null; //just for compiler
     }

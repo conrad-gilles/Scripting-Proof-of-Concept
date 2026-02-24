@@ -45,6 +45,10 @@ public class ActionResultV2 : ActionResult
         // return new ActionResult(true, message);
         return new ActionResultV2(true, message, null, new List<string>()); //todo check inheritance use base idk
     }
+    public new static ActionResultV2 Failure(string message, List<string> loggedActions, string errorCode = "GENERIC_ERROR")
+    {
+        return new ActionResultV2(false, message, errorCode, loggedActions);
+    }
     public void AppendLoggedActions(string action)
     {
         LoggedActions.Add(action);
