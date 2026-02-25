@@ -1,5 +1,6 @@
 using System;
 using Serilog;
+using Ember.Scripting;
 
 public class LoggerForScripting
 {
@@ -17,7 +18,6 @@ public class LoggerForScripting
         rollingInterval: RollingInterval.Day,
         retainedFileCountLimit: 5).WriteTo.Console()
         .WriteTo.Seq("http://localhost:5341", bufferBaseFilename: "logs/seq-offline-buffer")
-
         .CreateLogger();
     }
 }

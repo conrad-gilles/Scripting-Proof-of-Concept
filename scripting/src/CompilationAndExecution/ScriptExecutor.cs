@@ -3,6 +3,9 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Scripting;
 using System.Reflection;
 using System.Threading.Tasks;
+
+namespace Ember.Scripting;
+
 public class ScriptExecutor
 {
     public byte[] compiledScript;
@@ -142,8 +145,9 @@ public class ScriptExecutor
             var resultValue = resultProperty.GetValue(resultTask);
 
             Console.WriteLine($"Result in 86 sExecuter: {resultValue}");    //todo probably unnessesary but good for debugging
-            // return (ActionResult)resultValue; 
-            return UpgradeActionResult(resultValue);
+            // return (ActionResult)resultValue;
+            // return UpgradeActionResult(resultValue);
+            return (ActionResultBaseClass)resultValue;  //this might fail because not baseclass idk, if it does maybe change whole structure to only one function
         }
         catch (Exception e)
         {
@@ -154,53 +158,53 @@ public class ScriptExecutor
 
     }
 
-    public ActionResultV3NoInheritance UpgradeActionResult(object resultValue)
-    {
-        var facade = new ScriptManagerFacade();
-        // var newestVersion = await facade.GetRecentApiVersion();
-        object finalActionResult = resultValue;
-        int loopBreaker = 0;   //I am assuming not 1000 versions will be written                // will probably fail in real application todo fix mabe with reflection i heard?
-        while (finalActionResult is not ActionResultV3NoInheritance && loopBreaker < 1000)    //could fail if loaded from diffrent assembly should probably replace the is statements with something like get type.name 
-        {
-            loopBreaker++;
-            // if (finalActionResult is ActionResultV2 v2Script)
-            if (finalActionResult.GetType().Name == "ActionResultV2")
-            {
-                try
-                {
-                    ActionResultV2 v2Script2 = (ActionResultV2)finalActionResult;
-                    finalActionResult = ActionResultV3NoInheritance.UpgradeV2(v2Script2);
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e.ToString());
-                }
-            }
-            // else if (finalActionResult is ActionResult v1Script)
-            else if (finalActionResult.GetType().Name == "ActionResult")
-            {
-                try
-                {
-                    ActionResult v1Script2 = (ActionResult)finalActionResult;
-                    List<string> loggedActions = [];
-                    finalActionResult = ActionResultV2.UpgradeV1(v1Script2, loggedActions);
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e.ToString());
-                }
-            }
-        }
-        // if (finalActionResult is ActionResultV3NoInheritance v3Script)
-        if (finalActionResult.GetType().Name == "ActionResultV3NoInheritance")
-        {
-            ActionResultV3NoInheritance v3Script2 = (ActionResultV3NoInheritance)finalActionResult;
-            return (ActionResultV3NoInheritance)v3Script2;
-        }
-        else
-        {
-            throw new Exception(message: "UpgradeActionResult in ScriptExecutor failed.");
-        }
-    }
+    // public ActionResultV3NoInheritance UpgradeActionResult(object resultValue)
+    // {
+    //     var facade = new ScriptManagerFacade();
+    //     // var newestVersion = await facade.GetRecentApiVersion();
+    //     object finalActionResult = resultValue;
+    //     int loopBreaker = 0;   //I am assuming not 1000 versions will be written                // will probably fail in real application todo fix mabe with reflection i heard?
+    //     while (finalActionResult is not ActionResultV3NoInheritance && loopBreaker < 1000)    //could fail if loaded from diffrent assembly should probably replace the is statements with something like get type.name 
+    //     {
+    //         loopBreaker++;
+    //         // if (finalActionResult is ActionResultV2 v2Script)
+    //         if (finalActionResult.GetType().Name == "ActionResultV2")
+    //         {
+    //             try
+    //             {
+    //                 ActionResultV2 v2Script2 = (ActionResultV2)finalActionResult;
+    //                 finalActionResult = ActionResultV3NoInheritance.UpgradeV2(v2Script2);
+    //             }
+    //             catch (Exception e)
+    //             {
+    //                 Console.WriteLine(e.ToString());
+    //             }
+    //         }
+    //         // else if (finalActionResult is ActionResult v1Script)
+    //         else if (finalActionResult.GetType().Name == "ActionResult")
+    //         {
+    //             try
+    //             {
+    //                 ActionResult v1Script2 = (ActionResult)finalActionResult;
+    //                 List<string> loggedActions = [];
+    //                 finalActionResult = ActionResultV2.UpgradeV1(v1Script2, loggedActions);
+    //             }
+    //             catch (Exception e)
+    //             {
+    //                 Console.WriteLine(e.ToString());
+    //             }
+    //         }
+    //     }
+    //     // if (finalActionResult is ActionResultV3NoInheritance v3Script)
+    //     if (finalActionResult.GetType().Name == "ActionResultV3NoInheritance")
+    //     {
+    //         ActionResultV3NoInheritance v3Script2 = (ActionResultV3NoInheritance)finalActionResult;
+    //         return (ActionResultV3NoInheritance)v3Script2;
+    //     }
+    //     else
+    //     {
+    //         throw new Exception(message: "UpgradeActionResult in ScriptExecutor failed.");
+    //     }
+    // }
 
 }

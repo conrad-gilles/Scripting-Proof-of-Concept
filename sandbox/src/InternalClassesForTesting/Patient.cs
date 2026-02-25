@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Ember.Scripting;
 
 // Interface for script access (safe subset)
 public interface PatientInterface

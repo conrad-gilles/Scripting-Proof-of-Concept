@@ -1,26 +1,17 @@
+using Ember.Scripting;
+
 /// <summary>
 /// Simplest implementation of the Condition script probably should make them private in real application to prevent user from using
 /// </summary>
-public interface IGeneratorConditionScript
-{
-    Task<bool> EvaluateAsync(IGeneratorReadOnlyContext context);
-}
-public interface IGeneratorActionScript
-{
-    // Task<ActionResultBaseClass> ExecuteAsync(IGeneratorContext context);
-    Task<ActionResultBaseClass> ExecuteAsync(IGeneratorBaseInterface context);
-}
-
 /// <summary>
 /// Implementation using 1 generic for Context
 /// </summary>
-
-
 public interface IGeneratorConditionScript<TContext> : IGeneratorConditionScript    //todo this needs to get tested still
 where TContext : IGeneratorReadOnlyContext
 {
     new Task<bool> EvaluateAsync(TContext context);
-    Task<bool> IGeneratorConditionScript.EvaluateAsync(IGeneratorReadOnlyContext context)
+    // Task<bool> IGeneratorConditionScript.EvaluateAsync(IGeneratorReadOnlyContext context)
+    Task<bool> IGeneratorConditionScript.EvaluateAsync(IGeneratorBaseInterface context)
     {
         return EvaluateAsync((TContext)context);
     }

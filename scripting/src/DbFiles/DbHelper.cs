@@ -1,8 +1,18 @@
 using EFModeling.EntityProperties.FluentAPI.Required;
 using Microsoft.CodeAnalysis;
 using Microsoft.EntityFrameworkCore;
+using Ember.Scripting;
+
+
+namespace Ember.Scripting;
+
 public class DbHelper
 {
+    MetadataReference[] References;
+    public DbHelper(MetadataReference[] references)
+    {
+        References = references;
+    }
     public async Task EnsureDeletedCreated()    //todo delete this for obvious safety reasons before production
     {
         using (var db = new MyContext())
@@ -91,7 +101,7 @@ public class DbHelper
     {
         try
         {
-            ScriptManagerFacade facade = new ScriptManagerFacade();
+            ScriptManagerFacade facade = new ScriptManagerFacade(References);
             int currentApiVersion = await facade.GetRecentApiVersion();
             CustomerScript script = await GetCustomerScript(scriptId, includeCaches: true);  //maybe this is inefficient better to pass object maybe
 
@@ -179,13 +189,13 @@ public class DbHelper
 
         using (var db = new MyContext())
         {
-            ScriptManagerFacade facade = new ScriptManagerFacade();
+            ScriptManagerFacade facade = new ScriptManagerFacade(References);
             int currentApiVersion = await facade.GetRecentApiVersion();
             if (createdAt == null)
             {
                 createdAt = DateTime.UtcNow;
             }
-            ScriptCompiler compiler = new ScriptCompiler();
+            ScriptCompiler compiler = new ScriptCompiler(References);
             var getTupleFromVal = compiler.BasicValidationBeforeCompiling(scriptString);
 
             CustomerScript randomTestScript2 = new CustomerScript
@@ -247,9 +257,9 @@ public class DbHelper
     {
         using (var db = new MyContext())
         {
-            ScriptManagerFacade facade = new ScriptManagerFacade();
+            ScriptManagerFacade facade = new ScriptManagerFacade(References);
             int currentApiVersion = await facade.GetRecentApiVersion();
-            ScriptCompiler compiler = new ScriptCompiler();
+            ScriptCompiler compiler = new ScriptCompiler(References);
             var getTupleFromVal = compiler.BasicValidationBeforeCompiling(script.SourceCode);
 
             if (await db.ScriptCompiledCaches.AnyAsync(c => c.ScriptId == script.Id && c.ApiVersion == currentApiVersion))
@@ -417,7 +427,7 @@ public class DbHelper
     public async Task<bool> IsDuplicateScript(CustomerScript script)
     {
         List<CustomerScript> allScripts = await GetAllCustomerScripts(includeCaches: true);
-        ScriptCompiler compiler = new ScriptCompiler();
+        ScriptCompiler compiler = new ScriptCompiler(References);
         foreach (var item in allScripts)
         {
             if (item.Id == script.Id
@@ -442,7 +452,7 @@ public class DbHelper
         {
             List<CustomerScript> allScripts = await GetAllCustomerScripts(includeCaches: true);
             List<Guid> duplicateGuids = [];
-            ScriptCompiler compiler = new ScriptCompiler();
+            ScriptCompiler compiler = new ScriptCompiler(References);
             for (int i = 0; i < allScripts.Count(); i++)
             {
                 for (int j = 0; j < allScripts.Count(); j++)
@@ -556,8 +566,8 @@ public class DbHelper
     //Ai generated
     public async Task HealthCheck() //todo verify 
     {
-        ScriptManagerFacade facade = new ScriptManagerFacade();
-        ScriptCompiler compiler = new ScriptCompiler();
+        ScriptManagerFacade facade = new ScriptManagerFacade(References);
+        ScriptCompiler compiler = new ScriptCompiler(References);
 
         //checking if can connect to db
         using (var context = new MyContext())

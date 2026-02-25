@@ -1,6 +1,7 @@
 using System;   //todo this is possible to default in compiler
 using System.Threading.Tasks;
 using System.Collections.Generic;   //todo same for them
+using Ember.Scripting;
 public class AddPediatricTestsV1 : IGeneratorActionScript<IGeneratorContext, ActionResult>
 {
     public async Task<ActionResult> ExecuteAsync(IGeneratorContext context)    //error is here in Basyns

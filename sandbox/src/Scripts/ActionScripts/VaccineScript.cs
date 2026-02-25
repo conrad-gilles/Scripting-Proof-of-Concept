@@ -1,5 +1,6 @@
 using System.Threading.Tasks;
 using System;
+using Ember.Scripting;
 
 public class VaccineScript : IGeneratorActionScript<IGeneratorContextNoInheritance_V4, ActionResultV3NoInheritance>
 {

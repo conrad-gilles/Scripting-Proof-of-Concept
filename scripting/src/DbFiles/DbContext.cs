@@ -1,3 +1,4 @@
+using Ember.Scripting;
 using Microsoft.EntityFrameworkCore;
 
 namespace EFModeling.EntityProperties.FluentAPI.Required;

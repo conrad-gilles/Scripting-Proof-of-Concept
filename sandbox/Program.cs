@@ -7,6 +7,8 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
+using Ember.Scripting;
+using System.Reflection;
 
 class MainProgram
 {
@@ -18,6 +20,7 @@ class MainProgram
     // private static int currentApiVersion = 6;   //get rid of this and name todo
     private static int currentApiVersion;   //set below
     private static int currentSdkVersion = 1;
+
     static async Task Main(string[] args)
     {
         try
@@ -41,7 +44,7 @@ class MainProgram
     {
         try
         {
-            var db = new DbHelper();
+            var db = new DbHelper(UsefulMethods.GetReferences());
 
             // await RandomMethods.CompileAllScriptsInFolderAndSaveToDB(scriptFolderPath);   //main precompilation act
             // Dictionary<int, Guid> cacheDict = await RandomMethods.ListAllCompiledFromDB();
@@ -49,7 +52,7 @@ class MainProgram
             // Dictionary<int, Guid> sourceDict = [];
             Dictionary<int, Guid> cacheDict = [];
             Guid scriptId = new Guid();
-            ScriptManagerFacade facade = new ScriptManagerFacade();
+            ScriptManagerFacade facade = new ScriptManagerFacade(UsefulMethods.GetReferences());
             currentApiVersion = await facade.GetRecentApiVersion(); //needs to be above autocomp else error
 
             await db.AutomaticCompilationOnVersionUpdate(currentApiVersion);    //todo make this "background job that is run automatically periodically"
@@ -78,7 +81,7 @@ class MainProgram
                             await RandomMethods.GetSourceCodeInSwitch();
                             break;
                         case "reset":
-                            await new DbHelper().EnsureDeletedCreated();
+                            await new DbHelper(UsefulMethods.GetReferences()).EnsureDeletedCreated();
                             // cacheDict = 
                             await RandomMethods.ListAllCompiledFromDB();
                             break;
@@ -88,7 +91,7 @@ class MainProgram
                             await RandomMethods.ListAllCompiledFromDB();
                             break;
                         case "comp source":
-                            await new DbHelper().CompileAllStoredScripts(currentApiVersion);
+                            await new DbHelper(UsefulMethods.GetReferences()).CompileAllStoredScripts(currentApiVersion);
                             break;
                         case "comp mv": //no functioality just for testing
                             scriptId = await UsefulMethods.GetIdInConsoleAsync(fromSrc: true);
@@ -104,10 +107,10 @@ class MainProgram
                             sourceDict = await RandomMethods.ListAllStoredSourceCodes();
                             break;
                         case "dupes":
-                            await new DbHelper().RemoveDuplicates();
+                            await new DbHelper(UsefulMethods.GetReferences()).RemoveDuplicates();
                             break;
                         case "deleteCache":
-                            await new DbHelper().DeleteAllCachedScripts();
+                            await new DbHelper(UsefulMethods.GetReferences()).DeleteAllCachedScripts();
                             break;
 
                         #region Script Lifecycle

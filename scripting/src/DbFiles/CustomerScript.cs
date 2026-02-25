@@ -1,6 +1,8 @@
 using System;
 using System.ComponentModel.DataAnnotations.Schema;
 
+namespace Ember.Scripting;
+
 [Table("customer_scripts")] //might be unnessesary todo //added ? to values that can be null
 public class CustomerScript
 {

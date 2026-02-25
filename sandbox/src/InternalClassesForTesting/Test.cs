@@ -1,3 +1,5 @@
+using Ember.Scripting;
+
 public interface ITestInfo
 {
     string TestCode { get; }

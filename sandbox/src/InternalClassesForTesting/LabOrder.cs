@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Ember.Scripting;
 
 // Interface for Condition Scripts (Read Only)
 public interface ILabOrderInterface

@@ -1,5 +1,6 @@
 
 using System.Data.Common;
+using Ember.Scripting;
 
 public interface IReadOnlyVaccince
 {

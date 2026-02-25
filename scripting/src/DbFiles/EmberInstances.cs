@@ -2,6 +2,8 @@ using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
+namespace Ember.Scripting;
+
 [Table("ember_instances")] //might be unnessesary todo
 public class EmberInstance
 {

@@ -1,5 +1,6 @@
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Ember.Scripting;
 
 namespace FirstTests;
 
@@ -15,8 +16,8 @@ public class ScriptManagerFacadeTests
     [TestInitialize]
     public async Task Setup()
     {
-        facade = new ScriptManagerFacade();
-        db = new DbHelper();
+        facade = new ScriptManagerFacade(UsefulMethods.GetReferences());
+        db = new DbHelper(UsefulMethods.GetReferences());
 
         // Clear all data between tests without drop/recreate
         await facade.ClearAllCaches();
@@ -241,6 +242,7 @@ public class ScriptManagerFacadeTests
         Assert.IsNotNull(result);
         // Assert.IsTrue(result.IsSuccess);
         // Assert.IsTrue(result.Message.Contains("Pediatric"));
+        result = RandomMethods.UpgradeActionResult(result);
         Assert.IsInstanceOfType(result, typeof(ActionResultV3NoInheritance));
 
         Guid id2 = await facade.CreateScript(sourceCodePedia);

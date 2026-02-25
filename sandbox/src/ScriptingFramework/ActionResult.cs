@@ -1,7 +1,5 @@
-public abstract class ActionResultBaseClass
-{
+using Ember.Scripting;
 
-}
 public class ActionResult : ActionResultBaseClass
 {
     public bool IsSuccess { get; private set; }

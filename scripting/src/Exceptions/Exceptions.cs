@@ -1,4 +1,6 @@
 // [Serializable]
+namespace Ember.Scripting;
+
 public class NoFileWithThisClassNameFoundException : Exception
 {
 

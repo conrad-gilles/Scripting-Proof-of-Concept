@@ -4,8 +4,15 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Scripting;
 using System.Reflection;
 
+namespace Ember.Scripting;
+
 public class ScriptCompiler
 {
+    public MetadataReference[]? References2 = null;
+    public ScriptCompiler(MetadataReference[] references2)
+    {
+        References2 = references2;
+    }
     public byte[] RunCompilation(string script, MetadataReference[]? references = null, int apiVersion = -1) //references param there to enable later on users to define custom references
     {
         try
@@ -27,13 +34,17 @@ public class ScriptCompiler
                         MetadataReference.CreateFromFile(typeof(DateTime).Assembly.Location), // System.DateTime
                         // References t custom interfaces
                         MetadataReference.CreateFromFile(typeof(IGeneratorConditionScript).Assembly.Location),
-                        MetadataReference.CreateFromFile(typeof(IGeneratorReadOnlyContext).Assembly.Location)
+                        // MetadataReference.CreateFromFile(typeof(IGeneratorReadOnlyContext).Assembly.Location)   //try removing if works good i guess but still need to pass from sandbox
                      };
             }
             if (apiVersion != -1)
             {
                 Console.WriteLine("Added custom references!");  //if this works remove the if references is null if stat above
                 references = GetReferencesForVersion(apiVersion);
+            }
+            if (References2 != null)
+            {
+                references = References2;
             }
 
             //this initiates the process of the compilation (does not produce bytes yet), it binds the source code with the refrences and the config options

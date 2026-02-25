@@ -18,6 +18,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\sandbox\sandbox.csproj" />
+    <ProjectReference Include="..\scripting\scripting.csproj" />
   </ItemGroup>
 
 </Project>

@@ -1,11 +1,5 @@
 using Microsoft.Extensions.Logging;
-// namespace GeneratorContext.V1;
-
-/// <summary>
-/// Interfaces first classes are defined a bit down in the file,
-/// There is one empty interface IGeneratorBaseInterface, and one empty abstract class GeneratorContext
-/// </summary>
-public interface IGeneratorBaseInterface { }
+using Ember.Scripting;
 
 public interface IGeneratorReadOnlyContext : IGeneratorBaseInterface
 {
@@ -38,7 +32,7 @@ public interface IGeneratorContextNoInheritance_V4 : IGeneratorBaseInterface
 /// <summary>
 /// Classes of context come here
 /// </summary>
-public abstract class GeneratorContext { }
+// public abstract class GeneratorContext { }
 public class ReadOnlyContext : GeneratorContext, IGeneratorReadOnlyContext
 {
     public ILabOrderInterface labOrder;

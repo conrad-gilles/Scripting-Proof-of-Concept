@@ -1,3 +1,5 @@
+using Ember.Scripting;
+
 // Interfaces
 public interface ConsoleLoggerInterface
 {

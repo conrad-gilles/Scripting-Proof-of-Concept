@@ -2,14 +2,18 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.EntityFrameworkCore.Infrastructure.Internal;
 
+namespace Ember.Scripting;
+
 public class ScriptManagerFacade : IScriptManager
 {
-    DbHelper db;
-    ScriptCompiler compiler;
-    public ScriptManagerFacade()
+    DbHelper Db;
+    ScriptCompiler Compiler;
+    MetadataReference[] References;
+    public ScriptManagerFacade(MetadataReference[] references)
     {
-        db = new DbHelper();
-        compiler = new ScriptCompiler();
+        References = references;
+        Db = new DbHelper(references);
+        Compiler = new ScriptCompiler(references);
     }
 
     #region Script Lifecycle
@@ -21,11 +25,11 @@ public class ScriptManagerFacade : IScriptManager
         Guid id = Guid.NewGuid();
         if (apiVersion == -1)
         {
-            await db.CreateAndInsertCustomerScript(sourceCode, id, userName);
+            await Db.CreateAndInsertCustomerScript(sourceCode, id, userName);
         }
         else
         {
-            await db.CreateAndInsertCustomerScript(sourceCode, id, userName, apiVersion);
+            await Db.CreateAndInsertCustomerScript(sourceCode, id, userName, apiVersion);
         }
         return id;
 
@@ -38,23 +42,23 @@ public class ScriptManagerFacade : IScriptManager
         {
             apiVersion = await GetRecentApiVersion();
         }
-        var customerScript = await db.GetCustomerScript(scriptId);
+        var customerScript = await Db.GetCustomerScript(scriptId);
         var creationDate = customerScript.CreatedAt;
-        await db.DeleteCustomerScript(scriptId);    //todo update is still inefficient 
-        await db.CreateAndInsertCustomerScript(newSourceCode, scriptId, userName, createdAt: (DateTime)creationDate); //todo unsafe af
+        await Db.DeleteCustomerScript(scriptId);    //todo update is still inefficient 
+        await Db.CreateAndInsertCustomerScript(newSourceCode, scriptId, userName, createdAt: (DateTime)creationDate); //todo unsafe af
         // await RecompileScript(scriptId);    //todo inefficient also untested, ineff because compiles 2 for 1 api v
     }
 
     // Removes script and all associated compiled caches
     public async Task DeleteScript(Guid scriptId)
     {
-        await db.DeleteCustomerScript(scriptId);    //todo check if this also deletes the caches
+        await Db.DeleteCustomerScript(scriptId);    //todo check if this also deletes the caches
     }
 
     // Retrieves script metadata and source code
     public async Task<CustomerScript> GetScript(Guid scriptId, bool includeCaches = false)
     {
-        CustomerScript script = await db.GetCustomerScript(scriptId, includeCaches);
+        CustomerScript script = await Db.GetCustomerScript(scriptId, includeCaches);
         return script;
     }
 
@@ -62,7 +66,7 @@ public class ScriptManagerFacade : IScriptManager
     public async Task<List<CustomerScript>> ListScripts(CustomerScriptFilter filters = null, bool includeCaches = false)
     {
         List<CustomerScript> scripts;
-        scripts = await db.GetAllCustomerScripts(includeCaches: includeCaches, filters: filters);
+        scripts = await Db.GetAllCustomerScripts(includeCaches: includeCaches, filters: filters);
         return scripts;
     }
 
@@ -75,14 +79,14 @@ public class ScriptManagerFacade : IScriptManager
     {
         if (targetApiVersion == -1)
         {
-            CustomerScript script = await db.GetCustomerScript(scriptId);
-            await db.CreateAndInsertCompiledCache(script);
+            CustomerScript script = await Db.GetCustomerScript(scriptId);
+            await Db.CreateAndInsertCompiledCache(script);
         }
         else
         {
             targetApiVersion = await GetRecentApiVersion();
-            CustomerScript script = await db.GetCustomerScript(scriptId);
-            await db.CreateAndInsertCompiledCache(script, oldApiV: targetApiVersion);
+            CustomerScript script = await Db.GetCustomerScript(scriptId);
+            await Db.CreateAndInsertCompiledCache(script, oldApiV: targetApiVersion);
         }
 
     }
@@ -91,13 +95,13 @@ public class ScriptManagerFacade : IScriptManager
     public async Task CompileAllScripts()
     {
         int currentApiVersion = await GetRecentApiVersion();
-        await db.CompileAllStoredScripts(currentApiVersion);
+        await Db.CompileAllStoredScripts(currentApiVersion);
     }
 
     // Recompiles script for all active API versions
     public async Task RecompileScript(Guid scriptId)  //todo maybe get rid of the currentapi and create global var in dbhelper class
     {
-        await db.RecompileScript(scriptId, deleteAlso: true);  //todo fix this i need old version dlls or something like that which will need to be passed maybe as fodler path or file path
+        await Db.RecompileScript(scriptId, deleteAlso: true);  //todo fix this i need old version dlls or something like that which will need to be passed maybe as fodler path or file path
     }
 
     /// Performs syntax and interface validation without saving
@@ -105,7 +109,7 @@ public class ScriptManagerFacade : IScriptManager
     {
         try
         {
-            var validation = compiler.BasicValidationBeforeCompiling(sourceCode);
+            var validation = Compiler.BasicValidationBeforeCompiling(sourceCode);
             string className = validation.className;    //figure out if i should do something with this
             string baseTypeName = validation.baseTypeName;
             int versionInt = validation.versionInt;
@@ -130,12 +134,12 @@ public class ScriptManagerFacade : IScriptManager
             if (apiVersion == -1)
             {
                 apiVersion = await GetRecentApiVersion();
-                compiler.RunCompilation(script.SourceCode);
+                Compiler.RunCompilation(script.SourceCode);
             }
             else
             {
-                MetadataReference[] refs = compiler.GetReferencesForVersion(apiVersion);
-                compiler.RunCompilation(script.SourceCode, refs);
+                MetadataReference[] refs = Compiler.GetReferencesForVersion(apiVersion);
+                Compiler.RunCompilation(script.SourceCode, refs);
             }
 
             return "Successful Compilation!";
@@ -163,7 +167,7 @@ public class ScriptManagerFacade : IScriptManager
             byte[] compiledScript = null;
             try
             {
-                var temp = await db.GetCompiledScripCache(scriptId, currentApiVersion);
+                var temp = await Db.GetCompiledScripCache(scriptId, currentApiVersion);
                 compiledScript = temp.AssemblyBytes;
             }
             catch (Exception e)
@@ -171,7 +175,7 @@ public class ScriptManagerFacade : IScriptManager
                 Console.WriteLine("Retrieval failed jit comp launched:");
                 await CompileScript(scriptId, currentApiVersion);
                 //try again, if fails again we catch error outside
-                var temp = await db.GetCompiledScripCache(scriptId, currentApiVersion);
+                var temp = await Db.GetCompiledScripCache(scriptId, currentApiVersion);
                 compiledScript = temp.AssemblyBytes;
             }
 
@@ -201,7 +205,7 @@ public class ScriptManagerFacade : IScriptManager
             byte[] compiledScript = null;
             try
             {
-                var temp = await db.GetCompiledScripCache(scriptId, ApiVersion);
+                var temp = await Db.GetCompiledScripCache(scriptId, ApiVersion);
                 compiledScript = temp.AssemblyBytes;
             }
             catch (Exception e)
@@ -209,7 +213,7 @@ public class ScriptManagerFacade : IScriptManager
                 Console.WriteLine("Retrieval failed jit comp launched:");
                 await CompileScript(scriptId, await GetRecentApiVersion());
                 //try again, if fails again we catch error outside
-                var temp = await db.GetCompiledScripCache(scriptId, ApiVersion);
+                var temp = await Db.GetCompiledScripCache(scriptId, ApiVersion);
                 compiledScript = temp.AssemblyBytes;
             }
 
@@ -237,7 +241,7 @@ public class ScriptManagerFacade : IScriptManager
             byte[] compiledScript = null;
             try
             {
-                var temp = await db.GetCompiledScripCache(scriptId, currentApiVersion);
+                var temp = await Db.GetCompiledScripCache(scriptId, currentApiVersion);
                 compiledScript = temp.AssemblyBytes;
             }
             catch (Exception e)
@@ -245,7 +249,7 @@ public class ScriptManagerFacade : IScriptManager
                 Console.WriteLine("Retrieval failed jit comp launched:");
                 await CompileScript(scriptId, await GetRecentApiVersion());
                 //try again, if fails again we catch error outside
-                var temp = await db.GetCompiledScripCache(scriptId, currentApiVersion);
+                var temp = await Db.GetCompiledScripCache(scriptId, currentApiVersion);
                 compiledScript = temp.AssemblyBytes;
             }
 
@@ -274,7 +278,7 @@ public class ScriptManagerFacade : IScriptManager
         }
         try
         {
-            var temp = await db.GetCompiledScripCache(scriptId, currentApiVersion);
+            var temp = await Db.GetCompiledScripCache(scriptId, currentApiVersion);
             byte[] compiledScript = temp.AssemblyBytes;
             return compiledScript;
         }
@@ -294,7 +298,7 @@ public class ScriptManagerFacade : IScriptManager
         {
             try
             {
-                await db.DeleteScriptCache(scriptId, i);
+                await Db.DeleteScriptCache(scriptId, i);
                 Console.WriteLine("Deleted: " + i);
             }   //todo check if doesnt throw something  
             catch (Exception e)
@@ -307,14 +311,14 @@ public class ScriptManagerFacade : IScriptManager
     // Removes all compiled caches (maintenance operation)
     public async Task ClearAllCaches()
     {
-        await db.DeleteAllCachedScripts();
+        await Db.DeleteAllCachedScripts();
     }
 
     // Background job to precompile all compatible scripts
     public async Task PrecompileForApiVersion()
     {
         int currentApiVersion = await GetRecentApiVersion();
-        await db.AutomaticCompilationOnVersionUpdate(currentApiVersion);
+        await Db.AutomaticCompilationOnVersionUpdate(currentApiVersion);
     }
 
     #endregion
@@ -324,7 +328,7 @@ public class ScriptManagerFacade : IScriptManager
     // Returns list of currently active API versions from Ember instances
     public async Task<List<int>> GetActiveApiVersions() //todo implement
     {
-        return await db.GetActiveApiVersions(); //shit implementation not really functional in rl
+        return await Db.GetActiveApiVersions(); //shit implementation not really functional in rl
     }
 
     public async Task<int> GetRecentApiVersion() //todo implement
@@ -339,14 +343,14 @@ public class ScriptManagerFacade : IScriptManager
     // Returns which API versions a script is compatible with
     public async Task<int> GetScriptCompatibility(Guid scriptId)
     {
-        CustomerScript script = await db.GetCustomerScript(scriptId);
+        CustomerScript script = await Db.GetCustomerScript(scriptId);
         return script.MinApiVersion;
     }
 
     // Validates if script can run on target version
     public async Task<bool> CheckVersionCompatibility(Guid scriptId, int targetApiVersion)
     {
-        CustomerScript script = await db.GetCustomerScript(scriptId);
+        CustomerScript script = await Db.GetCustomerScript(scriptId);
         // int minV = script.MinApiVersion;
         int minV = targetApiVersion;
         var ls = await GetActiveApiVersions();
@@ -370,7 +374,7 @@ public class ScriptManagerFacade : IScriptManager
     // Identifies duplicate scripts based on source code equivalence
     public async Task<(List<Guid> scriptGUIDs, Dictionary<Guid, int> cacheGUIDs)> DetectDuplicates()
     {
-        var dupes = await db.DetectDuplicates();
+        var dupes = await Db.DetectDuplicates();
         return (scriptGUIDs: dupes.scriptGUIDs, cacheGUIDs: dupes.cacheGUIDs);
     }
 
@@ -378,14 +382,14 @@ public class ScriptManagerFacade : IScriptManager
     public async Task RemoveDuplicates()
     {
         int currentApiVersion = await GetRecentApiVersion();
-        await db.RemoveDuplicates();   //automatically get dupes from function in dbhelper dont have to pass therefore
+        await Db.RemoveDuplicates();   //automatically get dupes from function in dbhelper dont have to pass therefore
     }
 
     // Removes caches without associated scripts
     public async Task CleanupOrphanedCaches()
     {
         int currentApiVersion = await GetRecentApiVersion();
-        await db.AutomaticCompilationOnVersionUpdate(currentApiVersion);    //this also does this maybe implement real funcion later
+        await Db.AutomaticCompilationOnVersionUpdate(currentApiVersion);    //this also does this maybe implement real funcion later
     }
 
     #endregion
@@ -408,20 +412,21 @@ public class ScriptManagerFacade : IScriptManager
     public async Task HealthCheck()
     {
         // TODO
-        await db.HealthCheck();
+        await Db.HealthCheck();
     }
 
     // Extracts className, baseTypeName, and version from script
     public async Task<string> GetScriptMetadata(Guid scriptId)
     {
-        CustomerScript script = await db.GetCustomerScript(scriptId, includeCaches: true);
+        CustomerScript script = await Db.GetCustomerScript(scriptId, includeCaches: true);
         string str = "Metadata for script: " + script.ToString();
         return str;
     }
 
     public string GetUserName()
     {
-        return UsefulMethods.GetUserName();
+        // return UsefulMethods.GetUserName();
+        return "Gilles";
     }
 
     #endregion
