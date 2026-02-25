@@ -6,19 +6,32 @@ namespace Ember.Scripting;
 
 public class ScriptManagerFacade : IScriptManager
 {
-    DbHelper Db;
-    ScriptCompiler Compiler;
-    MetadataReference[] References;
-    public ScriptManagerFacade(MetadataReference[] references)
+    private readonly DbHelper Db;
+    private readonly ScriptCompiler Compiler;
+    private readonly ScriptExecutor Executor;
+    private readonly MetadataReference[] References;
+
+    public ScriptManagerFacade(DbHelper db, ScriptCompiler compiler, ScriptExecutor executor, MetadataReference[] references)
     {
         References = references;
-        Db = new DbHelper(references);
-        Compiler = new ScriptCompiler(references);
+        Db = db;
+        Compiler = compiler;
+        Executor = executor;
+        // Db = new DbHelper(references);
+        // Compiler = new ScriptCompiler(references);
+        // Executor = new ScriptExecutor();
     }
 
     #region Script Lifecycle
 
-    /// Validates, compiles, and stores a new script
+    /// <inheritdoc cref="IScriptManager.CreateScript(string, string?, string, int)">
+    ///
+    /// </summary>
+    /// <param name="sourceCode"></param>
+    /// <param name="scriptType"></param>
+    /// <param name="userName"></param>
+    /// <param name="apiVersion"></param>
+    /// <returns></returns>
     public async Task<Guid> CreateScript(string sourceCode, string? scriptType = null, string userName = "Default", int apiVersion = -1)    //maybe minApiVersion is better?
     {
         int currentApiVersion = await GetRecentApiVersion();
@@ -44,8 +57,8 @@ public class ScriptManagerFacade : IScriptManager
         }
         var customerScript = await Db.GetCustomerScript(scriptId);
         var creationDate = customerScript.CreatedAt;
-        await Db.DeleteCustomerScript(scriptId);    //todo update is still inefficient 
-        await Db.CreateAndInsertCustomerScript(newSourceCode, scriptId, userName, createdAt: (DateTime)creationDate); //todo unsafe af
+        await Db.DeleteCustomerScript(scriptId);    //todo update is still inefficient
+        await Db.CreateAndInsertCustomerScript(newSourceCode, scriptId, userName, createdAt: (DateTime)creationDate!); //todo unsafe af
         // await RecompileScript(scriptId);    //todo inefficient also untested, ineff because compiles 2 for 1 api v
     }
 
@@ -63,7 +76,7 @@ public class ScriptManagerFacade : IScriptManager
     }
 
     // Returns all scripts with optional filtering by type, API version, or creation date
-    public async Task<List<CustomerScript>> ListScripts(CustomerScriptFilter filters = null, bool includeCaches = false)
+    public async Task<List<CustomerScript>> ListScripts(CustomerScriptFilter? filters = null, bool includeCaches = false)
     {
         List<CustomerScript> scripts;
         scripts = await Db.GetAllCustomerScripts(includeCaches: includeCaches, filters: filters);
@@ -154,8 +167,8 @@ public class ScriptManagerFacade : IScriptManager
 
     #region Execution Operations
 
-    // Executes a Generator Action script with provided context, realisitcally not needed 
-    public async Task<ActionResultBaseClass> ExecuteActionScript(Guid scriptId, GeneratorContext context, int currentApiVersion = -1)    //lowkey so many errors better to have one 
+    // Executes a Generator Action script with provided context, realisitcally not needed
+    public async Task<ActionResultBaseClass> ExecuteActionScript(Guid scriptId, GeneratorContext context, int currentApiVersion = -1)    //lowkey so many errors better to have one
     {
         try
         {
@@ -164,7 +177,7 @@ public class ScriptManagerFacade : IScriptManager
                 currentApiVersion = await GetRecentApiVersion();
             }
 
-            byte[] compiledScript = null;
+            byte[]? compiledScript = null;
             try
             {
                 var temp = await Db.GetCompiledScripCache(scriptId, currentApiVersion);
@@ -172,7 +185,7 @@ public class ScriptManagerFacade : IScriptManager
             }
             catch (Exception e)
             {
-                Console.WriteLine("Retrieval failed jit comp launched:");
+                Console.WriteLine("Retrieval failed jit comp launched:" + e.ToString());
                 await CompileScript(scriptId, currentApiVersion);
                 //try again, if fails again we catch error outside
                 var temp = await Db.GetCompiledScripCache(scriptId, currentApiVersion);
@@ -180,8 +193,8 @@ public class ScriptManagerFacade : IScriptManager
             }
 
             //possibly add a null check for compiledScript
-            ScriptExecutor executor = new ScriptExecutor(compiledScript, context);
-            ActionResultBaseClass result = (ActionResultBaseClass)executor.RunScriptExecution<object>();  //todo maybe better handling than casting although the error will be thrown in the class itself
+            // ScriptExecutor executor = new ScriptExecutor();
+            ActionResultBaseClass result = (ActionResultBaseClass)Executor.RunScriptExecution<object>(compiledScript!, context);  //todo maybe better handling than casting although the error will be thrown in the class itself
             return result;
         }
         catch (Exception e)
@@ -192,7 +205,7 @@ public class ScriptManagerFacade : IScriptManager
 
     }
 
-    // Executes a Generator Condition script and returns boolean result, realisitcally not needed 
+    // Executes a Generator Condition script and returns boolean result, realisitcally not needed
     public async Task<bool> ExecuteConditionScript(Guid scriptId, GeneratorContext context, int ApiVersion = -1)
     {
         try
@@ -202,7 +215,7 @@ public class ScriptManagerFacade : IScriptManager
                 ApiVersion = await GetRecentApiVersion();
             }
 
-            byte[] compiledScript = null;
+            byte[]? compiledScript = null;
             try
             {
                 var temp = await Db.GetCompiledScripCache(scriptId, ApiVersion);
@@ -210,7 +223,7 @@ public class ScriptManagerFacade : IScriptManager
             }
             catch (Exception e)
             {
-                Console.WriteLine("Retrieval failed jit comp launched:");
+                Console.WriteLine("Retrieval failed jit comp launched:" + e.ToString());
                 await CompileScript(scriptId, await GetRecentApiVersion());
                 //try again, if fails again we catch error outside
                 var temp = await Db.GetCompiledScripCache(scriptId, ApiVersion);
@@ -218,8 +231,8 @@ public class ScriptManagerFacade : IScriptManager
             }
 
             //possibly add a null check for compiledScript
-            ScriptExecutor executor = new ScriptExecutor(compiledScript, context);
-            bool result = (bool)executor.RunScriptExecution<object>();  //todo maybe better handling than casting although the error will be thrown in the class itself
+            // ScriptExecutor executor = new ScriptExecutor();
+            bool result = (bool)Executor.RunScriptExecution<object>(compiledScript!, context);  //todo maybe better handling than casting although the error will be thrown in the class itself
             return result;
         }
         catch (Exception e)
@@ -238,7 +251,7 @@ public class ScriptManagerFacade : IScriptManager
             {
                 currentApiVersion = await GetRecentApiVersion();
             }
-            byte[] compiledScript = null;
+            byte[]? compiledScript = null;
             try
             {
                 var temp = await Db.GetCompiledScripCache(scriptId, currentApiVersion);
@@ -246,7 +259,7 @@ public class ScriptManagerFacade : IScriptManager
             }
             catch (Exception e)
             {
-                Console.WriteLine("Retrieval failed jit comp launched:");
+                Console.WriteLine("Retrieval failed jit comp launched:" + e.ToString());
                 await CompileScript(scriptId, await GetRecentApiVersion());
                 //try again, if fails again we catch error outside
                 var temp = await Db.GetCompiledScripCache(scriptId, currentApiVersion);
@@ -254,8 +267,8 @@ public class ScriptManagerFacade : IScriptManager
             }
 
             //possibly add a null check for compiledScript
-            ScriptExecutor executor = new ScriptExecutor(compiledScript, context);
-            object result = executor.RunScriptExecution<object>();  //returns either bool or action result todo maybe add checks if thats the case but normally should be
+            // ScriptExecutor executor = new ScriptExecutor();
+            object result = Executor.RunScriptExecution<object>(compiledScript!, context);  //returns either bool or action result todo maybe add checks if thats the case but normally should be
             return result;
         }
         catch (Exception e)
@@ -279,8 +292,8 @@ public class ScriptManagerFacade : IScriptManager
         try
         {
             var temp = await Db.GetCompiledScripCache(scriptId, currentApiVersion);
-            byte[] compiledScript = temp.AssemblyBytes;
-            return compiledScript;
+            byte[]? compiledScript = temp.AssemblyBytes;
+            return compiledScript!;
         }
         catch (Exception e)
         {
@@ -293,19 +306,7 @@ public class ScriptManagerFacade : IScriptManager
     // Removes all compiled versions of a script
     public async Task ClearScriptCache(Guid scriptId)
     {
-        int currentApiVersion = await GetRecentApiVersion();
-        for (int i = 0; i <= currentApiVersion; i++)    //this only works if currentApiVersion is the highest
-        {
-            try
-            {
-                await Db.DeleteScriptCache(scriptId, i);
-                Console.WriteLine("Deleted: " + i);
-            }   //todo check if doesnt throw something  
-            catch (Exception e)
-            { Console.WriteLine(e.ToString()); }
-
-        }
-
+        await Db.ClearScriptCache(scriptId);
     }
 
     // Removes all compiled caches (maintenance operation)
@@ -333,11 +334,7 @@ public class ScriptManagerFacade : IScriptManager
 
     public async Task<int> GetRecentApiVersion() //todo implement
     {
-        // var versions = await GetActiveApiVersions();
-        // int last = versions[versions.Count() - 1];
-        // return last;
-        // return UsefulMethods.GetRecentApiVersion();
-        return 6;
+        return await Db.GetRecentApiVersion();
     }
 
     // Returns which API versions a script is compatible with

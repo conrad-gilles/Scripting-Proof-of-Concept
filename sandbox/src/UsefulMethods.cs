@@ -150,18 +150,18 @@ public class UsefulMethods
         }
 
     }
-    public static async Task<Guid> GetIdInConsoleAsync(bool fromSrc = false)
-    {
-        Dictionary<int, Guid> cacheDict = [];
-        if (fromSrc == false)
-        { cacheDict = await RandomMethods.ListAllCompiledFromDB(); }
+    // public static async Task<Guid> GetIdInConsoleAsync(bool fromSrc = false)
+    // {
+    //     Dictionary<int, Guid> cacheDict = [];
+    //     if (fromSrc == false)
+    //     { cacheDict = await RandomMethods.ListAllCompiledFromDB(); }
 
-        else { cacheDict = await RandomMethods.ListAllStoredSourceCodes(); }
+    //     else { cacheDict = await RandomMethods.ListAllStoredSourceCodes(); }
 
-        Dictionary<int, Guid> sourceDict = [];
-        Console.WriteLine("Enter the number of the script ");
-        string userInputForEdit = Console.ReadLine();
-        Guid id = cacheDict[Int32.Parse(userInputForEdit)];
-        return id;
-    }
+    //     Dictionary<int, Guid> sourceDict = [];
+    //     Console.WriteLine("Enter the number of the script ");
+    //     string userInputForEdit = Console.ReadLine();
+    //     Guid id = cacheDict[Int32.Parse(userInputForEdit)];
+    //     return id;
+    // }
 }

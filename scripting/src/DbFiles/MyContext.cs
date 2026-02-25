@@ -3,8 +3,18 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EFModeling.EntityProperties.FluentAPI.Required;
 
-internal class MyContext : DbContext
+public class MyContext : DbContext
 {
+    // 1. Add this constructor to accept configuration from Ember's Dependency Injection
+    public MyContext(DbContextOptions<MyContext> options) : base(options)
+    {
+    }
+
+    // Keep the parameterless constructor for local EF Core tooling/migrations
+    public MyContext()
+    {
+    }
+
     public DbSet<CustomerScript> CustomerScripts { get; set; }
     public DbSet<ScriptCompiledCache> ScriptCompiledCaches { get; set; }
     public DbSet<EmberInstance> EmberInstances { get; set; }
@@ -22,7 +32,11 @@ internal class MyContext : DbContext
     #endregion
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        optionsBuilder.UseNpgsql(
+        if (optionsBuilder.IsConfigured == false)
+        {
+            optionsBuilder.UseNpgsql(
             @"Host=localhost;Port=5432;Database=script_registry;Username=admin;Password=your_secure_password");
+        }
+
     }
 }

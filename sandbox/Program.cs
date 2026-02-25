@@ -44,15 +44,18 @@ class MainProgram
     {
         try
         {
-            var db = new DbHelper(UsefulMethods.GetReferences());
+            ScriptCompiler compiler3 = new ScriptCompiler(UsefulMethods.GetReferences());
+            ScriptExecutor exec3 = new ScriptExecutor();
+            var db = new DbHelper(compiler: compiler3, UsefulMethods.GetReferences());
+            RandomMethods rm = new RandomMethods(db);
 
             // await RandomMethods.CompileAllScriptsInFolderAndSaveToDB(scriptFolderPath);   //main precompilation act
             // Dictionary<int, Guid> cacheDict = await RandomMethods.ListAllCompiledFromDB();
-            Dictionary<int, Guid> sourceDict = await RandomMethods.ListAllStoredSourceCodes();
+            Dictionary<int, Guid> sourceDict = await rm.ListAllStoredSourceCodes();
             // Dictionary<int, Guid> sourceDict = [];
             Dictionary<int, Guid> cacheDict = [];
             Guid scriptId = new Guid();
-            ScriptManagerFacade facade = new ScriptManagerFacade(UsefulMethods.GetReferences());
+            ScriptManagerFacade facade = new ScriptManagerFacade(db, compiler3, exec3, UsefulMethods.GetReferences());
             currentApiVersion = await facade.GetRecentApiVersion(); //needs to be above autocomp else error
 
             await db.AutomaticCompilationOnVersionUpdate(currentApiVersion);    //todo make this "background job that is run automatically periodically"
@@ -64,7 +67,7 @@ class MainProgram
                 try
                 {
                     Console.WriteLine("Enter the function you want to run: ");
-                    string userInput = Console.ReadLine();
+                    string? userInput = Console.ReadLine();
                     // Switch statement to test ScriptManagerFacade functions
                     switch (userInput)
                     {
@@ -78,39 +81,43 @@ class MainProgram
                             break;
                         case "source":
 
-                            await RandomMethods.GetSourceCodeInSwitch();
+                            await rm.GetSourceCodeInSwitch();
                             break;
                         case "reset":
-                            await new DbHelper(UsefulMethods.GetReferences()).EnsureDeletedCreated();
-                            // cacheDict = 
-                            await RandomMethods.ListAllCompiledFromDB();
+                            // await new DbHelper(UsefulMethods.GetReferences()).EnsureDeletedCreated();
+                            await db.EnsureDeletedCreated();
+                            // cacheDict =
+                            await rm.ListAllCompiledFromDB();
                             break;
                         case "comp":    //doesnt compile if isDuplicate is eneblaed bc scripts are already in db so no cache is created maybe todo
-                            await RandomMethods.CompileAllScriptsInFolderAndSaveToDB(scriptFolderPath, userName, currentApiVersion);   //main precompilation act
-                                                                                                                                       // cacheDict = 
-                            await RandomMethods.ListAllCompiledFromDB();
+                            await rm.CompileAllScriptsInFolderAndSaveToDB(scriptFolderPath, userName, currentApiVersion);   //main precompilation act
+                                                                                                                            // cacheDict =
+                            await rm.ListAllCompiledFromDB();
                             break;
                         case "comp source":
-                            await new DbHelper(UsefulMethods.GetReferences()).CompileAllStoredScripts(currentApiVersion);
+                            // await new DbHelper(UsefulMethods.GetReferences()).CompileAllStoredScripts(currentApiVersion);
+                            await db.CompileAllStoredScripts(currentApiVersion);
                             break;
                         case "comp mv": //no functioality just for testing
-                            scriptId = await UsefulMethods.GetIdInConsoleAsync(fromSrc: true);
+                            scriptId = await rm.GetIdInConsoleAsync(fromSrc: true);
                             for (int i = 0; i < 5; i++)
                             {
                                 await facade.CompileScript(scriptId, i);
                             }
                             break;
                         case "ls":
-                            cacheDict = await RandomMethods.ListAllCompiledFromDB();
+                            cacheDict = await rm.ListAllCompiledFromDB();
                             break;
                         case "ls source":
-                            sourceDict = await RandomMethods.ListAllStoredSourceCodes();
+                            sourceDict = await rm.ListAllStoredSourceCodes();
                             break;
                         case "dupes":
-                            await new DbHelper(UsefulMethods.GetReferences()).RemoveDuplicates();
+                            // await new DbHelper(UsefulMethods.GetReferences()).RemoveDuplicates();
+                            await db.RemoveDuplicates();
                             break;
                         case "deleteCache":
-                            await new DbHelper(UsefulMethods.GetReferences()).DeleteAllCachedScripts();
+                            // await new DbHelper(UsefulMethods.GetReferences()).DeleteAllCachedScripts();
+                            await db.DeleteAllCachedScripts();
                             break;
 
                         #region Script Lifecycle
@@ -127,15 +134,15 @@ class MainProgram
                             break;
 
                         case "UpdateScript":
-                            Guid idEdit = await UsefulMethods.GetIdInConsoleAsync(fromSrc: true);
+                            Guid idEdit = await rm.GetIdInConsoleAsync(fromSrc: true);
 
                             var customerScript = await db.GetCustomerScript(idEdit);
                             var creationDate = customerScript.CreatedAt;
 
                             Console.WriteLine("Copy paste your new version file path now:");
-                            string userInput2 = Console.ReadLine();
+                            string? userInput2 = Console.ReadLine();
 
-                            string str = UsefulMethods.CreateStringFromCsFile(userInput2);
+                            string? str = UsefulMethods.CreateStringFromCsFile(userInput2!);
 
                             //In reality it would be better like this but doesnt work because cant paste too much in console:
                             // Console.WriteLine("Copy paste your new version now:");
@@ -145,12 +152,12 @@ class MainProgram
                             break;
 
                         case "DeleteScript":
-                            scriptId = await UsefulMethods.GetIdInConsoleAsync(fromSrc: true);
+                            scriptId = await rm.GetIdInConsoleAsync(fromSrc: true);
                             await facade.DeleteScript(scriptId);
                             break;
 
                         case "GetScript":
-                            scriptId = await UsefulMethods.GetIdInConsoleAsync(fromSrc: true);
+                            scriptId = await rm.GetIdInConsoleAsync(fromSrc: true);
                             CustomerScript s = await facade.GetScript(scriptId);
                             Console.WriteLine(s.ToString());
                             break;
@@ -168,7 +175,7 @@ class MainProgram
                         #region Compilation Operations
 
                         case "CompileScript":   //todo check
-                            scriptId = await UsefulMethods.GetIdInConsoleAsync(fromSrc: true);
+                            scriptId = await rm.GetIdInConsoleAsync(fromSrc: true);
                             await facade.CompileScript(scriptId);    //should not compile if already present in db;
                             break;
 
@@ -177,19 +184,19 @@ class MainProgram
                             break;
 
                         case "RecompileScript":
-                            scriptId = await UsefulMethods.GetIdInConsoleAsync(fromSrc: true);
+                            scriptId = await rm.GetIdInConsoleAsync(fromSrc: true);
                             await facade.RecompileScript(scriptId);
                             break;
 
                         case "ValidateScript":
-                            scriptId = await UsefulMethods.GetIdInConsoleAsync(fromSrc: true);
+                            scriptId = await rm.GetIdInConsoleAsync(fromSrc: true);
                             var script = await db.GetCustomerScript(scriptId);
                             string answer = await facade.ValidateScript(script.SourceCode);
                             Console.WriteLine(answer);
                             break;
 
                         case "GetCompilationErrors":    //todo test by turning off auto check when adding same with above
-                            scriptId = await UsefulMethods.GetIdInConsoleAsync(fromSrc: true);
+                            scriptId = await rm.GetIdInConsoleAsync(fromSrc: true);
                             string compAnswer = await facade.GetCompilationErrors(scriptId);
                             Console.WriteLine(compAnswer);
                             break;
@@ -199,19 +206,19 @@ class MainProgram
                         #region Execution Operations
 
                         case "ExecuteActionScript":
-                            scriptId = await UsefulMethods.GetIdInConsoleAsync(fromSrc: true);
+                            scriptId = await rm.GetIdInConsoleAsync(fromSrc: true);
                             ActionResultBaseClass result = await facade.ExecuteActionScript(scriptId, UsefulMethods.GetTestingContext<GeneratorContextV3>());
                             Console.WriteLine(result.ToString());   //you could do whatever with it
                             break;
 
                         case "ExecuteConditionScript":
-                            scriptId = await UsefulMethods.GetIdInConsoleAsync(fromSrc: true);
+                            scriptId = await rm.GetIdInConsoleAsync(fromSrc: true);
                             bool resultCond = await facade.ExecuteConditionScript(scriptId, UsefulMethods.GetTestingContext<GeneratorContextV3>());
                             Console.WriteLine(resultCond);
                             break;
 
                         case "ExecuteScriptById":
-                            scriptId = await UsefulMethods.GetIdInConsoleAsync(fromSrc: true);
+                            scriptId = await rm.GetIdInConsoleAsync(fromSrc: true);
                             object resultObj = await facade.ExecuteScriptById(scriptId, UsefulMethods.GetTestingContext<GeneratorContextV3>());
 
                             if (typeof(bool).IsAssignableFrom(resultObj.GetType()))       //good idea to check what type was returne, you could also just check the property from db normally
@@ -233,13 +240,13 @@ class MainProgram
                         #region Cache Management
 
                         case "GetCompiledCache":
-                            scriptId = await UsefulMethods.GetIdInConsoleAsync();
+                            scriptId = await rm.GetIdInConsoleAsync();
                             byte[] arr = await facade.GetCompiledCache(scriptId, currentApiVersion);
                             Console.WriteLine(arr.ToString());
                             break;
 
                         case "ClearScriptCache":
-                            scriptId = await UsefulMethods.GetIdInConsoleAsync(fromSrc: true);
+                            scriptId = await rm.GetIdInConsoleAsync(fromSrc: true);
                             await facade.ClearScriptCache(scriptId);
                             break;
 
@@ -266,13 +273,13 @@ class MainProgram
                             break;
 
                         case "GetScriptCompatibility":
-                            scriptId = await UsefulMethods.GetIdInConsoleAsync(fromSrc: true);
+                            scriptId = await rm.GetIdInConsoleAsync(fromSrc: true);
                             int compa = await facade.GetScriptCompatibility(scriptId);
                             Console.WriteLine("Min api version: " + compa);
                             break;
 
                         case "CheckVersionCompatibility":
-                            scriptId = await UsefulMethods.GetIdInConsoleAsync(fromSrc: true);
+                            scriptId = await rm.GetIdInConsoleAsync(fromSrc: true);
                             bool check = await facade.CheckVersionCompatibility(scriptId, currentApiVersion);
                             Console.WriteLine("CheckVersionCompatibility with ApiV: " + currentApiVersion + " is " + check);
                             break;
@@ -328,7 +335,7 @@ class MainProgram
                             break;
 
                         case "GetScriptMetadata":
-                            scriptId = await UsefulMethods.GetIdInConsoleAsync(fromSrc: true);
+                            scriptId = await rm.GetIdInConsoleAsync(fromSrc: true);
                             string strr = await facade.GetScriptMetadata(scriptId);
                             Console.WriteLine(strr);
                             break;
@@ -340,7 +347,7 @@ class MainProgram
                         #endregion
 
                         default:
-                            sourceDict = await RandomMethods.ListAllStoredSourceCodes(dontPrint: true);
+                            sourceDict = await rm.ListAllStoredSourceCodes(dontPrint: true);
                             scriptId = sourceDict[Int32.Parse(userInput)];
                             CustomerScript justForTesting = await db.GetCustomerScript(scriptId);
                             object resultObj2 = await facade.ExecuteScriptById(scriptId, UsefulMethods.GetTestingContext<GeneratorContextNoInherVaccine>(justForTesting: justForTesting));
@@ -366,7 +373,7 @@ class MainProgram
                     Console.WriteLine("Database Error: " + e.InnerException?.Message);  //todo check what this really does and if superior to just tostring
                     Console.WriteLine("Database Error: " + e.ToString());
                 }
-                catch (NoFileWithThisClassNameFoundException e)
+                catch (NoFileWithThisClassNameFoundException)
                 {
                     Console.WriteLine("No file with this Class name found, make sure the file name is the same as the class name.");
                 }

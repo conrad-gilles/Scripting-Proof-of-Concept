@@ -5,7 +5,20 @@ using Ember.Scripting;
 [TestClass]
 public class ScriptTests
 {
-    ScriptManagerFacade facade = new ScriptManagerFacade(UsefulMethods.GetReferences());
+
+
+    ScriptManagerFacade facade;
+
+    [TestInitialize]
+    public async Task Setup()
+    {
+        ScriptCompiler compiler = new ScriptCompiler(UsefulMethods.GetReferences());
+        compiler = new ScriptCompiler(UsefulMethods.GetReferences());
+        DbHelper db = new DbHelper(compiler, UsefulMethods.GetReferences());
+        ScriptExecutor executor = new ScriptExecutor();
+        facade = new ScriptManagerFacade(db, compiler, executor, UsefulMethods.GetReferences());
+
+    }
     string ActionResultVersionSpecific = "[Message contains either failure or succes: ] ";  //change this if action result version changes it will thraow cause of message contains
     string sourceCodeActionV1 = UsefulMethods.CreateStringFromCsFile(
         Path.GetFullPath(Path.Combine(

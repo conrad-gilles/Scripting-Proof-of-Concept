@@ -8,17 +8,16 @@ namespace Ember.Scripting;
 
 public class ScriptExecutor
 {
-    public byte[] compiledScript;
-    public GeneratorContext genContext;
-    private static int ScriptTimeout = 5000;
+    // private readonly byte[] compiledScript;
+    // private readonly GeneratorContext genContext;
+    private readonly static int ScriptTimeout = 5000;
     // private static readonly TimeSpan ScriptTimeout = TimeSpan.FromSeconds(5);
-    public ScriptExecutor(byte[] pCompiledScript, GeneratorContext pGenContext)
-    {
-        compiledScript = pCompiledScript;
-        genContext = pGenContext;
-    }
+    // public ScriptExecutor()
+    // {
 
-    public T RunScriptExecution<T>()
+    // }
+
+    public T RunScriptExecution<T>(byte[] compiledScript, GeneratorContext genContext)
     // public void RunScriptExecution()
     {
         try
@@ -63,12 +62,12 @@ public class ScriptExecutor
             // if (typeof(IGeneratorConditionScript).IsAssignableFrom(type))
             if (typeof(IGeneratorConditionScript).IsAssignableFrom(type))    //checks if type implements the generator specific interface  //check if runs
             {
-                var result = RunConditionScript(type, scriptInstance);
+                var result = RunConditionScript(type, scriptInstance, genContext);
                 return (T)(object)result;
             }
             else if (typeof(IGeneratorActionScript).IsAssignableFrom(type))
             {
-                var result = RunActionScript(type, scriptInstance);
+                var result = RunActionScript(type, scriptInstance, genContext);
                 return (T)(object)result;
             }
             else
@@ -87,7 +86,7 @@ public class ScriptExecutor
         }
 
     }
-    public bool RunConditionScript(Type type, object scriptInstance)
+    public bool RunConditionScript(Type type, object scriptInstance, GeneratorContext genContext)
     {
         try
         {
@@ -120,7 +119,7 @@ public class ScriptExecutor
         }
 
     }
-    public ActionResultBaseClass RunActionScript(Type type, object scriptInstance)
+    public ActionResultBaseClass RunActionScript(Type type, object scriptInstance, GeneratorContext genContext)
     {
         try
         {
@@ -164,7 +163,7 @@ public class ScriptExecutor
     //     // var newestVersion = await facade.GetRecentApiVersion();
     //     object finalActionResult = resultValue;
     //     int loopBreaker = 0;   //I am assuming not 1000 versions will be written                // will probably fail in real application todo fix mabe with reflection i heard?
-    //     while (finalActionResult is not ActionResultV3NoInheritance && loopBreaker < 1000)    //could fail if loaded from diffrent assembly should probably replace the is statements with something like get type.name 
+    //     while (finalActionResult is not ActionResultV3NoInheritance && loopBreaker < 1000)    //could fail if loaded from diffrent assembly should probably replace the is statements with something like get type.name
     //     {
     //         loopBreaker++;
     //         // if (finalActionResult is ActionResultV2 v2Script)

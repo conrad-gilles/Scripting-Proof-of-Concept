@@ -2,9 +2,15 @@ using System.Globalization;
 using Ember.Scripting;
 public class RandomMethods
 {
-    public static async Task<Dictionary<int, Guid>> ListAllCompiledFromDB()
+    private readonly DbHelper db;
+
+    public RandomMethods(DbHelper db2)
     {
-        var db = new DbHelper(UsefulMethods.GetReferences());
+        db = db2;
+    }
+    public async Task<Dictionary<int, Guid>> ListAllCompiledFromDB()
+    {
+        // var db = new DbHelper(UsefulMethods.GetReferences());
         List<ScriptCompiledCache> caches = await db.GetAllCompiledScriptCaches();
 
         Dictionary<int, Guid> cacheDict = new Dictionary<int, Guid>();
@@ -20,9 +26,9 @@ public class RandomMethods
         return cacheDict;
     }
 
-    public static async Task<Dictionary<int, Guid>> ListAllStoredSourceCodes(bool dontPrint = false)
+    public async Task<Dictionary<int, Guid>> ListAllStoredSourceCodes(bool dontPrint = false)
     {
-        var db = new DbHelper(UsefulMethods.GetReferences());
+        // var db = new DbHelper(UsefulMethods.GetReferences());
         List<CustomerScript> sourceCodes = await db.GetAllCustomerScripts(includeCaches: true);
 
         Dictionary<int, Guid> sourceDict = new Dictionary<int, Guid>();
@@ -43,7 +49,7 @@ public class RandomMethods
         return sourceDict;
     }
 
-    public static async Task CompileAllScriptsInFolderAndSaveToDB(string folderPath, string userName, int currentApiVersion)
+    public async Task CompileAllScriptsInFolderAndSaveToDB(string folderPath, string userName, int currentApiVersion)
     {
 
         string[] files = Directory.GetFiles(folderPath, "*.cs", SearchOption.AllDirectories);  //todo check for infinite loop  https://msdn.microsoft.com/en-us/library/ms143316(v=vs.110).aspx
@@ -52,7 +58,7 @@ public class RandomMethods
 
             try
             {
-                var db = new DbHelper(UsefulMethods.GetReferences());
+                // var db = new DbHelper(UsefulMethods.GetReferences());
                 string scriptString = UsefulMethods.CreateStringFromCsFile(files[i]);
                 Guid id = Guid.NewGuid();
                 CustomerScript randomTestScript2 = await db.CreateAndInsertCustomerScript(scriptString, id, userName);
@@ -73,9 +79,9 @@ public class RandomMethods
 
 
 
-    public static async Task EditScriptInSwitch(Guid id, string userName, int currentApiVersion)
+    public async Task EditScriptInSwitch(Guid id, string userName, int currentApiVersion)
     {
-        var db = new DbHelper(UsefulMethods.GetReferences());
+        // var db = new DbHelper(UsefulMethods.GetReferences());
         var customerScript = await db.GetCustomerScript(id);
         var creationDate = customerScript.CreatedAt;
         Console.WriteLine("Here is the old version of the script source code:");
@@ -95,11 +101,11 @@ public class RandomMethods
 
 
     }
-    public static async Task GetSourceCodeInSwitch()
+    public async Task GetSourceCodeInSwitch()
     {
         Console.WriteLine("Enter the the script you want to read: ");
         string userInput = Console.ReadLine();
-        var db = new DbHelper(UsefulMethods.GetReferences());
+        // var db = new DbHelper(UsefulMethods.GetReferences());
         if (userInput == null || userInput == "")
         {
             // string userInput = Console.ReadLine();
@@ -121,11 +127,11 @@ public class RandomMethods
     }
     public static ActionResultV3NoInheritance UpgradeActionResult(object resultValue)
     {
-        var facade = new ScriptManagerFacade(UsefulMethods.GetReferences());
+        // var facade = new ScriptManagerFacade(UsefulMethods.GetReferences());
         // var newestVersion = await facade.GetRecentApiVersion();
         object finalActionResult = resultValue;
         int loopBreaker = 0;   //I am assuming not 1000 versions will be written                // will probably fail in real application todo fix mabe with reflection i heard?
-        while (finalActionResult is not ActionResultV3NoInheritance && loopBreaker < 1000)    //could fail if loaded from diffrent assembly should probably replace the is statements with something like get type.name 
+        while (finalActionResult is not ActionResultV3NoInheritance && loopBreaker < 1000)    //could fail if loaded from diffrent assembly should probably replace the is statements with something like get type.name
         {
             loopBreaker++;
             // if (finalActionResult is ActionResultV2 v2Script)
@@ -166,6 +172,20 @@ public class RandomMethods
         {
             throw new Exception(message: "UpgradeActionResult in ScriptExecutor failed.");
         }
+    }
+    public async Task<Guid> GetIdInConsoleAsync(bool fromSrc = false)
+    {
+        Dictionary<int, Guid> cacheDict = [];
+        if (fromSrc == false)
+        { cacheDict = await ListAllCompiledFromDB(); }
+
+        else { cacheDict = await ListAllStoredSourceCodes(); }
+
+        Dictionary<int, Guid> sourceDict = [];
+        Console.WriteLine("Enter the number of the script ");
+        string userInputForEdit = Console.ReadLine();
+        Guid id = cacheDict[Int32.Parse(userInputForEdit)];
+        return id;
     }
 
 }

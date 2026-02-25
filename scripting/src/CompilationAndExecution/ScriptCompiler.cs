@@ -55,7 +55,7 @@ public class ScriptCompiler
                 options: new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary)
             );
 
-            //actual build phase, success emits raw bytes of a .dll file 
+            //actual build phase, success emits raw bytes of a .dll file
             using var ms = new MemoryStream();
             var emitResult = compilation.Emit(ms);  //this line is the line that uses a lot of resources and time
 

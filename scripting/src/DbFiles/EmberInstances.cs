@@ -15,7 +15,7 @@ public class EmberInstance
     public string? InstanceName { get; set; }
 
     [Column("ember_version")]
-    public string EmberVersion { get; set; }
+    public string? EmberVersion { get; set; }
 
     [Column("sdk_version")]
     public int SdkVersion { get; set; }

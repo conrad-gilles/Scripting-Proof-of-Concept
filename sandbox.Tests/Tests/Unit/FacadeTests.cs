@@ -12,12 +12,16 @@ public class ScriptManagerFacadeTests
     string sourceCodePedia;
     private string sourceCodeActionV1;
     private string sourceCodeActionV3;
+    private RandomMethods rm;
 
     [TestInitialize]
     public async Task Setup()
     {
-        facade = new ScriptManagerFacade(UsefulMethods.GetReferences());
-        db = new DbHelper(UsefulMethods.GetReferences());
+        ScriptCompiler compiler3 = new ScriptCompiler(UsefulMethods.GetReferences());
+        ScriptExecutor exec3 = new ScriptExecutor();
+        db = new DbHelper(compiler3, UsefulMethods.GetReferences());
+        rm = new RandomMethods(db);
+        facade = new ScriptManagerFacade(db, compiler3, exec3, UsefulMethods.GetReferences());
 
         // Clear all data between tests without drop/recreate
         await facade.ClearAllCaches();
@@ -123,7 +127,7 @@ public class ScriptManagerFacadeTests
         string scriptFolderPath = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "..",
                 "sandbox", "src", "Scripts"));
         await db.EnsureDeletedCreated();
-        await RandomMethods.CompileAllScriptsInFolderAndSaveToDB(scriptFolderPath, "Gilles", 4);
+        await rm.CompileAllScriptsInFolderAndSaveToDB(scriptFolderPath, "Gilles", 4);
         List<CustomerScript> scripts = await facade.ListScripts(includeCaches: true);
         Assert.IsNotNull(scripts);
         Assert.IsTrue(scripts.Count == 5);

@@ -2,16 +2,17 @@ using EFModeling.EntityProperties.FluentAPI.Required;
 using Microsoft.CodeAnalysis;
 using Microsoft.EntityFrameworkCore;
 using Ember.Scripting;
-
-
 namespace Ember.Scripting;
 
 public class DbHelper
 {
-    MetadataReference[] References;
-    public DbHelper(MetadataReference[] references)
+    private readonly MetadataReference[] References;
+    private readonly ScriptCompiler Compiler;
+    public DbHelper(ScriptCompiler compiler, MetadataReference[] references)
     {
         References = references;
+        Compiler = compiler;
+        // Compiler = new ScriptCompiler(References);
     }
     public async Task EnsureDeletedCreated()    //todo delete this for obvious safety reasons before production
     {
@@ -21,7 +22,7 @@ public class DbHelper
             await db.Database.EnsureCreatedAsync();
         }
     }
-    public async Task<List<CustomerScript>> GetAllCustomerScripts(bool includeCaches = false, CustomerScriptFilter filters = null)
+    public async Task<List<CustomerScript>> GetAllCustomerScripts(bool includeCaches = false, CustomerScriptFilter? filters = null)
     {
 
         if (filters != null)
@@ -97,12 +98,31 @@ public class DbHelper
             return caches;
         }
     }
+    public async Task<int> GetRecentApiVersion() //todo implement
+    {
+        return 6;
+    }
+    public async Task ClearScriptCache(Guid scriptId)
+    {
+        int currentApiVersion = await GetRecentApiVersion();
+        for (int i = 0; i <= currentApiVersion; i++)    //this only works if currentApiVersion is the highest
+        {
+            try
+            {
+                await DeleteScriptCache(scriptId, i);
+                Console.WriteLine("Deleted: " + i);
+            }   //todo check if doesnt throw something
+            catch (Exception e)
+            { Console.WriteLine(e.ToString()); }
+
+        }
+
+    }
     public async Task RecompileScript(Guid scriptId, bool deleteAlso = false)  //todo maybe get rid of the currentapi and create global var in dbhelper class
     {
         try
         {
-            ScriptManagerFacade facade = new ScriptManagerFacade(References);
-            int currentApiVersion = await facade.GetRecentApiVersion();
+            int currentApiVersion = await GetRecentApiVersion();
             CustomerScript script = await GetCustomerScript(scriptId, includeCaches: true);  //maybe this is inefficient better to pass object maybe
 
             int start = script.MinApiVersion;
@@ -110,7 +130,7 @@ public class DbHelper
             int[] versions = Enumerable.Range(start, count).ToArray();
             if (deleteAlso)
             {
-                await facade.ClearScriptCache(scriptId);
+                await ClearScriptCache(scriptId);
             }
             foreach (var itemN in script.CompiledCaches)
             {
@@ -121,7 +141,7 @@ public class DbHelper
                         await CreateAndInsertCompiledCache(script, itemN.ApiVersion); //todo error check this
                         Console.WriteLine("Mock recompilation of old V" + itemN.ApiVersion);
                     }
-                    catch (Exception e) { Console.WriteLine("Compilation of old version failed"); }
+                    catch (Exception e) { Console.WriteLine("Compilation of old version failed" + e.ToString()); }
 
                 }
                 if (itemN.ApiVersion == currentApiVersion)  //this is only temporary until the if statement above works
@@ -189,14 +209,13 @@ public class DbHelper
 
         using (var db = new MyContext())
         {
-            ScriptManagerFacade facade = new ScriptManagerFacade(References);
-            int currentApiVersion = await facade.GetRecentApiVersion();
+            int currentApiVersion = await GetRecentApiVersion();
             if (createdAt == null)
             {
                 createdAt = DateTime.UtcNow;
             }
-            ScriptCompiler compiler = new ScriptCompiler(References);
-            var getTupleFromVal = compiler.BasicValidationBeforeCompiling(scriptString);
+            // ScriptCompiler compiler = new ScriptCompiler(References);
+            var getTupleFromVal = Compiler.BasicValidationBeforeCompiling(scriptString);
 
             CustomerScript randomTestScript2 = new CustomerScript
             {
@@ -222,14 +241,14 @@ public class DbHelper
                     // Console.WriteLine("trying to add refs in dbhelper");
                     // MetadataReference[] refs = compiler.GetReferencesForVersion(oldApiV);
                     // Console.WriteLine("Added refs in DbHelper!");
-                    tempComp = compiler.RunCompilation(scriptString, apiVersion: oldApiV);
+                    tempComp = Compiler.RunCompilation(scriptString, apiVersion: oldApiV);
                     // Console.WriteLine("Comp ran in db helper with refs!");
                     currentApiVersion = oldApiV;
                 }
                 else
                 {
-                    currentApiVersion = await facade.GetRecentApiVersion();
-                    tempComp = compiler.RunCompilation(scriptString);
+                    currentApiVersion = await GetRecentApiVersion();
+                    tempComp = Compiler.RunCompilation(scriptString);
                 }
 
                 randomTestScript2.CompiledCaches.Add(new ScriptCompiledCache
@@ -257,10 +276,9 @@ public class DbHelper
     {
         using (var db = new MyContext())
         {
-            ScriptManagerFacade facade = new ScriptManagerFacade(References);
-            int currentApiVersion = await facade.GetRecentApiVersion();
-            ScriptCompiler compiler = new ScriptCompiler(References);
-            var getTupleFromVal = compiler.BasicValidationBeforeCompiling(script.SourceCode);
+            int currentApiVersion = await GetRecentApiVersion();
+            // ScriptCompiler compiler = new ScriptCompiler(References);
+            var getTupleFromVal = Compiler.BasicValidationBeforeCompiling(script.SourceCode);
 
             if (await db.ScriptCompiledCaches.AnyAsync(c => c.ScriptId == script.Id && c.ApiVersion == currentApiVersion))
             {
@@ -273,13 +291,13 @@ public class DbHelper
                 byte[] tempComp;
                 if (oldApiV != -1)
                 {
-                    MetadataReference[] refs = compiler.GetReferencesForVersion(oldApiV);
-                    tempComp = compiler.RunCompilation(script.SourceCode, refs);
+                    MetadataReference[] refs = Compiler.GetReferencesForVersion(oldApiV);
+                    tempComp = Compiler.RunCompilation(script.SourceCode, refs);
                     currentApiVersion = oldApiV;
                 }
                 else
                 {
-                    tempComp = compiler.RunCompilation(script.SourceCode);
+                    tempComp = Compiler.RunCompilation(script.SourceCode);
                 }
                 // byte[] tempComp = compiler.RunCompilation(script.SourceCode);
                 ScriptCompiledCache tempCache = new ScriptCompiledCache
@@ -427,13 +445,13 @@ public class DbHelper
     public async Task<bool> IsDuplicateScript(CustomerScript script)
     {
         List<CustomerScript> allScripts = await GetAllCustomerScripts(includeCaches: true);
-        ScriptCompiler compiler = new ScriptCompiler(References);
+        // ScriptCompiler compiler = new ScriptCompiler(References);
         foreach (var item in allScripts)
         {
             if (item.Id == script.Id
                 || item.ScriptName == script.ScriptName
                 || item.SourceCode == script.SourceCode
-                || compiler.IsTheSameTree(item.SourceCode, script.SourceCode))
+                || Compiler.IsTheSameTree(item.SourceCode, script.SourceCode))
             {
                 return true;
             }
@@ -452,7 +470,7 @@ public class DbHelper
         {
             List<CustomerScript> allScripts = await GetAllCustomerScripts(includeCaches: true);
             List<Guid> duplicateGuids = [];
-            ScriptCompiler compiler = new ScriptCompiler(References);
+            // ScriptCompiler compiler = new ScriptCompiler(References);
             for (int i = 0; i < allScripts.Count(); i++)
             {
                 for (int j = 0; j < allScripts.Count(); j++)
@@ -462,7 +480,7 @@ public class DbHelper
                         if (allScripts[i].Id == allScripts[j].Id
                         || allScripts[i].ScriptName == allScripts[j].ScriptName
                         || allScripts[i].SourceCode == allScripts[j].SourceCode
-                        || compiler.IsTheSameTree(allScripts[i].SourceCode, allScripts[j].SourceCode)
+                        || Compiler.IsTheSameTree(allScripts[i].SourceCode, allScripts[j].SourceCode)
                         )
                         {
                             if (duplicateGuids.Contains(allScripts[j].Id) == false)
@@ -490,7 +508,7 @@ public class DbHelper
                 {
                     try
                     {
-                        cachesToDelete.Add(cacheID, allCaches[i].ApiVersion);        //also add the version 
+                        cachesToDelete.Add(cacheID, allCaches[i].ApiVersion);        //also add the version
                         // await DeleteScriptCache(cacheID);   //deletes if there is a cache without a script attached to it
                     }
                     catch (Exception e)
@@ -564,10 +582,9 @@ public class DbHelper
 
     }
     //Ai generated
-    public async Task HealthCheck() //todo verify 
+    public async Task HealthCheck() //todo verify
     {
-        ScriptManagerFacade facade = new ScriptManagerFacade(References);
-        ScriptCompiler compiler = new ScriptCompiler(References);
+        // ScriptCompiler compiler = new ScriptCompiler(References);
 
         //checking if can connect to db
         using (var context = new MyContext())
@@ -591,14 +608,14 @@ public class DbHelper
         try
         {
             // Ensure the current runtime version is valid (positive integer)
-            int currentApiVersion = await facade.GetRecentApiVersion();
+            int currentApiVersion = await GetRecentApiVersion();
             if (currentApiVersion <= 0)
             {
                 throw new InvalidOperationException($"HealthCheck Failed: Invalid Current API Version configured ({currentApiVersion}).");
             }
 
             // Ensure we can retrieve active API versions from the database (Consistency check)
-            var activeVersions = await facade.GetActiveApiVersions();
+            var activeVersions = await GetActiveApiVersions();
             if (activeVersions == null)
             {
                 throw new InvalidOperationException("HealthCheck Failed: Active API versions list is null.");
@@ -610,7 +627,7 @@ public class DbHelper
         }
 
         // 4. Validate Compiler State
-        if (compiler == null)
+        if (Compiler == null)
         {
             throw new InvalidOperationException("HealthCheck Failed: ScriptCompiler is not correctly initialized.");
         }
