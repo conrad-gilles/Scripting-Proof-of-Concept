@@ -40,7 +40,7 @@ public class ScriptExecutor
                     typeArrayList.Add(unfilteredTypeArray[i]);
                 }
             }
-            Type[] typeArray = typeArrayList.ToArray();
+            Type[] typeArray = typeArrayList.ToArray(); //todo why did i make an array here put back into list
 
             if (typeArray.Length == 0)
             {

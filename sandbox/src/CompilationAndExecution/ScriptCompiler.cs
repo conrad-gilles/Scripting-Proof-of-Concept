@@ -26,7 +26,7 @@ public class ScriptCompiler
                         MetadataReference.CreateFromFile(typeof(Task<>).Assembly.Location), // System.Threading.Tasks
                         MetadataReference.CreateFromFile(typeof(DateTime).Assembly.Location), // System.DateTime
                         // References t custom interfaces
-                        MetadataReference.CreateFromFile(typeof(IGeneratorConditionScript).Assembly.Location),    //todo check if runs
+                        MetadataReference.CreateFromFile(typeof(IGeneratorConditionScript).Assembly.Location),
                         MetadataReference.CreateFromFile(typeof(IGeneratorReadOnlyContext).Assembly.Location)
                      };
             }

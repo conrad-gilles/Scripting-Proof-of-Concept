@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+// namespace GeneratorContext.V1;
 
 /// <summary>
 /// Interfaces first classes are defined a bit down in the file,

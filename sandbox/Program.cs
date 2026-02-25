@@ -6,6 +6,7 @@ using EFModeling.EntityProperties.FluentAPI.Required;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
 
 class MainProgram
 {
@@ -19,9 +20,21 @@ class MainProgram
     private static int currentSdkVersion = 1;
     static async Task Main(string[] args)
     {
-        // await new DbHelper().ensureDeletedCreated();       //only for testing
-        await MainProgramSwitch();
-        // await RandomMethods.MainProgramSwitchAsync(scriptFolderPath);
+        try
+        {
+            // HostApplicationBuilder builder = Host.CreateApplicationBuilder(args);
+            LoggerForScripting loggerVar = new LoggerForScripting();
+            loggerVar.SetUpLogger();
+            Log.Information("Test log");
+            // await new DbHelper().ensureDeletedCreated();       //only for testing
+            await MainProgramSwitch();
+            // await RandomMethods.MainProgramSwitchAsync(scriptFolderPath);
+        }
+        finally
+        {
+            await Log.CloseAndFlushAsync();
+        }
+
     }
 
     public static async Task MainProgramSwitch()
