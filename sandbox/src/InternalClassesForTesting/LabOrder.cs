@@ -12,7 +12,7 @@ public interface ILabOrderInterface
     DateTime ReceivedDate { get; }
     IReadOnlyList<ITestInfo> Tests { get; }
     bool HasTest(string testCode);
-    object GetCustomField(string name);
+    object? GetCustomField(string name);
 }
 // Interface for Action Scripts (Read/Write)
 public interface ILabOrderRWInterface : ILabOrderInterface
@@ -97,7 +97,7 @@ internal class LabOrder : ILabOrderRWInterface, ILabOrderInterface, ILabOrderInt
         _customFields[name] = value;
     }
 
-    public object GetCustomField(string name)
+    public object? GetCustomField(string name)
     {
         return _customFields.ContainsKey(name) ? _customFields[name] : null;
     }
@@ -184,7 +184,7 @@ internal class LabOrder : ILabOrderRWInterface, ILabOrderInterface, ILabOrderInt
 //     {
 //         if (HasTest(testCode)) return false; // Already exists
 
-//         // In a real system, you'd look up the test definition here. 
+//         // In a real system, you'd look up the test definition here.
 //         // For PoC, we just create a generic test.
 //         _tests.Add(new Test(testCode, $"Test {testCode}"));
 //         return true;

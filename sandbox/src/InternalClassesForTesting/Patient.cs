@@ -11,7 +11,7 @@ public interface PatientInterface
     DateTime? DateOfBirth { get; }
     string Gender { get; }
     int Age { get; }
-    string GetCustomField(string fieldName);
+    string? GetCustomField(string fieldName);
 }
 
 // Full Implementation
@@ -47,7 +47,7 @@ internal class Patient : PatientInterface
         }
     }
 
-    public string GetCustomField(string fieldName)
+    public string? GetCustomField(string fieldName)
     {
         return _customFields.ContainsKey(fieldName) ? _customFields[fieldName] : null;
     }

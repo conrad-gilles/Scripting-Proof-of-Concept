@@ -1,0 +1,26 @@
+﻿{"@t":"2026-02-26T14:12:37.0881725Z","@mt":"Entered {MethodName} in {ClassName}.","@l":"Verbose","MethodName":"BasicValidationBeforeCompiling","ClassName":"ScriptCompiler","SourceContext":"Ember.Scripting.ScriptCompiler"}
+{"@t":"2026-02-26T14:12:37.1232786Z","@mt":"Class Name = AddPediatricTestsV2","@l":"Verbose","SourceContext":"Ember.Scripting.ScriptCompiler"}
+{"@t":"2026-02-26T14:12:37.1234488Z","@mt":"BaseClass Name = IGeneratorActionScriptV2","@l":"Verbose","SourceContext":"Ember.Scripting.ScriptCompiler"}
+{"@t":"2026-02-26T14:12:37.1234866Z","@mt":"Version Int = 1","@l":"Verbose","SourceContext":"Ember.Scripting.ScriptCompiler"}
+{"@t":"2026-02-26T14:12:37.1237300Z","@mt":"Entered {MethodName} in {ClassName}.","@l":"Verbose","MethodName":"ValidateNamespaceUsage","ClassName":"ScriptCompiler","SourceContext":"Ember.Scripting.ScriptCompiler"}
+{"@t":"2026-02-26T14:13:09.4335403Z","@mt":"Sandbox closing.","@l":"Debug"}
+{"@t":"2026-02-26T14:14:06.9214100Z","@mt":"Sandbox launched.","@l":"Debug","SourceContext":"MainProgram"}
+{"@t":"2026-02-26T14:14:06.9984501Z","@mt":"Entered {MethodName} in {ClassName}.","@l":"Verbose","MethodName":"ListAllCompiledFromDB","ClassName":"RandomMethods"}
+{"@t":"2026-02-26T14:14:07.0118563Z","@mt":"Entered {MethodName} in {ClassName}.","@l":"Verbose","MethodName":"GetAllCustomerScripts","ClassName":"DbHelper","SourceContext":"Ember.Scripting.DbHelper"}
+{"@t":"2026-02-26T14:14:08.1055885Z","@mt":"Entered {MethodName} in {ClassName}.","@l":"Verbose","MethodName":"GetRecentApiVersion","ClassName":"ScriptManagerFacade","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-02-26T14:14:08.1059931Z","@mt":"Entered {MethodName} in {ClassName}.","@l":"Verbose","MethodName":"GetRecentApiVersion","ClassName":"DbHelper","SourceContext":"Ember.Scripting.DbHelper"}
+{"@t":"2026-02-26T14:14:08.1072612Z","@mt":"Entered {MethodName} in {ClassName} with currentApiVersion: {ApiVersion}.","@l":"Verbose","MethodName":"AutomaticCompilationOnVersionUpdate","ClassName":"DbHelper","ApiVersion":6,"SourceContext":"Ember.Scripting.DbHelper"}
+{"@t":"2026-02-26T14:14:08.1075449Z","@mt":"Entered {MethodName} in {ClassName}.","@l":"Verbose","MethodName":"GetAllCustomerScripts","ClassName":"DbHelper","SourceContext":"Ember.Scripting.DbHelper"}
+{"@t":"2026-02-26T14:14:51.0885429Z","@mt":"Entered {MethodName} in {ClassName}.","@l":"Verbose","MethodName":"ListAllCompiledFromDB","ClassName":"RandomMethods"}
+{"@t":"2026-02-26T14:14:51.0891179Z","@mt":"Entered {MethodName} in {ClassName}.","@l":"Verbose","MethodName":"GetAllCustomerScripts","ClassName":"DbHelper","SourceContext":"Ember.Scripting.DbHelper"}
+{"@t":"2026-02-26T14:15:08.3020019Z","@mt":"Entered {MethodName} in {ClassName}.","@l":"Verbose","MethodName":"ListAllCompiledFromDB","ClassName":"RandomMethods"}
+{"@t":"2026-02-26T14:15:08.3023227Z","@mt":"Entered {MethodName} in {ClassName}.","@l":"Verbose","MethodName":"GetAllCustomerScripts","ClassName":"DbHelper","SourceContext":"Ember.Scripting.DbHelper"}
+{"@t":"2026-02-26T14:15:08.3192855Z","@mt":"Entered {MethodName} in {ClassName} with ID: {ScriptId}.","@l":"Verbose","MethodName":"GetCustomerScript","ClassName":"DbHelper","ScriptId":"0ad7c996-0514-404e-a87c-bb9bef7e8b9f","SourceContext":"Ember.Scripting.DbHelper"}
+{"@t":"2026-02-26T14:15:08.3664673Z","@mt":"Entered {MethodName} in {ClassName}.","@l":"Verbose","MethodName":"GetTestingContext","ClassName":"RandomMethods"}
+{"@t":"2026-02-26T14:15:09.0637231Z","@mt":"Entered {MethodName} in {ClassName} with scriptId: {ScriptId}.","@l":"Verbose","MethodName":"ExecuteScriptById","ClassName":"ScriptManagerFacade","ScriptId":"0ad7c996-0514-404e-a87c-bb9bef7e8b9f","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-02-26T14:15:09.0639059Z","@mt":"Entered {MethodName} in {ClassName}.","@l":"Verbose","MethodName":"GetRecentApiVersion","ClassName":"ScriptManagerFacade","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-02-26T14:15:09.0639425Z","@mt":"Entered {MethodName} in {ClassName}.","@l":"Verbose","MethodName":"GetRecentApiVersion","ClassName":"DbHelper","SourceContext":"Ember.Scripting.DbHelper"}
+{"@t":"2026-02-26T14:15:09.0647841Z","@mt":"Entered {MethodName} in {ClassName} with ID: {ScriptId}.","@l":"Verbose","MethodName":"GetCompiledScripCache","ClassName":"DbHelper","ScriptId":"0ad7c996-0514-404e-a87c-bb9bef7e8b9f","SourceContext":"Ember.Scripting.DbHelper"}
+{"@t":"2026-02-26T14:15:09.0753852Z","@mt":"Entered {MethodName} in {ClassName}.","@l":"Verbose","MethodName":"RunScriptExecution","ClassName":"ScriptExecutor","SourceContext":"Ember.Scripting.ScriptExecutor"}
+{"@t":"2026-02-26T14:15:09.0913341Z","@mt":"Entered {MethodName} in {ClassName}.","@l":"Verbose","MethodName":"RunActionScript","ClassName":"ScriptExecutor","SourceContext":"Ember.Scripting.ScriptExecutor"}
+{"@t":"2026-02-26T14:15:09.1002382Z","@mt":"Result in 86 sExecuter: [Success] Pediatric tests added","SourceContext":"Ember.Scripting.ScriptExecutor"}

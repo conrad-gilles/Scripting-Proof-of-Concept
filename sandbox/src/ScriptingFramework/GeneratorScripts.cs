@@ -9,7 +9,7 @@ using Ember.Scripting;
 public interface IGeneratorConditionScript<TContext> : IGeneratorConditionScript    //todo this needs to get tested still
 where TContext : IGeneratorReadOnlyContext
 {
-    new Task<bool> EvaluateAsync(TContext context);
+    Task<bool> EvaluateAsync(TContext context);
     // Task<bool> IGeneratorConditionScript.EvaluateAsync(IGeneratorReadOnlyContext context)
     Task<bool> IGeneratorConditionScript.EvaluateAsync(IGeneratorBaseInterface context)
     {
@@ -19,7 +19,7 @@ where TContext : IGeneratorReadOnlyContext
 public interface IGeneratorActionScript<TContext> : IGeneratorActionScript
 where TContext : IGeneratorContext
 {
-    new Task<ActionResultBaseClass> ExecuteAsync(TContext context);
+    Task<ActionResultBaseClass> ExecuteAsync(TContext context);
 
     //explicit default implementation for the base interface
     // Task<ActionResultBaseClass> IGeneratorActionScript.ExecuteAsync(IGeneratorContext context)
@@ -37,7 +37,7 @@ public interface IGeneratorActionScript<TContext, TActionResult> : IGeneratorAct
 where TContext : IGeneratorBaseInterface    //changed from IGeneratorContext
 where TActionResult : ActionResultBaseClass
 {
-    new Task<TActionResult> ExecuteAsync(TContext context);
+    Task<TActionResult> ExecuteAsync(TContext context);
 
     //explicit default implementation for the base interface
     async Task<ActionResultBaseClass> IGeneratorActionScript.ExecuteAsync(IGeneratorBaseInterface context)

@@ -1,5 +1,6 @@
 using System;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.Extensions.Logging;
 
 namespace Ember.Scripting;
 
@@ -16,7 +17,7 @@ public class CustomerScript
     public string? ScriptType { get; set; } // "GeneratorCondition" or "GeneratorAction"
 
     [Column("source_code")]
-    public string SourceCode { get; set; }
+    public string? SourceCode { get; set; } //todo fix make this not be ablte to be null
 
     [Column("min_api_version")]
     public int MinApiVersion { get; set; }  //maybe do ?
@@ -38,6 +39,15 @@ public class CustomerScript
     {
         CompiledCaches = new List<ScriptCompiledCache>();
     }
+    // public CustomerScript(Guid? id=null,string? scriptName=null,string? scriptType)
+    // {
+    //     CompiledCaches = new List<ScriptCompiledCache>();
+    // }
+    // public CustomerScript CreateScript()
+    // {
+    //     Guid newRandomId = Guid.NewGuid();
+
+    // }
 
     public override string ToString()
     {

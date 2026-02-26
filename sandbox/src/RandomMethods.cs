@@ -1,5 +1,7 @@
 using System.Globalization;
+using System.Reflection;
 using Ember.Scripting;
+using Microsoft.CodeAnalysis;
 public class RandomMethods
 {
     private readonly DbHelper db;
@@ -10,6 +12,7 @@ public class RandomMethods
     }
     public async Task<Dictionary<int, Guid>> ListAllCompiledFromDB()
     {
+        Serilog.Log.Verbose("Entered {MethodName} in {ClassName}.", nameof(ListAllCompiledFromDB), nameof(RandomMethods));
         // var db = new DbHelper(UsefulMethods.GetReferences());
         List<ScriptCompiledCache> caches = await db.GetAllCompiledScriptCaches();
 
@@ -28,6 +31,7 @@ public class RandomMethods
 
     public async Task<Dictionary<int, Guid>> ListAllStoredSourceCodes(bool dontPrint = false)
     {
+        Serilog.Log.Verbose("Entered {MethodName} in {ClassName}.", nameof(ListAllStoredSourceCodes), nameof(RandomMethods));
         // var db = new DbHelper(UsefulMethods.GetReferences());
         List<CustomerScript> sourceCodes = await db.GetAllCustomerScripts(includeCaches: true);
 
@@ -51,6 +55,7 @@ public class RandomMethods
 
     public async Task CompileAllScriptsInFolderAndSaveToDB(string folderPath, string userName, int currentApiVersion)
     {
+        Serilog.Log.Verbose("Entered {MethodName} in {ClassName}.", nameof(CompileAllScriptsInFolderAndSaveToDB), nameof(RandomMethods));
 
         string[] files = Directory.GetFiles(folderPath, "*.cs", SearchOption.AllDirectories);  //todo check for infinite loop  https://msdn.microsoft.com/en-us/library/ms143316(v=vs.110).aspx
         for (int i = 0; i < files.Length; i++)
@@ -59,7 +64,7 @@ public class RandomMethods
             try
             {
                 // var db = new DbHelper(UsefulMethods.GetReferences());
-                string scriptString = UsefulMethods.CreateStringFromCsFile(files[i]);
+                string scriptString = CreateStringFromCsFile(files[i]);
                 Guid id = Guid.NewGuid();
                 CustomerScript randomTestScript2 = await db.CreateAndInsertCustomerScript(scriptString, id, userName);
                 // Console.WriteLine(randomTestScript2.ScriptName + "Added script N" + i + ". to both tables.");
@@ -81,6 +86,7 @@ public class RandomMethods
 
     public async Task EditScriptInSwitch(Guid id, string userName, int currentApiVersion)
     {
+        Serilog.Log.Verbose("Entered {MethodName} in {ClassName} with scriptId: {ScriptId}.", nameof(EditScriptInSwitch), nameof(RandomMethods), id);
         // var db = new DbHelper(UsefulMethods.GetReferences());
         var customerScript = await db.GetCustomerScript(id);
         var creationDate = customerScript.CreatedAt;
@@ -88,23 +94,24 @@ public class RandomMethods
         Console.WriteLine(customerScript.SourceCode);
 
         Console.WriteLine("Copy paste your new version file path now:");
-        string userInput2 = Console.ReadLine();
+        string userInput2 = Console.ReadLine()!;
 
-        string str = UsefulMethods.CreateStringFromCsFile(userInput2);
+        string str = CreateStringFromCsFile(userInput2!);
         await db.DeleteCustomerScript(id);
 
         //In reality it would be better like this but doesnt work because cant paste too much in console:
         // Console.WriteLine("Copy paste your new version now:");
         // string userInput2 = Console.ReadLine();
 
-        await db.CreateAndInsertCustomerScript(str, id, userName, createdAt: (DateTime)creationDate); //todo unsafe af
+        await db.CreateAndInsertCustomerScript(str, id, userName, createdAt: (DateTime)creationDate!); //todo unsafe af
 
 
     }
     public async Task GetSourceCodeInSwitch()
     {
+        Serilog.Log.Verbose("Entered {MethodName} in {ClassName}.", nameof(GetSourceCodeInSwitch), nameof(RandomMethods));
         Console.WriteLine("Enter the the script you want to read: ");
-        string userInput = Console.ReadLine();
+        string userInput = Console.ReadLine()!;
         // var db = new DbHelper(UsefulMethods.GetReferences());
         if (userInput == null || userInput == "")
         {
@@ -127,6 +134,8 @@ public class RandomMethods
     }
     public static ActionResultV3NoInheritance UpgradeActionResult(object resultValue)
     {
+        Serilog.Log.Verbose("Entered {MethodName} in {ClassName}.", nameof(UpgradeActionResult), nameof(RandomMethods));
+
         // var facade = new ScriptManagerFacade(UsefulMethods.GetReferences());
         // var newestVersion = await facade.GetRecentApiVersion();
         object finalActionResult = resultValue;
@@ -144,7 +153,7 @@ public class RandomMethods
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine(e.ToString());
+                    Serilog.Log.Error(e.ToString());
                 }
             }
             // else if (finalActionResult is ActionResult v1Script)
@@ -158,7 +167,7 @@ public class RandomMethods
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine(e.ToString());
+                    Serilog.Log.Error(e.ToString());
                 }
             }
         }
@@ -175,6 +184,7 @@ public class RandomMethods
     }
     public async Task<Guid> GetIdInConsoleAsync(bool fromSrc = false)
     {
+        Serilog.Log.Verbose("Entered {MethodName} in {ClassName}.", nameof(GetIdInConsoleAsync), nameof(RandomMethods));
         Dictionary<int, Guid> cacheDict = [];
         if (fromSrc == false)
         { cacheDict = await ListAllCompiledFromDB(); }
@@ -183,9 +193,171 @@ public class RandomMethods
 
         Dictionary<int, Guid> sourceDict = [];
         Console.WriteLine("Enter the number of the script ");
-        string userInputForEdit = Console.ReadLine();
+        string userInputForEdit = Console.ReadLine()!;
         Guid id = cacheDict[Int32.Parse(userInputForEdit)];
         return id;
     }
+    private static MetadataReference[] references = new MetadataReference[]
+                 {
+                        MetadataReference.CreateFromFile(typeof(object).Assembly.Location), // System.Private.CoreLib
+                        MetadataReference.CreateFromFile(typeof(Console).Assembly.Location), // System.Console
+                        MetadataReference.CreateFromFile(Assembly.Load("System.Runtime").Location), // System.Runtime
+                        MetadataReference.CreateFromFile(typeof(Task<>).Assembly.Location), // System.Threading.Tasks
+                        MetadataReference.CreateFromFile(typeof(DateTime).Assembly.Location), // System.DateTime
+                        // References t custom interfaces
+                        MetadataReference.CreateFromFile(typeof(IGeneratorConditionScript).Assembly.Location),
+                        MetadataReference.CreateFromFile(typeof(IGeneratorReadOnlyContext).Assembly.Location)   //try removing if works good i guess but still need to pass from sandbox
+                 };
+    public static MetadataReference[] GetReferences()
+    {
+        return references;
+    }
+    public static int GetRecentApiVersion()
+    {
+        return 6;
+    }
+    public static string GetUserName()
+    {
+        // GeneratorContext ctx = GetTestingContext();
+        return "Gilles";
+    }
+    public static GeneratorContext GetTestingContext<T>(CustomerScript? justForTesting = null) where T : GeneratorContext
+    {
+        Serilog.Log.Verbose("Entered {MethodName} in {ClassName}.", nameof(GetTestingContext), nameof(RandomMethods));
+        try
+        {
+            LabOrder labOrder = new LabOrder("1", "Pediatrics");
+            Patient patient = new Patient("1", "TestFirst", "TestLast", new DateTime(2010, 6, 1, 7, 47, 0), "M");   //mfu
+            ConsoleLogger logger = new ConsoleLogger();
+            DataAccess testDataAccess = new DataAccess();
+            Vaccine vaccine = new Vaccine("Polio", 1, DateTime.UtcNow);
+
+            GeneratorContext ctx = typeof(T) switch
+            {
+                var t when t == typeof(ReadOnlyContext) => new ReadOnlyContext(labOrder, patient, logger, testDataAccess),
+                var t when t == typeof(RWContext) => new RWContext(labOrder, patient, logger, testDataAccess),
+                var t when t == typeof(GeneratorContextV2) => new GeneratorContextV2(labOrder, patient, logger, testDataAccess),
+                var t when t == typeof(GeneratorContextV3) => new GeneratorContextV3(labOrder, patient, logger, testDataAccess),
+                var t when t == typeof(GeneratorContextNoInherVaccine) => new GeneratorContextNoInherVaccine(labOrder, vaccine),
+                _ => throw new ArgumentException($"Unsupported context type: {typeof(T).Name}")
+            };
+            if (justForTesting != null) //this is ofc just for testing purposes in the real application you would never automatically distribute the context because it is unsafe you want to be able to control who gets which context precisely
+            {
+                var microsoftLogger = new LoggerForScripting().GetMicrosoftLogger<ScriptManagerFacade>();
+                var refs = GetReferences();
+                ScriptCompiler compiler = new ScriptCompiler(refs, new LoggerForScripting().GetMicrosoftLogger<ScriptCompiler>());
+                string implementedInterface = compiler.BasicValidationBeforeCompiling(justForTesting.SourceCode!).baseTypeName;
+                switch (implementedInterface)
+                {
+                    case "IGeneratorActionScript":
+                        // ctx = new RWContext(labOrder, patient, logger, testDataAccess);
+                        int v = compiler.BasicValidationBeforeCompiling(justForTesting.SourceCode!).versionInt;
+                        ctx = v switch
+                        {
+                            1 => new RWContext(labOrder, patient, logger, testDataAccess),
+                            2 => new GeneratorContextV2(labOrder, patient, logger, testDataAccess),
+                            3 => new GeneratorContextV3(labOrder, patient, logger, testDataAccess),
+                            4 => new GeneratorContextNoInherVaccine(labOrder, vaccine),
+                            _ => throw new NotImplementedException(),
+                        };
+                        break;
+                    case "IGeneratorActionScriptV2":
+                        ctx = new GeneratorContextV2(labOrder, patient, logger, testDataAccess);
+                        break;
+                    case "IGeneratorActionScriptV3":
+                        ctx = new GeneratorContextV3(labOrder, patient, logger, testDataAccess);
+                        break;
+                    case "IGeneratorActionScriptV4Vaccine":
+                        ctx = new GeneratorContextNoInherVaccine(labOrder, vaccine);
+                        break;
+                    case "IGeneratorConditionScript":
+                        ctx = new ReadOnlyContext(labOrder, patient, logger, testDataAccess);
+                        break;
+                    default:
+                        Console.WriteLine("Error in testing switch");
+                        throw new Exception();
+                }
+            }
+
+            // return (T)ctx;
+            return ctx;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine("GetTestingContext failed");
+            Console.WriteLine(e.ToString());
+            throw new Exception();
+        }
+
+    }
+
+
+    public static string CreateStringFromCsFile(string scriptPath)
+    {
+        Serilog.Log.Verbose("Entered {MethodName} in {ClassName} with path: {ScriptPath}.", nameof(CreateStringFromCsFile), nameof(RandomMethods), scriptPath);
+        try
+        {
+            // Display the lines that are read from the file
+            string text = File.ReadAllText(scriptPath);
+            // Console.WriteLine(text); //cool for debugging
+            return text;
+        }
+        catch (Exception e)
+        {
+            // Displays the error on the screen.
+            Console.WriteLine(e.ToString());
+            Console.WriteLine("The file could not be read: probably because typo in classOfScriptToExecute variable:");
+            throw new CreateStringFromCsFileException();    // todo correct error handling throw an error
+        }
+        // Source https://www.tutorialspoint.com/chash-program-to-create-string-from-contents-of-a-file //obv i changed a lot but i still copied
+    }
+    public static string GetScriptPathFromFolder(string scriptFolderPath, string classOfScriptToExecute)
+    {
+        Serilog.Log.Verbose("Entered {MethodName} in {ClassName}.", nameof(GetScriptPathFromFolder), nameof(RandomMethods));
+        try
+        {
+            string[] files =
+                 Directory.GetFiles(scriptFolderPath, "*.cs", SearchOption.AllDirectories);  //todo check for infinite loop  https://msdn.microsoft.com/en-us/library/ms143316(v=vs.110).aspx
+            string scriptPath = "";
+            for (int i = 0; i < files.Length; i++)
+            {
+                int start = files[i].Length - 1 - classOfScriptToExecute.Length - 3;    //minus 3 for the.cs extension
+                int lenght = classOfScriptToExecute.Length + 1;                     //plus 3 for extension might be unnsessecary
+                string subString = files[i].Substring(start, lenght);
+
+                if (subString.Contains(classOfScriptToExecute))
+                {
+                    scriptPath = files[i];
+                    break;  //probably unsafe but good for efficiency? todo
+                }
+            }
+            if (scriptPath == "" || scriptPath == null)
+            {
+                throw new NoFileWithThisClassNameFoundException();
+            }
+            return scriptPath;  //todo this method cant fail because scriptPath is always atleast "" and therefore if wrong name is inserted it will still return even if no file was found
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine("getScriptPathFromFolder method failed");
+            Console.WriteLine(e.ToString());
+            throw new GetScriptPathFromFolderException();
+        }
+
+    }
+    // public static async Task<Guid> GetIdInConsoleAsync(bool fromSrc = false)
+    // {
+    //     Dictionary<int, Guid> cacheDict = [];
+    //     if (fromSrc == false)
+    //     { cacheDict = await RandomMethods.ListAllCompiledFromDB(); }
+
+    //     else { cacheDict = await RandomMethods.ListAllStoredSourceCodes(); }
+
+    //     Dictionary<int, Guid> sourceDict = [];
+    //     Console.WriteLine("Enter the number of the script ");
+    //     string userInputForEdit = Console.ReadLine();
+    //     Guid id = cacheDict[Int32.Parse(userInputForEdit)];
+    //     return id;
+    // }
 
 }

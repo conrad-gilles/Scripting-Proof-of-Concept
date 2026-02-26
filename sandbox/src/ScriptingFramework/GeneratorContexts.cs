@@ -25,8 +25,8 @@ public interface IGeneratorContext_V3 : IGeneratorContext_V2
 }
 public interface IGeneratorContextNoInheritance_V4 : IGeneratorBaseInterface
 {
-    new ILabOrderInterfaceV4NoInheritence LabOrder { get; }
-    new IVaccineInterface Vaccine { get; }
+    ILabOrderInterfaceV4NoInheritence LabOrder { get; }
+    IVaccineInterface Vaccine { get; }
 }
 
 /// <summary>
@@ -87,10 +87,10 @@ public class RWContext : GeneratorContext, IGeneratorContext
 public class GeneratorContextV2 : RWContext, IGeneratorContext_V2
 {
     public ILabOrderInterfaceV2 labOrderV2;
-    public PatientInterface patient;
+    public new PatientInterface patient;
 
-    public ConsoleLoggerInterface logger;
-    public DataAccessInterface data;
+    public new ConsoleLoggerInterface logger;
+    public new DataAccessInterface data;
 
 
     public GeneratorContextV2(ILabOrderInterfaceV2 pLabOrder, PatientInterface pPatient, ConsoleLoggerInterface plogger, DataAccessInterface pdata)
@@ -108,10 +108,10 @@ public class GeneratorContextV2 : RWContext, IGeneratorContext_V2
 public class GeneratorContextV3 : GeneratorContextV2, IGeneratorContext_V3  //todo implement Adapter pattern
 {
     public ILabOrderInterfaceV3 labOrderV3;
-    public PatientInterface patient;
+    public new PatientInterface patient;
 
-    public ConsoleLoggerInterface logger;
-    public DataAccessInterface data;
+    public new ConsoleLoggerInterface logger;
+    public new DataAccessInterface data;
 
 
     public GeneratorContextV3(ILabOrderInterfaceV3 pLabOrderV3, PatientInterface pPatient, ConsoleLoggerInterface plogger, DataAccessInterface pdata)
@@ -142,4 +142,4 @@ public class GeneratorContextNoInherVaccine : GeneratorContext, IGeneratorContex
     IVaccineInterface IGeneratorContextNoInheritance_V4.Vaccine => Vaccine;
 }
 
-//context not always backwards comp, make sure right context passed factory 
+//context not always backwards comp, make sure right context passed factory

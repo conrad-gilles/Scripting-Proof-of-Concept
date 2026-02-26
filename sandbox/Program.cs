@@ -28,28 +28,36 @@ class MainProgram
         try
         {
             var logger = new LoggerForScripting();
-            var microsoftLogger = logger.GetMicrosoftLogger<ScriptManagerFacade>();
+            // var microsoftLogger = logger.GetMicrosoftLogger<ScriptManagerFacade>();
+
+            var mainLogger = logger.GetMicrosoftLogger<MainProgram>();
+            mainLogger.LogDebug("Sandbox launched.");
 
             // await new DbHelper().ensureDeletedCreated();       //only for testing
-            await MainProgramSwitch(microsoftLogger);
+            await MainProgramSwitch(logger);
             // await RandomMethods.MainProgramSwitchAsync(scriptFolderPath);
         }
         finally
         {
+            Log.Debug("Sandbox closing.");
             // await Task.Delay(20);
             await Log.CloseAndFlushAsync();
         }
 
     }
 
-    public static async Task MainProgramSwitch(ILogger<ScriptManagerFacade> logger)
+    public static async Task MainProgramSwitch(LoggerForScripting logger)
     {
         try
         {
-            ScriptCompiler compiler3 = new ScriptCompiler(UsefulMethods.GetReferences(), logger);
-            ScriptExecutor exec3 = new ScriptExecutor(logger);
-            var db = new DbHelper(compiler: compiler3, UsefulMethods.GetReferences(), logger);
+            // var logger = new LoggerForScripting();
+            // var microsoftLogger = logger.GetMicrosoftLogger<ScriptManagerFacade>();
+
+            ScriptCompiler compiler3 = new ScriptCompiler(RandomMethods.GetReferences(), logger.GetMicrosoftLogger<ScriptCompiler>());
+            ScriptExecutor exec3 = new ScriptExecutor(logger.GetMicrosoftLogger<ScriptExecutor>());
+            var db = new DbHelper(compiler: compiler3, RandomMethods.GetReferences(), logger.GetMicrosoftLogger<DbHelper>());
             RandomMethods rm = new RandomMethods(db);
+
 
             // await RandomMethods.CompileAllScriptsInFolderAndSaveToDB(scriptFolderPath);   //main precompilation act
             // Dictionary<int, Guid> cacheDict = await RandomMethods.ListAllCompiledFromDB();
@@ -57,7 +65,7 @@ class MainProgram
             // Dictionary<int, Guid> sourceDict = [];
             Dictionary<int, Guid> cacheDict = [];
             Guid scriptId = new Guid();
-            ScriptManagerFacade facade = new ScriptManagerFacade(db, compiler3, exec3, UsefulMethods.GetReferences(), logger);
+            ScriptManagerFacade facade = new ScriptManagerFacade(db, compiler3, exec3, RandomMethods.GetReferences(), logger.GetMicrosoftLogger<ScriptManagerFacade>());
             currentApiVersion = await facade.GetRecentApiVersion(); //needs to be above autocomp else error
 
             await db.AutomaticCompilationOnVersionUpdate(currentApiVersion);    //todo make this "background job that is run automatically periodically"
@@ -126,13 +134,13 @@ class MainProgram
 
                         case "CreateScript":
                             // string sourceCode = UsefulMethods.CreateStringFromCsFile(@"C:\Users\Gilles\Desktop\UNI\Semester 6\Code\Codebase\labsolutionlu-ember-scripting-fb966c220f60\sandbox\src\Scripts\ConditionScripts\PediatricCondition.cs");
-                            string sourceCode = UsefulMethods.CreateStringFromCsFile(Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "src", "Scripts", "ConditionScripts", "PediatricCondition.cs")));
-                            await facade.CreateScript(sourceCode, scriptType: "ConditionScriptTest", "Gilles");
+                            string sourceCode = RandomMethods.CreateStringFromCsFile(Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "src", "Scripts", "ConditionScripts", "PediatricCondition.cs")));
+                            await facade.CreateScript(sourceCode, "Gilles");
                             break;
                         case "CreateScriptWithOld":
                             // string sourceCodeOld = UsefulMethods.CreateStringFromCsFile(@"C:\Users\Gilles\Desktop\UNI\Semester 6\Code\Codebase\labsolutionlu-ember-scripting-fb966c220f60\sandbox\src\Scripts\ConditionScripts\PediatricCondition.cs");
-                            string sourceCodeOld = UsefulMethods.CreateStringFromCsFile(Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "src", "Scripts", "ConditionScripts", "PediatricCondition.cs")));
-                            await facade.CreateScript(sourceCodeOld, scriptType: "ConditionScriptTest", "Gilles", 1);
+                            string sourceCodeOld = RandomMethods.CreateStringFromCsFile(Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "src", "Scripts", "ConditionScripts", "PediatricCondition.cs")));
+                            await facade.CreateScript(sourceCodeOld, "Gilles", 1);
                             break;
 
                         case "UpdateScript":
@@ -144,7 +152,7 @@ class MainProgram
                             Console.WriteLine("Copy paste your new version file path now:");
                             string? userInput2 = Console.ReadLine();
 
-                            string? str = UsefulMethods.CreateStringFromCsFile(userInput2!);
+                            string? str = RandomMethods.CreateStringFromCsFile(userInput2!);
 
                             //In reality it would be better like this but doesnt work because cant paste too much in console:
                             // Console.WriteLine("Copy paste your new version now:");
@@ -193,7 +201,7 @@ class MainProgram
                         case "ValidateScript":
                             scriptId = await rm.GetIdInConsoleAsync(fromSrc: true);
                             var script = await db.GetCustomerScript(scriptId);
-                            string answer = await facade.ValidateScript(script.SourceCode);
+                            string answer = await facade.ValidateScript(script.SourceCode!);
                             Console.WriteLine(answer);
                             break;
 
@@ -209,19 +217,19 @@ class MainProgram
 
                         case "ExecuteActionScript":
                             scriptId = await rm.GetIdInConsoleAsync(fromSrc: true);
-                            ActionResultBaseClass result = await facade.ExecuteActionScript(scriptId, UsefulMethods.GetTestingContext<GeneratorContextV3>());
+                            ActionResultBaseClass result = await facade.ExecuteActionScript(scriptId, RandomMethods.GetTestingContext<GeneratorContextV3>());
                             Console.WriteLine(result.ToString());   //you could do whatever with it
                             break;
 
                         case "ExecuteConditionScript":
                             scriptId = await rm.GetIdInConsoleAsync(fromSrc: true);
-                            bool resultCond = await facade.ExecuteConditionScript(scriptId, UsefulMethods.GetTestingContext<GeneratorContextV3>());
+                            bool resultCond = await facade.ExecuteConditionScript(scriptId, RandomMethods.GetTestingContext<GeneratorContextV3>());
                             Console.WriteLine(resultCond);
                             break;
 
                         case "ExecuteScriptById":
                             scriptId = await rm.GetIdInConsoleAsync(fromSrc: true);
-                            object resultObj = await facade.ExecuteScriptById(scriptId, UsefulMethods.GetTestingContext<GeneratorContextV3>());
+                            object resultObj = await facade.ExecuteScriptById(scriptId, RandomMethods.GetTestingContext<GeneratorContextV3>());
 
                             if (typeof(bool).IsAssignableFrom(resultObj.GetType()))       //good idea to check what type was returne, you could also just check the property from db normally
                             {
@@ -352,7 +360,7 @@ class MainProgram
                             sourceDict = await rm.ListAllStoredSourceCodes(dontPrint: true);
                             scriptId = sourceDict[Int32.Parse(userInput)];
                             CustomerScript justForTesting = await db.GetCustomerScript(scriptId);
-                            object resultObj2 = await facade.ExecuteScriptById(scriptId, UsefulMethods.GetTestingContext<GeneratorContextNoInherVaccine>(justForTesting: justForTesting));
+                            object resultObj2 = await facade.ExecuteScriptById(scriptId, RandomMethods.GetTestingContext<GeneratorContextNoInherVaccine>(justForTesting: justForTesting));
 
                             if (typeof(bool).IsAssignableFrom(resultObj2.GetType()))       //good idea to check what type was returne, you could also just check the property from db normally
                             {

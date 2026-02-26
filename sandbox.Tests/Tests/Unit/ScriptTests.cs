@@ -7,51 +7,51 @@ public class ScriptTests
 {
 
 
-    ScriptManagerFacade facade;
+    ScriptManagerFacade? facade;
 
     [TestInitialize]
     public async Task Setup()
     {
         var logger = new LoggerForScripting();
-        var microsoftLogger = logger.GetMicrosoftLogger<ScriptManagerFacade>();
-        ScriptCompiler compiler = new ScriptCompiler(UsefulMethods.GetReferences(), microsoftLogger);
+        // var microsoftLogger = logger.GetMicrosoftLogger<ScriptManagerFacade>();
+        ScriptCompiler compiler = new ScriptCompiler(RandomMethods.GetReferences(), logger.GetMicrosoftLogger<ScriptCompiler>());
         // compiler = new ScriptCompiler(UsefulMethods.GetReferences());
-        DbHelper db = new DbHelper(compiler, UsefulMethods.GetReferences(), microsoftLogger);
-        ScriptExecutor executor = new ScriptExecutor(microsoftLogger);
+        DbHelper db = new DbHelper(compiler, RandomMethods.GetReferences(), logger.GetMicrosoftLogger<DbHelper>());
+        ScriptExecutor executor = new ScriptExecutor(logger.GetMicrosoftLogger<ScriptExecutor>());
 
-        facade = new ScriptManagerFacade(db, compiler, executor, UsefulMethods.GetReferences(), microsoftLogger);
+        facade = new ScriptManagerFacade(db, compiler, executor, RandomMethods.GetReferences(), logger.GetMicrosoftLogger<ScriptManagerFacade>());
 
     }
     string ActionResultVersionSpecific = "[Message contains either failure or succes: ] ";  //change this if action result version changes it will thraow cause of message contains
-    string sourceCodeActionV1 = UsefulMethods.CreateStringFromCsFile(
+    string sourceCodeActionV1 = RandomMethods.CreateStringFromCsFile(
         Path.GetFullPath(Path.Combine(
             AppDomain.CurrentDomain.BaseDirectory,
             "..", "..", "..", "..",
             "sandbox", "src", "Scripts", "ActionScripts", "AddPediatricTestsV1.cs"
         ))
     );
-    string sourceCodeActionV2 = UsefulMethods.CreateStringFromCsFile(
+    string sourceCodeActionV2 = RandomMethods.CreateStringFromCsFile(
      Path.GetFullPath(Path.Combine(
          AppDomain.CurrentDomain.BaseDirectory,
          "..", "..", "..", "..",
          "sandbox", "src", "Scripts", "ActionScripts", "AddPediatricTestsV2.cs"
      ))
  );
-    string sourceCodeActionV3 = UsefulMethods.CreateStringFromCsFile(
+    string sourceCodeActionV3 = RandomMethods.CreateStringFromCsFile(
     Path.GetFullPath(Path.Combine(
         AppDomain.CurrentDomain.BaseDirectory,
         "..", "..", "..", "..",
         "sandbox", "src", "Scripts", "ActionScripts", "AddPediatricTestsV3.cs"
     ))
 );
-    string sourceCodeVaccineAction = UsefulMethods.CreateStringFromCsFile(
+    string sourceCodeVaccineAction = RandomMethods.CreateStringFromCsFile(
        Path.GetFullPath(Path.Combine(
        AppDomain.CurrentDomain.BaseDirectory,
        "..", "..", "..", "..",
        "sandbox", "src", "Scripts", "ActionScripts", "VaccineScript.cs"
    ))
    );
-    string sourceCodePedia = UsefulMethods.CreateStringFromCsFile(
+    string sourceCodePedia = RandomMethods.CreateStringFromCsFile(
     Path.GetFullPath(Path.Combine(
         AppDomain.CurrentDomain.BaseDirectory,
                 "..", "..", "..", "..",
@@ -62,9 +62,9 @@ public class ScriptTests
     [TestMethod]
     public async Task ActionV1Test()
     {
-        Guid id = await facade.CreateScript(sourceCodeActionV1);
+        Guid id = await facade!.CreateScript(sourceCodeActionV1);
         CustomerScript retrievedScript = await facade.GetScript(id);
-        var context = UsefulMethods.GetTestingContext<GeneratorContextNoInherVaccine>(justForTesting: retrievedScript);
+        var context = RandomMethods.GetTestingContext<GeneratorContextNoInherVaccine>(justForTesting: retrievedScript);
         object resultBeforeUpgrade = await facade.ExecuteScriptById(id, context);
         ActionResultV3NoInheritance result = RandomMethods.UpgradeActionResult(resultBeforeUpgrade);
         string shouldReturn = ActionResultVersionSpecific + "Pediatric tests added";
@@ -77,9 +77,9 @@ public class ScriptTests
     [TestMethod]
     public async Task ActionV2Test()
     {
-        Guid id = await facade.CreateScript(sourceCodeActionV2);
+        Guid id = await facade!.CreateScript(sourceCodeActionV2);
         CustomerScript retrievedScript = await facade.GetScript(id);
-        var context = UsefulMethods.GetTestingContext<GeneratorContextNoInherVaccine>(justForTesting: retrievedScript);
+        var context = RandomMethods.GetTestingContext<GeneratorContextNoInherVaccine>(justForTesting: retrievedScript);
         object resultBeforeUpgrade = await facade.ExecuteScriptById(id, context);
         ActionResultV3NoInheritance result = RandomMethods.UpgradeActionResult(resultBeforeUpgrade);
         string shouldReturn = ActionResultVersionSpecific + "Pediatric tests added";
@@ -92,9 +92,9 @@ public class ScriptTests
     [TestMethod]
     public async Task ActionV3Test()
     {
-        Guid id = await facade.CreateScript(sourceCodeActionV3);
+        Guid id = await facade!.CreateScript(sourceCodeActionV3);
         CustomerScript retrievedScript = await facade.GetScript(id);
-        var context = UsefulMethods.GetTestingContext<GeneratorContextNoInherVaccine>(justForTesting: retrievedScript);
+        var context = RandomMethods.GetTestingContext<GeneratorContextNoInherVaccine>(justForTesting: retrievedScript);
         object resultBeforeUpgrade = await facade.ExecuteScriptById(id, context);
         ActionResultV3NoInheritance result = RandomMethods.UpgradeActionResult(resultBeforeUpgrade);
         string shouldReturn = ActionResultVersionSpecific + "Pediatric tests added V3";
@@ -107,14 +107,14 @@ public class ScriptTests
     [TestMethod]
     public async Task VaccineScriptTest()
     {
-        Guid id = await facade.CreateScript(sourceCodeVaccineAction);
+        Guid id = await facade!.CreateScript(sourceCodeVaccineAction);
         CustomerScript retrievedScript = await facade.GetScript(id);
-        var context = UsefulMethods.GetTestingContext<GeneratorContextNoInherVaccine>(justForTesting: retrievedScript);
+        var context = RandomMethods.GetTestingContext<GeneratorContextNoInherVaccine>(justForTesting: retrievedScript);
         object result = await facade.ExecuteScriptById(id, context);
         string shouldReturn = ActionResultVersionSpecific + "Polio Vaccine added";
         Assert.IsInstanceOfType(result, typeof(ActionResultBaseClass));
         Assert.IsInstanceOfType(result, typeof(ActionResultV3NoInheritance));
-        Assert.IsTrue(result.ToString().Contains(shouldReturn));
+        Assert.IsTrue(result.ToString()!.Contains(shouldReturn));
 
         //todo make negative test
     }
@@ -122,13 +122,13 @@ public class ScriptTests
     [TestMethod]
     public async Task ConditionTest()
     {
-        Guid id = await facade.CreateScript(sourceCodePedia);
+        Guid id = await facade!.CreateScript(sourceCodePedia);
         CustomerScript retrievedScript = await facade.GetScript(id);
-        var context = UsefulMethods.GetTestingContext<GeneratorContextNoInherVaccine>(justForTesting: retrievedScript);
+        var context = RandomMethods.GetTestingContext<GeneratorContextNoInherVaccine>(justForTesting: retrievedScript);
         object result = await facade.ExecuteScriptById(id, context);
         string shouldReturn = "True";
         Assert.IsInstanceOfType(result, typeof(bool));
-        Assert.IsTrue(result.ToString().Contains(shouldReturn));
+        Assert.IsTrue(result.ToString()!.Contains(shouldReturn));
 
         //todo make negative test
     }

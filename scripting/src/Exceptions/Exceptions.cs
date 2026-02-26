@@ -47,7 +47,7 @@ public class ClassNameOrBaseNameNullException : Exception
 }
 public class ForbiddenNamespaceException : Exception
 {
-    string Message;
+    new string Message;
     public ForbiddenNamespaceException(string message)
     {
         Message = message;
@@ -55,7 +55,7 @@ public class ForbiddenNamespaceException : Exception
 }
 public class ScriptTimeoutException : Exception
 {
-    string Message;
+    new string Message;
     public ScriptTimeoutException(string message)
     {
         Message = message;

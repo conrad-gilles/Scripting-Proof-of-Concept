@@ -10,17 +10,22 @@ namespace Ember.Scripting;
 public class ScriptCompiler
 {
     private readonly MetadataReference[]? References2 = null;
-    private readonly ILogger Logger;
-    public ScriptCompiler(MetadataReference[] references2, ILogger logger)
+    private readonly ILogger<ScriptCompiler> Logger;
+    public ScriptCompiler(MetadataReference[] references2, ILogger<ScriptCompiler> logger)
     {
         References2 = references2;
         Logger = logger;
     }
-    public byte[] RunCompilation(string script, MetadataReference[]? references = null, int apiVersion = -1) //references param there to enable later on users to define custom references
+    public byte[] RunCompilation(string script, MetadataReference[]? references = null, int apiVersion = -1, (string className, string baseTypeName, int versionInt)? metaData = null) //references param there to enable later on users to define custom references
     {
-        Logger.LogTrace("Entered RunCompilation method in ScriptCompiler.");
         try
         {
+            Logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(RunCompilation), nameof(ScriptCompiler));
+            if (metaData != null)
+            {
+                Logger.LogTrace("Trying to compile script:" + metaData.Value.className);
+            }
+
             //Takes C# source string and turns it into a "Roslyn parsed syntax tree representation" of a normal C# file
             SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(script);
 
@@ -28,7 +33,7 @@ public class ScriptCompiler
             // if (references == null)
             if (apiVersion == -1)
             {
-                Logger.LogInformation("Added default references");
+                Logger.LogInformation("Added default references in {MethodName}.", nameof(RunCompilation));
                 references = new MetadataReference[]
                      {
                         MetadataReference.CreateFromFile(typeof(object).Assembly.Location), // System.Private.CoreLib
@@ -43,12 +48,12 @@ public class ScriptCompiler
             }
             if (apiVersion != -1)
             {
-                Logger.LogInformation("Added custom references.");  //if this works remove the if references is null if stat above
+                Logger.LogInformation("Added custom references in {MethodName}.", nameof(RunCompilation));  //if this works remove the if references is null if stat above
                 references = GetReferencesForVersion(apiVersion);
             }
             if (References2 != null)
             {
-                Logger.LogInformation("References 2 added references.");
+                Logger.LogInformation("References 2 added references in {MethodName}.", nameof(RunCompilation));
                 references = References2;
             }
 
@@ -88,7 +93,7 @@ public class ScriptCompiler
 
     public (string className, string baseTypeName, int versionInt) BasicValidationBeforeCompiling(string script)
     {
-        Logger.LogTrace("BasicValidationBeforeCompiling in ScriptCompiler entered.");
+        Logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(BasicValidationBeforeCompiling), nameof(ScriptCompiler));
         try
         {
 
@@ -138,9 +143,9 @@ public class ScriptCompiler
                 Logger.LogError("BaseTypeName or classname null in BasicValidationBeforeCompiling.");
                 throw new ClassNameOrBaseNameNullException();
             }
-            // Logger.LogTrace("Class Name = " + className);
-            // Logger.LogTrace("BaseClass Name = " + baseTypeName);
-            // Logger.LogTrace("Version Int = " + versionInt);
+            Logger.LogTrace("Class Name = " + className);
+            Logger.LogTrace("BaseClass Name = " + baseTypeName);
+            Logger.LogTrace("Version Int = " + versionInt);
 
             ValidateNamespaceUsage(tree, model);
             return (className, baseTypeName, versionInt);
@@ -154,7 +159,7 @@ public class ScriptCompiler
     }
     private void ValidateNamespaceUsage(SyntaxTree tree, SemanticModel model)    //todo check
     {
-        Logger.LogTrace("ValidateNameSpaceUsage in ScriptCompiler entered.");
+        Logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(ValidateNamespaceUsage), nameof(ScriptCompiler));
         HashSet<string> illegalNamespaces = new() //no duplicates unlike list
             {
                 "System.IO",
@@ -206,7 +211,7 @@ public class ScriptCompiler
 
     public bool IsTheSameTree(string script1, string script2)
     {
-        Logger.LogTrace("IsTheSameTree in ScriptCompiler entered.");
+        Logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(IsTheSameTree), nameof(ScriptCompiler));
         SyntaxTree tree1 = CSharpSyntaxTree.ParseText(script1);
         SyntaxTree tree2 = CSharpSyntaxTree.ParseText(script2);
 
@@ -218,7 +223,7 @@ public class ScriptCompiler
 
     public MetadataReference[] GetReferencesForVersion(int version, string[]? customDlls = null, bool loadCurrentRT = true)
     {
-        Logger.LogTrace("GetReferencesForVersion entered.");
+        Logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(GetReferencesForVersion), nameof(ScriptCompiler));
         var references = new List<MetadataReference>();
 
         // string versionPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "OldVersions", version.ToString());

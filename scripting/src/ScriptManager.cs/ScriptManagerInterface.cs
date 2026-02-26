@@ -12,7 +12,7 @@ public interface IScriptManager
     /// <param name="userName"></param>
     /// <param name="apiVersion"></param>
     /// <returns></returns>
-    Task<Guid> CreateScript(string sourceCode, string? scriptType = null, string userName = "Default", int apiVersion = -1);
+    Task<Guid> CreateScript(string sourceCode, string userName = "Default", int apiVersion = -1);
 
     /// <summary>
     /// Updates existing script source code and recompiles for all compatible API versions
@@ -45,7 +45,7 @@ public interface IScriptManager
     /// <param name="filters"></param>
     /// <param name="includeCaches"></param>
     /// <returns></returns>
-    Task<List<CustomerScript>> ListScripts(CustomerScriptFilter filters = null, bool includeCaches = false);
+    Task<List<CustomerScript>> ListScripts(CustomerScriptFilter filters = null!, bool includeCaches = false);
 
     #endregion
 

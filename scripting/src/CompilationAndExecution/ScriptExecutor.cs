@@ -13,8 +13,8 @@ public class ScriptExecutor
     // private readonly GeneratorContext genContext;
     private readonly static int ScriptTimeout = 5000;
     // private static readonly TimeSpan ScriptTimeout = TimeSpan.FromSeconds(5);
-    private readonly ILogger Logger;
-    public ScriptExecutor(ILogger logger)
+    private readonly ILogger<ScriptExecutor> Logger;
+    public ScriptExecutor(ILogger<ScriptExecutor> logger)
     {
         Logger = logger;
     }
@@ -22,6 +22,7 @@ public class ScriptExecutor
     public T RunScriptExecution<T>(byte[] compiledScript, GeneratorContext genContext)
     // public void RunScriptExecution()
     {
+        Logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(RunScriptExecution), nameof(ScriptExecutor));
         try
         {
             if (compiledScript.Length > 5 * 1024 * 1024) // 5 mb maximum size
@@ -52,13 +53,13 @@ public class ScriptExecutor
             }
             else if (typeArray.Length > 1)
             {
-                Console.WriteLine("more than one class found in script");
+                Logger.LogInformation("more than one class found in script");
                 throw new MoreThanOneClassFoundInScriptException();   //to implement more than one name you would need to pass name of class into this class
             }
 
             Type type = typeArray[0];
 
-            object scriptInstance = Activator.CreateInstance(type);     //if null here probably typo in file name somewhere, like pedriatic instead of pediatic :(
+            object scriptInstance = Activator.CreateInstance(type)!;     //if null here probably typo in file name somewhere, like pedriatic instead of pediatic :(
 
 
             // if (typeof(IGeneratorConditionScript).IsAssignableFrom(type))
@@ -74,28 +75,29 @@ public class ScriptExecutor
             }
             else
             {
-                Console.WriteLine("Could not run your script because it is neither a ActionScript nor a ConditionScript.");
+                Logger.LogInformation("Could not run your script because it is neither a ActionScript nor a ConditionScript.");
                 throw new ScriptExecutionException();
             }
         }
         catch (Exception e)
         {
-            Console.WriteLine("Something went wrong when trying to execute your code, here are some details:");
-            // Console.WriteLine(e.Message);
-            // Console.WriteLine(e.StackTrace);
-            Console.WriteLine(e.ToString());
+            Logger.LogInformation("Something went wrong when trying to execute your code, here are some details:");
+            // Logger.LogError(e.Message);
+            // Logger.LogError(e.StackTrace);
+            Logger.LogError(e.ToString());
             throw new ScriptExecutionException();
         }
 
     }
     public bool RunConditionScript(Type type, object scriptInstance, GeneratorContext genContext)
     {
+        Logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(RunConditionScript), nameof(ScriptExecutor));
         try
         {
-            MethodInfo method = type.GetMethod("EvaluateAsync");
+            MethodInfo method = type.GetMethod("EvaluateAsync")!;
             // 2. Invoke method on the instance, passing context as a parameter
             // Note: EvaluateAsync returns a Task<bool>, so 'result' will be a Task
-            var resultTask = (Task)method.Invoke(scriptInstance, new object[] { genContext });
+            var resultTask = (Task)method.Invoke(scriptInstance, new object[] { genContext })!;
 
             // // 3. Wait for the task to complete and get the result
             // resultTask.Wait();
@@ -109,29 +111,30 @@ public class ScriptExecutor
 
             // access the "Result" property of the Task
             var resultProperty = resultTask.GetType().GetProperty("Result");
-            var resultValue = resultProperty.GetValue(resultTask);
+            var resultValue = resultProperty!.GetValue(resultTask);
 
-            Console.WriteLine($"Result: {resultValue}");    //todo probably unnessesary but good for debugging
-            return (bool)resultValue; // todo very important error handling
+            Logger.LogInformation($"Result: {resultValue}");    //todo probably unnessesary but good for debugging
+            return (bool)resultValue!; // todo very important error handling
         }
         catch (Exception e)
         {
-            Console.WriteLine(e.ToString());
+            Logger.LogInformation(e.ToString());
             throw new ConditionScriptExecutionException();
         }
 
     }
     public ActionResultBaseClass RunActionScript(Type type, object scriptInstance, GeneratorContext genContext)
     {
+        Logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(RunActionScript), nameof(ScriptExecutor));
         try
         {
-            MethodInfo method = type.GetMethod("ExecuteAsync"); //todo
-                                                                // 2. Invoke method on the instance, passing context as a parameter
-                                                                // Note: EvaluateAsync returns a Task<bool>, so 'result' will be a Task
-                                                                //todo implement check for old versions of GeneratorContext class because GeneratorContextV2 might not be compatible
+            MethodInfo method = type.GetMethod("ExecuteAsync")!; //todo
+                                                                 // 2. Invoke method on the instance, passing context as a parameter
+                                                                 // Note: EvaluateAsync returns a Task<bool>, so 'result' will be a Task
+                                                                 //todo implement check for old versions of GeneratorContext class because GeneratorContextV2 might not be compatible
 
 
-            var resultTask = (Task)method.Invoke(scriptInstance, new object[] { genContext });
+            var resultTask = (Task)method.Invoke(scriptInstance, new object[] { genContext })!;
 
             // 3. Wait for the task to complete and get the result
             // resultTask.Wait();
@@ -143,69 +146,19 @@ public class ScriptExecutor
 
             // access the "Result" property of the Task
             var resultProperty = resultTask.GetType().GetProperty("Result");
-            var resultValue = resultProperty.GetValue(resultTask);
+            var resultValue = resultProperty!.GetValue(resultTask);
 
-            Console.WriteLine($"Result in 86 sExecuter: {resultValue}");    //todo probably unnessesary but good for debugging
+            Logger.LogInformation($"Result in 86 sExecuter: {resultValue}");    //todo probably unnessesary but good for debugging
             // return (ActionResult)resultValue;
             // return UpgradeActionResult(resultValue);
-            return (ActionResultBaseClass)resultValue;  //this might fail because not baseclass idk, if it does maybe change whole structure to only one function
+            return (ActionResultBaseClass)resultValue!;  //this might fail because not baseclass idk, if it does maybe change whole structure to only one function
         }
         catch (Exception e)
         {
-            Console.WriteLine(e.ToString());
-            Console.WriteLine("You might have passed the wrong GeneratorContext class, ex V1 instead of V2");
+            Logger.LogError(e.ToString());
+            Logger.LogWarning("You might have passed the wrong GeneratorContext class, ex V1 instead of V2");
             throw new ActionScriptExecutionException();
         }
 
     }
-
-    // public ActionResultV3NoInheritance UpgradeActionResult(object resultValue)
-    // {
-    //     var facade = new ScriptManagerFacade();
-    //     // var newestVersion = await facade.GetRecentApiVersion();
-    //     object finalActionResult = resultValue;
-    //     int loopBreaker = 0;   //I am assuming not 1000 versions will be written                // will probably fail in real application todo fix mabe with reflection i heard?
-    //     while (finalActionResult is not ActionResultV3NoInheritance && loopBreaker < 1000)    //could fail if loaded from diffrent assembly should probably replace the is statements with something like get type.name
-    //     {
-    //         loopBreaker++;
-    //         // if (finalActionResult is ActionResultV2 v2Script)
-    //         if (finalActionResult.GetType().Name == "ActionResultV2")
-    //         {
-    //             try
-    //             {
-    //                 ActionResultV2 v2Script2 = (ActionResultV2)finalActionResult;
-    //                 finalActionResult = ActionResultV3NoInheritance.UpgradeV2(v2Script2);
-    //             }
-    //             catch (Exception e)
-    //             {
-    //                 Console.WriteLine(e.ToString());
-    //             }
-    //         }
-    //         // else if (finalActionResult is ActionResult v1Script)
-    //         else if (finalActionResult.GetType().Name == "ActionResult")
-    //         {
-    //             try
-    //             {
-    //                 ActionResult v1Script2 = (ActionResult)finalActionResult;
-    //                 List<string> loggedActions = [];
-    //                 finalActionResult = ActionResultV2.UpgradeV1(v1Script2, loggedActions);
-    //             }
-    //             catch (Exception e)
-    //             {
-    //                 Console.WriteLine(e.ToString());
-    //             }
-    //         }
-    //     }
-    //     // if (finalActionResult is ActionResultV3NoInheritance v3Script)
-    //     if (finalActionResult.GetType().Name == "ActionResultV3NoInheritance")
-    //     {
-    //         ActionResultV3NoInheritance v3Script2 = (ActionResultV3NoInheritance)finalActionResult;
-    //         return (ActionResultV3NoInheritance)v3Script2;
-    //     }
-    //     else
-    //     {
-    //         throw new Exception(message: "UpgradeActionResult in ScriptExecutor failed.");
-    //     }
-    // }
-
 }

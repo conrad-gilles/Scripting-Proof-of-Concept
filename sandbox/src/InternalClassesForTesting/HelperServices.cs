@@ -11,7 +11,7 @@ public interface ConsoleLoggerInterface
 public interface DataAccessInterface
 {
     // Simulates fetching external data (e.g., "Is this doctor valid?")
-    object GetReferenceData(string category, string key);
+    object? GetReferenceData(string category, string key);
 }
 
 // Implementations
@@ -24,7 +24,7 @@ public class ConsoleLogger : ConsoleLoggerInterface
 
 public class DataAccess : DataAccessInterface
 {
-    public object GetReferenceData(string category, string key)
+    public object? GetReferenceData(string category, string key)
     {
         // Mock data for PoC
         if (category == "Doctor" && key == "Dr.House") return new { Name = "Gregory House", Specialty = "Diagnostic" };

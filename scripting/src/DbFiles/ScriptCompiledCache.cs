@@ -8,7 +8,7 @@ namespace Ember.Scripting;
 [Table("script_compiled_cache")]
 public class ScriptCompiledCache
 {
-    // [Key]   
+    // [Key]
     [ForeignKey(nameof(CustomerScript))]
     [Column("script_id")]
     public Guid ScriptId { get; set; }
@@ -29,11 +29,11 @@ public class ScriptCompiledCache
     public string? CompilationErrors { get; set; }
 
     // Navigation property back to the script
-    public CustomerScript CustomerScript { get; set; }
+    public CustomerScript? CustomerScript { get; set; }
 
     public override string ToString()
     {
-        string str = "Compiled Script: Script Name: " + CustomerScript.ScriptName + ", Script ID: " + ScriptId.ToString() +
+        string str = "Compiled Script: Script Name: " + CustomerScript!.ScriptName + ", Script ID: " + ScriptId.ToString() +
         ", Compiled: " + CompilationDate + ", Version: " + ApiVersion
         // " Script Created: " + CustomerScript.CreatedAt
         ;
@@ -42,7 +42,7 @@ public class ScriptCompiledCache
     }
     public string ToStringBetter()
     {
-        string str = "Compiled Script: Script Name: " + CustomerScript.ScriptName + ", Compiled for V" + ApiVersion + ", Created: " + CompilationDate +
+        string str = "Compiled Script: Script Name: " + CustomerScript!.ScriptName + ", Compiled for V" + ApiVersion + ", Created: " + CompilationDate +
         ", Script Created: " + CustomerScript.CreatedAt;
         return str;
     }

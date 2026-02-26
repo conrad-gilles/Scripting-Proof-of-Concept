@@ -1,0 +1,6 @@
+﻿{"@t":"2026-02-26T14:15:08.3745388Z","@mt":"Entered {MethodName} in {ClassName}.","@l":"Verbose","MethodName":"BasicValidationBeforeCompiling","ClassName":"ScriptCompiler","SourceContext":"Ember.Scripting.ScriptCompiler"}
+{"@t":"2026-02-26T14:15:08.6877344Z","@mt":"Class Name = AddPediatricTestsV2","@l":"Verbose","SourceContext":"Ember.Scripting.ScriptCompiler"}
+{"@t":"2026-02-26T14:15:08.6879376Z","@mt":"BaseClass Name = IGeneratorActionScriptV2","@l":"Verbose","SourceContext":"Ember.Scripting.ScriptCompiler"}
+{"@t":"2026-02-26T14:15:08.6879845Z","@mt":"Version Int = 1","@l":"Verbose","SourceContext":"Ember.Scripting.ScriptCompiler"}
+{"@t":"2026-02-26T14:15:08.6898285Z","@mt":"Entered {MethodName} in {ClassName}.","@l":"Verbose","MethodName":"ValidateNamespaceUsage","ClassName":"ScriptCompiler","SourceContext":"Ember.Scripting.ScriptCompiler"}
+{"@t":"2026-02-26T14:25:16.3518529Z","@mt":"Sandbox closing.","@l":"Debug"}
