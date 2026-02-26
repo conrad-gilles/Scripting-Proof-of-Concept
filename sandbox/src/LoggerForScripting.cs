@@ -1,0 +1,58 @@
+using System;
+using Serilog;
+using Ember.Scripting;
+using Serilog.Extensions.Logging;
+using Microsoft.Extensions.Logging;
+
+public class LoggerForScripting
+{
+    private Serilog.Core.Logger? serilogLogger = null;
+    private ILoggerFactory? factory = null;
+    public LoggerForScripting()
+    {
+
+    }
+    public Serilog.Core.Logger SetUpAndGetSeriLogger()
+    {
+        Serilog.Core.Logger? serilogLoggerSet = new LoggerConfiguration()
+            .MinimumLevel.Verbose()
+    .Enrich.FromLogContext()
+    .WriteTo.File(
+        "logs/app-.log",
+        rollingInterval: RollingInterval.Day,
+        retainedFileCountLimit: 5).WriteTo.Console(restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Warning)
+        .WriteTo.Seq("http://localhost:5341", bufferBaseFilename: "logs/seq-offline-buffer")
+        .CreateLogger();
+
+        return serilogLoggerSet;
+    }
+
+    // public Microsoft.Extensions.Logging.Logger<ScriptManagerFacade> GetMicrosoftLogger()
+    public Microsoft.Extensions.Logging.Logger<T> GetMicrosoftLogger<T>()
+    {
+        if (serilogLogger == null)
+        {
+            serilogLogger = SetUpAndGetSeriLogger();
+            Log.Logger = serilogLogger;
+        }
+
+        if (factory == null)
+        {
+            factory = new SerilogLoggerFactory(serilogLogger);
+        }
+
+        // using var factory = new SerilogLoggerFactory(serilogLogger);
+
+        Microsoft.Extensions.Logging.Logger<T>? microsoftLogger =
+              new Microsoft.Extensions.Logging.Logger<T>(factory);
+        return microsoftLogger;
+    }
+    public void Dispose()
+    {
+        factory?.Dispose();
+        serilogLogger?.Dispose();
+    }
+    // Source - https://stackoverflow.com/a/68559937
+    // Posted by mihails.kuzmins, modified by community. See post 'Timeline' for change history
+    // Retrieved 2026-02-26, License - CC BY-SA 4.0
+}

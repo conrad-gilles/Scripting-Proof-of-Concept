@@ -58,3 +58,31 @@ dotnet publish -c Release -f net9.0 -r win-x64 --self-contained -o ./TempPublish
 
 dotnet run --project sandbox          # runs your app normally
 dotnet test sandbox.Tests             # runs only tests
+
+# Microsoft Logger Tutorial:
+From lowest severity to highest:
+### Trace:
+logger.LogTrace("Entered the CompileScript method with scriptId: {Id}", scriptId);
+
+### Debug
+logger.LogDebug("Fetched {Count} cached scripts from the database", cacheDict.Count);
+
+### Information
+logger.LogInformation("Successfully compiled script {ScriptName}", script.Name);
+
+### Warning
+logger.LogWarning("No API version specified, falling back to default version {Version}", currentApiVersion);
+
+### Error
+try
+{
+    // code that throws
+}
+catch (CompilationFailedException ex)
+{
+    logger.LogError(ex, "Failed to compile script {ScriptId} due to syntax errors", scriptId);
+}
+
+### Critical
+logger.LogCritical(ex, "The database connection dropped. ScriptManager cannot continue.");
+

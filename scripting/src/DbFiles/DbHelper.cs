@@ -2,16 +2,19 @@ using EFModeling.EntityProperties.FluentAPI.Required;
 using Microsoft.CodeAnalysis;
 using Microsoft.EntityFrameworkCore;
 using Ember.Scripting;
+using Microsoft.Extensions.Logging;
 namespace Ember.Scripting;
 
 public class DbHelper
 {
     private readonly MetadataReference[] References;
     private readonly ScriptCompiler Compiler;
-    public DbHelper(ScriptCompiler compiler, MetadataReference[] references)
+    private readonly ILogger Logger;
+    public DbHelper(ScriptCompiler compiler, MetadataReference[] references, ILogger logger)
     {
         References = references;
         Compiler = compiler;
+        Logger = logger;
         // Compiler = new ScriptCompiler(References);
     }
     public async Task EnsureDeletedCreated()    //todo delete this for obvious safety reasons before production

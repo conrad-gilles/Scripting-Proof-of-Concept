@@ -1,0 +1,110 @@
+﻿{"@t":"2026-02-26T08:45:18.4285426Z","@mt":"Test before init"}
+{"@t":"2026-02-26T08:48:28.4274614Z","@mt":"Test before init"}
+{"@t":"2026-02-26T08:48:28.4842862Z","@mt":"Test log microssoft","@l":"Debug","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-02-26T08:48:38.0213551Z","@mt":"CreateScript Executes","@l":"Debug","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-02-26T08:53:16.4931658Z","@mt":"Test before init"}
+{"@t":"2026-02-26T08:53:16.5390718Z","@mt":"Test log microssoft","@l":"Debug","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-02-26T09:11:05.0814802Z","@mt":"Test before init"}
+{"@t":"2026-02-26T09:11:05.1295509Z","@mt":"Test log microssoft","@l":"Debug","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-02-26T09:16:34.5503376Z","@mt":"Test log microssoft after abstraction to class","@l":"Debug","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-02-26T09:17:02.5542851Z","@mt":"CreateScript Executes","@l":"Debug","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-02-26T10:17:25.4391368Z","@mt":"BasicValidationBeforeCompiling in ScriptCompiler entered.","@l":"Verbose","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-02-26T10:17:25.7911688Z","@mt":"ValidateNameSpaceUsage in ScriptCompiler entered.","@l":"Verbose","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-02-26T10:17:25.9981317Z","@mt":"Entered RunCompilation method in ScriptCompiler.","@l":"Verbose","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-02-26T10:17:25.9987213Z","@mt":"Added default references","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-02-26T10:17:26.0179142Z","@mt":"References 2 added references.","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-02-26T10:17:26.7353319Z","@mt":"BasicValidationBeforeCompiling in ScriptCompiler entered.","@l":"Verbose","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-02-26T10:17:26.7501411Z","@mt":"ValidateNameSpaceUsage in ScriptCompiler entered.","@l":"Verbose","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-02-26T10:17:26.7850450Z","@mt":"Entered RunCompilation method in ScriptCompiler.","@l":"Verbose","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-02-26T10:17:26.7854692Z","@mt":"Added default references","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-02-26T10:17:26.8032797Z","@mt":"References 2 added references.","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-02-26T10:17:26.9003509Z","@mt":"BasicValidationBeforeCompiling in ScriptCompiler entered.","@l":"Verbose","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-02-26T10:17:26.9108919Z","@mt":"ValidateNameSpaceUsage in ScriptCompiler entered.","@l":"Verbose","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-02-26T10:17:26.9545196Z","@mt":"Entered RunCompilation method in ScriptCompiler.","@l":"Verbose","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-02-26T10:17:26.9549197Z","@mt":"Added default references","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-02-26T10:17:26.9740709Z","@mt":"References 2 added references.","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-02-26T10:17:27.0595379Z","@mt":"BasicValidationBeforeCompiling in ScriptCompiler entered.","@l":"Verbose","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-02-26T10:17:27.0705981Z","@mt":"ValidateNameSpaceUsage in ScriptCompiler entered.","@l":"Verbose","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-02-26T10:17:27.0815225Z","@mt":"Entered RunCompilation method in ScriptCompiler.","@l":"Verbose","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-02-26T10:17:27.0818464Z","@mt":"Added default references","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-02-26T10:17:27.1004071Z","@mt":"References 2 added references.","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-02-26T10:17:27.1184330Z","@mt":"BasicValidationBeforeCompiling in ScriptCompiler entered.","@l":"Verbose","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-02-26T10:17:27.1292472Z","@mt":"ValidateNameSpaceUsage in ScriptCompiler entered.","@l":"Verbose","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-02-26T10:17:27.1434333Z","@mt":"Entered RunCompilation method in ScriptCompiler.","@l":"Verbose","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-02-26T10:17:27.1437113Z","@mt":"Added default references","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-02-26T10:17:27.1633941Z","@mt":"References 2 added references.","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-02-26T10:34:39.7630218Z","@mt":"BasicValidationBeforeCompiling in ScriptCompiler entered.","@l":"Verbose","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-02-26T10:34:40.1056327Z","@mt":"ValidateNameSpaceUsage in ScriptCompiler entered.","@l":"Verbose","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-02-26T10:34:40.3060036Z","@mt":"Entered RunCompilation method in ScriptCompiler.","@l":"Verbose","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-02-26T10:34:40.3065735Z","@mt":"Added default references","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-02-26T10:34:40.3256966Z","@mt":"References 2 added references.","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-02-26T10:34:41.0328875Z","@mt":"BasicValidationBeforeCompiling in ScriptCompiler entered.","@l":"Verbose","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-02-26T10:34:41.0470632Z","@mt":"ValidateNameSpaceUsage in ScriptCompiler entered.","@l":"Verbose","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-02-26T10:34:41.0851460Z","@mt":"Entered RunCompilation method in ScriptCompiler.","@l":"Verbose","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-02-26T10:34:41.0855030Z","@mt":"Added default references","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-02-26T10:34:41.1049685Z","@mt":"References 2 added references.","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-02-26T10:34:41.2094547Z","@mt":"BasicValidationBeforeCompiling in ScriptCompiler entered.","@l":"Verbose","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-02-26T10:34:41.2211772Z","@mt":"ValidateNameSpaceUsage in ScriptCompiler entered.","@l":"Verbose","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-02-26T10:34:41.2684186Z","@mt":"Entered RunCompilation method in ScriptCompiler.","@l":"Verbose","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-02-26T10:34:41.2688438Z","@mt":"Added default references","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-02-26T10:34:41.2894422Z","@mt":"References 2 added references.","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-02-26T10:34:41.3778432Z","@mt":"BasicValidationBeforeCompiling in ScriptCompiler entered.","@l":"Verbose","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-02-26T10:34:41.3875948Z","@mt":"ValidateNameSpaceUsage in ScriptCompiler entered.","@l":"Verbose","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-02-26T10:34:41.4015061Z","@mt":"Entered RunCompilation method in ScriptCompiler.","@l":"Verbose","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-02-26T10:34:41.4018106Z","@mt":"Added default references","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-02-26T10:34:41.4213254Z","@mt":"References 2 added references.","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-02-26T10:34:41.4395553Z","@mt":"BasicValidationBeforeCompiling in ScriptCompiler entered.","@l":"Verbose","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-02-26T10:34:41.4518187Z","@mt":"ValidateNameSpaceUsage in ScriptCompiler entered.","@l":"Verbose","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-02-26T10:34:41.4671027Z","@mt":"Entered RunCompilation method in ScriptCompiler.","@l":"Verbose","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-02-26T10:34:41.4673866Z","@mt":"Added default references","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-02-26T10:34:41.4925834Z","@mt":"References 2 added references.","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-02-26T10:40:57.9052118Z","@mt":"BasicValidationBeforeCompiling in ScriptCompiler entered.","@l":"Verbose","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-02-26T10:40:58.2515334Z","@mt":"ValidateNameSpaceUsage in ScriptCompiler entered.","@l":"Verbose","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-02-26T10:40:58.4672284Z","@mt":"Entered RunCompilation method in ScriptCompiler.","@l":"Verbose","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-02-26T10:40:58.4678147Z","@mt":"Added default references","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-02-26T10:40:58.4864784Z","@mt":"References 2 added references.","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-02-26T10:40:59.0708379Z","@mt":"BasicValidationBeforeCompiling in ScriptCompiler entered.","@l":"Verbose","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-02-26T10:40:59.0838607Z","@mt":"ValidateNameSpaceUsage in ScriptCompiler entered.","@l":"Verbose","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-02-26T10:40:59.1183368Z","@mt":"Entered RunCompilation method in ScriptCompiler.","@l":"Verbose","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-02-26T10:40:59.1187164Z","@mt":"Added default references","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-02-26T10:40:59.1380709Z","@mt":"References 2 added references.","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-02-26T10:40:59.2397088Z","@mt":"BasicValidationBeforeCompiling in ScriptCompiler entered.","@l":"Verbose","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-02-26T10:40:59.2505045Z","@mt":"ValidateNameSpaceUsage in ScriptCompiler entered.","@l":"Verbose","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-02-26T10:40:59.2851579Z","@mt":"Entered RunCompilation method in ScriptCompiler.","@l":"Verbose","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-02-26T10:40:59.2855662Z","@mt":"Added default references","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-02-26T10:40:59.3040028Z","@mt":"References 2 added references.","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-02-26T10:40:59.3274158Z","@mt":"BasicValidationBeforeCompiling in ScriptCompiler entered.","@l":"Verbose","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-02-26T10:40:59.3385298Z","@mt":"ValidateNameSpaceUsage in ScriptCompiler entered.","@l":"Verbose","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-02-26T10:40:59.3493542Z","@mt":"Entered RunCompilation method in ScriptCompiler.","@l":"Verbose","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-02-26T10:40:59.3496619Z","@mt":"Added default references","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-02-26T10:40:59.3730732Z","@mt":"References 2 added references.","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-02-26T10:40:59.3894503Z","@mt":"BasicValidationBeforeCompiling in ScriptCompiler entered.","@l":"Verbose","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-02-26T10:40:59.4021179Z","@mt":"ValidateNameSpaceUsage in ScriptCompiler entered.","@l":"Verbose","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-02-26T10:40:59.4231309Z","@mt":"Entered RunCompilation method in ScriptCompiler.","@l":"Verbose","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-02-26T10:40:59.4234690Z","@mt":"Added default references","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-02-26T10:40:59.4437578Z","@mt":"References 2 added references.","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-02-26T10:46:06.7436442Z","@mt":"BasicValidationBeforeCompiling in ScriptCompiler entered.","@l":"Verbose","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-02-26T10:46:07.1071976Z","@mt":"ValidateNameSpaceUsage in ScriptCompiler entered.","@l":"Verbose","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-02-26T10:46:07.3259065Z","@mt":"Entered RunCompilation method in ScriptCompiler.","@l":"Verbose","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-02-26T10:46:07.3265085Z","@mt":"Added default references","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-02-26T10:46:07.3469059Z","@mt":"References 2 added references.","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-02-26T10:46:08.0261566Z","@mt":"BasicValidationBeforeCompiling in ScriptCompiler entered.","@l":"Verbose","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-02-26T10:46:08.0390930Z","@mt":"ValidateNameSpaceUsage in ScriptCompiler entered.","@l":"Verbose","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-02-26T10:46:08.0746074Z","@mt":"Entered RunCompilation method in ScriptCompiler.","@l":"Verbose","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-02-26T10:46:08.0749995Z","@mt":"Added default references","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-02-26T10:46:08.0974951Z","@mt":"References 2 added references.","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-02-26T10:46:08.1994256Z","@mt":"BasicValidationBeforeCompiling in ScriptCompiler entered.","@l":"Verbose","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-02-26T10:46:08.2123994Z","@mt":"ValidateNameSpaceUsage in ScriptCompiler entered.","@l":"Verbose","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-02-26T10:46:08.2625828Z","@mt":"Entered RunCompilation method in ScriptCompiler.","@l":"Verbose","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-02-26T10:46:08.2630133Z","@mt":"Added default references","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-02-26T10:46:08.2821618Z","@mt":"References 2 added references.","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-02-26T10:46:08.3683310Z","@mt":"BasicValidationBeforeCompiling in ScriptCompiler entered.","@l":"Verbose","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-02-26T10:46:08.3783768Z","@mt":"ValidateNameSpaceUsage in ScriptCompiler entered.","@l":"Verbose","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-02-26T10:46:08.3907847Z","@mt":"Entered RunCompilation method in ScriptCompiler.","@l":"Verbose","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-02-26T10:46:08.3911487Z","@mt":"Added default references","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-02-26T10:46:08.4115006Z","@mt":"References 2 added references.","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-02-26T10:46:08.4309113Z","@mt":"BasicValidationBeforeCompiling in ScriptCompiler entered.","@l":"Verbose","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-02-26T10:46:08.4424691Z","@mt":"ValidateNameSpaceUsage in ScriptCompiler entered.","@l":"Verbose","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-02-26T10:46:08.4570133Z","@mt":"Entered RunCompilation method in ScriptCompiler.","@l":"Verbose","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-02-26T10:46:08.4573137Z","@mt":"Added default references","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-02-26T10:46:08.4814043Z","@mt":"References 2 added references.","SourceContext":"Ember.Scripting.ScriptManagerFacade"}

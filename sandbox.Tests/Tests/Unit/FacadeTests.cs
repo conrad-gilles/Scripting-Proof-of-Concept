@@ -7,21 +7,24 @@ namespace FirstTests;
 [TestClass]
 public class ScriptManagerFacadeTests
 {
-    ScriptManagerFacade facade;
-    private DbHelper db;
-    string sourceCodePedia;
-    private string sourceCodeActionV1;
-    private string sourceCodeActionV3;
-    private RandomMethods rm;
+    private ScriptManagerFacade? facade;
+    private DbHelper? db;
+    string? sourceCodePedia;
+    private string? sourceCodeActionV1;
+    private string? sourceCodeActionV3;
+    private RandomMethods? rm;
 
     [TestInitialize]
     public async Task Setup()
     {
-        ScriptCompiler compiler3 = new ScriptCompiler(UsefulMethods.GetReferences());
-        ScriptExecutor exec3 = new ScriptExecutor();
-        db = new DbHelper(compiler3, UsefulMethods.GetReferences());
+        var logger = new LoggerForScripting();
+        var microsoftLogger = logger.GetMicrosoftLogger<ScriptManagerFacade>();
+        ScriptCompiler compiler3 = new ScriptCompiler(UsefulMethods.GetReferences(), microsoftLogger);
+        ScriptExecutor exec3 = new ScriptExecutor(microsoftLogger);
+        db = new DbHelper(compiler3, UsefulMethods.GetReferences(), microsoftLogger);
         rm = new RandomMethods(db);
-        facade = new ScriptManagerFacade(db, compiler3, exec3, UsefulMethods.GetReferences());
+
+        facade = new ScriptManagerFacade(db, compiler3, exec3, UsefulMethods.GetReferences(), microsoftLogger);
 
         // Clear all data between tests without drop/recreate
         await facade.ClearAllCaches();

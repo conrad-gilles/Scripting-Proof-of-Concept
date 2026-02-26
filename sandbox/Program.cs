@@ -9,6 +9,8 @@ using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Ember.Scripting;
 using System.Reflection;
+using Serilog.Extensions.Logging;
+using Microsoft.Extensions.Logging;
 
 class MainProgram
 {
@@ -25,28 +27,28 @@ class MainProgram
     {
         try
         {
-            // HostApplicationBuilder builder = Host.CreateApplicationBuilder(args);
-            LoggerForScripting loggerVar = new LoggerForScripting();
-            loggerVar.SetUpLogger();
-            Log.Information("Test log");
+            var logger = new LoggerForScripting();
+            var microsoftLogger = logger.GetMicrosoftLogger<ScriptManagerFacade>();
+
             // await new DbHelper().ensureDeletedCreated();       //only for testing
-            await MainProgramSwitch();
+            await MainProgramSwitch(microsoftLogger);
             // await RandomMethods.MainProgramSwitchAsync(scriptFolderPath);
         }
         finally
         {
+            // await Task.Delay(20);
             await Log.CloseAndFlushAsync();
         }
 
     }
 
-    public static async Task MainProgramSwitch()
+    public static async Task MainProgramSwitch(ILogger<ScriptManagerFacade> logger)
     {
         try
         {
-            ScriptCompiler compiler3 = new ScriptCompiler(UsefulMethods.GetReferences());
-            ScriptExecutor exec3 = new ScriptExecutor();
-            var db = new DbHelper(compiler: compiler3, UsefulMethods.GetReferences());
+            ScriptCompiler compiler3 = new ScriptCompiler(UsefulMethods.GetReferences(), logger);
+            ScriptExecutor exec3 = new ScriptExecutor(logger);
+            var db = new DbHelper(compiler: compiler3, UsefulMethods.GetReferences(), logger);
             RandomMethods rm = new RandomMethods(db);
 
             // await RandomMethods.CompileAllScriptsInFolderAndSaveToDB(scriptFolderPath);   //main precompilation act
@@ -55,7 +57,7 @@ class MainProgram
             // Dictionary<int, Guid> sourceDict = [];
             Dictionary<int, Guid> cacheDict = [];
             Guid scriptId = new Guid();
-            ScriptManagerFacade facade = new ScriptManagerFacade(db, compiler3, exec3, UsefulMethods.GetReferences());
+            ScriptManagerFacade facade = new ScriptManagerFacade(db, compiler3, exec3, UsefulMethods.GetReferences(), logger);
             currentApiVersion = await facade.GetRecentApiVersion(); //needs to be above autocomp else error
 
             await db.AutomaticCompilationOnVersionUpdate(currentApiVersion);    //todo make this "background job that is run automatically periodically"

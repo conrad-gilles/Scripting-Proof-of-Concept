@@ -51,8 +51,9 @@ public class UsefulMethods
             };
             if (justForTesting != null) //this is ofc just for testing purposes in the real application you would never automatically distribute the context because it is unsafe you want to be able to control who gets which context precisely
             {
+                var microsoftLogger = new LoggerForScripting().GetMicrosoftLogger<ScriptManagerFacade>();
                 var refs = GetReferences();
-                ScriptCompiler compiler = new ScriptCompiler(refs);
+                ScriptCompiler compiler = new ScriptCompiler(refs, microsoftLogger);
                 string implementedInterface = compiler.BasicValidationBeforeCompiling(justForTesting.SourceCode).baseTypeName;
                 switch (implementedInterface)
                 {

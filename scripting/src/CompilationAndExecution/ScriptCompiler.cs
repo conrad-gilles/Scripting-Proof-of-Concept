@@ -2,19 +2,23 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Scripting;
+using Microsoft.Extensions.Logging;
 using System.Reflection;
 
 namespace Ember.Scripting;
 
 public class ScriptCompiler
 {
-    public MetadataReference[]? References2 = null;
-    public ScriptCompiler(MetadataReference[] references2)
+    private readonly MetadataReference[]? References2 = null;
+    private readonly ILogger Logger;
+    public ScriptCompiler(MetadataReference[] references2, ILogger logger)
     {
         References2 = references2;
+        Logger = logger;
     }
     public byte[] RunCompilation(string script, MetadataReference[]? references = null, int apiVersion = -1) //references param there to enable later on users to define custom references
     {
+        Logger.LogTrace("Entered RunCompilation method in ScriptCompiler.");
         try
         {
             //Takes C# source string and turns it into a "Roslyn parsed syntax tree representation" of a normal C# file
@@ -24,7 +28,7 @@ public class ScriptCompiler
             // if (references == null)
             if (apiVersion == -1)
             {
-                Console.WriteLine("Added default references!");
+                Logger.LogInformation("Added default references");
                 references = new MetadataReference[]
                      {
                         MetadataReference.CreateFromFile(typeof(object).Assembly.Location), // System.Private.CoreLib
@@ -39,11 +43,12 @@ public class ScriptCompiler
             }
             if (apiVersion != -1)
             {
-                Console.WriteLine("Added custom references!");  //if this works remove the if references is null if stat above
+                Logger.LogInformation("Added custom references.");  //if this works remove the if references is null if stat above
                 references = GetReferencesForVersion(apiVersion);
             }
             if (References2 != null)
             {
+                Logger.LogInformation("References 2 added references.");
                 references = References2;
             }
 
@@ -61,9 +66,12 @@ public class ScriptCompiler
 
             if (!emitResult.Success)
             {
-                // Print why it failed (e.g., missing references)
-                foreach (var diag in emitResult.Diagnostics) Console.WriteLine(diag);   //Iterates through the list of compiler messages
-                Console.WriteLine("Error in ScriptCompiler RunCompilation method compilation probably failed");
+                foreach (var diag in emitResult.Diagnostics)
+                {
+                    Logger.LogInformation(diag.ToString());
+                }
+                ;   //Iterates through the list of compiler messages
+                Logger.LogError("Error in ScriptCompiler RunCompilation method compilation probably failed");
                 throw new CompilationFailedException();
             }
 
@@ -72,7 +80,7 @@ public class ScriptCompiler
         }
         catch (Exception e)
         {
-            Console.WriteLine(e.ToString());
+            Logger.LogError(e.ToString());
             throw new CompilationFailedException();
         }
 
@@ -80,6 +88,7 @@ public class ScriptCompiler
 
     public (string className, string baseTypeName, int versionInt) BasicValidationBeforeCompiling(string script)
     {
+        Logger.LogTrace("BasicValidationBeforeCompiling in ScriptCompiler entered.");
         try
         {
 
@@ -97,11 +106,12 @@ public class ScriptCompiler
             var classesInTree = tree.GetRoot().DescendantNodes().OfType<ClassDeclarationSyntax>();
             if (classesInTree.Count() > 1)
             {
+                Logger.LogError("More Than one class found in Script string.");
                 throw new MoreThanOneClassFoundInScriptException(); //this might throw even if there is one class in script if compiler adds classes or something like that, so if it does maybe change this if statement
             }
             var myClass = classesInTree.Last();
             var myClassSymbol = model.GetDeclaredSymbol(myClass) as ITypeSymbol;
-            var baseTypeName = myClassSymbol.BaseType.Name;
+            var baseTypeName = myClassSymbol!.BaseType!.Name;
             var className = myClassSymbol.ToString();
             int versionInt;
 
@@ -125,26 +135,26 @@ public class ScriptCompiler
 
             if (baseTypeName == null || className == null)
             {
-                Console.WriteLine("BaseTypeName or classname null in BasicValidationBeforeCompiling.");
+                Logger.LogError("BaseTypeName or classname null in BasicValidationBeforeCompiling.");
                 throw new ClassNameOrBaseNameNullException();
             }
-            // Console.WriteLine("Class Name = " + className);
-            Console.WriteLine("BaseClass Name = " + baseTypeName);
-            // Console.WriteLine("Version Int = " + versionInt);
+            // Logger.LogTrace("Class Name = " + className);
+            // Logger.LogTrace("BaseClass Name = " + baseTypeName);
+            // Logger.LogTrace("Version Int = " + versionInt);
 
             ValidateNamespaceUsage(tree, model);
             return (className, baseTypeName, versionInt);
         }
         catch (Exception e)
         {
-            Console.WriteLine(e.ToString());
-            Console.WriteLine("BasicValidationBeforeCompiling() failed!");
+            Logger.LogError("BasicValidation failed:" + e.ToString());
             throw new ValidationBeforeCompilationException();
         }
 
     }
     private void ValidateNamespaceUsage(SyntaxTree tree, SemanticModel model)    //todo check
     {
+        Logger.LogTrace("ValidateNameSpaceUsage in ScriptCompiler entered.");
         HashSet<string> illegalNamespaces = new() //no duplicates unlike list
             {
                 "System.IO",
@@ -164,7 +174,7 @@ public class ScriptCompiler
         var usings = tree.GetRoot()
             .DescendantNodes()
             .OfType<UsingDirectiveSyntax>()
-            .Select(s => s.Name.ToString());
+            .Select(s => s.Name!.ToString());
 
         IEnumerable<IdentifierNameSyntax> identifiers = tree.GetRoot().DescendantNodes().OfType<IdentifierNameSyntax>();
 
@@ -174,6 +184,7 @@ public class ScriptCompiler
             {
                 if (illegal == usingItem || usingItem.StartsWith(illegal + "."))  //to prevent usage of for example System.IO and then System.IO.Compression
                 {
+                    Logger.LogError("Script tried to use a illegal namespace.");
                     throw new ForbiddenNamespaceException($"Script uses forbidden namespace: {illegal}");
                 }
             }
@@ -185,6 +196,7 @@ public class ScriptCompiler
                     var nameSpaceEx = symbol.ContainingNamespace?.ToString();
                     if (nameSpaceEx != null && (illegal == nameSpaceEx || nameSpaceEx.StartsWith(illegal + ".")))
                     {
+                        Logger.LogError("Script tried to use a illegal type.");
                         throw new ForbiddenNamespaceException($"Usage of forbidden type: {symbol.ToDisplayString()}");
                     }
                 }
@@ -194,6 +206,7 @@ public class ScriptCompiler
 
     public bool IsTheSameTree(string script1, string script2)
     {
+        Logger.LogTrace("IsTheSameTree in ScriptCompiler entered.");
         SyntaxTree tree1 = CSharpSyntaxTree.ParseText(script1);
         SyntaxTree tree2 = CSharpSyntaxTree.ParseText(script2);
 
@@ -205,6 +218,7 @@ public class ScriptCompiler
 
     public MetadataReference[] GetReferencesForVersion(int version, string[]? customDlls = null, bool loadCurrentRT = true)
     {
+        Logger.LogTrace("GetReferencesForVersion entered.");
         var references = new List<MetadataReference>();
 
         // string versionPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "OldVersions", version.ToString());
@@ -218,6 +232,7 @@ public class ScriptCompiler
 
         if (!Directory.Exists(versionPath))
         {
+            Logger.LogError("Could not find references.");
             throw new Exception($"References for version {version} not found at {versionPath}");
         }
 
@@ -232,6 +247,7 @@ public class ScriptCompiler
 
         if (loadCurrentRT)
         {
+            Logger.LogTrace("loadCurrentRT true.");
             dllsToLoad = ["Ember.dll"];
             var stdRefs = new MetadataReference[]
             {
@@ -248,6 +264,7 @@ public class ScriptCompiler
         }
         if (customDlls != null)
         {
+            Logger.LogTrace("customDlls was not not null");
             foreach (var item in customDlls)
             {
                 dllsToLoad.Append(item);

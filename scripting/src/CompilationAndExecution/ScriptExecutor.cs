@@ -1,6 +1,7 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Scripting;
+using Microsoft.Extensions.Logging;
 using System.Reflection;
 using System.Threading.Tasks;
 
@@ -12,10 +13,11 @@ public class ScriptExecutor
     // private readonly GeneratorContext genContext;
     private readonly static int ScriptTimeout = 5000;
     // private static readonly TimeSpan ScriptTimeout = TimeSpan.FromSeconds(5);
-    // public ScriptExecutor()
-    // {
-
-    // }
+    private readonly ILogger Logger;
+    public ScriptExecutor(ILogger logger)
+    {
+        Logger = logger;
+    }
 
     public T RunScriptExecution<T>(byte[] compiledScript, GeneratorContext genContext)
     // public void RunScriptExecution()

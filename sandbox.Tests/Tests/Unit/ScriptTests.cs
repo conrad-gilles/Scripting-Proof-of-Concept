@@ -12,11 +12,14 @@ public class ScriptTests
     [TestInitialize]
     public async Task Setup()
     {
-        ScriptCompiler compiler = new ScriptCompiler(UsefulMethods.GetReferences());
-        compiler = new ScriptCompiler(UsefulMethods.GetReferences());
-        DbHelper db = new DbHelper(compiler, UsefulMethods.GetReferences());
-        ScriptExecutor executor = new ScriptExecutor();
-        facade = new ScriptManagerFacade(db, compiler, executor, UsefulMethods.GetReferences());
+        var logger = new LoggerForScripting();
+        var microsoftLogger = logger.GetMicrosoftLogger<ScriptManagerFacade>();
+        ScriptCompiler compiler = new ScriptCompiler(UsefulMethods.GetReferences(), microsoftLogger);
+        // compiler = new ScriptCompiler(UsefulMethods.GetReferences());
+        DbHelper db = new DbHelper(compiler, UsefulMethods.GetReferences(), microsoftLogger);
+        ScriptExecutor executor = new ScriptExecutor(microsoftLogger);
+
+        facade = new ScriptManagerFacade(db, compiler, executor, UsefulMethods.GetReferences(), microsoftLogger);
 
     }
     string ActionResultVersionSpecific = "[Message contains either failure or succes: ] ";  //change this if action result version changes it will thraow cause of message contains

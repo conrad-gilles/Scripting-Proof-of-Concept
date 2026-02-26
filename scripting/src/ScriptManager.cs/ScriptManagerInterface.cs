@@ -92,7 +92,7 @@ public interface IScriptManager
     #region Execution Operations
 
     /// <summary>
-    /// Executes a Generator Action script with provided context, realisitcally not needed 
+    /// Executes a Generator Action script with provided context, realisitcally not needed
     /// </summary>
     /// <param name="scriptId"></param>
     /// <param name="context"></param>
@@ -101,7 +101,7 @@ public interface IScriptManager
     Task<ActionResultBaseClass> ExecuteActionScript(Guid scriptId, GeneratorContext context, int apiVersion = -1);
 
     /// <summary>
-    /// Executes a Generator Condition script and returns boolean result, realisitcally not needed 
+    /// Executes a Generator Condition script and returns boolean result, realisitcally not needed
     /// </summary>
     /// <param name="scriptId"></param>
     /// <param name="context"></param>

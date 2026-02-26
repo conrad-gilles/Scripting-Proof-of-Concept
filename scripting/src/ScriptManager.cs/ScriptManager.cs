@@ -1,6 +1,7 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.EntityFrameworkCore.Infrastructure.Internal;
+using Microsoft.Extensions.Logging;
 
 namespace Ember.Scripting;
 
@@ -10,13 +11,15 @@ public class ScriptManagerFacade : IScriptManager
     private readonly ScriptCompiler Compiler;
     private readonly ScriptExecutor Executor;
     private readonly MetadataReference[] References;
+    private readonly ILogger Logger;
 
-    public ScriptManagerFacade(DbHelper db, ScriptCompiler compiler, ScriptExecutor executor, MetadataReference[] references)
+    public ScriptManagerFacade(DbHelper db, ScriptCompiler compiler, ScriptExecutor executor, MetadataReference[] references, ILogger logger)
     {
         References = references;
         Db = db;
         Compiler = compiler;
         Executor = executor;
+        Logger = logger;
         // Db = new DbHelper(references);
         // Compiler = new ScriptCompiler(references);
         // Executor = new ScriptExecutor();
@@ -34,6 +37,7 @@ public class ScriptManagerFacade : IScriptManager
     /// <returns></returns>
     public async Task<Guid> CreateScript(string sourceCode, string? scriptType = null, string userName = "Default", int apiVersion = -1)    //maybe minApiVersion is better?
     {
+        Logger.LogDebug("CreateScript Executes");
         int currentApiVersion = await GetRecentApiVersion();
         Guid id = Guid.NewGuid();
         if (apiVersion == -1)
