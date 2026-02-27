@@ -1,0 +1,8 @@
+﻿{"@t":"2026-02-27T09:27:37.7536560Z","@mt":"Entered {MethodName} in {ClassName}.","@l":"Verbose","MethodName":"BasicValidationBeforeCompiling","ClassName":"ScriptCompiler","SourceContext":"Ember.Scripting.ScriptCompiler"}
+{"@t":"2026-02-27T09:27:37.7853392Z","@mt":"Class Name = AddPediatricTestsV3","@l":"Verbose","SourceContext":"Ember.Scripting.ScriptCompiler"}
+{"@t":"2026-02-27T09:27:37.7855138Z","@mt":"BaseClass Name = IGeneratorActionScriptV3","@l":"Verbose","SourceContext":"Ember.Scripting.ScriptCompiler"}
+{"@t":"2026-02-27T09:27:37.7855752Z","@mt":"Version Int = 1","@l":"Verbose","SourceContext":"Ember.Scripting.ScriptCompiler"}
+{"@t":"2026-02-27T09:27:37.7858922Z","@mt":"Entered {MethodName} in {ClassName}.","@l":"Verbose","MethodName":"ValidateNamespaceUsage","ClassName":"ScriptCompiler","SourceContext":"Ember.Scripting.ScriptCompiler"}
+{"@t":"2026-02-27T09:27:38.2264593Z","@mt":"Entered {MethodName} in {ClassName}.","@l":"Verbose","MethodName":"ListAllStoredSourceCodes","ClassName":"RandomMethods"}
+{"@t":"2026-02-27T09:27:38.9306768Z","@mt":"Entered {MethodName} in {ClassName}.","@l":"Verbose","MethodName":"ListAllStoredSourceCodes","ClassName":"RandomMethods"}
+{"@t":"2026-02-27T09:27:40.3478338Z","@mt":"Sandbox closing.","@l":"Debug"}

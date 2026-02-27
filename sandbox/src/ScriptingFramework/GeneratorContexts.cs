@@ -127,7 +127,7 @@ public class GeneratorContextV3 : GeneratorContextV2, IGeneratorContext_V3  //to
 
 }
 
-public class GeneratorContextNoInherVaccine : GeneratorContext, IGeneratorContextNoInheritance_V4
+public class GeneratorContextNoInherVaccine : GeneratorContext, IGeneratorContextNoInheritance_V4   //into diffrent namespaces blocks later folders
 {
     ILabOrderInterfaceV4NoInheritence LabOrder;
     IVaccineInterface Vaccine;

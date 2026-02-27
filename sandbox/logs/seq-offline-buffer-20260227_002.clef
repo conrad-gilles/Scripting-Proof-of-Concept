@@ -1,0 +1,7 @@
+﻿{"@t":"2026-02-27T09:27:31.3607439Z","@mt":"Entered {MethodName} in {ClassName}.","@l":"Verbose","MethodName":"BasicValidationBeforeCompiling","ClassName":"ScriptCompiler","SourceContext":"Ember.Scripting.ScriptCompiler"}
+{"@t":"2026-02-27T09:27:31.3848370Z","@mt":"Class Name = PediatricCondition","@l":"Verbose","SourceContext":"Ember.Scripting.ScriptCompiler"}
+{"@t":"2026-02-27T09:27:31.3849742Z","@mt":"BaseClass Name = IGeneratorConditionScript","@l":"Verbose","SourceContext":"Ember.Scripting.ScriptCompiler"}
+{"@t":"2026-02-27T09:27:31.3850043Z","@mt":"Version Int = 1","@l":"Verbose","SourceContext":"Ember.Scripting.ScriptCompiler"}
+{"@t":"2026-02-27T09:27:31.3852687Z","@mt":"Entered {MethodName} in {ClassName}.","@l":"Verbose","MethodName":"ValidateNamespaceUsage","ClassName":"ScriptCompiler","SourceContext":"Ember.Scripting.ScriptCompiler"}
+{"@t":"2026-02-27T09:27:36.6878100Z","@mt":"Entered {MethodName} in {ClassName}.","@l":"Verbose","MethodName":"ListAllStoredSourceCodes","ClassName":"RandomMethods"}
+{"@t":"2026-02-27T09:27:36.7113828Z","@mt":"Entered {MethodName} in {ClassName}.","@l":"Verbose","MethodName":"GetTestingContext","ClassName":"RandomMethods"}
