@@ -1,0 +1,16 @@
+@startuml
+interface ITestInfo {
+    TestCode : string <<get>>
+    Name : string <<get>>
+    Status : string <<get>>
+    Result : string? <<get>>
+}
+class Test {
+    + TestCode : string <<get>>
+    + Name : string <<get>>
+    + Status : string <<get>> <<set>>
+    + Result : string? <<get>> <<set>>
+    + Test(code:string, name:string)
+}
+ITestInfo <|-- Test
+@enduml

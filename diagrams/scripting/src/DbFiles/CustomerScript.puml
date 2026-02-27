@@ -1,0 +1,16 @@
+@startuml
+class CustomerScript {
+    + Id : Guid <<get>> <<set>>
+    + ScriptName : string? <<get>> <<set>>
+    + ScriptType : string? <<get>> <<set>>
+    + SourceCode : string? <<get>> <<set>>
+    + MinApiVersion : int <<get>> <<set>>
+    + CreatedAt : DateTime? <<get>> <<set>>
+    + ModifiedAt : DateTime? <<get>> <<set>>
+    + CreatedBy : string? <<get>> <<set>>
+    + CompiledCaches : List<ScriptCompiledCache> <<get>> <<set>>
+    + CustomerScript()
+    + <<override>> ToString() : string
+    + ToStringShorter() : string
+}
+@enduml

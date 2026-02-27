@@ -1,0 +1,17 @@
+@startuml
+class ScriptTests {
+    - facade : ScriptManagerFacade?
+    + <<async>> Setup() : Task
+    - ActionResultVersionSpecific : string = "[Message contains either failure or succes: ] "
+    - sourceCodeActionV1 : string
+    - sourceCodeActionV2 : string
+    - sourceCodeActionV3 : string
+    - sourceCodeVaccineAction : string
+    - sourceCodePedia : string
+    + <<async>> ActionV1Test() : Task
+    + <<async>> ActionV2Test() : Task
+    + <<async>> ActionV3Test() : Task
+    + <<async>> VaccineScriptTest() : Task
+    + <<async>> ConditionTest() : Task
+}
+@enduml

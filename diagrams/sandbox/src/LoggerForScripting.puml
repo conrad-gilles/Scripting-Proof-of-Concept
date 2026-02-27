@@ -1,0 +1,10 @@
+@startuml
+class LoggerForScripting {
+    - serilogLogger : Serilog.Core.Logger? = null
+    - factory : ILoggerFactory? = null
+    + LoggerForScripting()
+    + SetUpAndGetSeriLogger() : Serilog.Core.Logger
+    + GetMicrosoftLogger() : Microsoft.Extensions.Logging.Logger<T>
+    + Dispose() : void
+}
+@enduml

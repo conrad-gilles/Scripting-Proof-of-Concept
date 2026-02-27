@@ -86,3 +86,8 @@ catch (CompilationFailedException ex)
 ### Critical
 logger.LogCritical(ex, "The database connection dropped. ScriptManager cannot continue.");
 
+dotnet tool install -g PlantUmlClassDiagramGenerator
+puml-gen ./scripting/src ./diagrams -dir
+
+puml-gen . ./diagrams -dir -allInOne -createAssociation -excludePaths bin,obj,Properties
+

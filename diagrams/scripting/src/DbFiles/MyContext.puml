@@ -1,0 +1,12 @@
+@startuml
+class MyContext {
+    + MyContext(options:DbContextOptions<MyContext>)
+    + MyContext()
+    + CustomerScripts : DbSet<CustomerScript> <<get>> <<set>>
+    + ScriptCompiledCaches : DbSet<ScriptCompiledCache> <<get>> <<set>>
+    + EmberInstances : DbSet<EmberInstance> <<get>> <<set>>
+    # <<override>> OnModelCreating(modelBuilder:ModelBuilder) : void
+    # <<override>> OnConfiguring(optionsBuilder:DbContextOptionsBuilder) : void
+}
+DbContext <|-- MyContext
+@enduml

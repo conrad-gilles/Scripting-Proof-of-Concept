@@ -1,0 +1,20 @@
+@startuml
+class RandomMethods {
+    - <<readonly>> db : DbHelper
+    + RandomMethods(db2:DbHelper)
+    + <<async>> ListAllCompiledFromDB() : Task<Dictionary<int, Guid>>
+    + <<async>> ListAllStoredSourceCodes(dontPrint:bool) : Task<Dictionary<int, Guid>>
+    + <<async>> CompileAllScriptsInFolderAndSaveToDB(folderPath:string, userName:string, currentApiVersion:int) : Task
+    + <<async>> EditScriptInSwitch(id:Guid, userName:string, currentApiVersion:int) : Task
+    + <<async>> GetSourceCodeInSwitch() : Task
+    + {static} UpgradeActionResult(resultValue:object) : ActionResultV3NoInheritance
+    + <<async>> GetIdInConsoleAsync(fromSrc:bool) : Task<Guid>
+    - {static} references : MetadataReference[]
+    + {static} GetReferences() : MetadataReference[]
+    + {static} GetRecentApiVersion() : int
+    + {static} GetUserName() : string
+    + {static} GetTestingContext(justForTesting:CustomerScript?) : GeneratorContext
+    + {static} CreateStringFromCsFile(scriptPath:string) : string
+    + {static} GetScriptPathFromFolder(scriptFolderPath:string, classOfScriptToExecute:string) : string
+}
+@enduml

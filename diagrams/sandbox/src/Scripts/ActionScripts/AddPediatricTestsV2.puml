@@ -1,0 +1,6 @@
+@startuml
+class AddPediatricTestsV2 {
+    + <<async>> ExecuteAsync(context:IGeneratorContext_V2) : Task<ActionResultV2>
+}
+IGeneratorActionScriptV2 <|-- AddPediatricTestsV2
+@enduml

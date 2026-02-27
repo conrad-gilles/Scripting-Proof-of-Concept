@@ -1,0 +1,20 @@
+@startuml
+interface ConsoleLoggerInterface {
+    Info(message:string) : void
+    Warning(message:string) : void
+    Error(message:string) : void
+}
+interface DataAccessInterface {
+    GetReferenceData(category:string, key:string) : object?
+}
+class ConsoleLogger {
+    + Info(message:string) : void
+    + Warning(message:string) : void
+    + Error(message:string) : void
+}
+class DataAccess {
+    + GetReferenceData(category:string, key:string) : object?
+}
+ConsoleLoggerInterface <|-- ConsoleLogger
+DataAccessInterface <|-- DataAccess
+@enduml

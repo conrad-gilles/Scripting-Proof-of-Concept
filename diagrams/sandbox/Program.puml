@@ -1,0 +1,10 @@
+@startuml
+class MainProgram {
+    - {static} scriptFolderPath : string
+    - {static} userName : string = "Gilles"
+    - {static} currentApiVersion : int
+    - {static} currentSdkVersion : int = 1
+    {static} <<async>> - Main(args:string[]) : Task
+    + {static} <<async>> MainProgramSwitch(logger:LoggerForScripting) : Task
+}
+@enduml

@@ -12,6 +12,9 @@ using System.Reflection;
 using Serilog.Extensions.Logging;
 using Microsoft.Extensions.Logging;
 
+using Microsoft.Extensions.Hosting;           // ADDED
+using Microsoft.Extensions.DependencyInjection; // ADDED
+
 class MainProgram
 {
     // private static string scriptFolderPath = @"C:\Users\Gilles\Desktop\UNI\Semester 6\Code\Codebase\labsolutionlu-ember-scripting-fb966c220f60\sandbox\src\Scripts";
@@ -28,10 +31,7 @@ class MainProgram
         try
         {
             var logger = new LoggerForScripting();
-            // var microsoftLogger = logger.GetMicrosoftLogger<ScriptManagerFacade>();
-
-            var mainLogger = logger.GetMicrosoftLogger<MainProgram>();
-            mainLogger.LogDebug("Sandbox launched.");
+            Log.Debug("Sandbox launched.");
 
             // await new DbHelper().ensureDeletedCreated();       //only for testing
             await MainProgramSwitch(logger);
