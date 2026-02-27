@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Ember.Scripting;
 
-public class ScriptManagerFacade : IScriptManager
+public class ScriptManagerFacade : IScriptManager, IScriptManagerExtended
 {
     private readonly DbHelper Db;
     private readonly ScriptCompiler Compiler;
@@ -20,24 +20,7 @@ public class ScriptManagerFacade : IScriptManager
         Compiler = compiler;
         Executor = executor;
         Logger = logger;
-        // Db = new DbHelper(references);
-        // Compiler = new ScriptCompiler(references);
-        // Executor = new ScriptExecutor();
     }
-
-    public async Task EnsureDeletedCreated()    //todo delete this for obvious safety reasons before production
-    {
-        await Db.EnsureDeletedCreated();
-    }
-    public async Task<List<ScriptCompiledCache>> GetAllCompiledScriptCaches()
-    {
-        return await Db.GetAllCompiledScriptCaches();
-    }
-    public (string className, string baseTypeName, int versionInt) BasicValidationBeforeCompiling(string script)
-    {
-        return Compiler.BasicValidationBeforeCompiling(script);
-    }
-
 
     #region Script Lifecycle
 
@@ -208,6 +191,11 @@ public class ScriptManagerFacade : IScriptManager
         }
     }
 
+    public (string className, string baseTypeName, int versionInt) BasicValidationBeforeCompiling(string script)
+    {
+        return Compiler.BasicValidationBeforeCompiling(script);
+    }
+
     #endregion
 
     #region Execution Operations
@@ -359,6 +347,11 @@ public class ScriptManagerFacade : IScriptManager
         await Db.ClearScriptCache(scriptId);
     }
 
+    public async Task<List<ScriptCompiledCache>> GetAllCompiledScriptCaches()
+    {
+        return await Db.GetAllCompiledScriptCaches();
+    }
+
     // Removes all compiled caches (maintenance operation)
     public async Task ClearAllCaches()
     {
@@ -376,6 +369,10 @@ public class ScriptManagerFacade : IScriptManager
         await Db.AutomaticCompilationOnVersionUpdate(currentApiVersion);
     }
 
+    public async Task EnsureDeletedCreated()
+    {
+        await Db.EnsureDeletedCreated();
+    }
     #endregion
 
     #region Version Management

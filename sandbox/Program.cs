@@ -19,7 +19,7 @@ using Microsoft.Extensions.DependencyInjection;
 string scriptFolderPath = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "src", "Scripts"));
 string userName = "Gilles";
 int currentApiVersion;
-int currentSdkVersion = 1;
+// int currentSdkVersion = 1;
 
 try
 {
@@ -48,10 +48,6 @@ async Task MainProgramSwitch(IServiceProvider provider)
 {
     try
     {
-        // ScriptCompiler compiler3 = provider.GetRequiredService<ScriptCompiler>();
-        // ScriptExecutor exec3 = provider.GetRequiredService<ScriptExecutor>();
-        // DbHelper db = provider.GetRequiredService<DbHelper>();
-
         ScriptManagerFacade facade = provider.GetRequiredService<ScriptManagerFacade>();
         currentApiVersion = await facade.GetRecentApiVersion();
 
@@ -60,9 +56,7 @@ async Task MainProgramSwitch(IServiceProvider provider)
         Dictionary<int, Guid> sourceDict = await rm.ListAllStoredSourceCodes();
         Dictionary<int, Guid> cacheDict = [];
         Guid scriptId = new Guid();
-        //needs to be above autocomp else error
 
-        // await db.AutomaticCompilationOnVersionUpdate(currentApiVersion);    //todo make this "background job that is run automatically periodically"
         await facade.PrecompileForApiVersion();
 
         bool running = true;
@@ -72,7 +66,6 @@ async Task MainProgramSwitch(IServiceProvider provider)
             {
                 Console.WriteLine("Enter the function you want to run: ");
                 string? userInput = Console.ReadLine();
-                // Switch statement to test ScriptManagerFacade functions
                 switch (userInput)
                 {
                     case null:
@@ -88,21 +81,19 @@ async Task MainProgramSwitch(IServiceProvider provider)
                         await rm.GetSourceCodeInSwitch();
                         break;
                     case "reset":
-                        // await new DbHelper(UsefulMethods.GetReferences()).EnsureDeletedCreated();
                         await facade.EnsureDeletedCreated();
-                        // cacheDict =
                         await rm.ListAllCompiledFromDB();
                         break;
-                    case "comp":    //doesnt compile if isDuplicate is eneblaed bc scripts are already in db so no cache is created maybe todo
-                        await rm.CompileAllScriptsInFolderAndSaveToDB(scriptFolderPath, userName, currentApiVersion);   //main precompilation act
-                                                                                                                        // cacheDict =
+                    case "comp":
+                        await rm.CompileAllScriptsInFolderAndSaveToDB(scriptFolderPath, userName, currentApiVersion);
+
                         await rm.ListAllCompiledFromDB();
                         break;
                     case "comp source":
-                        // await new DbHelper(UsefulMethods.GetReferences()).CompileAllStoredScripts(currentApiVersion);
+
                         await facade.CompileAllScripts();
                         break;
-                    case "comp mv": //no functioality just for testing
+                    case "comp mv":
                         scriptId = await rm.GetIdInConsoleAsync(fromSrc: true);
                         for (int i = 0; i < 5; i++)
                         {
@@ -116,23 +107,19 @@ async Task MainProgramSwitch(IServiceProvider provider)
                         sourceDict = await rm.ListAllStoredSourceCodes();
                         break;
                     case "dupes":
-                        // await new DbHelper(UsefulMethods.GetReferences()).RemoveDuplicates();
                         await facade.RemoveDuplicates();
                         break;
                     case "deleteCache":
-                        // await new DbHelper(UsefulMethods.GetReferences()).DeleteAllCachedScripts();
                         await facade.ClearAllCaches();
                         break;
 
                     #region Script Lifecycle
 
                     case "CreateScript":
-                        // string sourceCode = UsefulMethods.CreateStringFromCsFile(@"C:\Users\Gilles\Desktop\UNI\Semester 6\Code\Codebase\labsolutionlu-ember-scripting-fb966c220f60\sandbox\src\Scripts\ConditionScripts\PediatricCondition.cs");
                         string sourceCode = rm.CreateStringFromCsFile(Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "src", "Scripts", "ConditionScripts", "PediatricCondition.cs")));
                         await facade.CreateScript(sourceCode, "Gilles");
                         break;
                     case "CreateScriptWithOld":
-                        // string sourceCodeOld = UsefulMethods.CreateStringFromCsFile(@"C:\Users\Gilles\Desktop\UNI\Semester 6\Code\Codebase\labsolutionlu-ember-scripting-fb966c220f60\sandbox\src\Scripts\ConditionScripts\PediatricCondition.cs");
                         string sourceCodeOld = rm.CreateStringFromCsFile(Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "src", "Scripts", "ConditionScripts", "PediatricCondition.cs")));
                         await facade.CreateScript(sourceCodeOld, "Gilles", 1);
                         break;
@@ -425,406 +412,3 @@ async Task MainProgramSwitch(IServiceProvider provider)
     }
 
 }
-// string scriptFolderPath = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "src", "Scripts"));
-// string userName = "Gilles";
-// int currentApiVersion;
-// int currentSdkVersion = 1;
-
-
-// var services = new ServiceCollection();
-
-
-
-// try
-// {
-//     var logger = new LoggerForScripting();
-//     Log.Debug("Sandbox launched.");
-
-//     // await new DbHelper().ensureDeletedCreated();       //only for testing
-//     await MainProgramSwitch(logger);
-//     // await RandomMethods.MainProgramSwitchAsync(scriptFolderPath);
-// }
-// finally
-// {
-//     Log.Debug("Sandbox closing.");
-//     await Log.CloseAndFlushAsync();
-// }
-
-// async Task MainProgramSwitch(LoggerForScripting logger)
-// {
-//     try
-//     {
-//         ScriptCompiler compiler3 = new ScriptCompiler(RandomMethods.GetReferences(), logger.GetMicrosoftLogger<ScriptCompiler>());
-//         ScriptExecutor exec3 = new ScriptExecutor(logger.GetMicrosoftLogger<ScriptExecutor>());
-//         var db = new DbHelper(compiler: compiler3, RandomMethods.GetReferences(), logger.GetMicrosoftLogger<DbHelper>());
-//         RandomMethods rm = new RandomMethods(db);
-
-//         Dictionary<int, Guid> sourceDict = await rm.ListAllStoredSourceCodes();
-//         Dictionary<int, Guid> cacheDict = [];
-//         Guid scriptId = new Guid();
-//         ScriptManagerFacade facade = new ScriptManagerFacade(db, compiler3, exec3, RandomMethods.GetReferences(), logger.GetMicrosoftLogger<ScriptManagerFacade>());
-//         currentApiVersion = await facade.GetRecentApiVersion(); //needs to be above autocomp else error
-
-//         await db.AutomaticCompilationOnVersionUpdate(currentApiVersion);    //todo make this "background job that is run automatically periodically"
-
-//         bool running = true;
-//         while (running)
-//         {
-//             try
-//             {
-//                 Console.WriteLine("Enter the function you want to run: ");
-//                 string? userInput = Console.ReadLine();
-//                 // Switch statement to test ScriptManagerFacade functions
-//                 switch (userInput)
-//                 {
-//                     case null:
-//                     case "":
-//                     case " ":
-//                         Console.WriteLine("You entered nothing try again.");
-//                         break;
-//                     case "exit":
-//                         running = false;
-//                         break;
-//                     case "source":
-
-//                         await rm.GetSourceCodeInSwitch();
-//                         break;
-//                     case "reset":
-//                         // await new DbHelper(UsefulMethods.GetReferences()).EnsureDeletedCreated();
-//                         await db.EnsureDeletedCreated();
-//                         // cacheDict =
-//                         await rm.ListAllCompiledFromDB();
-//                         break;
-//                     case "comp":    //doesnt compile if isDuplicate is eneblaed bc scripts are already in db so no cache is created maybe todo
-//                         await rm.CompileAllScriptsInFolderAndSaveToDB(scriptFolderPath, userName, currentApiVersion);   //main precompilation act
-//                                                                                                                         // cacheDict =
-//                         await rm.ListAllCompiledFromDB();
-//                         break;
-//                     case "comp source":
-//                         // await new DbHelper(UsefulMethods.GetReferences()).CompileAllStoredScripts(currentApiVersion);
-//                         await db.CompileAllStoredScripts(currentApiVersion);
-//                         break;
-//                     case "comp mv": //no functioality just for testing
-//                         scriptId = await rm.GetIdInConsoleAsync(fromSrc: true);
-//                         for (int i = 0; i < 5; i++)
-//                         {
-//                             await facade.CompileScript(scriptId, i);
-//                         }
-//                         break;
-//                     case "ls":
-//                         cacheDict = await rm.ListAllCompiledFromDB();
-//                         break;
-//                     case "ls source":
-//                         sourceDict = await rm.ListAllStoredSourceCodes();
-//                         break;
-//                     case "dupes":
-//                         // await new DbHelper(UsefulMethods.GetReferences()).RemoveDuplicates();
-//                         await db.RemoveDuplicates();
-//                         break;
-//                     case "deleteCache":
-//                         // await new DbHelper(UsefulMethods.GetReferences()).DeleteAllCachedScripts();
-//                         await db.DeleteAllCachedScripts();
-//                         break;
-
-//                     #region Script Lifecycle
-
-//                     case "CreateScript":
-//                         // string sourceCode = UsefulMethods.CreateStringFromCsFile(@"C:\Users\Gilles\Desktop\UNI\Semester 6\Code\Codebase\labsolutionlu-ember-scripting-fb966c220f60\sandbox\src\Scripts\ConditionScripts\PediatricCondition.cs");
-//                         string sourceCode = RandomMethods.CreateStringFromCsFile(Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "src", "Scripts", "ConditionScripts", "PediatricCondition.cs")));
-//                         await facade.CreateScript(sourceCode, "Gilles");
-//                         break;
-//                     case "CreateScriptWithOld":
-//                         // string sourceCodeOld = UsefulMethods.CreateStringFromCsFile(@"C:\Users\Gilles\Desktop\UNI\Semester 6\Code\Codebase\labsolutionlu-ember-scripting-fb966c220f60\sandbox\src\Scripts\ConditionScripts\PediatricCondition.cs");
-//                         string sourceCodeOld = RandomMethods.CreateStringFromCsFile(Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "src", "Scripts", "ConditionScripts", "PediatricCondition.cs")));
-//                         await facade.CreateScript(sourceCodeOld, "Gilles", 1);
-//                         break;
-
-//                     case "UpdateScript":
-//                         Guid idEdit = await rm.GetIdInConsoleAsync(fromSrc: true);
-
-//                         var customerScript = await db.GetCustomerScript(idEdit);
-//                         var creationDate = customerScript.CreatedAt;
-
-//                         Console.WriteLine("Copy paste your new version file path now:");
-//                         string? userInput2 = Console.ReadLine();
-
-//                         string? str = RandomMethods.CreateStringFromCsFile(userInput2!);
-
-//                         //In reality it would be better like this but doesnt work because cant paste too much in console:
-//                         // Console.WriteLine("Copy paste your new version now:");
-//                         // string userInput2 = Console.ReadLine();
-
-//                         await facade.UpdateScript(idEdit, str, userName);
-//                         break;
-
-//                     case "DeleteScript":
-//                         scriptId = await rm.GetIdInConsoleAsync(fromSrc: true);
-//                         await facade.DeleteScript(scriptId);
-//                         break;
-
-//                     case "GetScript":
-//                         scriptId = await rm.GetIdInConsoleAsync(fromSrc: true);
-//                         CustomerScript s = await facade.GetScript(scriptId);
-//                         Console.WriteLine(s.ToString());
-//                         break;
-
-//                     case "ListScripts":
-//                         var list = await facade.ListScripts();
-//                         foreach (var item in list)
-//                         {
-//                             Console.WriteLine(item.ToStringShorter());
-//                         }
-//                         break;
-
-//                     #endregion
-
-//                     #region Compilation Operations
-
-//                     case "CompileScript":   //todo check
-//                         scriptId = await rm.GetIdInConsoleAsync(fromSrc: true);
-//                         await facade.CompileScript(scriptId);    //should not compile if already present in db;
-//                         break;
-
-//                     case "CompileAllScripts":
-//                         await facade.CompileAllScripts();
-//                         break;
-
-//                     case "RecompileScript":
-//                         scriptId = await rm.GetIdInConsoleAsync(fromSrc: true);
-//                         await facade.RecompileScript(scriptId);
-//                         break;
-
-//                     case "ValidateScript":
-//                         scriptId = await rm.GetIdInConsoleAsync(fromSrc: true);
-//                         var script = await db.GetCustomerScript(scriptId);
-//                         string answer = await facade.ValidateScript(script.SourceCode!);
-//                         Console.WriteLine(answer);
-//                         break;
-
-//                     case "GetCompilationErrors":    //todo test by turning off auto check when adding same with above
-//                         scriptId = await rm.GetIdInConsoleAsync(fromSrc: true);
-//                         string compAnswer = await facade.GetCompilationErrors(scriptId);
-//                         Console.WriteLine(compAnswer);
-//                         break;
-
-//                     #endregion
-
-//                     #region Execution Operations
-
-//                     case "ExecuteActionScript":
-//                         scriptId = await rm.GetIdInConsoleAsync(fromSrc: true);
-//                         ActionResultBaseClass result = await facade.ExecuteActionScript(scriptId, RandomMethods.GetTestingContext<GeneratorContextV3>());
-//                         Console.WriteLine(result.ToString());   //you could do whatever with it
-//                         break;
-
-//                     case "ExecuteConditionScript":
-//                         scriptId = await rm.GetIdInConsoleAsync(fromSrc: true);
-//                         bool resultCond = await facade.ExecuteConditionScript(scriptId, RandomMethods.GetTestingContext<GeneratorContextV3>());
-//                         Console.WriteLine(resultCond);
-//                         break;
-
-//                     case "ExecuteScriptById":
-//                         scriptId = await rm.GetIdInConsoleAsync(fromSrc: true);
-//                         object resultObj = await facade.ExecuteScriptById(scriptId, RandomMethods.GetTestingContext<GeneratorContextV3>());
-
-//                         if (typeof(bool).IsAssignableFrom(resultObj.GetType()))       //good idea to check what type was returne, you could also just check the property from db normally
-//                         {
-//                             Console.WriteLine("Script returned a bool: " + resultObj.ToString());
-//                         }
-//                         else if (typeof(ActionResultBaseClass).IsAssignableFrom(resultObj.GetType()))
-//                         {
-//                             Console.WriteLine("Script returned an ActionResult: " + resultObj.ToString());
-//                         }
-//                         else
-//                         {
-//                             Console.WriteLine("Script was neither returned a bool nor an ActionResultBaseClass, it was a: " + resultObj.GetType().ToString());
-//                         }
-//                         break;
-
-//                     #endregion
-
-//                     #region Cache Management
-
-//                     case "GetCompiledCache":
-//                         scriptId = await rm.GetIdInConsoleAsync();
-//                         byte[] arr = await facade.GetCompiledCache(scriptId, currentApiVersion);
-//                         Console.WriteLine(arr.ToString());
-//                         break;
-
-//                     case "ClearScriptCache":
-//                         scriptId = await rm.GetIdInConsoleAsync(fromSrc: true);
-//                         await facade.ClearScriptCache(scriptId);
-//                         break;
-
-//                     case "ClearAllCaches":
-//                         await facade.ClearAllCaches();
-//                         break;
-
-//                     case "PrecompileForApiVersion":
-//                         await facade.PrecompileForApiVersion();
-//                         break;
-
-//                     #endregion
-
-//                     #region Version Management
-
-//                     case "GetActiveApiVersions":
-//                         var ls = await facade.GetActiveApiVersions();    //todo
-//                         string vs = "";
-//                         foreach (var item in ls)
-//                         {
-//                             vs = vs + " " + item;
-//                         }
-//                         Console.WriteLine("Active Api versions: " + vs);
-//                         break;
-
-//                     case "GetScriptCompatibility":
-//                         scriptId = await rm.GetIdInConsoleAsync(fromSrc: true);
-//                         int compa = await facade.GetScriptCompatibility(scriptId);
-//                         Console.WriteLine("Min api version: " + compa);
-//                         break;
-
-//                     case "CheckVersionCompatibility":
-//                         scriptId = await rm.GetIdInConsoleAsync(fromSrc: true);
-//                         bool check = await facade.CheckVersionCompatibility(scriptId, currentApiVersion);
-//                         Console.WriteLine("CheckVersionCompatibility with ApiV: " + currentApiVersion + " is " + check);
-//                         break;
-
-//                     case "RegisterEmberInstance":
-//                         // await facade.RegisterEmberInstance(instanceId, emberVersion, apiVersion);
-//                         break;
-
-//                     #endregion
-
-//                     #region Duplicate Detection & Cleanup
-
-//                     case "DetectDuplicates":
-//                         var dupes = await facade.DetectDuplicates();
-//                         List<Guid> scriptGUIDs = dupes.scriptGUIDs;
-//                         Dictionary<Guid, int> cacheGUIDs = dupes.cacheGUIDs;
-//                         string rtrnStr1 = "Script Guids to remove: ";
-//                         foreach (var item in scriptGUIDs)
-//                         {
-//                             rtrnStr1 = rtrnStr1 + " , " + item;
-//                         }
-//                         string rtrnStr2 = "Cache Guids to remove: ";
-//                         foreach (var item in cacheGUIDs)
-//                         {
-//                             rtrnStr2 = rtrnStr2 + " , " + item;
-//                         }
-//                         Console.WriteLine(rtrnStr1);
-//                         Console.WriteLine(rtrnStr2);
-//                         break;
-
-//                     case "RemoveDuplicates":
-//                         await facade.RemoveDuplicates();
-//                         break;
-
-//                     case "CleanupOrphanedCaches":
-//                         await facade.CleanupOrphanedCaches();
-//                         break;
-
-//                     #endregion
-
-//                     #region Monitoring & Diagnostics
-
-//                     case "GetScriptExecutionHistory":
-//                         // await facade.GetScriptExecutionHistory(scriptId);
-//                         break;
-
-//                     case "GetCompilationStatistics":
-//                         // await facade.GetCompilationStatistics();
-//                         break;
-
-//                     case "HealthCheck":
-//                         await facade.HealthCheck();
-//                         break;
-
-//                     case "GetScriptMetadata":
-//                         scriptId = await rm.GetIdInConsoleAsync(fromSrc: true);
-//                         string strr = await facade.GetScriptMetadata(scriptId);
-//                         Console.WriteLine(strr);
-//                         break;
-//                     case "GetUserName":
-//                         string strrr = facade.GetUserName();
-//                         Console.WriteLine(strrr);
-//                         break;
-
-//                     #endregion
-
-//                     default:
-//                         sourceDict = await rm.ListAllStoredSourceCodes(dontPrint: true);
-//                         scriptId = sourceDict[Int32.Parse(userInput)];
-//                         CustomerScript justForTesting = await db.GetCustomerScript(scriptId);
-//                         object resultObj2 = await facade.ExecuteScriptById(scriptId, RandomMethods.GetTestingContext<GeneratorContextNoInherVaccine>(justForTesting: justForTesting));
-
-//                         if (typeof(bool).IsAssignableFrom(resultObj2.GetType()))       //good idea to check what type was returne, you could also just check the property from db normally
-//                         {
-//                             Console.WriteLine("Script returned a bool: " + resultObj2.ToString());
-//                         }
-//                         else if (typeof(ActionResultBaseClass).IsAssignableFrom(resultObj2.GetType()))
-//                         {
-//                             Console.WriteLine("Script returned an ActionResult: " + resultObj2.ToString());
-//                         }
-//                         else
-//                         {
-//                             Console.WriteLine("Script was neither returned a bool nor an ActionResult, it was a: " + resultObj2.GetType().ToString());
-//                         }
-//                         break;
-//                 }
-
-//             }
-//             catch (DbUpdateException e)
-//             {
-//                 Console.WriteLine("Database Error: " + e.InnerException?.Message);  //todo check what this really does and if superior to just tostring
-//                 Console.WriteLine("Database Error: " + e.ToString());
-//             }
-//             catch (NoFileWithThisClassNameFoundException)
-//             {
-//                 Console.WriteLine("No file with this Class name found, make sure the file name is the same as the class name.");
-//             }
-//             catch (CompilationFailedException)
-//             {
-//                 Console.WriteLine("Something went wrong when trying to compile your script, but you can try again.");
-//             }
-//             catch (ScriptExecutionException)
-//             {
-//                 Console.WriteLine("Something went wrong when trying to execute your script, but you can try again.");
-//             }
-//             catch (ConditionScriptExecutionException)
-//             {
-//                 Console.WriteLine("Something went wrong trying to execute your ConditionScript, but you can try again.");
-//             }
-//             catch (ActionScriptExecutionException)
-//             {
-//                 Console.WriteLine("Something went wrong trying to execute your ActionScript, but you can try again.");
-//             }
-//             catch (GetScriptPathFromFolderException)
-//             {
-//                 Console.WriteLine("Something went wrong when trying to get the Script path from the folder, but you can try again.");
-//             }
-//             catch (CreateStringFromCsFileException)
-//             {
-//                 Console.WriteLine("Something went wrong trying to create the string from the .cs file, but you can try again.");
-//             }
-//             catch (NoClassFoundInScriptFileException)
-//             {
-//                 //todo
-//             }
-//             catch (MoreThanOneClassFoundInScriptException)
-//             {
-//                 //todo
-//             }
-//             catch (Exception e)
-//             {
-//                 Console.WriteLine(e.Message);
-//             }
-//         }
-//     }
-//     catch (Exception e)
-//     {
-//         Console.WriteLine(e.Message);
-//     }
-
-// }
-

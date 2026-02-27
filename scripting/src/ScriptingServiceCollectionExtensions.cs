@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Ember.Scripting;
 
+//Ai Generated
 public static class ScriptingServiceCollectionExtensions
 {
     public static IServiceCollection AddEmberScripting(this IServiceCollection services, MetadataReference[] references)
