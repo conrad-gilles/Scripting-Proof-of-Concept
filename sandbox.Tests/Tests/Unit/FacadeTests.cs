@@ -1,6 +1,8 @@
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Ember.Scripting;
+using Serilog;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace FirstTests;
 
@@ -8,7 +10,6 @@ namespace FirstTests;
 public class ScriptManagerFacadeTests
 {
     private ScriptManagerFacade? facade;
-    private DbHelper? db;
     string? sourceCodePedia;
     private string? sourceCodeActionV1;
     private string? sourceCodeActionV3;
@@ -17,14 +18,32 @@ public class ScriptManagerFacadeTests
     [TestInitialize]
     public async Task Setup()
     {
-        var logger = new LoggerForScripting();
-        // var microsoftLogger = logger.GetMicrosoftLogger<ScriptManagerFacade>();
-        ScriptCompiler compiler3 = new ScriptCompiler(RandomMethods.GetReferences(), logger.GetMicrosoftLogger<ScriptCompiler>());
-        ScriptExecutor exec3 = new ScriptExecutor(logger.GetMicrosoftLogger<ScriptExecutor>());
-        db = new DbHelper(compiler3, RandomMethods.GetReferences(), logger.GetMicrosoftLogger<DbHelper>());
-        rm = new RandomMethods(db);
 
-        facade = new ScriptManagerFacade(db, compiler3, exec3, RandomMethods.GetReferences(), logger.GetMicrosoftLogger<ScriptManagerFacade>());
+        var logger = new LoggerForScripting();
+        Log.Debug("Sandbox launched.");
+
+        var services = new ServiceCollection();
+        services.AddLogging(builder =>
+        {
+            // Assuming you use Serilog, this forwards standard MS Logging to Serilog
+            builder.AddSerilog(dispose: true);
+        });
+
+        ScriptingServiceCollectionExtensions.AddEmberScripting(services, RandomMethods.GetReferences());
+
+        using var provider = services.BuildServiceProvider();
+
+        facade = provider.GetRequiredService<ScriptManagerFacade>();
+        rm = new RandomMethods(facade);
+
+        // var logger = new LoggerForScripting();
+        // // var microsoftLogger = logger.GetMicrosoftLogger<ScriptManagerFacade>();
+        // ScriptCompiler compiler3 = new ScriptCompiler(RandomMethods.GetReferences(), logger.GetMicrosoftLogger<ScriptCompiler>());
+        // ScriptExecutor exec3 = new ScriptExecutor(logger.GetMicrosoftLogger<ScriptExecutor>());
+        // db = new DbHelper(compiler3, RandomMethods.GetReferences(), logger.GetMicrosoftLogger<DbHelper>());
+        // rm = new RandomMethods(db);
+
+        // facade = new ScriptManagerFacade(db, compiler3, exec3, RandomMethods.GetReferences(), logger.GetMicrosoftLogger<ScriptManagerFacade>());
 
         // Clear all data between tests without drop/recreate
         await facade.ClearAllCaches();
@@ -33,7 +52,7 @@ public class ScriptManagerFacadeTests
             await facade.DeleteScript(s.Id);
 
         // Load source files
-        sourceCodePedia = RandomMethods.CreateStringFromCsFile(
+        sourceCodePedia = rm.CreateStringFromCsFile(
             Path.GetFullPath(Path.Combine(
                 AppDomain.CurrentDomain.BaseDirectory,
                 "..", "..", "..", "..",
@@ -41,7 +60,7 @@ public class ScriptManagerFacadeTests
             ))
         );
 
-        sourceCodeActionV1 = RandomMethods.CreateStringFromCsFile(
+        sourceCodeActionV1 = rm.CreateStringFromCsFile(
             Path.GetFullPath(Path.Combine(
                 AppDomain.CurrentDomain.BaseDirectory,
                 "..", "..", "..", "..",
@@ -49,7 +68,7 @@ public class ScriptManagerFacadeTests
             ))
         );
 
-        sourceCodeActionV3 = RandomMethods.CreateStringFromCsFile(
+        sourceCodeActionV3 = rm.CreateStringFromCsFile(
             Path.GetFullPath(Path.Combine(
                 AppDomain.CurrentDomain.BaseDirectory,
                 "..", "..", "..", "..",
@@ -129,7 +148,7 @@ public class ScriptManagerFacadeTests
     {
         string scriptFolderPath = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "..",
                 "sandbox", "src", "Scripts"));
-        await db!.EnsureDeletedCreated();
+        await facade!.EnsureDeletedCreated();
         await rm!.CompileAllScriptsInFolderAndSaveToDB(scriptFolderPath, "Gilles", 4);
         List<CustomerScript> scripts = await facade!.ListScripts(includeCaches: true);
         Assert.IsNotNull(scripts);
@@ -242,7 +261,7 @@ public class ScriptManagerFacadeTests
     public async Task ExecuteActionScriptTest()
     {
         Guid id = await facade!.CreateScript(sourceCodeActionV1!);
-        var testingContext = RandomMethods.GetTestingContext<GeneratorContextV3>();
+        var testingContext = rm.GetTestingContext<GeneratorContextV3>();
 
         ActionResultBaseClass result = await facade.ExecuteActionScript(id, testingContext);
 
@@ -264,7 +283,7 @@ public class ScriptManagerFacadeTests
     public async Task ExecuteConditionScriptTest()
     {
         Guid id = await facade!.CreateScript(sourceCodePedia!);
-        var testingContext = RandomMethods.GetTestingContext<GeneratorContextV3>();
+        var testingContext = rm.GetTestingContext<GeneratorContextV3>();
 
         bool result = await facade.ExecuteConditionScript(id, testingContext);
 
@@ -281,7 +300,7 @@ public class ScriptManagerFacadeTests
     [TestMethod]
     public async Task ExecuteScriptByIdTest()
     {
-        var context = RandomMethods.GetTestingContext<GeneratorContextV3>();
+        var context = rm.GetTestingContext<GeneratorContextV3>();
 
         Guid condId = await facade!.CreateScript(sourceCodePedia!);
         object condResult = await facade.ExecuteScriptById(condId, context);
@@ -336,7 +355,7 @@ public class ScriptManagerFacadeTests
 
         await facade.ClearAllCaches();
 
-        var caches = await db!.GetAllCompiledScriptCaches();
+        var caches = await facade.GetAllCompiledScriptCaches();
         Assert.AreEqual(0, caches.Count);
     }
 
@@ -477,7 +496,7 @@ public class ScriptManagerFacadeTests
     [TestMethod]
     public async Task HealthCheckTest() //todo
     {
-        await db!.HealthCheck();
+        await facade!.HealthCheck();
         Assert.IsTrue(true);
     }
 

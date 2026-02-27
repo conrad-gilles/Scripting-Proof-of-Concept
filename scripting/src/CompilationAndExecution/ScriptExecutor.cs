@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Ember.Scripting;
 
-public class ScriptExecutor
+internal class ScriptExecutor
 {
     // private readonly byte[] compiledScript;
     // private readonly GeneratorContext genContext;

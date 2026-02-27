@@ -5,7 +5,7 @@ using Ember.Scripting;
 using Microsoft.Extensions.Logging;
 namespace Ember.Scripting;
 
-public class DbHelper
+internal class DbHelper
 {
     private readonly MetadataReference[] References;
     private readonly ScriptCompiler Compiler;

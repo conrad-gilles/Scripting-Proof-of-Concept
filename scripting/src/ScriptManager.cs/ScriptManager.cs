@@ -13,7 +13,7 @@ public class ScriptManagerFacade : IScriptManager
     private readonly MetadataReference[] References;
     private readonly ILogger<ScriptManagerFacade> Logger;
 
-    public ScriptManagerFacade(DbHelper db, ScriptCompiler compiler, ScriptExecutor executor, MetadataReference[] references, ILogger<ScriptManagerFacade> logger)
+    internal ScriptManagerFacade(DbHelper db, ScriptCompiler compiler, ScriptExecutor executor, MetadataReference[] references, ILogger<ScriptManagerFacade> logger)
     {
         References = references;
         Db = db;
@@ -25,6 +25,20 @@ public class ScriptManagerFacade : IScriptManager
         // Executor = new ScriptExecutor();
     }
 
+    public async Task EnsureDeletedCreated()    //todo delete this for obvious safety reasons before production
+    {
+        await Db.EnsureDeletedCreated();
+    }
+    public async Task<List<ScriptCompiledCache>> GetAllCompiledScriptCaches()
+    {
+        return await Db.GetAllCompiledScriptCaches();
+    }
+    public (string className, string baseTypeName, int versionInt) BasicValidationBeforeCompiling(string script)
+    {
+        return Compiler.BasicValidationBeforeCompiling(script);
+    }
+
+
     #region Script Lifecycle
 
     /// <inheritdoc cref="IScriptManager.CreateScript(string, string?, string, int)">
@@ -35,19 +49,20 @@ public class ScriptManagerFacade : IScriptManager
     /// <param name="userName"></param>
     /// <param name="apiVersion"></param>
     /// <returns></returns>
-    public async Task<Guid> CreateScript(string sourceCode, string userName = "Default", int apiVersion = -1)    //maybe minApiVersion is better?
+    public async Task<Guid> CreateScript(string sourceCode, string userName = "Default", int apiVersion = -1, DateTime? createdAt = null)    //maybe minApiVersion is better?
     {
         Logger.LogDebug("Entered {MethodName} in {ClassName}.", nameof(CreateScript), nameof(ScriptManagerFacade));
 
         int currentApiVersion = await GetRecentApiVersion();
         Guid id = Guid.NewGuid();
+
         if (apiVersion == -1)
         {
-            await Db.CreateAndInsertCustomerScript(sourceCode, id, userName);
+            await Db.CreateAndInsertCustomerScript(sourceCode, id, userName, createdAt: createdAt);
         }
         else
         {
-            await Db.CreateAndInsertCustomerScript(sourceCode, id, userName, apiVersion);
+            await Db.CreateAndInsertCustomerScript(sourceCode, id, userName, apiVersion, createdAt: createdAt);
         }
         return id;
 
@@ -492,4 +507,6 @@ public class ScriptManagerFacade : IScriptManager
     }
 
     #endregion
+
+
 }

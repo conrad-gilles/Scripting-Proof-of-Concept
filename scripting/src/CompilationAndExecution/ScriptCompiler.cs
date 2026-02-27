@@ -7,7 +7,7 @@ using System.Reflection;
 
 namespace Ember.Scripting;
 
-public class ScriptCompiler
+internal class ScriptCompiler
 {
     private readonly MetadataReference[]? References2 = null;
     private readonly ILogger<ScriptCompiler> Logger;
@@ -153,7 +153,7 @@ public class ScriptCompiler
         catch (Exception e)
         {
             Logger.LogError("BasicValidation failed:" + e.ToString());
-            throw new ValidationBeforeCompilationException();
+            throw new ValidationBeforeCompilationException(e.ToString(), e);
         }
 
     }

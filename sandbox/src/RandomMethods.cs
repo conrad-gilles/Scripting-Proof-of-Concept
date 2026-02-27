@@ -4,9 +4,9 @@ using Ember.Scripting;
 using Microsoft.CodeAnalysis;
 public class RandomMethods
 {
-    private readonly DbHelper db;
+    private readonly ScriptManagerFacade db;
 
-    public RandomMethods(DbHelper db2)
+    public RandomMethods(ScriptManagerFacade db2)
     {
         db = db2;
     }
@@ -33,7 +33,7 @@ public class RandomMethods
     {
         Serilog.Log.Verbose("Entered {MethodName} in {ClassName}.", nameof(ListAllStoredSourceCodes), nameof(RandomMethods));
         // var db = new DbHelper(UsefulMethods.GetReferences());
-        List<CustomerScript> sourceCodes = await db.GetAllCustomerScripts(includeCaches: true);
+        List<CustomerScript> sourceCodes = await db.ListScripts(includeCaches: true);
 
         Dictionary<int, Guid> sourceDict = new Dictionary<int, Guid>();
         for (int i = 0; i < sourceCodes.Count; i++)
@@ -66,7 +66,7 @@ public class RandomMethods
                 // var db = new DbHelper(UsefulMethods.GetReferences());
                 string scriptString = CreateStringFromCsFile(files[i]);
                 Guid id = Guid.NewGuid();
-                CustomerScript randomTestScript2 = await db.CreateAndInsertCustomerScript(scriptString, id, userName);
+                Guid randomTestScript2Id = await db.CreateScript(scriptString);
                 // Console.WriteLine(randomTestScript2.ScriptName + "Added script N" + i + ". to both tables.");
 
             }
@@ -88,7 +88,7 @@ public class RandomMethods
     {
         Serilog.Log.Verbose("Entered {MethodName} in {ClassName} with scriptId: {ScriptId}.", nameof(EditScriptInSwitch), nameof(RandomMethods), id);
         // var db = new DbHelper(UsefulMethods.GetReferences());
-        var customerScript = await db.GetCustomerScript(id);
+        var customerScript = await db.GetScript(id);
         var creationDate = customerScript.CreatedAt;
         Console.WriteLine("Here is the old version of the script source code:");
         Console.WriteLine(customerScript.SourceCode);
@@ -97,13 +97,13 @@ public class RandomMethods
         string userInput2 = Console.ReadLine()!;
 
         string str = CreateStringFromCsFile(userInput2!);
-        await db.DeleteCustomerScript(id);
+        await db.DeleteScript(id);
 
         //In reality it would be better like this but doesnt work because cant paste too much in console:
         // Console.WriteLine("Copy paste your new version now:");
         // string userInput2 = Console.ReadLine();
 
-        await db.CreateAndInsertCustomerScript(str, id, userName, createdAt: (DateTime)creationDate!); //todo unsafe af
+        await db.CreateScript(str, userName, createdAt: (DateTime)creationDate!); //todo unsafe af
 
 
     }
@@ -117,7 +117,7 @@ public class RandomMethods
         {
             // string userInput = Console.ReadLine();
 
-            List<CustomerScript> customerScripts = await db.GetAllCustomerScripts();
+            List<CustomerScript> customerScripts = await db.ListScripts();
             for (int i = 0; i < customerScripts.Count; i++)
             {
                 Console.WriteLine(customerScripts[i]);
@@ -127,7 +127,7 @@ public class RandomMethods
         {
             var listAllCompiledFromDB = await ListAllCompiledFromDB();
             Guid idEdit = listAllCompiledFromDB[Int32.Parse(userInput)];
-            CustomerScript scr = await db.GetCustomerScript(idEdit);
+            CustomerScript scr = await db.GetScript(idEdit);
             Console.WriteLine(scr.SourceCode);
         }
 
@@ -221,7 +221,7 @@ public class RandomMethods
         // GeneratorContext ctx = GetTestingContext();
         return "Gilles";
     }
-    public static GeneratorContext GetTestingContext<T>(CustomerScript? justForTesting = null) where T : GeneratorContext
+    public GeneratorContext GetTestingContext<T>(CustomerScript? justForTesting = null) where T : GeneratorContext
     {
         Serilog.Log.Verbose("Entered {MethodName} in {ClassName}.", nameof(GetTestingContext), nameof(RandomMethods));
         try
@@ -245,13 +245,13 @@ public class RandomMethods
             {
                 var microsoftLogger = new LoggerForScripting().GetMicrosoftLogger<ScriptManagerFacade>();
                 var refs = GetReferences();
-                ScriptCompiler compiler = new ScriptCompiler(refs, new LoggerForScripting().GetMicrosoftLogger<ScriptCompiler>());
-                string implementedInterface = compiler.BasicValidationBeforeCompiling(justForTesting.SourceCode!).baseTypeName;
+                // ScriptCompiler compiler = new ScriptCompiler(refs, new LoggerForScripting().GetMicrosoftLogger<ScriptCompiler>());
+                string implementedInterface = db.BasicValidationBeforeCompiling(justForTesting.SourceCode!).baseTypeName;
                 switch (implementedInterface)
                 {
                     case "IGeneratorActionScript":
                         // ctx = new RWContext(labOrder, patient, logger, testDataAccess);
-                        int v = compiler.BasicValidationBeforeCompiling(justForTesting.SourceCode!).versionInt;
+                        int v = db.BasicValidationBeforeCompiling(justForTesting.SourceCode!).versionInt;
                         ctx = v switch
                         {
                             1 => new RWContext(labOrder, patient, logger, testDataAccess),
@@ -292,7 +292,7 @@ public class RandomMethods
     }
 
 
-    public static string CreateStringFromCsFile(string scriptPath)
+    public string CreateStringFromCsFile(string scriptPath)
     {
         Serilog.Log.Verbose("Entered {MethodName} in {ClassName} with path: {ScriptPath}.", nameof(CreateStringFromCsFile), nameof(RandomMethods), scriptPath);
         try
@@ -311,7 +311,7 @@ public class RandomMethods
         }
         // Source https://www.tutorialspoint.com/chash-program-to-create-string-from-contents-of-a-file //obv i changed a lot but i still copied
     }
-    public static string GetScriptPathFromFolder(string scriptFolderPath, string classOfScriptToExecute)
+    public string GetScriptPathFromFolder(string scriptFolderPath, string classOfScriptToExecute)
     {
         Serilog.Log.Verbose("Entered {MethodName} in {ClassName}.", nameof(GetScriptPathFromFolder), nameof(RandomMethods));
         try
