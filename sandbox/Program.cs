@@ -48,7 +48,9 @@ async Task MainProgramSwitch(IServiceProvider provider)
 {
     try
     {
-        ScriptManagerFacade facade = provider.GetRequiredService<ScriptManagerFacade>();
+        // ScriptManagerFacade facade = provider.GetRequiredService<ScriptManagerFacade>();
+        IScriptManagerExtended facade = provider.GetRequiredService<IScriptManagerExtended>();
+        IScriptManager facade1 = provider.GetRequiredService<IScriptManager>();
         currentApiVersion = await facade.GetRecentApiVersion();
 
         RandomMethods rm = new RandomMethods(facade);

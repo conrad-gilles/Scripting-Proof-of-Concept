@@ -4,17 +4,17 @@ using Ember.Scripting;
 using Microsoft.CodeAnalysis;
 public class RandomMethods
 {
-    private readonly ScriptManagerFacade db;
+    private readonly IScriptManagerExtended Facade;
 
-    public RandomMethods(ScriptManagerFacade db2)
+    public RandomMethods(IScriptManagerExtended facade)
     {
-        db = db2;
+        Facade = facade;
     }
     public async Task<Dictionary<int, Guid>> ListAllCompiledFromDB()
     {
         Serilog.Log.Verbose("Entered {MethodName} in {ClassName}.", nameof(ListAllCompiledFromDB), nameof(RandomMethods));
         // var db = new DbHelper(UsefulMethods.GetReferences());
-        List<ScriptCompiledCache> caches = await db.GetAllCompiledScriptCaches();
+        List<ScriptCompiledCache> caches = await Facade.GetAllCompiledScriptCaches();
 
         Dictionary<int, Guid> cacheDict = new Dictionary<int, Guid>();
         for (int i = 0; i < caches.Count(); i++)
@@ -33,7 +33,7 @@ public class RandomMethods
     {
         Serilog.Log.Verbose("Entered {MethodName} in {ClassName}.", nameof(ListAllStoredSourceCodes), nameof(RandomMethods));
         // var db = new DbHelper(UsefulMethods.GetReferences());
-        List<CustomerScript> sourceCodes = await db.ListScripts(includeCaches: true);
+        List<CustomerScript> sourceCodes = await Facade.ListScripts(includeCaches: true);
 
         Dictionary<int, Guid> sourceDict = new Dictionary<int, Guid>();
         for (int i = 0; i < sourceCodes.Count; i++)
@@ -66,7 +66,7 @@ public class RandomMethods
                 // var db = new DbHelper(UsefulMethods.GetReferences());
                 string scriptString = CreateStringFromCsFile(files[i]);
                 Guid id = Guid.NewGuid();
-                Guid randomTestScript2Id = await db.CreateScript(scriptString);
+                Guid randomTestScript2Id = await Facade.CreateScript(scriptString);
                 // Console.WriteLine(randomTestScript2.ScriptName + "Added script N" + i + ". to both tables.");
 
             }
@@ -88,7 +88,7 @@ public class RandomMethods
     {
         Serilog.Log.Verbose("Entered {MethodName} in {ClassName} with scriptId: {ScriptId}.", nameof(EditScriptInSwitch), nameof(RandomMethods), id);
         // var db = new DbHelper(UsefulMethods.GetReferences());
-        var customerScript = await db.GetScript(id);
+        var customerScript = await Facade.GetScript(id);
         var creationDate = customerScript.CreatedAt;
         Console.WriteLine("Here is the old version of the script source code:");
         Console.WriteLine(customerScript.SourceCode);
@@ -97,13 +97,13 @@ public class RandomMethods
         string userInput2 = Console.ReadLine()!;
 
         string str = CreateStringFromCsFile(userInput2!);
-        await db.DeleteScript(id);
+        await Facade.DeleteScript(id);
 
         //In reality it would be better like this but doesnt work because cant paste too much in console:
         // Console.WriteLine("Copy paste your new version now:");
         // string userInput2 = Console.ReadLine();
 
-        await db.CreateScript(str, userName, createdAt: (DateTime)creationDate!); //todo unsafe af
+        await Facade.CreateScript(str, userName, createdAt: (DateTime)creationDate!); //todo unsafe af
 
 
     }
@@ -117,7 +117,7 @@ public class RandomMethods
         {
             // string userInput = Console.ReadLine();
 
-            List<CustomerScript> customerScripts = await db.ListScripts();
+            List<CustomerScript> customerScripts = await Facade.ListScripts();
             for (int i = 0; i < customerScripts.Count; i++)
             {
                 Console.WriteLine(customerScripts[i]);
@@ -127,7 +127,7 @@ public class RandomMethods
         {
             var listAllCompiledFromDB = await ListAllCompiledFromDB();
             Guid idEdit = listAllCompiledFromDB[Int32.Parse(userInput)];
-            CustomerScript scr = await db.GetScript(idEdit);
+            CustomerScript scr = await Facade.GetScript(idEdit);
             Console.WriteLine(scr.SourceCode);
         }
 
@@ -246,12 +246,12 @@ public class RandomMethods
                 var microsoftLogger = new LoggerForScripting().GetMicrosoftLogger<ScriptManagerFacade>();
                 var refs = GetReferences();
                 // ScriptCompiler compiler = new ScriptCompiler(refs, new LoggerForScripting().GetMicrosoftLogger<ScriptCompiler>());
-                string implementedInterface = db.BasicValidationBeforeCompiling(justForTesting.SourceCode!).baseTypeName;
+                string implementedInterface = Facade.BasicValidationBeforeCompiling(justForTesting.SourceCode!).baseTypeName;
                 switch (implementedInterface)
                 {
                     case "IGeneratorActionScript":
                         // ctx = new RWContext(labOrder, patient, logger, testDataAccess);
-                        int v = db.BasicValidationBeforeCompiling(justForTesting.SourceCode!).versionInt;
+                        int v = Facade.BasicValidationBeforeCompiling(justForTesting.SourceCode!).versionInt;
                         ctx = v switch
                         {
                             1 => new RWContext(labOrder, patient, logger, testDataAccess),

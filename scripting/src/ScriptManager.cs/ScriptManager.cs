@@ -7,6 +7,8 @@ namespace Ember.Scripting;
 
 public class ScriptManagerFacade : IScriptManager, IScriptManagerExtended
 {
+    /// <inheritdoc cref="IScriptManager.CreateScript(string, string?, string, int)">
+
     private readonly DbHelper Db;
     private readonly ScriptCompiler Compiler;
     private readonly ScriptExecutor Executor;
@@ -24,14 +26,6 @@ public class ScriptManagerFacade : IScriptManager, IScriptManagerExtended
 
     #region Script Lifecycle
 
-    /// <inheritdoc cref="IScriptManager.CreateScript(string, string?, string, int)">
-    ///
-    /// </summary>
-    /// <param name="sourceCode"></param>
-    /// <param name="scriptType"></param>
-    /// <param name="userName"></param>
-    /// <param name="apiVersion"></param>
-    /// <returns></returns>
     public async Task<Guid> CreateScript(string sourceCode, string userName = "Default", int apiVersion = -1, DateTime? createdAt = null)    //maybe minApiVersion is better?
     {
         Logger.LogDebug("Entered {MethodName} in {ClassName}.", nameof(CreateScript), nameof(ScriptManagerFacade));

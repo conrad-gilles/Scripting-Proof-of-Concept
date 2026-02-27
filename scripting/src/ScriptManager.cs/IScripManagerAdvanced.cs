@@ -1,6 +1,6 @@
 namespace Ember.Scripting;
 
-public interface IScriptManagerExtended
+public interface IScriptManagerExtended : IScriptManager
 {
     #region Script Lifecycle
 
@@ -117,14 +117,14 @@ public interface IScriptManagerExtended
     /// <returns></returns>
     Task<bool> ExecuteConditionScript(Guid scriptId, GeneratorContext context, int apiVersion = -1);
 
-    /// <summary>
-    /// Generic execution that detects script type automatically
-    /// </summary>
-    /// <param name="scriptId"></param>
-    /// <param name="context"></param>
-    /// <param name="currentApiVersion"></param>
-    /// <returns></returns>
-    Task<object> ExecuteScriptById(Guid scriptId, GeneratorContext context, int currentApiVersion = -1);
+    // /// <summary>
+    // /// Generic execution that detects script type automatically
+    // /// </summary>
+    // /// <param name="scriptId"></param>
+    // /// <param name="context"></param>
+    // /// <param name="currentApiVersion"></param>
+    // /// <returns></returns>
+    // Task<object> ExecuteScriptById(Guid scriptId, GeneratorContext context, int currentApiVersion = -1);
 
     #endregion
 

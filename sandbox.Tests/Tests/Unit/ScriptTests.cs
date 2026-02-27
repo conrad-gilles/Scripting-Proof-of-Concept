@@ -9,7 +9,7 @@ public class ScriptTests
 {
 
 
-    ScriptManagerFacade? facade;
+    IScriptManagerExtended? facade;
     RandomMethods? rm;
     string? ActionResultVersionSpecific;
     string? sourceCodeActionV1;
@@ -45,7 +45,7 @@ public class ScriptTests
 
         using var provider = services.BuildServiceProvider();
 
-        facade = provider.GetRequiredService<ScriptManagerFacade>();
+        facade = provider.GetRequiredService<IScriptManagerExtended>();
         rm = new RandomMethods(facade);
 
         ActionResultVersionSpecific = "[Message contains either failure or succes: ] ";  //change this if action result version changes it will thraow cause of message contains
