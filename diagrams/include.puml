@@ -1,15 +1,17 @@
 @startuml
-!include .\\.\scripting\src\CompilationAndExecution\ScriptCompiler.puml
-!include .\\.\scripting\src\CompilationAndExecution\ScriptExecutor.puml
-!include .\\.\scripting\src\DbFiles\CustomerScript.puml
-!include .\\.\scripting\src\DbFiles\DbHelper.puml
-!include .\\.\scripting\src\DbFiles\EmberInstances.puml
-!include .\\.\scripting\src\DbFiles\MyContext.puml
-!include .\\.\scripting\src\DbFiles\ScriptCompiledCache.puml
-' !include .\\.\scripting\src\Exceptions\Exceptions.puml
-!include .\\.\scripting\src\ScriptingFramework\ActionResult.puml
-!include .\\.\scripting\src\ScriptingFramework\GeneratorContexts.puml
-!include .\\.\scripting\src\ScriptingFramework\GeneratorScripts.puml
+' !include .\\.\scripting\src\ScriptingServiceCollectionExtensions.puml
+' !include .\\.\scripting\src\CompilationAndExecution\ScriptCompiler.puml
+' !include .\\.\scripting\src\CompilationAndExecution\ScriptExecutor.puml
+' !include .\\.\scripting\src\DbFiles\CustomerScript.puml
+' !include .\\.\scripting\src\DbFiles\DbHelper.puml
+' !include .\\.\scripting\src\DbFiles\EmberInstances.puml
+' !include .\\.\scripting\src\DbFiles\MyContext.puml
+' !include .\\.\scripting\src\DbFiles\ScriptCompiledCache.puml
+' ' !include .\\.\scripting\src\Exceptions\Exceptions.puml
+' !include .\\.\scripting\src\ScriptingFramework\ActionResult.puml
+' !include .\\.\scripting\src\ScriptingFramework\GeneratorContexts.puml
+' !include .\\.\scripting\src\ScriptingFramework\GeneratorScripts.puml
+!include .\\.\scripting\src\ScriptManager.cs\IScripManagerAdvanced.puml
+!include .\\.\scripting\src\ScriptManager.cs\IScriptManager.puml
 !include .\\.\scripting\src\ScriptManager.cs\ScriptManager.puml
-!include .\\.\scripting\src\ScriptManager.cs\ScriptManagerInterface.puml
 @enduml

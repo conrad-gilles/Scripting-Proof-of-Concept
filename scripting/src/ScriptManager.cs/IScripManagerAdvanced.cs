@@ -46,218 +46,218 @@ public interface IScriptManagerExtended : IScriptManager
     /// <param name="filters"></param>
     /// <param name="includeCaches"></param>
     /// <returns></returns>
-    Task<List<CustomerScript>> ListScripts(CustomerScriptFilter filters = null!, bool includeCaches = false);
+    // Task<List<CustomerScript>> ListScripts(CustomerScriptFilter filters = null!, bool includeCaches = false);
 
-    #endregion
+    // #endregion
 
-    #region Compilation Operations
-
-    /// <summary>
-    /// Compiles a specific script for a target API version, if target version not specified just takes the recent one
-    /// </summary>
-    /// <param name="scriptId"></param>
-    /// <param name="targetApiVersion"></param>
-    /// <returns></returns>
-    Task CompileScript(Guid scriptId, int targetApiVersion = -1);
-
-    /// <summary>
-    /// Compiles all compatible scripts for a new API version
-    /// </summary>
-    /// <returns></returns>
-    Task CompileAllScripts();
-
-    /// <summary>
-    /// Recompiles script for all active API versions
-    /// </summary>
-    /// <param name="scriptId"></param>
-    /// <returns></returns>
-    Task RecompileScript(Guid scriptId);
-
-    /// <summary>
-    /// Performs syntax and interface validation without saving
-    /// </summary>
-    /// <param name="sourceCode"></param>
-    /// <returns></returns>
-    Task<string> ValidateScript(string sourceCode);
-
-    /// <summary>
-    /// Retrieves compilation error details
-    /// </summary>
-    /// <param name="scriptId"></param>
-    /// <param name="apiVersion"></param>
-    /// <returns></returns>
-    Task<string> GetCompilationErrors(Guid scriptId, int apiVersion = -1);
-
-    /// <summary>
-    /// Gets the tuple from a script containing Class Name, base type name and the last integer of the declared version in the name
-    /// </summary>
-    /// <param name="script"></param>
-    /// <returns></returns>
-    (string className, string baseTypeName, int versionInt) BasicValidationBeforeCompiling(string script);
-
-    #endregion
-
-    #region Execution Operations
-
-    /// <summary>
-    /// Executes a Generator Action script with provided context, realisitcally not needed
-    /// </summary>
-    /// <param name="scriptId"></param>
-    /// <param name="context"></param>
-    /// <param name="apiVersion"></param>
-    /// <returns></returns>
-    Task<ActionResultBaseClass> ExecuteActionScript(Guid scriptId, GeneratorContext context, int apiVersion = -1);
-
-    /// <summary>
-    /// Executes a Generator Condition script and returns boolean result, realisitcally not needed
-    /// </summary>
-    /// <param name="scriptId"></param>
-    /// <param name="context"></param>
-    /// <param name="apiVersion"></param>
-    /// <returns></returns>
-    Task<bool> ExecuteConditionScript(Guid scriptId, GeneratorContext context, int apiVersion = -1);
+    // #region Compilation Operations
 
     // /// <summary>
-    // /// Generic execution that detects script type automatically
+    // /// Compiles a specific script for a target API version, if target version not specified just takes the recent one
+    // /// </summary>
+    // /// <param name="scriptId"></param>
+    // /// <param name="targetApiVersion"></param>
+    // /// <returns></returns>
+    // Task CompileScript(Guid scriptId, int targetApiVersion = -1);
+
+    // /// <summary>
+    // /// Compiles all compatible scripts for a new API version
+    // /// </summary>
+    // /// <returns></returns>
+    // Task CompileAllScripts();
+
+    // /// <summary>
+    // /// Recompiles script for all active API versions
+    // /// </summary>
+    // /// <param name="scriptId"></param>
+    // /// <returns></returns>
+    // Task RecompileScript(Guid scriptId);
+
+    // /// <summary>
+    // /// Performs syntax and interface validation without saving
+    // /// </summary>
+    // /// <param name="sourceCode"></param>
+    // /// <returns></returns>
+    // Task<string> ValidateScript(string sourceCode);
+
+    // /// <summary>
+    // /// Retrieves compilation error details
+    // /// </summary>
+    // /// <param name="scriptId"></param>
+    // /// <param name="apiVersion"></param>
+    // /// <returns></returns>
+    // Task<string> GetCompilationErrors(Guid scriptId, int apiVersion = -1);
+
+    // /// <summary>
+    // /// Gets the tuple from a script containing Class Name, base type name and the last integer of the declared version in the name
+    // /// </summary>
+    // /// <param name="script"></param>
+    // /// <returns></returns>
+    // (string className, string baseTypeName, int versionInt) BasicValidationBeforeCompiling(string script);
+
+    // #endregion
+
+    // #region Execution Operations
+
+    // /// <summary>
+    // /// Executes a Generator Action script with provided context, realisitcally not needed
     // /// </summary>
     // /// <param name="scriptId"></param>
     // /// <param name="context"></param>
+    // /// <param name="apiVersion"></param>
+    // /// <returns></returns>
+    // Task<ActionResultBaseClass> ExecuteActionScript(Guid scriptId, GeneratorContext context, int apiVersion = -1);
+
+    // /// <summary>
+    // /// Executes a Generator Condition script and returns boolean result, realisitcally not needed
+    // /// </summary>
+    // /// <param name="scriptId"></param>
+    // /// <param name="context"></param>
+    // /// <param name="apiVersion"></param>
+    // /// <returns></returns>
+    // Task<bool> ExecuteConditionScript(Guid scriptId, GeneratorContext context, int apiVersion = -1);
+
+    // // /// <summary>
+    // // /// Generic execution that detects script type automatically
+    // // /// </summary>
+    // // /// <param name="scriptId"></param>
+    // // /// <param name="context"></param>
+    // // /// <param name="currentApiVersion"></param>
+    // // /// <returns></returns>
+    // // Task<object> ExecuteScriptById(Guid scriptId, GeneratorContext context, int currentApiVersion = -1);
+
+    // #endregion
+
+    // #region Cache Management
+
+    // /// <summary>
+    // /// Retrieves compiled assembly bytes from cache
+    // /// </summary>
+    // /// <param name="scriptId"></param>
     // /// <param name="currentApiVersion"></param>
     // /// <returns></returns>
-    // Task<object> ExecuteScriptById(Guid scriptId, GeneratorContext context, int currentApiVersion = -1);
+    // Task<byte[]> GetCompiledCache(Guid scriptId, int currentApiVersion = -1);
 
-    #endregion
+    // /// <summary>
+    // /// Removes all compiled versions of a script
+    // /// </summary>
+    // /// <param name="scriptId"></param>
+    // /// <returns></returns>
+    // Task ClearScriptCache(Guid scriptId);
 
-    #region Cache Management
+    // /// <summary>
+    // /// Gets all Compiled Script Caches in the Database
+    // /// </summary>
+    // /// <returns></returns>
+    // Task<List<ScriptCompiledCache>> GetAllCompiledScriptCaches();
 
-    /// <summary>
-    /// Retrieves compiled assembly bytes from cache
-    /// </summary>
-    /// <param name="scriptId"></param>
-    /// <param name="currentApiVersion"></param>
-    /// <returns></returns>
-    Task<byte[]> GetCompiledCache(Guid scriptId, int currentApiVersion = -1);
+    // /// <summary>
+    // /// Removes all compiled caches (maintenance operation)
+    // /// </summary>
+    // /// <returns></returns>
+    // Task ClearAllCaches();
 
-    /// <summary>
-    /// Removes all compiled versions of a script
-    /// </summary>
-    /// <param name="scriptId"></param>
-    /// <returns></returns>
-    Task ClearScriptCache(Guid scriptId);
+    // /// <summary>
+    // /// Background job to precompile all compatible scripts
+    // /// </summary>
+    // /// <returns></returns>
+    // Task PrecompileForApiVersion();
 
-    /// <summary>
-    /// Gets all Compiled Script Caches in the Database
-    /// </summary>
-    /// <returns></returns>
-    Task<List<ScriptCompiledCache>> GetAllCompiledScriptCaches();
+    // /// <summary>
+    // ///Deletes the entire Database
+    // /// </summary>
+    // /// <returns></returns>
+    // Task EnsureDeletedCreated();
 
-    /// <summary>
-    /// Removes all compiled caches (maintenance operation)
-    /// </summary>
-    /// <returns></returns>
-    Task ClearAllCaches();
+    // #endregion
 
-    /// <summary>
-    /// Background job to precompile all compatible scripts
-    /// </summary>
-    /// <returns></returns>
-    Task PrecompileForApiVersion();
+    // #region Version Management
 
-    /// <summary>
-    ///Deletes the entire Database
-    /// </summary>
-    /// <returns></returns>
-    Task EnsureDeletedCreated();
+    // /// <summary>
+    // /// Returns list of currently active API versions from Ember instances
+    // /// </summary>
+    // /// <returns></returns>
+    // Task<List<int>> GetActiveApiVersions();
 
-    #endregion
+    // Task<int> GetRecentApiVersion();
 
-    #region Version Management
+    // /// <summary>
+    // /// Returns which API versions a script is compatible with
+    // /// </summary>
+    // /// <param name="scriptId"></param>
+    // /// <returns></returns>
+    // Task<int> GetScriptCompatibility(Guid scriptId);
 
-    /// <summary>
-    /// Returns list of currently active API versions from Ember instances
-    /// </summary>
-    /// <returns></returns>
-    Task<List<int>> GetActiveApiVersions();
+    // /// <summary>
+    // /// Validates if script can run on target version
+    // /// </summary>
+    // /// <param name="scriptId"></param>
+    // /// <param name="targetApiVersion"></param>
+    // /// <returns></returns>
+    // Task<bool> CheckVersionCompatibility(Guid scriptId, int targetApiVersion);
 
-    Task<int> GetRecentApiVersion();
+    // /// <summary>
+    // /// Registers a new Ember instance in the system
+    // /// </summary>
+    // /// <param name="instanceId"></param>
+    // /// <param name="emberVersion"></param>
+    // /// <param name="apiVersion"></param>
+    // /// <returns></returns>
+    // Task RegisterEmberInstance(Guid instanceId, string emberVersion, int apiVersion);
 
-    /// <summary>
-    /// Returns which API versions a script is compatible with
-    /// </summary>
-    /// <param name="scriptId"></param>
-    /// <returns></returns>
-    Task<int> GetScriptCompatibility(Guid scriptId);
+    // #endregion
 
-    /// <summary>
-    /// Validates if script can run on target version
-    /// </summary>
-    /// <param name="scriptId"></param>
-    /// <param name="targetApiVersion"></param>
-    /// <returns></returns>
-    Task<bool> CheckVersionCompatibility(Guid scriptId, int targetApiVersion);
+    // #region Duplicate Detection & Cleanup
 
-    /// <summary>
-    /// Registers a new Ember instance in the system
-    /// </summary>
-    /// <param name="instanceId"></param>
-    /// <param name="emberVersion"></param>
-    /// <param name="apiVersion"></param>
-    /// <returns></returns>
-    Task RegisterEmberInstance(Guid instanceId, string emberVersion, int apiVersion);
+    // /// <summary>
+    // /// Identifies duplicate scripts based on source code equivalence
+    // /// </summary>
+    // /// <returns></returns>
+    // Task<(List<Guid> scriptGUIDs, Dictionary<Guid, int> cacheGUIDs)> DetectDuplicates();
 
-    #endregion
+    // /// <summary>
+    // /// Removes duplicate scripts and orphaned caches
+    // /// </summary>
+    // /// <returns></returns>
+    // Task RemoveDuplicates();
 
-    #region Duplicate Detection & Cleanup
+    // /// <summary>
+    // /// Removes caches without associated scripts
+    // /// </summary>
+    // /// <returns></returns>
+    // Task CleanupOrphanedCaches();
 
-    /// <summary>
-    /// Identifies duplicate scripts based on source code equivalence
-    /// </summary>
-    /// <returns></returns>
-    Task<(List<Guid> scriptGUIDs, Dictionary<Guid, int> cacheGUIDs)> DetectDuplicates();
+    // #endregion
 
-    /// <summary>
-    /// Removes duplicate scripts and orphaned caches
-    /// </summary>
-    /// <returns></returns>
-    Task RemoveDuplicates();
+    // #region Monitoring & Diagnostics
 
-    /// <summary>
-    /// Removes caches without associated scripts
-    /// </summary>
-    /// <returns></returns>
-    Task CleanupOrphanedCaches();
+    // /// <summary>
+    // /// Returns execution logs and metrics
+    // /// </summary>
+    // /// <param name="scriptId"></param>
+    // /// <returns></returns>
+    // Task GetScriptExecutionHistory(Guid scriptId);
 
-    #endregion
+    // /// <summary>
+    // /// Returns compilation success/failure rates and performance metrics
+    // /// </summary>
+    // /// <returns></returns>
+    // Task GetCompilationStatistics();
 
-    #region Monitoring & Diagnostics
+    // /// <summary>
+    // /// Validates database connectivity, API version consistency, and system state
+    // /// </summary>
+    // /// <returns></returns>
+    // Task HealthCheck();
 
-    /// <summary>
-    /// Returns execution logs and metrics
-    /// </summary>
-    /// <param name="scriptId"></param>
-    /// <returns></returns>
-    Task GetScriptExecutionHistory(Guid scriptId);
+    // /// <summary>
+    // /// Extracts className, baseTypeName, and version from script
+    // /// </summary>
+    // /// <param name="scriptId"></param>
+    // /// <returns></returns>
+    // Task<string> GetScriptMetadata(Guid scriptId);
 
-    /// <summary>
-    /// Returns compilation success/failure rates and performance metrics
-    /// </summary>
-    /// <returns></returns>
-    Task GetCompilationStatistics();
-
-    /// <summary>
-    /// Validates database connectivity, API version consistency, and system state
-    /// </summary>
-    /// <returns></returns>
-    Task HealthCheck();
-
-    /// <summary>
-    /// Extracts className, baseTypeName, and version from script
-    /// </summary>
-    /// <param name="scriptId"></param>
-    /// <returns></returns>
-    Task<string> GetScriptMetadata(Guid scriptId);
-
-    string GetUserName();
+    // string GetUserName();
 
     #endregion
 }

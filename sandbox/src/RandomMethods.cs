@@ -4,9 +4,9 @@ using Ember.Scripting;
 using Microsoft.CodeAnalysis;
 public class RandomMethods
 {
-    private readonly IScriptManagerExtended Facade;
+    private readonly ISccriptManagerDeleteAfter Facade;
 
-    public RandomMethods(IScriptManagerExtended facade)
+    public RandomMethods(ISccriptManagerDeleteAfter facade)
     {
         Facade = facade;
     }

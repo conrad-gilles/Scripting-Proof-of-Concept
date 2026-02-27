@@ -37,6 +37,7 @@ public static class ScriptingServiceCollectionExtensions
         // Step B: Point both interfaces to the exact same concrete registration above
         services.AddTransient<IScriptManager>(sp => sp.GetRequiredService<ScriptManagerFacade>());
         services.AddTransient<IScriptManagerExtended>(sp => sp.GetRequiredService<ScriptManagerFacade>());
+        services.AddTransient<ISccriptManagerDeleteAfter>(sp => sp.GetRequiredService<ScriptManagerFacade>());
 
         return services;
     }

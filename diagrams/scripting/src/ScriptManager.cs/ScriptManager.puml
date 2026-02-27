@@ -5,8 +5,8 @@ class ScriptManagerFacade {
     - <<readonly>> Executor : ScriptExecutor
     - <<readonly>> References : MetadataReference[]
     - <<readonly>> Logger : ILogger<ScriptManagerFacade>
-    + ScriptManagerFacade(db:DbHelper, compiler:ScriptCompiler, executor:ScriptExecutor, references:MetadataReference[], logger:ILogger<ScriptManagerFacade>)
-    + <<async>> CreateScript(sourceCode:string, userName:string, apiVersion:int) : Task<Guid>
+    <<internal>> ScriptManagerFacade(db:DbHelper, compiler:ScriptCompiler, executor:ScriptExecutor, references:MetadataReference[], logger:ILogger<ScriptManagerFacade>)
+    + <<async>> CreateScript(sourceCode:string, userName:string, apiVersion:int, createdAt:DateTime?) : Task<Guid>
     + <<async>> UpdateScript(scriptId:Guid, newSourceCode:string, userName:string, apiVersion:int) : Task
     + <<async>> DeleteScript(scriptId:Guid) : Task
     + <<async>> GetScript(scriptId:Guid, includeCaches:bool) : Task<CustomerScript>
@@ -16,13 +16,16 @@ class ScriptManagerFacade {
     + <<async>> RecompileScript(scriptId:Guid) : Task
     + <<async>> ValidateScript(sourceCode:string) : Task<string>
     + <<async>> GetCompilationErrors(scriptId:Guid, apiVersion:int) : Task<string>
+    + BasicValidationBeforeCompiling(script:string) : (string className, string baseTypeName, int versionInt)
     + <<async>> ExecuteActionScript(scriptId:Guid, context:GeneratorContext, currentApiVersion:int) : Task<ActionResultBaseClass>
     + <<async>> ExecuteConditionScript(scriptId:Guid, context:GeneratorContext, ApiVersion:int) : Task<bool>
     + <<async>> ExecuteScriptById(scriptId:Guid, context:GeneratorContext, currentApiVersion:int) : Task<object>
     + <<async>> GetCompiledCache(scriptId:Guid, currentApiVersion:int) : Task<byte[]>
     + <<async>> ClearScriptCache(scriptId:Guid) : Task
+    + <<async>> GetAllCompiledScriptCaches() : Task<List<ScriptCompiledCache>>
     + <<async>> ClearAllCaches() : Task
     + <<async>> PrecompileForApiVersion() : Task
+    + <<async>> EnsureDeletedCreated() : Task
     + <<async>> GetActiveApiVersions() : Task<List<int>>
     + <<async>> GetRecentApiVersion() : Task<int>
     + <<async>> GetScriptCompatibility(scriptId:Guid) : Task<int>
@@ -38,4 +41,5 @@ class ScriptManagerFacade {
     + GetUserName() : string
 }
 IScriptManager <|-- ScriptManagerFacade
+IScriptManagerExtended <|-- ScriptManagerFacade
 @enduml

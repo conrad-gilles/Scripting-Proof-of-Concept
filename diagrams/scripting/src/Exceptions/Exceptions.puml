@@ -18,12 +18,16 @@ class NoClassFoundInScriptFileException {
 class MoreThanOneClassFoundInScriptException {
 }
 class ValidationBeforeCompilationException {
+    + ValidationBeforeCompilationException()
+    + ValidationBeforeCompilationException(message:string)
+    + ValidationBeforeCompilationException(message:string, innerException:Exception)
 }
 class ClassNameOrBaseNameNullException {
 }
 class ForbiddenNamespaceException {
-    <<new>> - Message : string
+    + ForbiddenNamespaceException()
     + ForbiddenNamespaceException(message:string)
+    + ForbiddenNamespaceException(message:string, innerException:Exception)
 }
 class ScriptTimeoutException {
     <<new>> - Message : string

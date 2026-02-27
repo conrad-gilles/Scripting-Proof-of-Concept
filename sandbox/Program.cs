@@ -49,7 +49,7 @@ async Task MainProgramSwitch(IServiceProvider provider)
     try
     {
         // ScriptManagerFacade facade = provider.GetRequiredService<ScriptManagerFacade>();
-        IScriptManagerExtended facade = provider.GetRequiredService<IScriptManagerExtended>();
+        ISccriptManagerDeleteAfter facade = provider.GetRequiredService<ISccriptManagerDeleteAfter>();
         IScriptManager facade1 = provider.GetRequiredService<IScriptManager>();
         currentApiVersion = await facade.GetRecentApiVersion();
 

@@ -9,7 +9,7 @@ namespace FirstTests;
 [TestClass]
 public class ScriptManagerFacadeTests
 {
-    private IScriptManagerExtended? facade;
+    private ISccriptManagerDeleteAfter? facade;
     string? sourceCodePedia;
     private string? sourceCodeActionV1;
     private string? sourceCodeActionV3;
@@ -33,7 +33,7 @@ public class ScriptManagerFacadeTests
 
         using var provider = services.BuildServiceProvider();
 
-        facade = provider.GetRequiredService<IScriptManagerExtended>();
+        facade = provider.GetRequiredService<ISccriptManagerDeleteAfter>();
         rm = new RandomMethods(facade);
 
         // var logger = new LoggerForScripting();
