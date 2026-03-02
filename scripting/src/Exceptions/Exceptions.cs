@@ -12,7 +12,6 @@ public class NoFileWithThisClassNameFoundException : Exception
     public NoFileWithThisClassNameFoundException(string message) : base(message) { }
     public NoFileWithThisClassNameFoundException(string message, Exception innerException) : base(message, innerException) { }
 
-    // Custom constructor
     public NoFileWithThisClassNameFoundException(string className, string searchDirectory)
         : base($"No file containing the class '{className}' was found in directory '{searchDirectory}'.")
     {
@@ -29,7 +28,6 @@ public class CompilationFailedException : Exception
     public CompilationFailedException(string message) : base(message) { }
     public CompilationFailedException(string message, Exception innerException) : base(message, innerException) { }
 
-    // Custom constructor
     public CompilationFailedException(string message, IEnumerable<string> compilerErrors) : base(message)
     {
         CompilerErrors = compilerErrors;
@@ -44,14 +42,12 @@ public class ScriptExecutionException : Exception
     public ScriptExecutionException(string message) : base(message) { }
     public ScriptExecutionException(string message, Exception innerException) : base(message, innerException) { }
 
-    // Custom constructor
     public ScriptExecutionException(string message, Guid scriptId, Exception innerException) : base(message, innerException)
     {
         ScriptId = scriptId;
     }
 }
 
-// These inherit from ScriptExecutionException so you can catch both with catch(ScriptExecutionException)
 public class ActionScriptExecutionException : ScriptExecutionException
 {
     public ActionScriptExecutionException() : base() { }
@@ -76,7 +72,6 @@ public class GetScriptPathFromFolderException : Exception
     public GetScriptPathFromFolderException(string message) : base(message) { }
     public GetScriptPathFromFolderException(string message, Exception innerException) : base(message, innerException) { }
 
-    // Custom constructor
     public GetScriptPathFromFolderException(string message, string folderPath) : base(message)
     {
         FolderPath = folderPath;
@@ -91,7 +86,6 @@ public class CreateStringFromCsFileException : Exception
     public CreateStringFromCsFileException(string message) : base(message) { }
     public CreateStringFromCsFileException(string message, Exception innerException) : base(message, innerException) { }
 
-    // Custom constructor
     public CreateStringFromCsFileException(string message, string filePath, Exception innerException) : base(message, innerException)
     {
         FilePath = filePath;
@@ -123,7 +117,6 @@ public class MoreThanOneClassFoundInScriptException : Exception
     public MoreThanOneClassFoundInScriptException(string message) : base(message) { }
     public MoreThanOneClassFoundInScriptException(string message, Exception innerException) : base(message, innerException) { }
 
-    // Custom constructor
     public MoreThanOneClassFoundInScriptException(string filePath, int classCount)
         : base($"Expected 1 class, but found {classCount} classes in the script file: {filePath}")
     {
@@ -140,7 +133,6 @@ public class ValidationBeforeCompilationException : Exception
     public ValidationBeforeCompilationException(string message) : base(message) { }
     public ValidationBeforeCompilationException(string message, Exception innerException) : base(message, innerException) { }
 
-    // Custom constructor
     public ValidationBeforeCompilationException(string message, IEnumerable<string> validationErrors) : base(message)
     {
         ValidationErrors = validationErrors;
@@ -162,7 +154,6 @@ public class ForbiddenNamespaceException : Exception
     public ForbiddenNamespaceException(string message) : base(message) { }
     public ForbiddenNamespaceException(string message, Exception innerException) : base(message, innerException) { }
 
-    // Custom constructor
     public ForbiddenNamespaceException(string message, string attemptedNamespace) : base(message)
     {
         AttemptedNamespace = attemptedNamespace;
@@ -177,10 +168,16 @@ public class ScriptTimeoutException : Exception
     public ScriptTimeoutException(string message) : base(message) { }
     public ScriptTimeoutException(string message, Exception innerException) : base(message, innerException) { }
 
-    // Custom constructor dynamically building the message
     public ScriptTimeoutException(int timeoutMilliseconds)
         : base($"The script execution timed out after {timeoutMilliseconds} milliseconds.")
     {
         TimeoutMilliseconds = timeoutMilliseconds;
     }
+}
+
+public class DbHelperException : Exception
+{
+    public DbHelperException() : base() { }
+    public DbHelperException(string message) : base(message) { }
+    public DbHelperException(string message, Exception innerException) : base(message, innerException) { }
 }

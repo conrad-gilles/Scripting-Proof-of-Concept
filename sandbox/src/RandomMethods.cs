@@ -2,6 +2,7 @@ using System.Globalization;
 using System.Reflection;
 using Ember.Scripting;
 using Microsoft.CodeAnalysis;
+using Serilog;
 public class RandomMethods
 {
     private readonly ISccriptManagerDeleteAfter Facade;
@@ -9,6 +10,16 @@ public class RandomMethods
     public RandomMethods(ISccriptManagerDeleteAfter facade)
     {
         Facade = facade;
+    }
+    public static int GetEmberApiVersion(int? testingDiffrentVersion = null)
+    {
+        Log.Debug("Entered {MethodName} in {ClassName}.", nameof(GetEmberApiVersion), nameof(RandomMethods));
+        if (testingDiffrentVersion != null)
+        {
+            return (int)testingDiffrentVersion;
+        }
+
+        return 6;
     }
     public async Task<Dictionary<int, Guid>> ListAllCompiledFromDB()
     {
@@ -204,15 +215,14 @@ public class RandomMethods
                         MetadataReference.CreateFromFile(typeof(DateTime).Assembly.Location), // System.DateTime
                         // References t custom interfaces
                         MetadataReference.CreateFromFile(typeof(IGeneratorConditionScript).Assembly.Location),
-                        MetadataReference.CreateFromFile(typeof(IGeneratorReadOnlyContext).Assembly.Location)  ]; //try removing if works good i guess but still need to pass from sandbox];
+                        MetadataReference.CreateFromFile(typeof(IGeneratorReadOnlyContext).Assembly.Location),//try removing if works good i guess but still need to pass from sandbox];
+                        //   MetadataReference.CreateFromFile(typeof(Ember.Scripting.ScriptManagerFacade).Assembly.Location)
+                          ];
     public static List<MetadataReference> GetReferences()
     {
         return references;
     }
-    public static int GetRecentApiVersion()
-    {
-        return 6;
-    }
+
     public static string GetUserName()
     {
         // GeneratorContext ctx = GetTestingContext();
@@ -240,7 +250,7 @@ public class RandomMethods
             };
             if (justForTesting != null) //this is ofc just for testing purposes in the real application you would never automatically distribute the context because it is unsafe you want to be able to control who gets which context precisely
             {
-                var microsoftLogger = new LoggerForScripting().GetMicrosoftLogger<ScriptManagerFacade>();
+                // var microsoftLogger = new LoggerForScripting().GetMicrosoftLogger<ScriptManagerFacade>();
                 var refs = GetReferences();
                 // ScriptCompiler compiler = new ScriptCompiler(refs, new LoggerForScripting().GetMicrosoftLogger<ScriptCompiler>());
                 string implementedInterface = Facade.BasicValidationBeforeCompiling(justForTesting.SourceCode!).baseTypeName;
@@ -289,7 +299,7 @@ public class RandomMethods
     }
 
 
-    public string CreateStringFromCsFile(string scriptPath)
+    public static string CreateStringFromCsFile(string scriptPath)
     {
         Serilog.Log.Verbose("Entered {MethodName} in {ClassName} with path: {ScriptPath}.", nameof(CreateStringFromCsFile), nameof(RandomMethods), scriptPath);
         try

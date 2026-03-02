@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Ember.Scripting;
 
-public class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISccriptManagerDeleteAfter
+internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISccriptManagerDeleteAfter
 {
     /// <inheritdoc cref="IScriptManager.CreateScript(string, string?, string, int)">
 
@@ -14,14 +14,16 @@ public class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISccr
     private readonly ScriptExecutor Executor;
     private readonly List<MetadataReference> References;
     private readonly ILogger<ScriptManagerFacade> Logger;
+    private readonly int RecentApiVersion;
 
-    internal ScriptManagerFacade(DbHelper db, ScriptCompiler compiler, ScriptExecutor executor, List<MetadataReference> references, ILogger<ScriptManagerFacade> logger)
+    internal ScriptManagerFacade(DbHelper db, ScriptCompiler compiler, ScriptExecutor executor, List<MetadataReference> references, ILogger<ScriptManagerFacade> logger, int recentApiVersion)
     {
         References = references;
         Db = db;
         Compiler = compiler;
         Executor = executor;
         Logger = logger;
+        RecentApiVersion = recentApiVersion;
     }
 
     #region Script Lifecycle

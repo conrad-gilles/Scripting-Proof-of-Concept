@@ -5,12 +5,9 @@ namespace EFModeling.EntityProperties.FluentAPI.Required;
 
 public class MyContext : DbContext
 {
-    // 1. Add this constructor to accept configuration from Ember's Dependency Injection
     public MyContext(DbContextOptions<MyContext> options) : base(options)
     {
     }
-
-    // Keep the parameterless constructor for local EF Core tooling/migrations
     public MyContext()
     {
     }
@@ -23,11 +20,8 @@ public class MyContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<CustomerScript>()   //enforces source code not null
-            .Property(b => b.SourceCode)        //todo source code is required rest can be extrapolated?    //this whole thing might be unnessesary
+            .Property(b => b.SourceCode)
             .IsRequired();
-        // modelBuilder.Entity<ScriptCompiledCache>()
-        //   .Property(b => b.ScriptId)
-        //   .IsRequired();
     }
     #endregion
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

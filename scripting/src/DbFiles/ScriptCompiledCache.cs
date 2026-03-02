@@ -28,6 +28,9 @@ public class ScriptCompiledCache
     [Column("copilation_errors")]
     public string? CompilationErrors { get; set; }
 
+    [Column("old_source_code")]
+    public string? OldSourceCode { get; set; }
+
     // Navigation property back to the script
     public CustomerScript? CustomerScript { get; set; }
 

@@ -33,7 +33,7 @@ try
         builder.AddSerilog(dispose: true);
     });
 
-    ScriptingServiceCollectionExtensions.AddEmberScripting(services, RandomMethods.GetReferences());
+    ScriptingServiceCollectionExtensions.AddEmberScripting(services, RandomMethods.GetReferences(), RandomMethods.GetEmberApiVersion());
 
     using var provider = services.BuildServiceProvider();
     await MainProgramSwitch(provider);
@@ -118,11 +118,11 @@ async Task MainProgramSwitch(IServiceProvider provider)
                     #region Script Lifecycle
 
                     case "CreateScript":
-                        string sourceCode = rm.CreateStringFromCsFile(Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "src", "Scripts", "ConditionScripts", "PediatricCondition.cs")));
+                        string sourceCode = RandomMethods.CreateStringFromCsFile(Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "src", "Scripts", "ConditionScripts", "PediatricCondition.cs")));
                         await facade.CreateScript(sourceCode, "Gilles");
                         break;
                     case "CreateScriptWithOld":
-                        string sourceCodeOld = rm.CreateStringFromCsFile(Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "src", "Scripts", "ConditionScripts", "PediatricCondition.cs")));
+                        string sourceCodeOld = RandomMethods.CreateStringFromCsFile(Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "src", "Scripts", "ConditionScripts", "PediatricCondition.cs")));
                         await facade.CreateScript(sourceCodeOld, "Gilles", 1);
                         break;
 
@@ -135,7 +135,7 @@ async Task MainProgramSwitch(IServiceProvider provider)
                         Console.WriteLine("Copy paste your new version file path now:");
                         string? userInput2 = Console.ReadLine();
 
-                        string? str = rm.CreateStringFromCsFile(userInput2!);
+                        string? str = RandomMethods.CreateStringFromCsFile(userInput2!);
 
                         //In reality it would be better like this but doesnt work because cant paste too much in console:
                         // Console.WriteLine("Copy paste your new version now:");
@@ -414,3 +414,4 @@ async Task MainProgramSwitch(IServiceProvider provider)
     }
 
 }
+

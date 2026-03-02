@@ -2,6 +2,7 @@ using System;   //todo this is possible to default in compiler
 using System.Threading.Tasks;
 using System.Collections.Generic;   //todo same for them
 using Ember.Scripting;
+// using static System.Threading.Mutex; //if uncomment it wont run which is good
 public class AddPediatricTestsV1 : IGeneratorActionScript<IGeneratorContext, ActionResult>
 {
     public async Task<ActionResult> ExecuteAsync(IGeneratorContext context)    //error is here in Basyns
@@ -13,6 +14,7 @@ public class AddPediatricTestsV1 : IGeneratorActionScript<IGeneratorContext, Act
         {
             context.LabOrder.AddTest("PED-BASIC");
         }
+        // System.IO.BufferedStream? stream = null;
         // double versionExample = context.LabOrder.RandomNewDouble;    //example of newer version
         // Console.WriteLine(versionExample);
         context.LabOrder.SetCustomField("ProcessedByGenerator", true);

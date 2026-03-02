@@ -7,7 +7,7 @@ namespace Ember.Scripting;
 //Ai Generated
 public static class ScriptingServiceCollectionExtensions
 {
-    public static IServiceCollection AddEmberScripting(this IServiceCollection services, List<MetadataReference> references)
+    public static IServiceCollection AddEmberScripting(this IServiceCollection services, List<MetadataReference> references, int maxSupportedApiVersion)
     {
         // 1. Register the references so they can be injected into constructors
         services.AddSingleton(references);
@@ -21,7 +21,8 @@ public static class ScriptingServiceCollectionExtensions
         services.AddTransient<DbHelper>(sp => new DbHelper(
             sp.GetRequiredService<ScriptCompiler>(),
             sp.GetRequiredService<List<MetadataReference>>(),
-            sp.GetRequiredService<ILogger<DbHelper>>()
+            sp.GetRequiredService<ILogger<DbHelper>>(),
+            maxSupportedApiVersion
         ));
 
         // 4. Register the Facade using a factory to hide the internal parameters
@@ -31,7 +32,8 @@ public static class ScriptingServiceCollectionExtensions
             sp.GetRequiredService<ScriptCompiler>(),
             sp.GetRequiredService<ScriptExecutor>(),
             sp.GetRequiredService<List<MetadataReference>>(),
-            sp.GetRequiredService<ILogger<ScriptManagerFacade>>()
+            sp.GetRequiredService<ILogger<ScriptManagerFacade>>(),
+            maxSupportedApiVersion
         ));
 
         // Step B: Point both interfaces to the exact same concrete registration above

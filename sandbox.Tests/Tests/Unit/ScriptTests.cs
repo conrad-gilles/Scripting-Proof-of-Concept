@@ -23,15 +23,6 @@ public class ScriptTests
     public
      void Setup()
     {
-        // var logger = new LoggerForScripting();
-        // // var microsoftLogger = logger.GetMicrosoftLogger<ScriptManagerFacade>();
-        // ScriptCompiler compiler = new ScriptCompiler(RandomMethods.GetReferences(), logger.GetMicrosoftLogger<ScriptCompiler>());
-        // // compiler = new ScriptCompiler(UsefulMethods.GetReferences());
-        // DbHelper db = new DbHelper(compiler, RandomMethods.GetReferences(), logger.GetMicrosoftLogger<DbHelper>());
-        // ScriptExecutor executor = new ScriptExecutor(logger.GetMicrosoftLogger<ScriptExecutor>());
-
-        // facade = new ScriptManagerFacade(db, compiler, executor, RandomMethods.GetReferences(), logger.GetMicrosoftLogger<ScriptManagerFacade>());
-
         var logger = new LoggerForScripting();
         Log.Debug("Sandbox launched.");
 
@@ -42,7 +33,7 @@ public class ScriptTests
             builder.AddSerilog(dispose: true);
         });
 
-        ScriptingServiceCollectionExtensions.AddEmberScripting(services, RandomMethods.GetReferences());
+        ScriptingServiceCollectionExtensions.AddEmberScripting(services, RandomMethods.GetReferences(), RandomMethods.GetEmberApiVersion());
 
         using var provider = services.BuildServiceProvider();
 
@@ -50,35 +41,35 @@ public class ScriptTests
         rm = new RandomMethods(facade);
 
         ActionResultVersionSpecific = "[Message contains either failure or succes: ] ";  //change this if action result version changes it will thraow cause of message contains
-        sourceCodeActionV1 = rm.CreateStringFromCsFile(
+        sourceCodeActionV1 = RandomMethods.CreateStringFromCsFile(
            Path.GetFullPath(Path.Combine(
                AppDomain.CurrentDomain.BaseDirectory,
                "..", "..", "..", "..",
                "sandbox", "src", "Scripts", "ActionScripts", "AddPediatricTestsV1.cs"
            ))
        );
-        sourceCodeActionV2 = rm.CreateStringFromCsFile(
+        sourceCodeActionV2 = RandomMethods.CreateStringFromCsFile(
         Path.GetFullPath(Path.Combine(
             AppDomain.CurrentDomain.BaseDirectory,
             "..", "..", "..", "..",
             "sandbox", "src", "Scripts", "ActionScripts", "AddPediatricTestsV2.cs"
         ))
     );
-        sourceCodeActionV3 = rm.CreateStringFromCsFile(
+        sourceCodeActionV3 = RandomMethods.CreateStringFromCsFile(
        Path.GetFullPath(Path.Combine(
            AppDomain.CurrentDomain.BaseDirectory,
            "..", "..", "..", "..",
            "sandbox", "src", "Scripts", "ActionScripts", "AddPediatricTestsV3.cs"
        ))
    );
-        sourceCodeVaccineAction = rm.CreateStringFromCsFile(
+        sourceCodeVaccineAction = RandomMethods.CreateStringFromCsFile(
           Path.GetFullPath(Path.Combine(
           AppDomain.CurrentDomain.BaseDirectory,
           "..", "..", "..", "..",
           "sandbox", "src", "Scripts", "ActionScripts", "VaccineScript.cs"
       ))
       );
-        sourceCodePedia = rm.CreateStringFromCsFile(
+        sourceCodePedia = RandomMethods.CreateStringFromCsFile(
        Path.GetFullPath(Path.Combine(
            AppDomain.CurrentDomain.BaseDirectory,
                    "..", "..", "..", "..",

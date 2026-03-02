@@ -29,7 +29,7 @@ public class ScriptManagerFacadeTests
             builder.AddSerilog(dispose: true);
         });
 
-        ScriptingServiceCollectionExtensions.AddEmberScripting(services, RandomMethods.GetReferences());
+        ScriptingServiceCollectionExtensions.AddEmberScripting(services, RandomMethods.GetReferences(), RandomMethods.GetEmberApiVersion());
 
         using var provider = services.BuildServiceProvider();
 
@@ -52,7 +52,7 @@ public class ScriptManagerFacadeTests
             await facade.DeleteScript(s.Id);
 
         // Load source files
-        sourceCodePedia = rm.CreateStringFromCsFile(
+        sourceCodePedia = RandomMethods.CreateStringFromCsFile(
             Path.GetFullPath(Path.Combine(
                 AppDomain.CurrentDomain.BaseDirectory,
                 "..", "..", "..", "..",
@@ -60,7 +60,7 @@ public class ScriptManagerFacadeTests
             ))
         );
 
-        sourceCodeActionV1 = rm.CreateStringFromCsFile(
+        sourceCodeActionV1 = RandomMethods.CreateStringFromCsFile(
             Path.GetFullPath(Path.Combine(
                 AppDomain.CurrentDomain.BaseDirectory,
                 "..", "..", "..", "..",
@@ -68,7 +68,7 @@ public class ScriptManagerFacadeTests
             ))
         );
 
-        sourceCodeActionV3 = rm.CreateStringFromCsFile(
+        sourceCodeActionV3 = RandomMethods.CreateStringFromCsFile(
             Path.GetFullPath(Path.Combine(
                 AppDomain.CurrentDomain.BaseDirectory,
                 "..", "..", "..", "..",
@@ -116,7 +116,7 @@ public class ScriptManagerFacadeTests
         await facade.DeleteScript(id);
 
 
-        await Assert.ThrowsExceptionAsync<InvalidOperationException>(async () =>    //todo check that this implements the correct exception
+        await Assert.ThrowsExceptionAsync<DbHelperException>(async () =>    //todo check that this implements the correct exception
         {
             CustomerScript script = await facade.GetScript(id);
         });
@@ -138,7 +138,7 @@ public class ScriptManagerFacadeTests
     {
         await facade!.ClearAllCaches();
         Guid id1 = await facade.CreateScript(sourceCodePedia!);
-        Guid id2 = await facade.CreateScript(sourceCodePedia!);
+        Guid id2 = await facade.CreateScript(sourceCodeActionV1!);
         List<CustomerScript> scripts = await facade.ListScripts(includeCaches: true);
         Assert.IsNotNull(scripts);
         Assert.IsTrue(scripts.Count == 2);
@@ -246,7 +246,7 @@ public class ScriptManagerFacadeTests
         string result = await facade.GetCompilationErrors(id);
         Assert.IsTrue(result.Contains("Successful Compilation!"));
 
-        await Assert.ThrowsExceptionAsync<ValidationBeforeCompilationException>(async () =>
+        await Assert.ThrowsExceptionAsync<DbHelperException>(async () =>    //before was basicvalidation exception todo
         {
             Guid id2 = await facade.CreateScript("wrong input test could be whatever");
             string result2 = await facade.GetCompilationErrors(id2);

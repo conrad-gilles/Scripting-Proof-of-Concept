@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Ember.Scripting;
 
-[Table("ember_instances")] //might be unnessesary todo
+[Table("ember_instances")]
 public class EmberInstance
 {
     [Key]

@@ -16,9 +16,7 @@ internal class ScriptCompiler
         References2 = references2;
         Logger = logger;
     }
-    public byte[] RunCompilation(string script,
-    // MetadataReference[]? references = null,
-    int apiVersion = -1, (string className, string baseTypeName, int versionInt)? metaData = null) //references param there to enable later on users to define custom references
+    public byte[] RunCompilation(string script, int apiVersion = -1, (string className, string baseTypeName, int versionInt)? metaData = null) //references param there to enable later on users to define custom references
     {
         try
         {
@@ -32,37 +30,16 @@ internal class ScriptCompiler
 
             //Takes C# source string and turns it into a "Roslyn parsed syntax tree representation" of a normal C# file
             SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(script);
-
-            //create list of "external assamblies" that the script needs in oder to be able to compile and run, you need to manually add file paths
-            // if (references == null)
-            // if (apiVersion == -1)
-            // {
-            //     Logger.LogInformation("Added default references in {MethodName}.", nameof(RunCompilation));
-            //     references = new MetadataReference[]
-            //          {
-            //             MetadataReference.CreateFromFile(typeof(object).Assembly.Location), // System.Private.CoreLib
-            //             MetadataReference.CreateFromFile(typeof(Console).Assembly.Location), // System.Console
-            //             MetadataReference.CreateFromFile(Assembly.Load("System.Runtime").Location), // System.Runtime
-            //             MetadataReference.CreateFromFile(typeof(Task<>).Assembly.Location), // System.Threading.Tasks
-            //             MetadataReference.CreateFromFile(typeof(DateTime).Assembly.Location), // System.DateTime
-            //             // References t custom interfaces
-            //             MetadataReference.CreateFromFile(typeof(IGeneratorConditionScript).Assembly.Location),
-            //             // MetadataReference.CreateFromFile(typeof(IGeneratorReadOnlyContext).Assembly.Location)   //try removing if works good i guess but still need to pass from sandbox
-            //          };
-            // }
-            if (apiVersion != -1)
-            {
-                Logger.LogInformation("Added custom references in {MethodName}.", nameof(RunCompilation));  //if this works remove the if references is null if stat above
-                references = GetReferencesForVersion(apiVersion, references);
-            }
             if (References2 != null)
             {
                 Logger.LogInformation("References 2 added references in {MethodName}.", nameof(RunCompilation));
                 references = References2;
             }
-
-
-
+            if (apiVersion != -1)
+            {
+                Logger.LogInformation("Added custom references in {MethodName}.", nameof(RunCompilation));  //if this works remove the if references is null if stat above
+                references = GetReferencesForVersion(apiVersion, references);
+            }
             //this initiates the process of the compilation (does not produce bytes yet), it binds the source code with the refrences and the config options
             CSharpCompilation compilation = CSharpCompilation.Create(
                 "MyDynamicAssembly",
@@ -77,12 +54,10 @@ internal class ScriptCompiler
 
             if (!emitResult.Success)
             {
+                //The following 3 lines were AI Generated
                 string? errors = string.Join(Environment.NewLine, emitResult.Diagnostics
-    .Where(d => d.IsWarningAsError || d.Severity == Microsoft.CodeAnalysis.DiagnosticSeverity.Error)
-    .Select(d => $"{d.Id}: {d.GetMessage()}"));
-
-                // throw new CompilationFailedException($"Compilation failed: {errors}");
-
+                .Where(d => d.IsWarningAsError || d.Severity == Microsoft.CodeAnalysis.DiagnosticSeverity.Error)
+                .Select(d => $"{d.Id}: {d.GetMessage()}"));
 
                 foreach (var diag in emitResult.Diagnostics)
                 {
@@ -109,7 +84,6 @@ internal class ScriptCompiler
         Logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(BasicValidationBeforeCompiling), nameof(ScriptCompiler));
         try
         {
-
             //Does basic validation such as correct interface usage, or if only one class is in the script file.
             //Also extracts class name, type of the scrip(ex. Action) and verison of interface.
 
@@ -170,7 +144,7 @@ internal class ScriptCompiler
         }
 
     }
-    private void ValidateNamespaceUsage(SyntaxTree tree, SemanticModel model)    //todo check
+    private void ValidateNamespaceUsage(SyntaxTree tree, SemanticModel model)
     {
         Logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(ValidateNamespaceUsage), nameof(ScriptCompiler));
         HashSet<string> illegalNamespaces = new() //no duplicates unlike list
@@ -224,17 +198,17 @@ internal class ScriptCompiler
 
     public bool IsTheSameTree(string script1, string script2)
     {
+        //This function i quickly generated with AI
         Logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(IsTheSameTree), nameof(ScriptCompiler));
         SyntaxTree tree1 = CSharpSyntaxTree.ParseText(script1);
         SyntaxTree tree2 = CSharpSyntaxTree.ParseText(script2);
 
-        // AI: Check if they are structurally identical (ignoring whitespace/comments)
         bool areSame = tree1.IsEquivalentTo(tree2, topLevel: false);
 
         return areSame;
     }
 
-    public List<MetadataReference> GetReferencesForVersion(int version, List<MetadataReference> stdReferences, List<string>? customDlls = null, bool loadCurrentRT = true)
+    public List<MetadataReference> GetReferencesForVersion(int version, List<MetadataReference> stdReferences, List<string>? customDlls = null, bool loadCurrentRT = true)  //todo fix this
     {
 
         // stdReferences.Remove(MetadataReference.CreateFromFile(typeof(IGeneratorConditionScript).Assembly.Location));
@@ -283,11 +257,11 @@ internal class ScriptCompiler
             // {
             //     references.Add(item);
             // }
-            stdReferences = [
-                MetadataReference.CreateFromFile(typeof(Console).Assembly.Location), // System.Console
-                        MetadataReference.CreateFromFile(Assembly.Load("System.Runtime").Location), // System.Runtime
-                        MetadataReference.CreateFromFile(typeof(Task<>).Assembly.Location), // System.Threading.Tasks
-                        MetadataReference.CreateFromFile(typeof(DateTime).Assembly.Location)]; // System.DateTime]
+            // stdReferences = [
+            //     MetadataReference.CreateFromFile(typeof(Console).Assembly.Location), // System.Console
+            //             MetadataReference.CreateFromFile(Assembly.Load("System.Runtime").Location), // System.Runtime
+            //             MetadataReference.CreateFromFile(typeof(Task<>).Assembly.Location), // System.Threading.Tasks
+            //             MetadataReference.CreateFromFile(typeof(DateTime).Assembly.Location)]; // System.DateTime]
             references.AddRange(stdReferences);
         }
         if (customDlls != null)

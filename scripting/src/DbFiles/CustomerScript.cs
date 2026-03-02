@@ -4,7 +4,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Ember.Scripting;
 
-[Table("customer_scripts")] //might be unnessesary todo //added ? to values that can be null
+[Table("customer_scripts")]
 public class CustomerScript
 {
     [Column("id")]
@@ -17,7 +17,7 @@ public class CustomerScript
     public string? ScriptType { get; set; } // "GeneratorCondition" or "GeneratorAction"
 
     [Column("source_code")]
-    public string? SourceCode { get; set; } //todo fix make this not be ablte to be null
+    public string? SourceCode { get; set; } //todo not urgent fix make this not be ablte to be null
 
     [Column("min_api_version")]
     public int MinApiVersion { get; set; }  //maybe do ?
@@ -31,14 +31,13 @@ public class CustomerScript
     [Column("created_by")]
     public string? CreatedBy { get; set; }
 
-    // Navigation property for compiled caches
-    // public ICollection<ScriptCompiledCache> CompiledCaches { get; set; }
-    public List<ScriptCompiledCache> CompiledCaches { get; set; }       //todo redo into collection because no duplicates etc
+    public List<ScriptCompiledCache> CompiledCaches { get; set; }
 
     public CustomerScript()
     {
         CompiledCaches = new List<ScriptCompiledCache>();
     }
+    //todo maybe add factories?
     // public CustomerScript(Guid? id=null,string? scriptName=null,string? scriptType)
     // {
     //     CompiledCaches = new List<ScriptCompiledCache>();
