@@ -12,10 +12,10 @@ public class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISccr
     private readonly DbHelper Db;
     private readonly ScriptCompiler Compiler;
     private readonly ScriptExecutor Executor;
-    private readonly MetadataReference[] References;
+    private readonly List<MetadataReference> References;
     private readonly ILogger<ScriptManagerFacade> Logger;
 
-    internal ScriptManagerFacade(DbHelper db, ScriptCompiler compiler, ScriptExecutor executor, MetadataReference[] references, ILogger<ScriptManagerFacade> logger)
+    internal ScriptManagerFacade(DbHelper db, ScriptCompiler compiler, ScriptExecutor executor, List<MetadataReference> references, ILogger<ScriptManagerFacade> logger)
     {
         References = references;
         Db = db;
@@ -172,8 +172,9 @@ public class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISccr
             }
             else
             {
-                MetadataReference[] refs = Compiler.GetReferencesForVersion(apiVersion);
-                Compiler.RunCompilation(script.SourceCode!, refs, metaData: metaData);
+                List<MetadataReference> refs = Compiler.GetReferencesForVersion(apiVersion, References);
+                // Compiler.RunCompilation(script.SourceCode!, references: refs, metaData: metaData);
+                Compiler.RunCompilation(script.SourceCode!, metaData: metaData);
             }
 
             return "Successful Compilation!";

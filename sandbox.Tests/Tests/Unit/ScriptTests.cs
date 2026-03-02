@@ -20,7 +20,8 @@ public class ScriptTests
 
 
     [TestInitialize]
-    public async Task Setup()
+    public
+     void Setup()
     {
         // var logger = new LoggerForScripting();
         // // var microsoftLogger = logger.GetMicrosoftLogger<ScriptManagerFacade>();

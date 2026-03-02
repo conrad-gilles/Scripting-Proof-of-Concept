@@ -261,7 +261,7 @@ public class ScriptManagerFacadeTests
     public async Task ExecuteActionScriptTest()
     {
         Guid id = await facade!.CreateScript(sourceCodeActionV1!);
-        var testingContext = rm.GetTestingContext<GeneratorContextV3>();
+        var testingContext = rm!.GetTestingContext<GeneratorContextV3>();
 
         ActionResultBaseClass result = await facade.ExecuteActionScript(id, testingContext);
 
@@ -283,7 +283,7 @@ public class ScriptManagerFacadeTests
     public async Task ExecuteConditionScriptTest()
     {
         Guid id = await facade!.CreateScript(sourceCodePedia!);
-        var testingContext = rm.GetTestingContext<GeneratorContextV3>();
+        var testingContext = rm!.GetTestingContext<GeneratorContextV3>();
 
         bool result = await facade.ExecuteConditionScript(id, testingContext);
 
@@ -300,7 +300,7 @@ public class ScriptManagerFacadeTests
     [TestMethod]
     public async Task ExecuteScriptByIdTest()
     {
-        var context = rm.GetTestingContext<GeneratorContextV3>();
+        var context = rm!.GetTestingContext<GeneratorContextV3>();
 
         Guid condId = await facade!.CreateScript(sourceCodePedia!);
         object condResult = await facade.ExecuteScriptById(condId, context);
@@ -420,7 +420,7 @@ public class ScriptManagerFacadeTests
     }
 
     [TestMethod]
-    public async Task RegisterEmberInstanceTest()   //todo
+    public void RegisterEmberInstanceTest()   //todo
     {
         // await facade.RegisterEmberInstance(Guid.NewGuid(), "2.3.0", 6);
         Assert.IsTrue(true);
@@ -460,7 +460,7 @@ public class ScriptManagerFacadeTests
     }
 
     [TestMethod]
-    public async Task CleanupOrphanedCachesTest()   //todo
+    public void CleanupOrphanedCachesTest()   //todo
     {
         // Guid id = await facade.CreateScript(sourceCodePedia);
 
@@ -479,7 +479,7 @@ public class ScriptManagerFacadeTests
     #region Monitoring & Diagnostics
 
     [TestMethod]
-    public async Task GetScriptExecutionHistoryTest()   //todo
+    public void GetScriptExecutionHistoryTest()   //todo
     {
         // Guid id = await facade.CreateScript(sourceCodePedia, "ConditionScriptTest");
         // await facade.GetScriptExecutionHistory(id); // TODO/no-op currently
@@ -487,7 +487,7 @@ public class ScriptManagerFacadeTests
     }
 
     [TestMethod]
-    public async Task GetCompilationStatisticsTest()    //todo
+    public void GetCompilationStatisticsTest()    //todo
     {
         // await facade.GetCompilationStatistics(); // TODO/no-op currently
         Assert.IsTrue(true);

@@ -378,14 +378,14 @@ async Task MainProgramSwitch(IServiceProvider provider)
             {
                 Console.WriteLine("Something went wrong when trying to execute your script, but you can try again.");
             }
-            catch (ConditionScriptExecutionException)
-            {
-                Console.WriteLine("Something went wrong trying to execute your ConditionScript, but you can try again.");
-            }
-            catch (ActionScriptExecutionException)
-            {
-                Console.WriteLine("Something went wrong trying to execute your ActionScript, but you can try again.");
-            }
+            // catch (ConditionScriptExecutionException)
+            // {
+            //     Console.WriteLine("Something went wrong trying to execute your ConditionScript, but you can try again.");
+            // }
+            // catch (ActionScriptExecutionException)
+            // {
+            //     Console.WriteLine("Something went wrong trying to execute your ActionScript, but you can try again.");
+            // }
             catch (GetScriptPathFromFolderException)
             {
                 Console.WriteLine("Something went wrong when trying to get the Script path from the folder, but you can try again.");

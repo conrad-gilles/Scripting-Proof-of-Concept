@@ -7,7 +7,7 @@ namespace Ember.Scripting;
 //Ai Generated
 public static class ScriptingServiceCollectionExtensions
 {
-    public static IServiceCollection AddEmberScripting(this IServiceCollection services, MetadataReference[] references)
+    public static IServiceCollection AddEmberScripting(this IServiceCollection services, List<MetadataReference> references)
     {
         // 1. Register the references so they can be injected into constructors
         services.AddSingleton(references);
@@ -20,7 +20,7 @@ public static class ScriptingServiceCollectionExtensions
         // 3. Register DbHelper using a factory so we can keep its constructor internal
         services.AddTransient<DbHelper>(sp => new DbHelper(
             sp.GetRequiredService<ScriptCompiler>(),
-            sp.GetRequiredService<MetadataReference[]>(),
+            sp.GetRequiredService<List<MetadataReference>>(),
             sp.GetRequiredService<ILogger<DbHelper>>()
         ));
 
@@ -30,7 +30,7 @@ public static class ScriptingServiceCollectionExtensions
             sp.GetRequiredService<DbHelper>(),
             sp.GetRequiredService<ScriptCompiler>(),
             sp.GetRequiredService<ScriptExecutor>(),
-            sp.GetRequiredService<MetadataReference[]>(),
+            sp.GetRequiredService<List<MetadataReference>>(),
             sp.GetRequiredService<ILogger<ScriptManagerFacade>>()
         ));
 

@@ -27,7 +27,7 @@ internal class ScriptExecutor
         {
             if (compiledScript.Length > 5 * 1024 * 1024) // 5 mb maximum size
             {
-                throw new ScriptExecutionException();
+                throw new ScriptExecutionException(nameof(RunScriptExecution) + " failed in if (compiledScript.Length > 5 * 1024 * 1024)");
             }
 
             Assembly assembly = Assembly.Load(compiledScript);
@@ -49,12 +49,12 @@ internal class ScriptExecutor
 
             if (typeArray.Length == 0)
             {
-                throw new NoClassFoundInScriptFileException();
+                throw new NoClassFoundInScriptFileException(nameof(RunScriptExecution) + "failed in if (typeArray.Length == 0)");
             }
             else if (typeArray.Length > 1)
             {
                 Logger.LogInformation("more than one class found in script");
-                throw new MoreThanOneClassFoundInScriptException();   //to implement more than one name you would need to pass name of class into this class
+                throw new MoreThanOneClassFoundInScriptException("more than one class found in script");   //to implement more than one name you would need to pass name of class into this class
             }
 
             Type type = typeArray[0];
@@ -76,7 +76,7 @@ internal class ScriptExecutor
             else
             {
                 Logger.LogInformation("Could not run your script because it is neither a ActionScript nor a ConditionScript.");
-                throw new ScriptExecutionException();
+                throw new ScriptExecutionException("Could not run your script because it is neither a ActionScript nor a ConditionScript.");
             }
         }
         catch (Exception e)
@@ -85,7 +85,7 @@ internal class ScriptExecutor
             // Logger.LogError(e.Message);
             // Logger.LogError(e.StackTrace);
             Logger.LogError(e.ToString());
-            throw new ScriptExecutionException();
+            throw new ScriptExecutionException("Something went wrong when trying to execute your code, here are some details:", e);
         }
 
     }
@@ -119,7 +119,7 @@ internal class ScriptExecutor
         catch (Exception e)
         {
             Logger.LogInformation(e.ToString());
-            throw new ConditionScriptExecutionException();
+            throw new ConditionScriptExecutionException("RunConditionScrptFailed.", e);
         }
 
     }
@@ -157,7 +157,7 @@ internal class ScriptExecutor
         {
             Logger.LogError(e.ToString());
             Logger.LogWarning("You might have passed the wrong GeneratorContext class, ex V1 instead of V2");
-            throw new ActionScriptExecutionException();
+            throw new ActionScriptExecutionException("You might have passed the wrong GeneratorContext class, ex V1 instead of V2", e);
         }
 
     }

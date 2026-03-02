@@ -197,18 +197,15 @@ public class RandomMethods
         Guid id = cacheDict[Int32.Parse(userInputForEdit)];
         return id;
     }
-    private static MetadataReference[] references = new MetadataReference[]
-                 {
-                        MetadataReference.CreateFromFile(typeof(object).Assembly.Location), // System.Private.CoreLib
+    private static List<MetadataReference> references = [                        MetadataReference.CreateFromFile(typeof(object).Assembly.Location), // System.Private.CoreLib
                         MetadataReference.CreateFromFile(typeof(Console).Assembly.Location), // System.Console
                         MetadataReference.CreateFromFile(Assembly.Load("System.Runtime").Location), // System.Runtime
                         MetadataReference.CreateFromFile(typeof(Task<>).Assembly.Location), // System.Threading.Tasks
                         MetadataReference.CreateFromFile(typeof(DateTime).Assembly.Location), // System.DateTime
                         // References t custom interfaces
                         MetadataReference.CreateFromFile(typeof(IGeneratorConditionScript).Assembly.Location),
-                        MetadataReference.CreateFromFile(typeof(IGeneratorReadOnlyContext).Assembly.Location)   //try removing if works good i guess but still need to pass from sandbox
-                 };
-    public static MetadataReference[] GetReferences()
+                        MetadataReference.CreateFromFile(typeof(IGeneratorReadOnlyContext).Assembly.Location)  ]; //try removing if works good i guess but still need to pass from sandbox];
+    public static List<MetadataReference> GetReferences()
     {
         return references;
     }
@@ -307,7 +304,7 @@ public class RandomMethods
             // Displays the error on the screen.
             Console.WriteLine(e.ToString());
             Console.WriteLine("The file could not be read: probably because typo in classOfScriptToExecute variable:");
-            throw new CreateStringFromCsFileException();    // todo correct error handling throw an error
+            throw new CreateStringFromCsFileException("The file could not be read: probably because typo in classOfScriptToExecute variable:", e);    // todo correct error handling throw an error
         }
         // Source https://www.tutorialspoint.com/chash-program-to-create-string-from-contents-of-a-file //obv i changed a lot but i still copied
     }
@@ -333,7 +330,7 @@ public class RandomMethods
             }
             if (scriptPath == "" || scriptPath == null)
             {
-                throw new NoFileWithThisClassNameFoundException();
+                throw new NoFileWithThisClassNameFoundException("GetScriptPathFromFolder failed no scriptPath in If statement");
             }
             return scriptPath;  //todo this method cant fail because scriptPath is always atleast "" and therefore if wrong name is inserted it will still return even if no file was found
         }
@@ -341,7 +338,7 @@ public class RandomMethods
         {
             Console.WriteLine("getScriptPathFromFolder method failed");
             Console.WriteLine(e.ToString());
-            throw new GetScriptPathFromFolderException();
+            throw new GetScriptPathFromFolderException("getScriptPathFromFolder method failed", e);
         }
 
     }

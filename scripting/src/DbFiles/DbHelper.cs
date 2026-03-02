@@ -7,10 +7,10 @@ namespace Ember.Scripting;
 
 internal class DbHelper
 {
-    private readonly MetadataReference[] References;
+    private readonly List<MetadataReference> References;
     private readonly ScriptCompiler Compiler;
     private readonly ILogger<DbHelper> Logger;
-    public DbHelper(ScriptCompiler compiler, MetadataReference[] references, ILogger<DbHelper> logger)
+    public DbHelper(ScriptCompiler compiler, List<MetadataReference> references, ILogger<DbHelper> logger)
     {
         References = references;
         Compiler = compiler;
@@ -316,8 +316,9 @@ internal class DbHelper
                 byte[] tempComp;
                 if (oldApiV != -1)
                 {
-                    MetadataReference[] refs = Compiler.GetReferencesForVersion(oldApiV);
-                    tempComp = Compiler.RunCompilation(script.SourceCode!, refs, metaData: getTupleFromVal);
+                    List<MetadataReference> refs = Compiler.GetReferencesForVersion(oldApiV, References);
+                    // tempComp = Compiler.RunCompilation(script.SourceCode!, references: refs, metaData: getTupleFromVal);
+                    tempComp = Compiler.RunCompilation(script.SourceCode!, metaData: getTupleFromVal);
                     currentApiVersion = oldApiV;
                 }
                 else
