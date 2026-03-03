@@ -1,4 +1,7 @@
 ﻿@page "/"
+@using Ember.Scripting
+@inject ISccriptManagerDeleteAfter ScriptManager
+<PageTitle>Dashboard</PageTitle>
 
 <PageTitle>Dashboard</PageTitle>
 
@@ -137,3 +140,37 @@
 </div>
 
 
+@code {
+    private bool isLoading = true;
+    private int totalScripts = 0;
+    private int compiledScripts = 0;
+    private int pendingScripts = 0;
+    private int totalCaches = 0;
+
+    // This lifecycle method runs when the page loads
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            // 1. Fetch all scripts
+            var allScripts = await ScriptManager.ListScripts(null, includeCaches: true);
+            totalScripts = allScripts.Count;
+
+            // 2. Fetch caches
+            var caches = await ScriptManager.GetAllCompiledScriptCaches();
+            totalCaches = caches.Count;
+
+            // 3. Simple logic to determine if compiled based on cache count
+            compiledScripts = caches.Select(c => c.ScriptId).Distinct().Count();
+            pendingScripts = totalScripts - compiledScripts;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading dashboard data: {ex.Message}");
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+}

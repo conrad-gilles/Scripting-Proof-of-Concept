@@ -1,10 +1,18 @@
 using BlazorUI.Components;
+using Ember.Scripting;
+// using sandbox; // only if RandomMethods is in the sandbox project/namespace
+
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+
+// Register Ember scripting services (DI)
+var references = RandomMethods.GetReferences();
+int version = RandomMethods.GetEmberApiVersion();
+builder.Services.AddEmberScripting(references, version);
 
 var app = builder.Build();
 

@@ -1,4 +1,6 @@
 @page "/scripts"
+@using Ember.Scripting
+@inject ISccriptManagerDeleteAfter ScriptManager
 <PageTitle>Scripts</PageTitle>
 
 <div class="top-bar">
@@ -8,8 +10,110 @@
     </a>
 </div>
 
-<div class="empty-state">
-    <i class="bi bi-file-code"></i>
-    <h4>Scripts List</h4>
-    <p>Your scripts will appear here once connected to the C# backend.</p>
+<div class="card">
+    <div class="card-body">
+        @if (isLoading)
+        {
+            <div class="text-center py-5">
+                <div class="spinner-border text-primary" role="status"></div>
+                <p class="mt-2">Loading scripts...</p>
+            </div>
+        }
+        else if (ScriptsList == null || !ScriptsList.Any())
+        {
+            <div class="empty-state">
+                <i class="bi bi-file-code"></i>
+                <h4>No scripts found</h4>
+                <p>Create your first C# script to get started.</p>
+            </div>
+        }
+        else
+        {
+            <div class="table-container">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Script Name</th>
+                            <th>Type</th>
+                            <th>Min API Version</th>
+                            <th>Created At</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var script in ScriptsList)
+                        {
+                            <tr>
+                                <td><i class="bi bi-file-code text-primary"></i> @script.ScriptName</td>
+                                <td>
+                                    @if (script.ScriptType == "GeneratorAction")
+                                    {
+                                        <span class="badge bg-info">Action</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-warning text-dark">Condition</span>
+                                    }
+                                </td>
+                                <td>v@(script.MinApiVersion)</td>
+                                <td>@(script.CreatedAt?.ToString("yyyy-MM-dd") ?? "N/A")</td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <button class="btn btn-sm btn-outline-success btn-icon" @onclick="() => CompileScript(script.Id)">
+                                            <i class="bi bi-hammer"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-danger btn-icon" @onclick="() => DeleteScript(script.Id)">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
 </div>
+
+@code {
+    private List<CustomerScript> ScriptsList = new();
+    private bool isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadScripts();
+    }
+
+    private async Task LoadScripts()
+    {
+        isLoading = true;
+        try
+        {
+            // Call your backend facade
+            ScriptsList = await ScriptManager.ListScripts(null, includeCaches: false);
+        }
+        finally
+        {
+            isLoading = false;
+            // Tell Blazor to re-render the HTML now that data changed
+            StateHasChanged();
+        }
+    }
+
+    // Connects to a UI button
+    private async Task CompileScript(Guid id)
+    {
+        await ScriptManager.CompileScript(id);
+        // Reload to show updated status
+        await LoadScripts();
+    }
+
+    // Connects to a UI button
+    private async Task DeleteScript(Guid id)
+    {
+        await ScriptManager.DeleteScript(id);
+        // Refresh the table
+        await LoadScripts();
+    }
+}
