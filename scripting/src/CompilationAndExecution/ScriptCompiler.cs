@@ -105,22 +105,33 @@ internal class ScriptCompiler
             var myClassSymbol = model.GetDeclaredSymbol(myClass) as ITypeSymbol;
             var baseTypeName = myClassSymbol!.BaseType!.Name;
             var className = myClassSymbol.ToString();
+            var parentSymbol = myClassSymbol!.Interfaces.FirstOrDefault() ?? myClassSymbol.BaseType;
             int versionInt;
 
-            if (myClassSymbol.BaseType?.TypeArguments.Length > 0)
+            string versionString = "";
+            string reversed = new string(parentSymbol.Name.Reverse().ToArray());
+            for (int i = 0; i < reversed.Length; i++)  //gets last int in version
             {
-                var generatorContextType = myClassSymbol.BaseType.TypeArguments[0];
-                var versionName = generatorContextType.Name;
-                if (char.IsDigit(versionName[versionName.Length - 1]))
+                if (char.IsDigit(reversed[i]))
                 {
-                    versionInt = int.Parse(versionName[versionName.Length - 1].ToString());
+                    versionString = versionString + reversed[i];
+
+                    int nextIndex = i + 1;
+                    while (char.IsDigit(reversed[nextIndex]) && nextIndex < reversed.Length)
+                    {
+                        versionString = versionString + reversed[nextIndex];
+                        nextIndex++;
+                    }
+                    break;
                 }
-                else
-                {
-                    versionInt = 1;
-                }
+
             }
-            else
+            versionString = new string(versionString.Reverse().ToArray());
+            try
+            {
+                versionInt = int.Parse(versionString.ToString());
+            }
+            catch (Exception)
             {
                 versionInt = 1;
             }

@@ -146,6 +146,7 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
         catch (Exception e)
         {
             return "Error: " + e.ToString();
+            // throw new FacadeException(e.ToString(), e);
         }
 
     }
@@ -185,6 +186,7 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
         catch (Exception e)
         {
             return "Failed to compilate script:" + scriptId + " " + e.ToString();
+            // throw new FacadeException(e.ToString(), e);
         }
     }
 
@@ -231,7 +233,7 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
         catch (Exception e)
         {
             Logger.LogError(e.ToString());
-            throw new Exception();
+            throw new FacadeException(e.ToString(), e);
         }
 
     }
@@ -270,7 +272,7 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
         catch (Exception e)
         {
             Logger.LogError(e.ToString());
-            throw new Exception();
+            throw new FacadeException(e.ToString(), e);
         }
     }
 
@@ -307,7 +309,7 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
         catch (Exception e)
         {
             Logger.LogError(e.ToString());
-            throw new Exception();
+            throw;
         }
     }
 
@@ -332,7 +334,7 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
         catch (Exception e)
         {
             Logger.LogError(e.ToString());
-            throw new Exception();
+            throw new FacadeException(e.ToString(), e);
         }
 
     }

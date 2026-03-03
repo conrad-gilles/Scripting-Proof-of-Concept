@@ -7,7 +7,7 @@ using Ember.Scripting;
 /// Implementation using 1 generic for Context
 /// </summary>
 public interface IGeneratorConditionScript<TContext> : IGeneratorConditionScript    //todo this needs to get tested still
-where TContext : IGeneratorReadOnlyContext
+where TContext : IGeneratorReadOnlyContext.IGeneratorContext
 {
     Task<bool> EvaluateAsync(TContext context);
     // Task<bool> IGeneratorConditionScript.EvaluateAsync(IGeneratorReadOnlyContext context)
@@ -17,7 +17,7 @@ where TContext : IGeneratorReadOnlyContext
     }
 }
 public interface IGeneratorActionScript<TContext> : IGeneratorActionScript
-where TContext : IGeneratorContext
+where TContext : IGeneratorContext_V1.IGeneratorContext
 {
     Task<ActionResultBaseClass> ExecuteAsync(TContext context);
 
@@ -52,7 +52,7 @@ where TActionResult : ActionResultBaseClass
 
 public interface IGeneratorActionScriptV2 : IGeneratorActionScript
 {
-    Task<ActionResultV2> ExecuteAsync(IGeneratorContext_V2 context);
+    Task<ActionResultV2> ExecuteAsync(IGeneratorContext_V2.IGeneratorContext context);
 
     Task<ActionResultBaseClass> IGeneratorActionScript.ExecuteAsync(IGeneratorBaseInterface context)     //if bugs maybe put as async and await ExecuteAsync
     {
@@ -61,7 +61,7 @@ public interface IGeneratorActionScriptV2 : IGeneratorActionScript
 }
 public interface IGeneratorActionScriptV3 : IGeneratorActionScript
 {
-    Task<ActionResultV3NoInheritance> ExecuteAsync(IGeneratorContext_V3 context);
+    Task<ActionResultV3NoInheritance> ExecuteAsync(IGeneratorContext_V3.IGeneratorContext context);
 
     Task<ActionResultBaseClass> IGeneratorActionScript.ExecuteAsync(IGeneratorBaseInterface context)     //if bugs maybe put as async and await ExecuteAsync
     {
@@ -70,7 +70,7 @@ public interface IGeneratorActionScriptV3 : IGeneratorActionScript
 }
 public interface IGeneratorActionScriptV4Vaccine : IGeneratorActionScript
 {
-    Task<ActionResultV3NoInheritance> ExecuteAsync(IGeneratorContextNoInheritance_V4 context);
+    Task<ActionResultV3NoInheritance> ExecuteAsync(IGeneratorContextNoInheritance_V4.IGeneratorContext context);
 
     Task<ActionResultBaseClass> IGeneratorActionScript.ExecuteAsync(IGeneratorBaseInterface context)     //if bugs maybe put as async and await ExecuteAsync
     {

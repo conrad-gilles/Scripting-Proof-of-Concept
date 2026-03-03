@@ -3,6 +3,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Ember.Scripting;
 using Serilog;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 [TestClass]
 public class EmberVersioning
@@ -71,6 +72,7 @@ public class EmberVersioning
                    "sandbox", "src", "Scripts", "ConditionScripts", "PediatricCondition.cs"
                ))
            );
+        sourceCodes = [];
         sourceCodes!.Add(sourceCodeActionV1);
         sourceCodes!.Add(sourceCodeActionV2);
         sourceCodes!.Add(sourceCodeActionV3);
@@ -79,17 +81,43 @@ public class EmberVersioning
     }
 
 
-    // [TestMethod]
+    [TestMethod]
     public async Task RecentEmberVersionTestAsync()
     {
-        ScriptingServiceCollectionExtensions.AddEmberScripting(services!, RandomMethods.GetReferences(), RandomMethods.GetEmberApiVersion());
+        int v = RandomMethods.GetEmberApiVersion();
+        ScriptingServiceCollectionExtensions.AddEmberScripting(services!, RandomMethods.GetReferences(), v);
 
         using var provider = services!.BuildServiceProvider();
 
         facade = provider.GetRequiredService<ISccriptManagerDeleteAfter>();
         rm = new RandomMethods(facade);
+        await facade!.EnsureDeletedCreated();
         await ExecuteEachScript(facade, rm);
+        int apiVersionInsideFacade = await facade.GetRecentApiVersion();
+        Assert.IsTrue(apiVersionInsideFacade == v);
 
+
+        ServiceCollection services2 = new ServiceCollection();
+
+        logger = new LoggerForScripting();
+        Log.Debug("Sandbox launched.");
+
+        services2 = new ServiceCollection();
+        services2.AddLogging(builder =>
+        {
+            builder.AddSerilog(dispose: true);
+        });
+
+        ScriptingServiceCollectionExtensions.AddEmberScripting(services2, RandomMethods.GetReferences(), RandomMethods.GetEmberApiVersion(testingDiffrentVersion: 1));
+
+        using var provider2 = services2.BuildServiceProvider();
+
+        facade = provider2.GetRequiredService<ISccriptManagerDeleteAfter>();
+        rm = new RandomMethods(facade);
+        await facade!.EnsureDeletedCreated();
+        await ExecuteEachScript(facade, rm);
+        apiVersionInsideFacade = await facade.GetRecentApiVersion();
+        Assert.IsTrue(apiVersionInsideFacade == RandomMethods.GetEmberApiVersion(testingDiffrentVersion: 1));
     }
     public void OldEmberVersionTest()
     {
@@ -110,8 +138,9 @@ public class EmberVersioning
         foreach (var id in await SaturateDBAsync(facade, rm))
         {
             CustomerScript retrievedScript = await facade!.GetScript(id);
-            var context = rm!.GetTestingContext<GeneratorContextNoInherVaccine>(justForTesting: retrievedScript);
+            var context = rm!.GetTestingContext<GeneratorContextNoInherVaccine.GeneratorContext>(justForTesting: retrievedScript);
             object resultBeforeUpgrade = await facade.ExecuteScriptById(id, context);   //here somehow figure out how to get the version that is being executed todo
+
             if (resultBeforeUpgrade is ActionResultBaseClass)
             {
                 ActionResultV3NoInheritance result = RandomMethods.UpgradeActionResult(resultBeforeUpgrade);

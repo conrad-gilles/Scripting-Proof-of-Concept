@@ -290,7 +290,7 @@ internal class DbHelper
                 };
 
                 bool testBool = false;
-                testBool = await IsDuplicateScript(randomTestScript2);  //uncomment this if you dont want to check for duplicate existing in db when inserting
+                // testBool = await IsDuplicateScript(randomTestScript2);  //uncomment this if you dont want to check for duplicate existing in db when inserting
 
 
                 if (testBool == false)
@@ -323,7 +323,8 @@ internal class DbHelper
                 }
                 else
                 {
-                    return randomTestScript2;
+                    // return randomTestScript2;
+                    throw new DbHelperException(nameof(CreateAndInsertCustomerScript) + " failed in " + nameof(DbHelper) + " because a duplicate script was already in the database!");
                 }
             }
         }
@@ -551,7 +552,7 @@ internal class DbHelper
             throw new DbHelperException(nameof(DeleteAllCachedScripts) + " failed in " + nameof(DbHelper), e);
         }
     }
-    public async Task<bool> IsDuplicateScript(CustomerScript script)
+    public async Task<bool> IsDuplicateScript(CustomerScript script)    //todo make more efficient using ef core
     {
         try
         {

@@ -23,7 +23,15 @@ int currentApiVersion;
 
 try
 {
+
+    using (var db = new MyContext())
+    {
+        await db.Database.EnsureDeletedAsync();
+        await db.Database.EnsureCreatedAsync();
+    }
+
     var logger = new LoggerForScripting();
+    Log.Logger = logger.SetUpAndGetSeriLogger(); // ADD THIS LINE
     Log.Debug("Sandbox launched.");
 
     var services = new ServiceCollection();
@@ -200,19 +208,19 @@ async Task MainProgramSwitch(IServiceProvider provider)
 
                     case "ExecuteActionScript":
                         scriptId = await rm.GetIdInConsoleAsync(fromSrc: true);
-                        ActionResultBaseClass result = await facade.ExecuteActionScript(scriptId, rm.GetTestingContext<GeneratorContextV3>());
+                        ActionResultBaseClass result = await facade.ExecuteActionScript(scriptId, rm.GetTestingContext<GeneratorContextV3.GeneratorContext>());
                         Console.WriteLine(result.ToString());   //you could do whatever with it
                         break;
 
                     case "ExecuteConditionScript":
                         scriptId = await rm.GetIdInConsoleAsync(fromSrc: true);
-                        bool resultCond = await facade.ExecuteConditionScript(scriptId, rm.GetTestingContext<GeneratorContextV3>());
+                        bool resultCond = await facade.ExecuteConditionScript(scriptId, rm.GetTestingContext<GeneratorContextV3.GeneratorContext>());
                         Console.WriteLine(resultCond);
                         break;
 
                     case "ExecuteScriptById":
                         scriptId = await rm.GetIdInConsoleAsync(fromSrc: true);
-                        object resultObj = await facade.ExecuteScriptById(scriptId, rm.GetTestingContext<GeneratorContextV3>());
+                        object resultObj = await facade.ExecuteScriptById(scriptId, rm.GetTestingContext<GeneratorContextV3.GeneratorContext>());
 
                         if (typeof(bool).IsAssignableFrom(resultObj.GetType()))       //good idea to check what type was returne, you could also just check the property from db normally
                         {
@@ -343,7 +351,7 @@ async Task MainProgramSwitch(IServiceProvider provider)
                         sourceDict = await rm.ListAllStoredSourceCodes(dontPrint: true);
                         scriptId = sourceDict[Int32.Parse(userInput)];
                         CustomerScript justForTesting = await facade.GetScript(scriptId);
-                        object resultObj2 = await facade.ExecuteScriptById(scriptId, rm.GetTestingContext<GeneratorContextNoInherVaccine>(justForTesting: justForTesting));
+                        object resultObj2 = await facade.ExecuteScriptById(scriptId, rm.GetTestingContext<GeneratorContextNoInherVaccine.GeneratorContext>(justForTesting: justForTesting));
 
                         if (typeof(bool).IsAssignableFrom(resultObj2.GetType()))       //good idea to check what type was returne, you could also just check the property from db normally
                         {

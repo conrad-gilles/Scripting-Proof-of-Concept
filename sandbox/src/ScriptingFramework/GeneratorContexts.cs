@@ -1,145 +1,182 @@
 using Microsoft.Extensions.Logging;
 using Ember.Scripting;
+using IGeneratorReadOnlyContext;
 
-public interface IGeneratorReadOnlyContext : IGeneratorBaseInterface
+namespace IGeneratorReadOnlyContext
 {
-    ILabOrderInterface LabOrder { get; }      // Read current order data
-    PatientInterface Patient { get; }     // Read patient data
-    ConsoleLoggerInterface Logger { get; }
-    DataAccessInterface Data { get; }
-}
-
-public interface IGeneratorContext : IGeneratorReadOnlyContext
-{
-    new ILabOrderRWInterface LabOrder { get; }
-
-}
-public interface IGeneratorContext_V2 : IGeneratorContext
-{
-    new ILabOrderInterfaceV2 LabOrder { get; }
+    public interface IGeneratorContext : IGeneratorBaseInterface
+    {
+        ILabOrderInterface LabOrder { get; }      // Read current order data
+        PatientInterface Patient { get; }     // Read patient data
+        ConsoleLoggerInterface Logger { get; }
+        DataAccessInterface Data { get; }
+    }
 }
 
-public interface IGeneratorContext_V3 : IGeneratorContext_V2
+namespace IGeneratorContext_V1
 {
-    new ILabOrderInterfaceV3 LabOrder { get; }
+    public interface IGeneratorContext : IGeneratorReadOnlyContext.IGeneratorContext
+    {
+        new ILabOrderRWInterface LabOrder { get; }
+
+    }
 }
-public interface IGeneratorContextNoInheritance_V4 : IGeneratorBaseInterface
+
+namespace IGeneratorContext_V2
 {
-    ILabOrderInterfaceV4NoInheritence LabOrder { get; }
-    IVaccineInterface Vaccine { get; }
+    public interface IGeneratorContext : IGeneratorContext_V1.IGeneratorContext
+    {
+        new ILabOrderInterfaceV2 LabOrder { get; }
+    }
 }
+
+
+namespace IGeneratorContext_V3
+{
+    public interface IGeneratorContext : IGeneratorContext_V2.IGeneratorContext
+    {
+        new ILabOrderInterfaceV3 LabOrder { get; }
+    }
+}
+namespace IGeneratorContextNoInheritance_V4
+{
+    public interface IGeneratorContext : IGeneratorBaseInterface
+    {
+        ILabOrderInterfaceV4NoInheritence LabOrder { get; }
+        IVaccineInterface Vaccine { get; }
+    }
+}
+
+
 
 /// <summary>
 /// Classes of context come here
 /// </summary>
-// public abstract class GeneratorContext { }
-public class ReadOnlyContext : GeneratorContext, IGeneratorReadOnlyContext
+namespace ReadOnlyContext
 {
-    public ILabOrderInterface labOrder;
-    public PatientInterface patient;
-
-    public ConsoleLoggerInterface logger;
-    public DataAccessInterface data;
-
-
-    public ReadOnlyContext(ILabOrderInterface pLabOrder, PatientInterface pPatient, ConsoleLoggerInterface plogger, DataAccessInterface pdata)
+    public class GeneratorContext : Ember.Scripting.GeneratorContext, IGeneratorReadOnlyContext.IGeneratorContext
     {
-        labOrder = pLabOrder;
-        patient = pPatient;
-        logger = plogger;
-        data = pdata;
+        public ILabOrderInterface labOrder;
+        public PatientInterface patient;
 
+        public ConsoleLoggerInterface logger;
+        public DataAccessInterface data;
+
+
+        public GeneratorContext(ILabOrderInterface pLabOrder, PatientInterface pPatient, ConsoleLoggerInterface plogger, DataAccessInterface pdata)
+        {
+            labOrder = pLabOrder;
+            patient = pPatient;
+            logger = plogger;
+            data = pdata;
+
+        }
+        ILabOrderInterface IGeneratorReadOnlyContext.IGeneratorContext.LabOrder => labOrder;
+        PatientInterface IGeneratorReadOnlyContext.IGeneratorContext.Patient => patient;
+        ConsoleLoggerInterface IGeneratorReadOnlyContext.IGeneratorContext.Logger => logger;
+        DataAccessInterface IGeneratorReadOnlyContext.IGeneratorContext.Data => data;
     }
-    ILabOrderInterface IGeneratorReadOnlyContext.LabOrder => labOrder;
-    PatientInterface IGeneratorReadOnlyContext.Patient => patient;
-    ConsoleLoggerInterface IGeneratorReadOnlyContext.Logger => logger;
-    DataAccessInterface IGeneratorReadOnlyContext.Data => data;
 }
 
-public class RWContext : GeneratorContext, IGeneratorContext
+namespace RWContext
 {
-    public ILabOrderRWInterface labOrder;
-    public PatientInterface patient;
-
-    public ConsoleLoggerInterface logger;
-    public DataAccessInterface data;
-
-
-    public RWContext(ILabOrderRWInterface pLabOrder, PatientInterface pPatient, ConsoleLoggerInterface plogger, DataAccessInterface pdata)
+    public class GeneratorContext : Ember.Scripting.GeneratorContext, IGeneratorContext_V1.IGeneratorContext
     {
-        labOrder = pLabOrder;
-        patient = pPatient;
-        logger = plogger;
-        data = pdata;
+        public ILabOrderRWInterface labOrder;
+        public PatientInterface patient;
 
+        public ConsoleLoggerInterface logger;
+        public DataAccessInterface data;
+
+
+        public GeneratorContext(ILabOrderRWInterface pLabOrder, PatientInterface pPatient, ConsoleLoggerInterface plogger, DataAccessInterface pdata)
+        {
+            labOrder = pLabOrder;
+            patient = pPatient;
+            logger = plogger;
+            data = pdata;
+
+        }
+
+        public ILabOrderRWInterface LabOrder => labOrder;
+
+        public PatientInterface Patient => patient;
+
+        public ConsoleLoggerInterface Logger => logger;
+
+        public DataAccessInterface Data => data;
+
+        ILabOrderInterface IGeneratorReadOnlyContext.IGeneratorContext.LabOrder => LabOrder;
     }
-
-    public ILabOrderRWInterface LabOrder => labOrder;
-
-    public PatientInterface Patient => patient;
-
-    public ConsoleLoggerInterface Logger => logger;
-
-    public DataAccessInterface Data => data;
-
-    ILabOrderInterface IGeneratorReadOnlyContext.LabOrder => LabOrder;
-}
-public class GeneratorContextV2 : RWContext, IGeneratorContext_V2
-{
-    public ILabOrderInterfaceV2 labOrderV2;
-    public new PatientInterface patient;
-
-    public new ConsoleLoggerInterface logger;
-    public new DataAccessInterface data;
-
-
-    public GeneratorContextV2(ILabOrderInterfaceV2 pLabOrder, PatientInterface pPatient, ConsoleLoggerInterface plogger, DataAccessInterface pdata)
-    : base(pLabOrder, pPatient, plogger, pdata)
-    {
-        labOrderV2 = pLabOrder;
-        patient = pPatient;
-        logger = plogger;
-        data = pdata;
-
-    }
-    ILabOrderInterfaceV2 IGeneratorContext_V2.LabOrder => labOrderV2;
-
-}
-public class GeneratorContextV3 : GeneratorContextV2, IGeneratorContext_V3  //todo implement Adapter pattern
-{
-    public ILabOrderInterfaceV3 labOrderV3;
-    public new PatientInterface patient;
-
-    public new ConsoleLoggerInterface logger;
-    public new DataAccessInterface data;
-
-
-    public GeneratorContextV3(ILabOrderInterfaceV3 pLabOrderV3, PatientInterface pPatient, ConsoleLoggerInterface plogger, DataAccessInterface pdata)
-    : base(pLabOrderV3, pPatient, plogger, pdata)
-    {
-        labOrderV3 = pLabOrderV3;
-        patient = pPatient;
-        logger = plogger;
-        data = pdata;
-
-    }
-    ILabOrderInterfaceV3 IGeneratorContext_V3.LabOrder => labOrderV3;
-
 }
 
-public class GeneratorContextNoInherVaccine : GeneratorContext, IGeneratorContextNoInheritance_V4   //into diffrent namespaces blocks later folders
+namespace GeneratorContextV2
 {
-    ILabOrderInterfaceV4NoInheritence LabOrder;
-    IVaccineInterface Vaccine;
-    public GeneratorContextNoInherVaccine(ILabOrderInterfaceV4NoInheritence labOrder, IVaccineInterface vaccine)
+    public class GeneratorContext : RWContext.GeneratorContext, IGeneratorContext_V2.IGeneratorContext
     {
-        LabOrder = labOrder;
-        Vaccine = vaccine;
+        public ILabOrderInterfaceV2 labOrderV2;
+        public new PatientInterface patient;
+
+        public new ConsoleLoggerInterface logger;
+        public new DataAccessInterface data;
+
+
+        public GeneratorContext(ILabOrderInterfaceV2 pLabOrder, PatientInterface pPatient, ConsoleLoggerInterface plogger, DataAccessInterface pdata)
+        : base(pLabOrder, pPatient, plogger, pdata)
+        {
+            labOrderV2 = pLabOrder;
+            patient = pPatient;
+            logger = plogger;
+            data = pdata;
+
+        }
+        ILabOrderInterfaceV2 IGeneratorContext_V2.IGeneratorContext.LabOrder => labOrderV2;
+
     }
-
-    ILabOrderInterfaceV4NoInheritence IGeneratorContextNoInheritance_V4.LabOrder => LabOrder;
-
-    IVaccineInterface IGeneratorContextNoInheritance_V4.Vaccine => Vaccine;
 }
+
+namespace GeneratorContextV3
+{
+    public class GeneratorContext : GeneratorContextV2.GeneratorContext, IGeneratorContext_V3.IGeneratorContext  //todo implement Adapter pattern
+    {
+        public ILabOrderInterfaceV3 labOrderV3;
+        public new PatientInterface patient;
+
+        public new ConsoleLoggerInterface logger;
+        public new DataAccessInterface data;
+
+
+        public GeneratorContext(ILabOrderInterfaceV3 pLabOrderV3, PatientInterface pPatient, ConsoleLoggerInterface plogger, DataAccessInterface pdata)
+        : base(pLabOrderV3, pPatient, plogger, pdata)
+        {
+            labOrderV3 = pLabOrderV3;
+            patient = pPatient;
+            logger = plogger;
+            data = pdata;
+
+        }
+        ILabOrderInterfaceV3 IGeneratorContext_V3.IGeneratorContext.LabOrder => labOrderV3;
+
+    }
+}
+
+namespace GeneratorContextNoInherVaccine
+{
+    public class GeneratorContext : Ember.Scripting.GeneratorContext, IGeneratorContextNoInheritance_V4.IGeneratorContext   //into diffrent namespaces blocks later folders
+    {
+        ILabOrderInterfaceV4NoInheritence LabOrder;
+        IVaccineInterface Vaccine;
+        public GeneratorContext(ILabOrderInterfaceV4NoInheritence labOrder, IVaccineInterface vaccine)
+        {
+            LabOrder = labOrder;
+            Vaccine = vaccine;
+        }
+
+        ILabOrderInterfaceV4NoInheritence IGeneratorContextNoInheritance_V4.IGeneratorContext.LabOrder => LabOrder;
+
+        IVaccineInterface IGeneratorContextNoInheritance_V4.IGeneratorContext.Vaccine => Vaccine;
+    }
+}
+
 
 //context not always backwards comp, make sure right context passed factory

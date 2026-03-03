@@ -8,10 +8,10 @@ using System.Collections.Generic;   //todo same for them
 // namespace MyCustomScripts //todo change get rid idk
 // {
 
-public class PediatricCondition : IGeneratorConditionScript<IGeneratorReadOnlyContext>
+public class PediatricCondition : IGeneratorConditionScript<IGeneratorReadOnlyContext.IGeneratorContext>
 {
 
-    public async Task<bool> EvaluateAsync(IGeneratorReadOnlyContext context)
+    public async Task<bool> EvaluateAsync(IGeneratorReadOnlyContext.IGeneratorContext context)
     {
         if (context.Patient.DateOfBirth.HasValue)
         {

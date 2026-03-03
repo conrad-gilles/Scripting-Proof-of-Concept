@@ -1,5 +1,0 @@
-﻿{"@t":"2026-02-27T12:52:36.5180916Z","@mt":"Entered {MethodName} in {ClassName}.","@l":"Verbose","MethodName":"ListAllStoredSourceCodes","ClassName":"RandomMethods"}
-{"@t":"2026-02-27T12:52:36.5397726Z","@mt":"Entered {MethodName} in {ClassName}.","@l":"Verbose","MethodName":"GetTestingContext","ClassName":"RandomMethods"}
-{"@t":"2026-02-27T12:52:36.8707896Z","@mt":"Entered {MethodName} in {ClassName}.","@l":"Verbose","MethodName":"ListAllStoredSourceCodes","ClassName":"RandomMethods"}
-{"@t":"2026-02-27T12:52:46.0442546Z","@mt":"Entered {MethodName} in {ClassName} with path: {ScriptPath}.","@l":"Verbose","MethodName":"CreateStringFromCsFile","ClassName":"RandomMethods","ScriptPath":"C:\\Users\\Gilles\\Desktop\\UNI\\Semester 6\\Code\\Codebase\\labsolutionlu-ember-scripting-fb966c220f60\\sandbox\\src\\Scripts\\ConditionScripts\\PediatricCondition.cs"}
-{"@t":"2026-02-27T12:52:49.5929082Z","@mt":"Entered {MethodName} in {ClassName}.","@l":"Verbose","MethodName":"ListAllStoredSourceCodes","ClassName":"RandomMethods"}

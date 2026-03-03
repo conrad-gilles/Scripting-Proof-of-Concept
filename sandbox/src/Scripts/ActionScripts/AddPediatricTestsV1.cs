@@ -3,9 +3,9 @@ using System.Threading.Tasks;
 using System.Collections.Generic;   //todo same for them
 using Ember.Scripting;
 // using static System.Threading.Mutex; //if uncomment it wont run which is good
-public class AddPediatricTestsV1 : IGeneratorActionScript<IGeneratorContext, ActionResult>
+public class AddPediatricTestsV1 : IGeneratorActionScript<IGeneratorContext_V1.IGeneratorContext, ActionResult>
 {
-    public async Task<ActionResult> ExecuteAsync(IGeneratorContext context)    //error is here in Basyns
+    public async Task<ActionResult> ExecuteAsync(IGeneratorContext_V1.IGeneratorContext context)    //error is here in Basyns
     {
         context.Logger.Info("Adding pediatric standard tests");
 

@@ -32,7 +32,7 @@ using Ember.Scripting;
 public class AddPediatricTestsV3 : IGeneratorActionScriptV3
 {
     // public async Task<ActionResult> ExecuteAsync(IGeneratorContext context)
-    public async Task<ActionResultV3NoInheritance> ExecuteAsync(IGeneratorContext_V3 context)
+    public async Task<ActionResultV3NoInheritance> ExecuteAsync(IGeneratorContext_V3.IGeneratorContext context)
     {
         context.Logger.Info("Adding pediatric standard tests");
 

@@ -181,3 +181,10 @@ public class DbHelperException : Exception
     public DbHelperException(string message) : base(message) { }
     public DbHelperException(string message, Exception innerException) : base(message, innerException) { }
 }
+public class FacadeException : Exception
+{
+    public FacadeException() : base() { }
+    public FacadeException(string message) : base(message) { }
+    public FacadeException(string message, Exception innerException) : base(message, innerException) { }
+}
+

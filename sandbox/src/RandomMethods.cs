@@ -215,7 +215,7 @@ public class RandomMethods
                         MetadataReference.CreateFromFile(typeof(DateTime).Assembly.Location), // System.DateTime
                         // References t custom interfaces
                         MetadataReference.CreateFromFile(typeof(IGeneratorConditionScript).Assembly.Location),
-                        MetadataReference.CreateFromFile(typeof(IGeneratorReadOnlyContext).Assembly.Location),//try removing if works good i guess but still need to pass from sandbox];
+                        MetadataReference.CreateFromFile(typeof(IGeneratorReadOnlyContext.IGeneratorContext).Assembly.Location),//try removing if works good i guess but still need to pass from sandbox];
                         //   MetadataReference.CreateFromFile(typeof(Ember.Scripting.ScriptManagerFacade).Assembly.Location)
                           ];
     public static List<MetadataReference> GetReferences()
@@ -241,11 +241,11 @@ public class RandomMethods
 
             GeneratorContext ctx = typeof(T) switch
             {
-                var t when t == typeof(ReadOnlyContext) => new ReadOnlyContext(labOrder, patient, logger, testDataAccess),
-                var t when t == typeof(RWContext) => new RWContext(labOrder, patient, logger, testDataAccess),
-                var t when t == typeof(GeneratorContextV2) => new GeneratorContextV2(labOrder, patient, logger, testDataAccess),
-                var t when t == typeof(GeneratorContextV3) => new GeneratorContextV3(labOrder, patient, logger, testDataAccess),
-                var t when t == typeof(GeneratorContextNoInherVaccine) => new GeneratorContextNoInherVaccine(labOrder, vaccine),
+                var t when t == typeof(ReadOnlyContext.GeneratorContext) => new ReadOnlyContext.GeneratorContext(labOrder, patient, logger, testDataAccess),
+                var t when t == typeof(RWContext.GeneratorContext) => new RWContext.GeneratorContext(labOrder, patient, logger, testDataAccess),
+                var t when t == typeof(GeneratorContextV2.GeneratorContext) => new GeneratorContextV2.GeneratorContext(labOrder, patient, logger, testDataAccess),
+                var t when t == typeof(GeneratorContextV3.GeneratorContext) => new GeneratorContextV3.GeneratorContext(labOrder, patient, logger, testDataAccess),
+                var t when t == typeof(GeneratorContextNoInherVaccine.GeneratorContext) => new GeneratorContextNoInherVaccine.GeneratorContext(labOrder, vaccine),
                 _ => throw new ArgumentException($"Unsupported context type: {typeof(T).Name}")
             };
             if (justForTesting != null) //this is ofc just for testing purposes in the real application you would never automatically distribute the context because it is unsafe you want to be able to control who gets which context precisely
@@ -261,24 +261,24 @@ public class RandomMethods
                         int v = Facade.BasicValidationBeforeCompiling(justForTesting.SourceCode!).versionInt;
                         ctx = v switch
                         {
-                            1 => new RWContext(labOrder, patient, logger, testDataAccess),
-                            2 => new GeneratorContextV2(labOrder, patient, logger, testDataAccess),
-                            3 => new GeneratorContextV3(labOrder, patient, logger, testDataAccess),
-                            4 => new GeneratorContextNoInherVaccine(labOrder, vaccine),
+                            1 => new RWContext.GeneratorContext(labOrder, patient, logger, testDataAccess),
+                            2 => new GeneratorContextV2.GeneratorContext(labOrder, patient, logger, testDataAccess),
+                            3 => new GeneratorContextV3.GeneratorContext(labOrder, patient, logger, testDataAccess),
+                            4 => new GeneratorContextNoInherVaccine.GeneratorContext(labOrder, vaccine),
                             _ => throw new NotImplementedException(),
                         };
                         break;
                     case "IGeneratorActionScriptV2":
-                        ctx = new GeneratorContextV2(labOrder, patient, logger, testDataAccess);
+                        ctx = new GeneratorContextV2.GeneratorContext(labOrder, patient, logger, testDataAccess);
                         break;
                     case "IGeneratorActionScriptV3":
-                        ctx = new GeneratorContextV3(labOrder, patient, logger, testDataAccess);
+                        ctx = new GeneratorContextV3.GeneratorContext(labOrder, patient, logger, testDataAccess);
                         break;
                     case "IGeneratorActionScriptV4Vaccine":
-                        ctx = new GeneratorContextNoInherVaccine(labOrder, vaccine);
+                        ctx = new GeneratorContextNoInherVaccine.GeneratorContext(labOrder, vaccine);
                         break;
                     case "IGeneratorConditionScript":
-                        ctx = new ReadOnlyContext(labOrder, patient, logger, testDataAccess);
+                        ctx = new ReadOnlyContext.GeneratorContext(labOrder, patient, logger, testDataAccess);
                         break;
                     default:
                         Console.WriteLine("Error in testing switch");
