@@ -131,7 +131,7 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
     }
 
     /// Performs syntax and interface validation without saving
-    public async Task<string> ValidateScript(string sourceCode)
+    public string ValidateScript(string sourceCode)
     {
         Logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(ValidateScript), nameof(ScriptManagerFacade));
         try
@@ -386,7 +386,7 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
     {
         Logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(GetRecentApiVersion), nameof(ScriptManagerFacade));
 
-        return await Db.GetRecentApiVersion();
+        return Db.GetRecentApiVersion();
     }
 
     // Returns which API versions a script is compatible with
@@ -415,7 +415,7 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
     }
 
     // Registers a new Ember instance in the system
-    public async Task RegisterEmberInstance(Guid instanceId, string emberVersion, int apiVersion)
+    public void RegisterEmberInstance(Guid instanceId, string emberVersion, int apiVersion)
     {
         Logger.LogTrace("Entered {MethodName} in {ClassName} with instanceId: {InstanceId}.", nameof(RegisterEmberInstance), nameof(ScriptManagerFacade), instanceId);
 
@@ -458,7 +458,7 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
     #region Monitoring & Diagnostics
 
     // Returns execution logs and metrics
-    public async Task GetScriptExecutionHistory(Guid scriptId)
+    public void GetScriptExecutionHistory(Guid scriptId)
     {
         Logger.LogTrace("Entered {MethodName} in {ClassName} with scriptId: {ScriptId}.", nameof(GetScriptExecutionHistory), nameof(ScriptManagerFacade), scriptId);
 
@@ -466,7 +466,7 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
     }
 
     // Returns compilation success/failure rates and performance metrics
-    public async Task GetCompilationStatistics()
+    public void GetCompilationStatistics()
     {
         Logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(GetCompilationStatistics), nameof(ScriptManagerFacade));
 

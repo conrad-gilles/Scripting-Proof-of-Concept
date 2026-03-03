@@ -192,7 +192,7 @@ async Task MainProgramSwitch(IServiceProvider provider)
                     case "ValidateScript":
                         scriptId = await rm.GetIdInConsoleAsync(fromSrc: true);
                         var script = await facade.GetScript(scriptId);
-                        string answer = await facade.ValidateScript(script.SourceCode!);
+                        string answer = facade.ValidateScript(script.SourceCode!);
                         Console.WriteLine(answer);
                         break;
 

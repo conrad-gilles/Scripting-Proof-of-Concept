@@ -34,7 +34,7 @@ public interface ISccriptManagerDeleteAfter : IScriptManagerExtended
     /// </summary>
     /// <param name="sourceCode"></param>
     /// <returns></returns>
-    Task<string> ValidateScript(string sourceCode);
+    string ValidateScript(string sourceCode);
 
     /// <summary>
     /// Retrieves compilation error details
@@ -159,7 +159,7 @@ public interface ISccriptManagerDeleteAfter : IScriptManagerExtended
     /// <param name="emberVersion"></param>
     /// <param name="apiVersion"></param>
     /// <returns></returns>
-    Task RegisterEmberInstance(Guid instanceId, string emberVersion, int apiVersion);
+    void RegisterEmberInstance(Guid instanceId, string emberVersion, int apiVersion);
 
     #endregion
 
@@ -192,13 +192,13 @@ public interface ISccriptManagerDeleteAfter : IScriptManagerExtended
     /// </summary>
     /// <param name="scriptId"></param>
     /// <returns></returns>
-    Task GetScriptExecutionHistory(Guid scriptId);
+    void GetScriptExecutionHistory(Guid scriptId);
 
     /// <summary>
     /// Returns compilation success/failure rates and performance metrics
     /// </summary>
     /// <returns></returns>
-    Task GetCompilationStatistics();
+    void GetCompilationStatistics();
 
     /// <summary>
     /// Validates database connectivity, API version consistency, and system state

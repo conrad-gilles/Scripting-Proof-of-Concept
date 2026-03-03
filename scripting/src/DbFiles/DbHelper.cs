@@ -134,7 +134,7 @@ internal class DbHelper
             throw new DbHelperException(nameof(GetAllCompiledScriptCaches) + " failed in " + nameof(DbHelper), e);
         }
     }
-    public async Task<int> GetRecentApiVersion()
+    public int GetRecentApiVersion()
     {
         Logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(GetRecentApiVersion), nameof(DbHelper));
         return RecentApiVersion;
@@ -143,7 +143,7 @@ internal class DbHelper
     {
         Logger.LogTrace("Entered {MethodName} in {ClassName} with scriptId: {ScriptId}.", nameof(ClearScriptCache), nameof(DbHelper), scriptId);
 
-        int currentApiVersion = await GetRecentApiVersion();
+        int currentApiVersion = GetRecentApiVersion();
         int highestV = currentApiVersion;
         foreach (var item in await GetActiveApiVersions())
         {
@@ -175,7 +175,7 @@ internal class DbHelper
 
         try
         {
-            int currentApiVersion = await GetRecentApiVersion();
+            int currentApiVersion = GetRecentApiVersion();
             CustomerScript script = await GetCustomerScript(scriptId, includeCaches: true);
 
             int start = script.MinApiVersion;
@@ -269,7 +269,7 @@ internal class DbHelper
 
             using (var db = new MyContext())
             {
-                int currentApiVersion = await GetRecentApiVersion();
+                int currentApiVersion = GetRecentApiVersion();
                 if (createdAt == null)
                 {
                     createdAt = DateTime.UtcNow;
@@ -303,7 +303,7 @@ internal class DbHelper
                     }
                     else
                     {
-                        currentApiVersion = await GetRecentApiVersion();
+                        currentApiVersion = GetRecentApiVersion();
                         tempComp = Compiler.RunCompilation(scriptString, metaData: getTupleFromVal);
                     }
 
@@ -341,7 +341,7 @@ internal class DbHelper
 
             using (var db = new MyContext())
             {
-                int currentApiVersion = await GetRecentApiVersion();
+                int currentApiVersion = GetRecentApiVersion();
 
                 var getTupleFromVal = Compiler.BasicValidationBeforeCompiling(script.SourceCode!);
 
@@ -429,7 +429,7 @@ internal class DbHelper
             throw new DbHelperException(nameof(DeleteScriptCache) + " failed in " + nameof(DbHelper), e);
         }
     }
-    public async Task UpdateCustomerScript(CustomerScript customerScript)
+    public void UpdateCustomerScript(CustomerScript customerScript)
     {
         try
         {
@@ -731,7 +731,7 @@ internal class DbHelper
         try
         {
             // Ensure the current runtime version is valid (positive integer)
-            int currentApiVersion = await GetRecentApiVersion();
+            int currentApiVersion = GetRecentApiVersion();
             if (currentApiVersion <= 0)
             {
                 throw new InvalidOperationException($"HealthCheck Failed: Invalid Current API Version configured ({currentApiVersion}).");
