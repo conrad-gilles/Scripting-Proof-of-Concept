@@ -91,8 +91,10 @@ public class ScriptManagerFacadeTests
     public async Task CreateScriptWithOldTest()
     {
 
-        Guid id = await facade!.CreateScript(sourceCodePedia!, apiVersion: 1);
+        Guid id = await facade!.CreateScript(sourceCodePedia!, apiVersion: 2);
         CustomerScript retrievedScript = await facade.GetScript(id);
+        var context = rm!.GetTestingContext<GeneratorContextNoInherVaccine.GeneratorContext>(retrievedScript);
+        await facade.ExecuteScriptById(retrievedScript.Id, context);
 
         Assert.AreEqual(retrievedScript.SourceCode, sourceCodePedia);
     }
@@ -227,12 +229,12 @@ public class ScriptManagerFacadeTests
     [TestMethod]
     public async Task ValidateScriptTest()
     {
-        string result = await facade!.ValidateScript(sourceCodePedia!);
+        string result = facade!.ValidateScript(sourceCodePedia!);
 
         Assert.IsTrue(result.StartsWith("Success:", StringComparison.OrdinalIgnoreCase));
         Assert.IsTrue(result.Contains("PediatricCondition"));
 
-        string result2 = await facade.ValidateScript("wrong input test could be whatever");
+        string result2 = facade.ValidateScript("wrong input test could be whatever");
 
         Assert.IsTrue(result2.StartsWith("Error:", StringComparison.OrdinalIgnoreCase));
         Assert.IsTrue(result2.Contains("Exception"));

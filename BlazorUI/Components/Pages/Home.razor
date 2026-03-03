@@ -1,10 +1,139 @@
 ﻿@page "/"
-@using Ember.Scripting
 
-<!-- @inject IScriptManager ScriptManager -->
-<PageTitle>Home</PageTitle>
+<PageTitle>Dashboard</PageTitle>
+
+<div class="top-bar">
+    <h2>Dashboard</h2>
+    <div>
+        <span class="badge bg-success"><span class="status-dot active"></span>System Online</span>
+    </div>
+</div>
+
+<!-- Statistics Cards -->
+<div class="row mb-4">
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="stat-card">
+            <i class="bi bi-file-code-fill"></i>
+            <h3>24</h3>
+            <p>Total Scripts</p>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="stat-card success">
+            <i class="bi bi-check-circle-fill"></i>
+            <h3>18</h3>
+            <p>Compiled Scripts</p>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="stat-card warning">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            <h3>3</h3>
+            <p>Pending Compilation</p>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="stat-card info">
+            <i class="bi bi-clock-history"></i>
+            <h3>156</h3>
+            <p>Total Executions</p>
+        </div>
+    </div>
+</div>
+<!-- Add this below the <div class="row mt-4"> block in Home.razor -->
+
+<div class="card mt-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span><i class="bi bi-clock-history"></i> Recent Scripts</span>
+        <a href="/scripts" class="btn btn-sm btn-primary">View All</a>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-container">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th class="ps-4">Script Name</th>
+                        <th>Type</th>
+                        <th>API Version</th>
+                        <th>Status</th>
+                        <th>Last Modified</th>
+                        <th class="text-end pe-4">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="ps-4"><i class="bi bi-file-code text-primary"></i> AddPediatricTestsV3</td>
+                        <td><span class="badge bg-info">Action</span></td>
+                        <td>v6</td>
+                        <td><span class="badge bg-success">Compiled</span></td>
+                        <td>2 hours ago</td>
+                        <td class="text-end pe-4">
+                            <div class="action-buttons justify-content-end">
+                                <button class="btn btn-sm btn-outline-primary btn-icon" title="View"><i class="bi bi-eye"></i></button>
+                                <button class="btn btn-sm btn-outline-success btn-icon" title="Execute"><i class="bi bi-play-fill"></i></button>
+                                <button class="btn btn-sm btn-outline-danger btn-icon" title="Delete"><i class="bi bi-trash"></i></button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="ps-4"><i class="bi bi-file-code text-primary"></i> VaccineScript</td>
+                        <td><span class="badge bg-info">Action</span></td>
+                        <td>v6</td>
+                        <td><span class="badge bg-success">Compiled</span></td>
+                        <td>5 hours ago</td>
+                        <td class="text-end pe-4">
+                            <div class="action-buttons justify-content-end">
+                                <button class="btn btn-sm btn-outline-primary btn-icon" title="View"><i class="bi bi-eye"></i></button>
+                                <button class="btn btn-sm btn-outline-success btn-icon" title="Execute"><i class="bi bi-play-fill"></i></button>
+                                <button class="btn btn-sm btn-outline-danger btn-icon" title="Delete"><i class="bi bi-trash"></i></button>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-server"></i> Ember Instances
+            </div>
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <span class="status-dot active"></span>
+                        <strong>Instance-01</strong>
+                    </div>
+                    <span class="badge bg-primary">v2.3.0 (SDK v6)</span>
+                </div>
+                <div class="progress">
+                    <div class="progress-bar bg-success" style="width: 85%"></div>
+                </div>
+                <small class="text-muted">Last heartbeat: 30 seconds ago</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-activity"></i> Quick Actions
+            </div>
+            <div class="card-body">
+                <a href="/create" class="btn btn-primary w-100 mb-2">
+                    <i class="bi bi-plus-circle"></i> Create New Script
+                </a>
+                <button class="btn btn-outline-primary w-100 mb-2">
+                    <i class="bi bi-hammer"></i> Compile All Scripts
+                </button>
+                <button class="btn btn-outline-danger w-100">
+                    <i class="bi bi-trash"></i> Clear All Caches
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 
 
-<h1>Hello, world!</h1>
-
-Welcome to your new app.

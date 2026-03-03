@@ -1,0 +1,69 @@
+<nav class="sidebar">
+    <div class="sidebar-logo">
+        <h4><i class="bi bi-lightning-charge-fill"></i> Ember</h4>
+        <small>Scripting Manager</small>
+    </div>
+    
+    <ul class="nav-menu">
+        <li class="nav-item">
+            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                <i class="bi bi-speedometer2"></i>
+                <span>Dashboard</span>
+            </NavLink>
+        </li>
+        <li class="nav-item">
+            <NavLink class="nav-link" href="scripts">
+                <i class="bi bi-file-code"></i>
+                <span>Scripts</span>
+            </NavLink>
+        </li>
+        <li class="nav-item">
+            <NavLink class="nav-link" href="create">
+                <i class="bi bi-plus-circle"></i>
+                <span>Create Script</span>
+            </NavLink>
+        </li>
+        <li class="nav-item">
+            <NavLink class="nav-link" href="execution">
+                <i class="bi bi-play-circle"></i>
+                <span>Execution</span>
+            </NavLink>
+        </li>
+        <li class="nav-item">
+            <NavLink class="nav-link" href="cache">
+                <i class="bi bi-database"></i>
+                <span>Cache Management</span>
+            </NavLink>
+        </li>
+        <li class="nav-item">
+            <NavLink class="nav-link" href="versions">
+                <i class="bi bi-layers"></i>
+                <span>API Versions</span>
+            </NavLink>
+        </li>
+        <li class="nav-item">
+            <NavLink class="nav-link" href="monitoring">
+                <i class="bi bi-graph-up"></i>
+                <span>Monitoring</span>
+            </NavLink>
+        </li>
+        <li class="nav-item">
+            <NavLink class="nav-link" href="settings">
+                <i class="bi bi-gear"></i>
+                <span>Settings</span>
+            </NavLink>
+        </li>
+    </ul>
+</nav>
+
+<style>
+    /* 
+     Blazor automatically adds the 'active' class to NavLink components 
+     when the current URL matches the href. We use this to style the selected tab.
+    */
+    .nav-link.active {
+        background: rgba(255,255,255,0.15) !important;
+        color: white !important;
+        border-left-color: #60a5fa !important;
+    }
+</style>
