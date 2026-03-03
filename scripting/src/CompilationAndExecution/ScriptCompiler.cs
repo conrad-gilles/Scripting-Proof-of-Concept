@@ -11,6 +11,13 @@ internal class ScriptCompiler
 {
     private readonly List<MetadataReference>? References2 = null;
     private readonly ILogger<ScriptCompiler> Logger;
+
+    private readonly List<MetadataReference> StandardRefrencesForAllScripts = [MetadataReference.CreateFromFile(typeof(object).Assembly.Location),
+                        MetadataReference.CreateFromFile(typeof(Console).Assembly.Location),
+                        MetadataReference.CreateFromFile(Assembly.Load("System.Runtime").Location),
+                        MetadataReference.CreateFromFile(typeof(Task<>).Assembly.Location),
+                        MetadataReference.CreateFromFile(typeof(DateTime).Assembly.Location),
+                        ];
     public ScriptCompiler(List<MetadataReference> references2, ILogger<ScriptCompiler> logger)
     {
         References2 = references2;
@@ -20,6 +27,8 @@ internal class ScriptCompiler
     {
         try
         {
+            References2!.AddRange(StandardRefrencesForAllScripts);
+
             List<MetadataReference>? references = [];
 
             Logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(RunCompilation), nameof(ScriptCompiler));
@@ -38,7 +47,7 @@ internal class ScriptCompiler
             if (apiVersion != -1)
             {
                 Logger.LogInformation("Added custom references in {MethodName}.", nameof(RunCompilation));  //if this works remove the if references is null if stat above
-                references = GetReferencesForVersion(apiVersion, references);
+                references = GetReferencesForOldVersion(apiVersion, stdReferences: references);
             }
             //this initiates the process of the compilation (does not produce bytes yet), it binds the source code with the refrences and the config options
             CSharpCompilation compilation = CSharpCompilation.Create(
@@ -219,17 +228,12 @@ internal class ScriptCompiler
         return areSame;
     }
 
-    public List<MetadataReference> GetReferencesForVersion(int version, List<MetadataReference> stdReferences, List<string>? customDlls = null, bool loadCurrentRT = true)  //todo fix this
+    public List<MetadataReference> GetReferencesForOldVersion(int version, List<MetadataReference> stdReferences, List<string>? customDlls = null, bool loadCurrentRT = true)  //todo fix this
     {
-
-        // stdReferences.Remove(MetadataReference.CreateFromFile(typeof(IGeneratorConditionScript).Assembly.Location));
-        // stdReferences.Remove(MetadataReference.CreateFromFile(typeof(IGeneratorReadOnlyContext).Assembly.Location));
-
-        Logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(GetReferencesForVersion), nameof(ScriptCompiler));
+        stdReferences = StandardRefrencesForAllScripts;
+        Logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(GetReferencesForOldVersion), nameof(ScriptCompiler));
         var references = new List<MetadataReference>();
 
-        // string versionPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "OldVersions", version.ToString());
-        // string tempPath = @"C:\Users\Gilles\Desktop\UNI\Semester 6\Code";
         string tempPath = Path.GetFullPath(
             Path.Combine(AppDomain.CurrentDomain.BaseDirectory,
                          "..", "..", "..", "..", "..", "..")
@@ -245,7 +249,7 @@ internal class ScriptCompiler
 
         List<string> dllsToLoad =
         [
-        "Ember.dll",               // application assembly
+        "Framework.dll",               // application assembly
         "System.Private.CoreLib.dll",
         "System.Runtime.dll",
         "System.Console.dll",
@@ -255,24 +259,7 @@ internal class ScriptCompiler
         if (loadCurrentRT)
         {
             Logger.LogTrace("loadCurrentRT true.");
-            dllsToLoad = ["Ember.dll"];
-            // var stdRefs = new MetadataReference[]
-            // {
-            //             MetadataReference.CreateFromFile(typeof(object).Assembly.Location), // System.Private.CoreLib
-            //             MetadataReference.CreateFromFile(typeof(Console).Assembly.Location), // System.Console
-            //             MetadataReference.CreateFromFile(Assembly.Load("System.Runtime").Location), // System.Runtime
-            //             MetadataReference.CreateFromFile(typeof(Task<>).Assembly.Location), // System.Threading.Tasks
-            //             MetadataReference.CreateFromFile(typeof(DateTime).Assembly.Location), // System.DateTime
-            // };
-            // foreach (var item in stdRefs)
-            // {
-            //     references.Add(item);
-            // }
-            // stdReferences = [
-            //     MetadataReference.CreateFromFile(typeof(Console).Assembly.Location), // System.Console
-            //             MetadataReference.CreateFromFile(Assembly.Load("System.Runtime").Location), // System.Runtime
-            //             MetadataReference.CreateFromFile(typeof(Task<>).Assembly.Location), // System.Threading.Tasks
-            //             MetadataReference.CreateFromFile(typeof(DateTime).Assembly.Location)]; // System.DateTime]
+            dllsToLoad = ["Framework.dll"];
             references.AddRange(stdReferences);
         }
         if (customDlls != null)
@@ -296,7 +283,7 @@ internal class ScriptCompiler
 
         return references;
     }
-    //     static void RemoveReferencesByAssemblyName(List<MetadataReference> refs, params string[] simpleNames)
+    // static void RemoveReferencesByAssemblyName(List<MetadataReference> refs, params string[] simpleNames)
     // {
     //     refs.RemoveAll(r =>
     //     {

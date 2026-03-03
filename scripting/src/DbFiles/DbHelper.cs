@@ -356,7 +356,7 @@ internal class DbHelper
                     byte[] tempComp;
                     if (oldApiV != -1)
                     {
-                        List<MetadataReference> refs = Compiler.GetReferencesForVersion(oldApiV, References);
+                        // List<MetadataReference> refs = Compiler.GetReferencesForVersion(oldApiV, References);
                         tempComp = Compiler.RunCompilation(script.SourceCode!, metaData: getTupleFromVal);
                         currentApiVersion = oldApiV;
                     }

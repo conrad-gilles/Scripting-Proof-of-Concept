@@ -30,7 +30,7 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
 
     public async Task<Guid> CreateScript(string sourceCode, string userName = "Default", int apiVersion = -1, DateTime? createdAt = null)    //maybe minApiVersion is better?
     {
-        Logger.LogDebug("Entered {MethodName} in {ClassName}.", nameof(CreateScript), nameof(ScriptManagerFacade));
+        Logger.LogDebug("Entered {MethodName} in {ClassName} apiVersion: {apiVersion}.", nameof(CreateScript), nameof(ScriptManagerFacade), apiVersion);
 
         int currentApiVersion = await GetRecentApiVersion();
         Guid id = Guid.NewGuid();
@@ -175,8 +175,6 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
             }
             else
             {
-                List<MetadataReference> refs = Compiler.GetReferencesForVersion(apiVersion, References);
-                // Compiler.RunCompilation(script.SourceCode!, references: refs, metaData: metaData);
                 Compiler.RunCompilation(script.SourceCode!, metaData: metaData);
             }
 

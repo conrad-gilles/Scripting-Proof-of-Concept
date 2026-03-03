@@ -131,7 +131,7 @@ async Task MainProgramSwitch(IServiceProvider provider)
                         break;
                     case "CreateScriptWithOld":
                         string sourceCodeOld = RandomMethods.CreateStringFromCsFile(Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "src", "Scripts", "ConditionScripts", "PediatricCondition.cs")));
-                        await facade.CreateScript(sourceCodeOld, "Gilles", 1);
+                        await facade.CreateScript(sourceCodeOld, "Gilles", 2);
                         break;
 
                     case "UpdateScript":

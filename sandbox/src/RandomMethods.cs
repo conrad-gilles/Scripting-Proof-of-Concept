@@ -209,12 +209,15 @@ public class RandomMethods
         return id;
     }
     private static List<MetadataReference> references = [                        MetadataReference.CreateFromFile(typeof(object).Assembly.Location), // System.Private.CoreLib
-                        MetadataReference.CreateFromFile(typeof(Console).Assembly.Location), // System.Console
-                        MetadataReference.CreateFromFile(Assembly.Load("System.Runtime").Location), // System.Runtime
-                        MetadataReference.CreateFromFile(typeof(Task<>).Assembly.Location), // System.Threading.Tasks
-                        MetadataReference.CreateFromFile(typeof(DateTime).Assembly.Location), // System.DateTime
+                        // MetadataReference.CreateFromFile(typeof(Console).Assembly.Location), // System.Console
+                        // MetadataReference.CreateFromFile(Assembly.Load("System.Runtime").Location), // System.Runtime
+                        // MetadataReference.CreateFromFile(typeof(Task<>).Assembly.Location), // System.Threading.Tasks
+                        // MetadataReference.CreateFromFile(typeof(DateTime).Assembly.Location), // System.DateTime
                         // References t custom interfaces
                         MetadataReference.CreateFromFile(typeof(IGeneratorConditionScript).Assembly.Location),
+                        // MetadataReference.CreateFromFile(typeof(IGeneratorActionScript).Assembly.Location),
+                        // MetadataReference.CreateFromFile(typeof(IGeneratorBaseInterface).Assembly.Location),
+                        // MetadataReference.CreateFromFile(typeof(Ember.Scripting.GeneratorContext).Assembly.Location),
                         MetadataReference.CreateFromFile(typeof(IGeneratorReadOnlyContext.IGeneratorContext).Assembly.Location),//try removing if works good i guess but still need to pass from sandbox];
                         //   MetadataReference.CreateFromFile(typeof(Ember.Scripting.ScriptManagerFacade).Assembly.Location)
                           ];
