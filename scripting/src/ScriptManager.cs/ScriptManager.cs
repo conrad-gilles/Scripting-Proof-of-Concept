@@ -344,6 +344,12 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
         await Db.ClearScriptCache(scriptId);
     }
 
+     public async Task DeleteScriptCache(Guid id, int ApiVersion)
+    {
+         Logger.LogTrace("Entered {MethodName} in {ClassName} with ApiVersion: {ScriptId}.", nameof(DeleteScriptCache), nameof(ScriptManagerFacade), ApiVersion);
+         await Db.DeleteScriptCache(id,ApiVersion);
+    }
+
     public async Task<List<ScriptCompiledCache>> GetAllCompiledScriptCaches()
     {
         return await Db.GetAllCompiledScriptCaches();

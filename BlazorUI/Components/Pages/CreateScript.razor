@@ -1,15 +1,151 @@
 @page "/create"
+@rendermode InteractiveServer
+@using BlazorUI.Services
+@using Ember.Scripting
+@inject ConsoleService Console
+@inject IJSRuntime JS
+@inject ISccriptManagerDeleteAfter ScriptManager
+@implements IAsyncDisposable
+
 <PageTitle>Create Script</PageTitle>
 
-<div class="top-bar">
-    <h2>Create New Script</h2>
-    <a href="/scripts" class="btn btn-outline-secondary">
-        <i class="bi bi-arrow-left"></i> Back
-    </a>
+<!-- The top-level wrapper with padding -->
+<div class="create-script-container" style="padding-bottom: 350px;">
+    <!-- Top bar with action buttons -->
+    <div class="top-bar d-flex justify-content-between align-items-center mb-4">
+        <h2>Create New Script</h2>
+        <div class="d-flex gap-2">
+            <button class="btn btn-outline-info" @onclick="HandleValidate" disabled="@_isBusy">
+                <i class="bi bi-check-circle"></i> Validate
+            </button>
+            <button class="btn btn-outline-warning" @onclick="HandleCompile" disabled="@_isBusy">
+                <i class="bi bi-hammer"></i> Compile
+            </button>
+            <button class="btn btn-success" @onclick="HandleSave" disabled="@_isBusy">
+                <i class="bi bi-save"></i> Save
+            </button>
+            <a href="scripts" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Back
+            </a>
+        </div>
+    </div>
+
+    <!-- Script name input -->
+    <div class="card mb-3">
+        <div class="card-body py-2 px-3">
+            <div class="row align-items-center g-2">
+                <div class="col-auto">
+                    <label class="form-label mb-0 fw-semibold">Script Name</label>
+                </div>
+                <div class="col-md-4">
+                    <input class="form-control" @bind="_scriptName" placeholder="e.g. MyValidationScript" />
+                </div>
+                <div class="col-auto">
+                    <label class="form-label mb-0 fw-semibold">Min API Version</label>
+                </div>
+                <div class="col-md-2">
+                    <input type="number" class="form-control" @bind="_minApiVersion" placeholder="e.g. 6" />
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Monaco Editor container -->
+    <div class="card border-0 mb-4" style="flex-grow: 1;">
+        <div class="card-body p-0" style="border-radius: 10px; overflow: hidden; background: #1e1e1e;">
+            <div id="monaco-editor-container" style="height: 50vh; min-height: 550px; width: 100%;"></div>
+        </div>
+    </div>
+
 </div>
 
-<div class="card">
-    <div class="card-body">
-        <p>Script editor UI goes here...</p>
-    </div>
-</div>
+<FakeTerminal />
+
+
+@code {
+    private bool _editorReady = false;
+    private bool _isBusy = false;
+    private string _scriptName = string.Empty;
+    private int _minApiVersion = 6;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JS.InvokeVoidAsync(
+                "monacoEditor.initialize",
+                "monaco-editor-container",
+                DefaultScript,
+                "csharp"
+            );
+            _editorReady = true;
+        }
+    }
+
+    private async Task HandleValidate()
+    {
+        var code = await JS.InvokeAsync<string>("monacoEditor.getValue");
+        Console.Log("Validating script:");
+        try
+        {
+            ScriptManager.BasicValidationBeforeCompiling(code);
+        }
+        catch (Exception e)
+        {
+            Console.Log(e.ToString());
+        }
+        // TODO: wire up to your ScriptManager validation
+    }
+
+    private async Task HandleCompile()
+    {
+        _isBusy = true;
+        var code = await JS.InvokeAsync<string>("monacoEditor.getValue");
+        Console.Log($"Compiling '{_scriptName}'...");
+        try
+        {
+            // TODO: await ScriptManager.CompileScript(scriptId);
+            Console.Log("Compilation successful.");
+        }
+        catch (Exception ex)
+        {
+            Console.Log($"Error: {ex.Message}");
+        }
+        finally { _isBusy = false; }
+    }
+
+    private async Task HandleSave()
+    {
+        _isBusy = true;
+        var code = await JS.InvokeAsync<string>("monacoEditor.getValue");
+        Console.Log($"Saving '{_scriptName}'...");
+        try
+        {
+            // TODO: build a CustomerScript object and call ScriptManager.SaveScript(...)
+            Console.Log("Script saved successfully.");
+        }
+        catch (Exception ex)
+        {
+            Console.Log($"Error: {ex.Message}");
+        }
+        finally { _isBusy = false; }
+    }
+
+    // Dispose the editor instance when navigating away
+    public async ValueTask DisposeAsync()
+    {
+        if (_editorReady)
+            await JS.InvokeVoidAsync("monacoEditor.dispose");
+    }
+
+    private const string DefaultScript = @"using System;
+
+public class MyScript
+{
+    public bool Execute()
+    {
+        // Write your C# logic here
+        return true;
+    }
+}";
+}

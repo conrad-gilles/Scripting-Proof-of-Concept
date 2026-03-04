@@ -1,6 +1,7 @@
 ﻿@page "/"
 @rendermode InteractiveServer
 @using Ember.Scripting
+@using BlazorUI.TotalExecutions
 @inject ISccriptManagerDeleteAfter ScriptManager
 <PageTitle>Dashboard</PageTitle>
 <PageTitle>Dashboard</PageTitle>
@@ -41,7 +42,7 @@
     <div class="col-lg-3 col-md-6 mb-3">
         <div class="stat-card info">
             <i class="bi bi-clock-history"></i>
-            <h3>@totalExecutions</h3>
+            <h3>@(TotalExecutions.GetTotalExecutions())</h3>
             <p>Total Executions</p>
         </div>
     </div>
@@ -136,20 +137,20 @@ block in Home.razor -->
         <div class="card">
             <div class="card-header">
                 <i class="bi bi-server"></i>
-                Ember Instances
+                Ember Instances Todo
             </div>
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <div>
                         <span class="status-dot active"></span>
-                        <strong>Instance-01</strong>
+                        <strong>Instance-01 Todo</strong>
                     </div>
-                    <span class="badge bg-primary">v2.3.0 (SDK v6)</span>
+                    <span class="badge bg-primary">vWhatever (API v@(currentEmberVersionApi))</span>
                 </div>
                 <div class="progress">
                     <div class="progress-bar bg-success" style="width: 85%"></div>
                 </div>
-                <small class="text-muted">Last heartbeat: 30 seconds ago</small>
+                <small class="text-muted">Last heartbeat: 30 seconds ago Todo</small>
             </div>
         </div>
     </div>
@@ -177,7 +178,7 @@ block in Home.razor -->
                         <span>Compile All Scripts</span>
                     }
                 </button>
-                <button class="btn btn-outline-primary w-100 mb-2" @onclick="HandleCompileAllScripts">
+                <button class="btn btn-outline-primary w-100 mb-2" @onclick="HandleCompileAllScriptsFromFolder">
                     <i class="bi bi-hammer"></i>
                     <span>Compile Default Scripts From Folder</span>
 
@@ -186,7 +187,7 @@ block in Home.razor -->
                     <i class="bi bi-trash"></i>
                     Clear All Caches
                 </button>
-                <button class="btn btn-outline-danger w-100 mb-2" @onclick="HandleClearAllCaches">
+                <button class="btn btn-outline-danger w-100 mb-2" @onclick="HandleDeleteAllScripts">
                     <i class="bi bi-trash"></i>
                     Delete All Scripts
                 </button>
@@ -203,7 +204,9 @@ block in Home.razor -->
     private int totalScripts = 0;
     private int compiledScripts = 0;
     private int pendingScripts = 0;
-    private int totalExecutions = 0;
+    @* private int totalExecutions = 0; *@
+
+    private int currentEmberVersionApi = 0; //todo weird imp
 
     private List<CustomerScript> CustomerScripts = [];
 
@@ -223,6 +226,7 @@ block in Home.razor -->
     private async Task LoadDashBoardData()
     {
         RandomMethods rm = new RandomMethods(ScriptManager);
+        currentEmberVersionApi = await ScriptManager.GetRecentApiVersion();
         CustomerScripts = await ScriptManager.ListScripts(includeCaches: true);
         totalScripts = CustomerScripts.Count();
         compiledScripts = 0;
@@ -230,11 +234,16 @@ block in Home.razor -->
         {
             compiledScripts = compiledScripts + script.CompiledCaches.Count();
         }
-
+        pendingScripts = totalScripts - compiledScripts;
         StateHasChanged();
     }
 
     private async Task HandleCompileAllScripts()
+    {
+        await ScriptManager.CompileAllScripts();
+        await LoadDashBoardData();
+    }
+    private async Task HandleCompileAllScriptsFromFolder()
     {
         try
         {
@@ -267,5 +276,10 @@ block in Home.razor -->
         {
             Console.WriteLine(e.ToString());
         }
+    }
+    private async Task HandleDeleteAllScripts()
+    {
+        await ScriptManager.EnsureDeletedCreated();
+        await LoadDashBoardData();
     }
 }

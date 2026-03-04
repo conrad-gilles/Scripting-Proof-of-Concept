@@ -2,6 +2,8 @@
 - i thing getcompilationErros saves to db after compiling
 - add a constructor to the customerScript class maybe add 2, 1 empty one so stuff dont break
 - store old source code versions in dictionary in db  map it to active api versions
+- pass data in context so when you execute script(id,context) it gives data to the script
+- this data needs to be standardized maybe using something like fluentvalidation idk
 
 # Converting to a class library:
 ### In sandbox.csproj make sure to uncomment:

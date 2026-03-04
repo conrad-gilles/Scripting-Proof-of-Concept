@@ -1,12 +1,102 @@
 @page "/cache"
+@rendermode InteractiveServer
+@using BlazorUI.Services
+@using Ember.Scripting
+@inject ISccriptManagerDeleteAfter ScriptManager
+@inject ConsoleService Console
+
 <PageTitle>Cache Management</PageTitle>
 
-<div class="top-bar">
-    <h2>Cache Management</h2>
+<div class="page-container">
+    <div class="top-bar d-flex justify-content-between align-items-center mb-4">
+        <h2>Cache Management</h2>
+        <button class="btn btn-outline-danger" @onclick="HandleClearAll">
+            <i class="bi bi-trash"></i> Clear All Caches
+        </button>
+    </div>
+
+    @if (caches == null || !caches.Any())
+    {
+        <div class="empty-state">
+            <i class="bi bi-database"></i>
+            <h4>No compiled caches found</h4>
+            <p>Compile some scripts to see them appearing here.</p>
+        </div>
+    }
+    else
+    {
+        <div class="card shadow-sm">
+            <div class="card-body p-0">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-4">Script Name</th>
+                            <th>API Version</th>
+                            <th>Status</th>
+                            <th>Compilation Date</th>
+                            <th class="text-end pe-4">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var cache in caches)
+                        {
+                            <tr>
+                                <td class="ps-4">
+                                    <strong>@cache.CustomerScript?.ScriptName</strong>
+                                    <br />
+                                    <small class="text-muted">ID: @cache.ScriptId</small>
+                                </td>
+                                <td><span class="badge bg-info">v @cache.ApiVersion</span></td>
+                                <td>
+                                    @if (cache.CompilationSuccess)
+                                    {
+                                        <span class="badge bg-success">Success</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger" title="@cache.CompilationErrors">Failed</span>
+                                    }
+                                </td>
+                                <td>@cache.CompilationDate.ToString("g")</td>
+                                <td class="text-end pe-4">
+                                    <button class="btn btn-sm btn-outline-danger btn-icon" title="Delete this cache version"
+                                            @onclick="() => HandleDeleteCache(cache)">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+    <FakeTerminal />
 </div>
 
-<div class="empty-state">
-    <i class="bi bi-database"></i>
-    <h4>Cache management interface</h4>
-    <p>View and manage compiled script caches</p>
-</div>
+@code {
+    private List<ScriptCompiledCache> caches = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadCaches();
+    }
+
+    private async Task LoadCaches()
+    {
+        // Fetch all caches from the database
+        caches = await ScriptManager.GetAllCompiledScriptCaches();
+        StateHasChanged();
+    }
+
+    private async Task HandleClearAll()
+    {
+        await ScriptManager.ClearAllCaches();
+        await LoadCaches();
+    }
+    private async Task HandleDeleteCache(ScriptCompiledCache cache)
+    {
+        await ScriptManager.DeleteScriptCache(cache.ScriptId, cache.ApiVersion);
+        await LoadCaches();
+    }
+}

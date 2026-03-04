@@ -4,4 +4,7 @@ namespace Ember.Scripting;
 
 public interface IGeneratorBaseInterface { }
 
-public abstract class GeneratorContext { }
+public abstract class GeneratorContext
+{
+    
+}

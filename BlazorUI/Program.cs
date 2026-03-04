@@ -1,5 +1,6 @@
 using BlazorUI.Components;
 using Ember.Scripting;
+using BlazorUI.Services;
 // using sandbox; // only if RandomMethods is in the sandbox project/namespace
 
 
@@ -13,6 +14,8 @@ builder.Services.AddRazorComponents()
 var references = RandomMethods.GetReferences();
 int version = RandomMethods.GetEmberApiVersion();
 builder.Services.AddEmberScripting(references, version);
+
+builder.Services.AddScoped<ConsoleService>();
 
 var app = builder.Build();
 

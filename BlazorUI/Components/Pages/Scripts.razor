@@ -1,79 +1,97 @@
 @page "/scripts"
+@rendermode InteractiveServer
 @using Ember.Scripting
+@using BlazorUI.TotalExecutions
+@using BlazorUI.Services
+@using Microsoft.CodeAnalysis.Differencing
+@inject ConsoleService Console
 @inject ISccriptManagerDeleteAfter ScriptManager
 <PageTitle>Scripts</PageTitle>
-
-<div class="top-bar">
-    <h2>All Scripts</h2>
-    <a href="/create" class="btn btn-primary">
-        <i class="bi bi-plus-circle"></i> New Script
-    </a>
-</div>
-
-<div class="card">
-    <div class="card-body">
-        @if (isLoading)
-        {
-            <div class="text-center py-5">
-                <div class="spinner-border text-primary" role="status"></div>
-                <p class="mt-2">Loading scripts...</p>
-            </div>
-        }
-        else if (ScriptsList == null || !ScriptsList.Any())
-        {
-            <div class="empty-state">
-                <i class="bi bi-file-code"></i>
-                <h4>No scripts found</h4>
-                <p>Create your first C# script to get started.</p>
-            </div>
-        }
-        else
-        {
-            <div class="table-container">
-                <table class="table table-hover">
-                    <thead>
-                        <tr>
-                            <th>Script Name</th>
-                            <th>Type</th>
-                            <th>Min API Version</th>
-                            <th>Created At</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var script in ScriptsList)
-                        {
-                            <tr>
-                                <td><i class="bi bi-file-code text-primary"></i> @script.ScriptName</td>
-                                <td>
-                                    @if (script.ScriptType == "GeneratorAction")
-                                    {
-                                        <span class="badge bg-info">Action</span>
-                                    }
-                                    else
-                                    {
-                                        <span class="badge bg-warning text-dark">Condition</span>
-                                    }
-                                </td>
-                                <td>v@(script.MinApiVersion)</td>
-                                <td>@(script.CreatedAt?.ToString("yyyy-MM-dd") ?? "N/A")</td>
-                                <td>
-                                    <div class="action-buttons">
-                                        <button class="btn btn-sm btn-outline-success btn-icon" @onclick="() => CompileScript(script.Id)">
-                                            <i class="bi bi-hammer"></i>
-                                        </button>
-                                        <button class="btn btn-sm btn-outline-danger btn-icon" @onclick="() => DeleteScript(script.Id)">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
-        }
+<div class="page-container">
+    <div class="top-bar">
+        <h2>All Scripts</h2>
+        <a href="/create" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> New Script
+        </a>
     </div>
+
+    <div class="card">
+        <div class="card-body">
+            @if (isLoading)
+            {
+                <div class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status"></div>
+                    <p class="mt-2">Loading scripts...</p>
+                </div>
+            }
+            else if (ScriptsList == null || !ScriptsList.Any())
+            {
+                <div class="empty-state">
+                    <i class="bi bi-file-code"></i>
+                    <h4>No scripts found</h4>
+                    <p>Create your first C# script to get started.</p>
+                </div>
+            }
+            else
+            {
+                <div class="table-container">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Script Name</th>
+                                <th>Type</th>
+                                <th>Min API Version</th>
+                                <th>Created At</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var script in ScriptsList)
+                            {
+                                <tr>
+                                    <td><i class="bi bi-file-code text-primary"></i> @script.ScriptName</td>
+                                    <td>
+                                        @* @if (script.ScriptType == "GeneratorAction") *@
+                                        @if (script.ScriptType != null && script.ScriptType.Contains("Action"))
+                                        {
+                                            <span class="badge bg-info">Action</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-warning text-dark">Condition</span>
+                                        }
+                                    </td>
+                                    <td>v@(script.MinApiVersion)</td>
+                                    <td>@(script.CreatedAt?.ToString("yyyy-MM-dd") ?? "N/A")</td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <button class="btn btn-sm btn-outline-success btn-icon"
+                                                    @onclick="() => ExecuteScript(script.Id)" title="Execute">
+                                                <i class="bi bi-play-fill"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-primary btn-icon"
+                                                    @onclick="() => EditScript(script.Id)" title="Edit">
+                                                <i class="bi bi-pencil-square"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-success btn-icon"
+                                                    @onclick="() => CompileScript(script.Id)">
+                                                <i class="bi bi-hammer"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-danger btn-icon"
+                                                    @onclick="() => DeleteScript(script.Id)">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+    <FakeTerminal />
 </div>
 
 @code {
@@ -91,7 +109,7 @@
         try
         {
             // Call your backend facade
-            ScriptsList = await ScriptManager.ListScripts(null, includeCaches: false);
+            ScriptsList = await ScriptManager.ListScripts(null!, includeCaches: false);
         }
         finally
         {
@@ -101,12 +119,57 @@
         }
     }
 
+    private async Task ExecuteScript(Guid id)
+    {
+        try
+        {
+            Console.Log("Test if it prints");
+            RandomMethods rm = new RandomMethods(ScriptManager);
+            CustomerScript script = await ScriptManager.GetScript(id);
+            var ctx = rm.GetTestingContext<GeneratorContextV3.GeneratorContext>(justForTesting: script);
+            object resultObj = await ScriptManager.ExecuteScriptById(id, ctx);
+
+            if (typeof(bool).IsAssignableFrom(resultObj.GetType()))
+            {
+                Console.Log("Script returned a bool: " + resultObj.ToString());
+            }
+            else if (typeof(ActionResultBaseClass).IsAssignableFrom(resultObj.GetType()))
+            {
+                Console.Log("Script returned an ActionResult: " + resultObj.ToString());
+            }
+            else
+            {
+                Console.Log("Script was neither returned a bool nor an ActionResultBaseClass, it was a: " +
+                resultObj.GetType().ToString());
+            }
+            TotalExecutions.IncrementTotalExecutions();
+            await LoadScripts();
+        }
+        catch (Exception e)
+        {
+            Console.Log(e.ToString());
+        }
+
+    }
+
+    private async Task EditScript(Guid id)
+    {
+
+    }
     // Connects to a UI button
     private async Task CompileScript(Guid id)
     {
-        await ScriptManager.CompileScript(id);
-        // Reload to show updated status
-        await LoadScripts();
+        try
+        {
+            await ScriptManager.CompileScript(id);
+            // Reload to show updated status
+            await LoadScripts();
+        }
+        catch (Exception e)
+        {
+            Console.Log(e.ToString());
+        }
+
     }
 
     // Connects to a UI button

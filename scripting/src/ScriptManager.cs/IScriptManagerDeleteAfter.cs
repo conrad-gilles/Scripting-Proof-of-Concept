@@ -101,6 +101,9 @@ public interface ISccriptManagerDeleteAfter : IScriptManagerExtended
     /// <returns></returns>
     Task ClearScriptCache(Guid scriptId);
 
+
+      Task DeleteScriptCache(Guid id, int ApiVersion);
+
     /// <summary>
     /// Gets all Compiled Script Caches in the Database
     /// </summary>
