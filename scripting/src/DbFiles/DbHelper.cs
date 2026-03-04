@@ -330,7 +330,9 @@ internal class DbHelper
         }
         catch (Exception e)
         {
-            throw new DbHelperException(nameof(CreateAndInsertCustomerScript) + " failed in " + nameof(DbHelper), e);
+            Logger.LogError(e.ToString());
+            throw;
+            // throw new DbHelperException(nameof(CreateAndInsertCustomerScript) + " failed in " + nameof(DbHelper), e);
         }
     }
     public async Task CreateAndInsertCompiledCache(CustomerScript script, int oldApiV = -1)

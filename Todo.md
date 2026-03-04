@@ -4,6 +4,8 @@
 - store old source code versions in dictionary in db  map it to active api versions
 - pass data in context so when you execute script(id,context) it gives data to the script
 - this data needs to be standardized maybe using something like fluentvalidation idk
+- fix basic val still doesnt check if implements correct class
+- give user possibility to save not working script
 
 # Converting to a class library:
 ### In sandbox.csproj make sure to uncomment:

@@ -2,6 +2,7 @@
 @rendermode InteractiveServer
 @using BlazorUI.Services
 @using Ember.Scripting
+@using Microsoft.AspNetCore.Routing.Template
 @inject ConsoleService Console
 @inject IJSRuntime JS
 @inject ISccriptManagerDeleteAfter ScriptManager
@@ -30,7 +31,7 @@
         </div>
     </div>
 
-    <!-- Script name input -->
+    @* <!-- Script name input -->
     <div class="card mb-3">
         <div class="card-body py-2 px-3">
             <div class="row align-items-center g-2">
@@ -48,12 +49,12 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div> *@
 
     <!-- Monaco Editor container -->
     <div class="card border-0 mb-4" style="flex-grow: 1;">
         <div class="card-body p-0" style="border-radius: 10px; overflow: hidden; background: #1e1e1e;">
-            <div id="monaco-editor-container" style="height: 50vh; min-height: 550px; width: 100%;"></div>
+            <div id="monaco-editor-container" style="height: 50vh; min-height: 625px; width: 100%;"></div>
         </div>
     </div>
 
@@ -70,6 +71,7 @@
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+
         if (firstRender)
         {
             await JS.InvokeVoidAsync(
@@ -89,6 +91,7 @@
         try
         {
             ScriptManager.BasicValidationBeforeCompiling(code);
+            Console.Log("Validation successfull!");
         }
         catch (Exception e)
         {
@@ -97,24 +100,70 @@
         // TODO: wire up to your ScriptManager validation
     }
 
-    private async Task HandleCompile()
+    @* private async Task HandleCompile()
     {
         _isBusy = true;
         var code = await JS.InvokeAsync<string>("monacoEditor.getValue");
         Console.Log($"Compiling '{_scriptName}'...");
         try
         {
-            // TODO: await ScriptManager.CompileScript(scriptId);
-            Console.Log("Compilation successful.");
+            await ScriptManager.CreateScript(code);
+            Console.Log("Compilation successful, script was created and inserted into the DB.");
         }
         catch (Exception ex)
         {
             Console.Log($"Error: {ex.Message}");
         }
         finally { _isBusy = false; }
+    } *@
+
+
+    private async Task HandleCompile()
+    {
+        _isBusy = true;
+        var code = await JS.InvokeAsync<string>("monacoEditor.getValue");
+
+        // Clear old red lines first
+        await JS.InvokeVoidAsync("monacoEditor.clearErrors");
+
+        Console.Log($"Compiling '{_scriptName}'...");
+
+        try
+        {
+            // Try to compile
+            await ScriptManager.CreateScript(code);
+            Console.Log("Compilation successful, script was created and inserted into the DB.");
+        }
+        catch (CompilationFailedException ex) // Assuming your compiler throws this
+        {
+            Console.Log($"Compilation Failed!");
+
+            // Example of how to parse the Roslyn diagnostics if your ScriptManager returns them
+            // If your exception message contains the errors, you might need to parse the string,
+            // or better yet, modify your ScriptManager to return the actual Diagnostic objects.
+
+            // For demonstration, let's pretend we parsed an error on line 4:
+            var errors = new List<ScriptError>
+        {
+            new ScriptError { Line = 4, Column = 10, Message = ex.Message }
+        };
+
+            // Send the errors to Monaco to draw the red squiggly lines
+            await JS.InvokeVoidAsync("monacoEditor.setErrors", errors);
+        }
+        catch (Exception ex)
+        {
+            Console.Log($"Error: {ex.Message}");
+        }
+        finally
+        {
+            _isBusy = false;
+        }
     }
 
-    private async Task HandleSave()
+
+
+    private async Task HandleSave() //todo
     {
         _isBusy = true;
         var code = await JS.InvokeAsync<string>("monacoEditor.getValue");
@@ -138,7 +187,14 @@
             await JS.InvokeVoidAsync("monacoEditor.dispose");
     }
 
-    private const string DefaultScript = @"using System;
+    private static string GetTemplate()
+    {
+        string path = @"C:\Users\Gilles\Desktop\UNI\Semester 6\Code\Codebase\Scripting-Proof-of-Concept\BlazorUI\src\ScriptTemplate.cs";
+        return RandomMethods.CreateStringFromCsFile(path);
+    }
+
+    private string DefaultScript = GetTemplate();
+    @* @"using System;
 
 public class MyScript
 {
@@ -147,5 +203,14 @@ public class MyScript
         // Write your C# logic here
         return true;
     }
-}";
+}"; *@
+
+    public class ScriptError
+    {
+        public int Line { get; set; }
+        public int Column { get; set; }
+        public string Message { get; set; } = string.Empty;
+    }
+
+
 }
