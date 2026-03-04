@@ -233,89 +233,6 @@ This section contains the contents of the repository's files.
     }
 </file>
 
-<file path="BlazorUI/Components/MonacoEditor.razor">
-@using Microsoft.JSInterop
-@inject IJSRuntime JS
-@implements IAsyncDisposable
-
-<div class="card border-0 flex-grow-1" style="min-height: 0;">
-    <div class="card-body p-0" style="border-radius: 10px; overflow: hidden; background: #1e1e1e; height: 100%;">
-        <!-- Note: We make the ID dynamic in case you ever put TWO editors on one page -->
-        <div id="@EditorId" style="height: 100%; width: 100%;"></div>
-    </div>
-</div>
-
-@code {
-    [Parameter]
-    public string EditorId { get; set; } = "monaco-editor-container";
-
-    [Parameter]
-    public string InitialCode { get; set; } = string.Empty;
-
-    private bool _editorReady = false;
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-            await Task.Delay(50);
-            await JS.InvokeVoidAsync(
-                "monacoEditor.initialize",
-                EditorId,
-                InitialCode,
-                "csharp"
-            );
-            _editorReady = true;
-        }
-    }
-
-    // Public method so the parent page can get the code
-    public async Task<string> GetValueAsync()
-    {
-        if (!_editorReady) return string.Empty;
-        return await JS.InvokeAsync<string>("monacoEditor.getValue");
-    }
-
-    // Add this to MonacoEditor.razor
-    public async Task SetValueAsync(string value)
-    {
-        if (_editorReady)
-        {
-            await JS.InvokeVoidAsync("monacoEditor.setValue", value);
-        }
-        else
-        {
-            // If the editor hasn't loaded yet, store it in InitialCode so it gets used when OnAfterRender runs
-            InitialCode = value;
-        }
-    }
-
-    // Public method to clear errors
-    public async Task ClearErrorsAsync()
-    {
-        if (_editorReady)
-        {
-            await JS.InvokeVoidAsync("monacoEditor.clearErrors");
-        }
-    }
-
-    // Public method to set errors
-    public async Task SetErrorsAsync(List<object> errors)
-    {
-        if (_editorReady && errors.Any())
-        {
-            await JS.InvokeVoidAsync("monacoEditor.setErrors", errors);
-        }
-    }
-
-    public async ValueTask DisposeAsync()
-    {
-        if (_editorReady)
-            await JS.InvokeVoidAsync("monacoEditor.dispose");
-    }
-}
-</file>
-
 <file path="BlazorUI/Components/Pages/Error.razor">
 @page "/Error"
 @using System.Diagnostics
@@ -542,6 +459,88 @@ public class AddPediatricTestsV3 : IGeneratorActionScriptV3
     <a href="." class="reload">Reload</a>
     <span class="dismiss">🗙</span>
 </div>
+</file>
+
+<file path="BlazorUI/Components/MonacoEditor.razor">
+@using Microsoft.JSInterop
+@inject IJSRuntime JS
+@implements IAsyncDisposable
+
+<div class="card border-0 flex-grow-1" style="min-height: 0;">
+    <div class="card-body p-0" style="border-radius: 10px; overflow: hidden; background: #1e1e1e; height: 100%;">
+        <!-- Note: We make the ID dynamic in case you ever put TWO editors on one page -->
+        <div id="@EditorId" style="height: 100%; width: 100%;"></div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public string EditorId { get; set; } = "monaco-editor-container";
+
+    [Parameter]
+    public string InitialCode { get; set; } = string.Empty;
+
+    private bool _editorReady = false;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JS.InvokeVoidAsync(
+                "monacoEditor.initialize",
+                EditorId,
+                InitialCode,
+                "csharp"
+            );
+            _editorReady = true;
+        }
+    }
+
+    // Public method so the parent page can get the code
+    public async Task<string> GetValueAsync()
+    {
+        if (!_editorReady) return string.Empty;
+        return await JS.InvokeAsync<string>("monacoEditor.getValue");
+    }
+
+    // Add this to MonacoEditor.razor
+    public async Task SetValueAsync(string value)
+    {
+        if (_editorReady)
+        {
+            await JS.InvokeVoidAsync("monacoEditor.setValue", value);
+        }
+        else
+        {
+            // If the editor hasn't loaded yet, store it in InitialCode so it gets used when OnAfterRender runs
+            InitialCode = value;
+        }
+    }
+
+    // Public method to clear errors
+    public async Task ClearErrorsAsync()
+    {
+        if (_editorReady)
+        {
+            await JS.InvokeVoidAsync("monacoEditor.clearErrors");
+        }
+    }
+
+    // Public method to set errors
+    public async Task SetErrorsAsync(List<object> errors)
+    {
+        if (_editorReady && errors.Any())
+        {
+            await JS.InvokeVoidAsync("monacoEditor.setErrors", errors);
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_editorReady)
+            await JS.InvokeVoidAsync("monacoEditor.dispose");
+    }
+}
 </file>
 
 <file path="BlazorUI/Components/Pages/Cache.razor">
@@ -988,19 +987,29 @@ window.monacoEditor = {
     _instance: null,
 
     initialize: function (elementId, initialValue, language) {
+        // Dispose stale instance before re-creating
+        if (window.monacoEditor._instance) {
+            window.monacoEditor._instance.dispose();
+            window.monacoEditor._instance = null;
+        }
+
         require(['vs/editor/editor.main'], function () {
-            window.monacoEditor._instance = monaco.editor.create(
-                document.getElementById(elementId), {
-                    value: initialValue || '',
-                    language: language || 'csharp',
-                    theme: 'vs-dark',
-                    automaticLayout: true,   // resizes with container
-                    fontSize: 14,
-                    minimap: { enabled: false },
-                    scrollBeyondLastLine: false,
-                    wordWrap: 'on'
-                }
-            );
+            const container = document.getElementById(elementId);
+            if (!container) return; // Guard: Blazor may have removed it already
+
+            window.monacoEditor._instance = monaco.editor.create(container, {
+                value: initialValue || '',
+                language: language || 'csharp',
+                theme: 'vs-dark',
+                automaticLayout: true,
+                fontSize: 14,
+                minimap: { enabled: false },
+                scrollBeyondLastLine: false,
+                wordWrap: 'on'
+            });
+
+            // Force a layout pass so the editor measures itself correctly
+            window.monacoEditor._instance.layout();
         });
     },
 
@@ -1008,27 +1017,23 @@ window.monacoEditor = {
         return window.monacoEditor._instance?.getValue() ?? '';
     },
 
-        // ADD THIS NEW FUNCTION:
     setErrors: function (errors) {
         if (!window.monacoEditor._instance) return;
-        
-        // Map the errors coming from C# to Monaco's marker format
+
         const markers = errors.map(err => ({
             severity: monaco.MarkerSeverity.Error,
             startLineNumber: err.line,
             startColumn: err.column,
             endLineNumber: err.line,
-            endColumn: err.column + 5, // Just highlighting 5 chars for the squiggle
+            endColumn: err.column + 5,
             message: err.message
         }));
 
-        // Apply the red squiggly lines
         const model = window.monacoEditor._instance.getModel();
         monaco.editor.setModelMarkers(model, "csharp", markers);
     },
 
-    // ADD THIS TO CLEAR ERRORS:
-    clearErrors: function() {
+    clearErrors: function () {
         if (!window.monacoEditor._instance) return;
         const model = window.monacoEditor._instance.getModel();
         monaco.editor.setModelMarkers(model, "csharp", []);
@@ -1080,9 +1085,59 @@ window.monacoEditor = {
     <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/loader.js"></script>
     <script src="js/monaco-interop.js"></script>
 
+    <!-- Re-measure the Monaco editor after Blazor Server reconnects -->
+    <script>
+        Blazor.addEventListener('reconnect', function () {
+        if (window.monacoEditor && window.monacoEditor._instance) {
+        window.monacoEditor._instance.layout();
+        }
+        });
+    </script>
 </body>
 
 </html>
+</file>
+
+<file path="BlazorUI/Program.cs">
+using BlazorUI.Components;
+using Ember.Scripting;
+using BlazorUI.Services;
+// using sandbox; // only if RandomMethods is in the sandbox project/namespace
+
+
+var builder = WebApplication.CreateBuilder(args);
+
+// Add services to the container.
+builder.Services.AddRazorComponents()
+    .AddInteractiveServerComponents();
+
+// Register Ember scripting services (DI)
+var references = RandomMethods.GetReferences();
+int version = RandomMethods.GetEmberApiVersion();
+builder.Services.AddEmberScripting(references, version);
+
+builder.Services.AddScoped<ConsoleService>();
+
+var app = builder.Build();
+
+// Configure the HTTP request pipeline.
+if (!app.Environment.IsDevelopment())
+{
+    app.UseExceptionHandler("/Error", createScopeForErrors: true);
+    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+    app.UseHsts();
+}
+
+app.UseHttpsRedirection();
+
+
+app.UseAntiforgery();
+
+app.MapStaticAssets();
+app.MapRazorComponents<App>()
+    .AddInteractiveServerRenderMode();
+
+app.Run();
 </file>
 
 <file path="BlazorUI/Components/Pages/Scripts.razor">
@@ -1440,48 +1495,6 @@ window.monacoEditor = {
         }
     }
 }
-</file>
-
-<file path="BlazorUI/Program.cs">
-using BlazorUI.Components;
-using Ember.Scripting;
-using BlazorUI.Services;
-// using sandbox; // only if RandomMethods is in the sandbox project/namespace
-
-
-var builder = WebApplication.CreateBuilder(args);
-
-// Add services to the container.
-builder.Services.AddRazorComponents()
-    .AddInteractiveServerComponents();
-
-// Register Ember scripting services (DI)
-var references = RandomMethods.GetReferences();
-int version = RandomMethods.GetEmberApiVersion();
-builder.Services.AddEmberScripting(references, version);
-
-builder.Services.AddScoped<ConsoleService>();
-
-var app = builder.Build();
-
-// Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment())
-{
-    app.UseExceptionHandler("/Error", createScopeForErrors: true);
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-    app.UseHsts();
-}
-
-app.UseHttpsRedirection();
-
-
-app.UseAntiforgery();
-
-app.MapStaticAssets();
-app.MapRazorComponents<App>()
-    .AddInteractiveServerRenderMode();
-
-app.Run();
 </file>
 
 <file path="BlazorUI/Components/Pages/CreateScript.razor">

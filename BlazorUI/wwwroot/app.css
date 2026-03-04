@@ -238,3 +238,42 @@ body {
 .empty-state i { font-size: 4rem; margin-bottom: 20px; opacity: 0.3; }
 .progress { height: 8px; border-radius: 4px; background-color: #e9ecef; }
 .progress-bar { border-radius: 4px; }
+
+
+/* ---- MONACO EDITOR VS CODE DARK+ THEME OVERRIDES ---- */
+/* Prevent global text colors from overriding Monaco's token colors */
+.monaco-editor, 
+.monaco-editor-background, 
+.monaco-editor .inputarea.ime-input {
+    background-color: #1e1e1e !important;
+}
+
+/* 
+ * Force Monaco token classes to use VS Code Dark+ default colors
+ * Mapped to standard TextMate scope hex values from dark_vs.json
+ */
+.monaco-editor .mtk1 { color: #d4d4d4 !important; } /* Base text/Default Foreground */
+.monaco-editor .mtk2 { color: #1e1e1e !important; } /* Base Background */
+.monaco-editor .mtk3 { color: #d4d4d4 !important; } /* Punctuation/Brackets */
+.monaco-editor .mtk4 { color: #6a9955 !important; } /* Comments */
+.monaco-editor .mtk5 { color: #569cd6 !important; } /* Keywords (public, class, async, task, etc.) */
+.monaco-editor .mtk6 { color: #ce9178 !important; } /* Strings ("text") */
+.monaco-editor .mtk7 { color: #b5cea8 !important; } /* Numbers/Constants */
+.monaco-editor .mtk8 { color: #c586c0 !important; } /* Control Flow Keywords (if, return, switch) */
+.monaco-editor .mtk9 { color: #4ec9b0 !important; } /* Types/Classes (ActionResult, Console) */
+.monaco-editor .mtk10 { color: #dcdcaa !important; } /* Functions/Methods (ExecuteAsync, WriteLine) */
+.monaco-editor .mtk11 { color: #9cdcfe !important; } /* Variables/Parameters (context, number) */
+.monaco-editor .mtk12 { color: #4fc1ff !important; } /* Properties/Fields (LabOrder, OrderNumber) */
+.monaco-editor .mtk13 { color: #f44747 !important; } /* Errors/Invalid Tokens */
+
+/* Fix the cursor/caret visibility */
+.monaco-editor .cursor {
+    background-color: #aeafad !important;
+    border-color: #aeafad !important;
+    color: #aeafad !important;
+}
+
+/* Ensure selected text highlight uses VS Code standard selection blue */
+.monaco-editor .selected-text {
+    background-color: #264f78 !important;
+}

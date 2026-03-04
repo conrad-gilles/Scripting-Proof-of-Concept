@@ -2,19 +2,29 @@ window.monacoEditor = {
     _instance: null,
 
     initialize: function (elementId, initialValue, language) {
+        // Dispose stale instance before re-creating
+        if (window.monacoEditor._instance) {
+            window.monacoEditor._instance.dispose();
+            window.monacoEditor._instance = null;
+        }
+
         require(['vs/editor/editor.main'], function () {
-            window.monacoEditor._instance = monaco.editor.create(
-                document.getElementById(elementId), {
-                    value: initialValue || '',
-                    language: language || 'csharp',
-                    theme: 'vs-dark',
-                    automaticLayout: true,   // resizes with container
-                    fontSize: 14,
-                    minimap: { enabled: false },
-                    scrollBeyondLastLine: false,
-                    wordWrap: 'on'
-                }
-            );
+            const container = document.getElementById(elementId);
+            if (!container) return; // Guard: Blazor may have removed it already
+
+            window.monacoEditor._instance = monaco.editor.create(container, {
+                value: initialValue || '',
+                language: language || 'csharp',
+                theme: 'vs-dark',
+                automaticLayout: true,
+                fontSize: 14,
+                minimap: { enabled: false },
+                scrollBeyondLastLine: false,
+                wordWrap: 'on'
+            });
+
+            // Force a layout pass so the editor measures itself correctly
+            window.monacoEditor._instance.layout();
         });
     },
 
@@ -22,27 +32,23 @@ window.monacoEditor = {
         return window.monacoEditor._instance?.getValue() ?? '';
     },
 
-        // ADD THIS NEW FUNCTION:
     setErrors: function (errors) {
         if (!window.monacoEditor._instance) return;
-        
-        // Map the errors coming from C# to Monaco's marker format
+
         const markers = errors.map(err => ({
             severity: monaco.MarkerSeverity.Error,
             startLineNumber: err.line,
             startColumn: err.column,
             endLineNumber: err.line,
-            endColumn: err.column + 5, // Just highlighting 5 chars for the squiggle
+            endColumn: err.column + 5,
             message: err.message
         }));
 
-        // Apply the red squiggly lines
         const model = window.monacoEditor._instance.getModel();
         monaco.editor.setModelMarkers(model, "csharp", markers);
     },
 
-    // ADD THIS TO CLEAR ERRORS:
-    clearErrors: function() {
+    clearErrors: function () {
         if (!window.monacoEditor._instance) return;
         const model = window.monacoEditor._instance.getModel();
         monaco.editor.setModelMarkers(model, "csharp", []);

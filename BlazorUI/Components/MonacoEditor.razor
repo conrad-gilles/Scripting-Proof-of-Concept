@@ -3,7 +3,8 @@
 @implements IAsyncDisposable
 
 <div class="card border-0 flex-grow-1" style="min-height: 0;">
-    <div class="card-body p-0" style="border-radius: 10px; overflow: hidden; background: #1e1e1e; height: 100%;">
+    <div class="card-body p-0"
+         style="border-radius: 10px; overflow: hidden; background: #1e1e1e; color: #d4d4d4; text-align: left; height: 100%;">
         <!-- Note: We make the ID dynamic in case you ever put TWO editors on one page -->
         <div id="@EditorId" style="height: 100%; width: 100%;"></div>
     </div>
@@ -22,7 +23,6 @@
     {
         if (firstRender)
         {
-            await Task.Delay(50);
             await JS.InvokeVoidAsync(
                 "monacoEditor.initialize",
                 EditorId,
