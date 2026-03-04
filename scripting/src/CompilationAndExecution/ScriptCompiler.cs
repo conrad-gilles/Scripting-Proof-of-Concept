@@ -66,7 +66,9 @@ internal class ScriptCompiler
                 //The following 3 lines were AI Generated
                 string? errors = string.Join(Environment.NewLine, emitResult.Diagnostics
                 .Where(d => d.IsWarningAsError || d.Severity == Microsoft.CodeAnalysis.DiagnosticSeverity.Error)
-                .Select(d => $"{d.Id}: {d.GetMessage()}"));
+                // .Select(d => $"{d.Id}: {d.GetMessage()}"));
+                .Select(d => $"Line {d.Location.GetLineSpan().StartLinePosition.Line + 1}, Col {d.Location.GetLineSpan().StartLinePosition.Character + 1}: {d.Id} - {d.GetMessage()}"));
+
 
                 foreach (var diag in emitResult.Diagnostics)
                 {
