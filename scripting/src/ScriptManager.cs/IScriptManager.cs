@@ -9,7 +9,7 @@ public interface IScriptManager
     /// <param name="context"></param>
     /// <param name="currentApiVersion"></param>
     /// <returns></returns>
-    Task<object> ExecuteScriptById(Guid scriptId, GeneratorContext context, int currentApiVersion = -1);
+    Task<object> ExecuteScriptById(Guid scriptId, GeneratorContext context, int? currentApiVersion = null);
 }
 
 

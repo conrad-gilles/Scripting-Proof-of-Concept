@@ -1,54 +1,62 @@
 ﻿@page "/"
+@rendermode InteractiveServer
 @using Ember.Scripting
 @inject ISccriptManagerDeleteAfter ScriptManager
 <PageTitle>Dashboard</PageTitle>
-
 <PageTitle>Dashboard</PageTitle>
-
-<div class="top-bar">
+@* <div class="top-bar">
     <h2>Dashboard</h2>
     <div>
-        <span class="badge bg-success"><span class="status-dot active"></span>System Online</span>
+        <span class="badge bg-success">
+            <span class="status-dot active"></span>
+            System Online
+        </span>
     </div>
-</div>
-
+</div> *@
 <!-- Statistics Cards -->
 <div class="row mb-4">
     <div class="col-lg-3 col-md-6 mb-3">
         <div class="stat-card">
             <i class="bi bi-file-code-fill"></i>
-            <h3>24</h3>
+            <h3>@totalScripts</h3>
             <p>Total Scripts</p>
         </div>
     </div>
     <div class="col-lg-3 col-md-6 mb-3">
         <div class="stat-card success">
             <i class="bi bi-check-circle-fill"></i>
-            <h3>18</h3>
+            <h3>
+                @compiledScripts
+            </h3>
             <p>Compiled Scripts</p>
         </div>
     </div>
     <div class="col-lg-3 col-md-6 mb-3">
         <div class="stat-card warning">
             <i class="bi bi-exclamation-triangle-fill"></i>
-            <h3>3</h3>
+            <h3>@pendingScripts</h3>
             <p>Pending Compilation</p>
         </div>
     </div>
     <div class="col-lg-3 col-md-6 mb-3">
         <div class="stat-card info">
             <i class="bi bi-clock-history"></i>
-            <h3>156</h3>
+            <h3>@totalExecutions</h3>
             <p>Total Executions</p>
         </div>
     </div>
 </div>
-<!-- Add this below the <div class="row mt-4"> block in Home.razor -->
-
+<!-- Add this below the <div class="row mt-4">
+block in Home.razor -->
 <div class="card mt-4">
     <div class="card-header d-flex justify-content-between align-items-center">
-        <span><i class="bi bi-clock-history"></i> Recent Scripts</span>
-        <a href="/scripts" class="btn btn-sm btn-primary">View All</a>
+        <span>
+            <i class="bi bi-clock-history"></i>
+            Recent Scripts
+        </span>
+        <a href="/scripts" class="btn btn-sm btn-primary">
+            View All
+        </a>
     </div>
     <div class="card-body p-0">
         <div class="table-container">
@@ -65,30 +73,56 @@
                 </thead>
                 <tbody>
                     <tr>
-                        <td class="ps-4"><i class="bi bi-file-code text-primary"></i> AddPediatricTestsV3</td>
-                        <td><span class="badge bg-info">Action</span></td>
+                        <td class="ps-4">
+                            <i class="bi bi-file-code text-primary"></i>
+                            AddPediatricTestsV3
+                        </td>
+                        <td>
+                            <span class="badge bg-info">Action</span>
+                        </td>
                         <td>v6</td>
-                        <td><span class="badge bg-success">Compiled</span></td>
+                        <td>
+                            <span class="badge bg-success">Compiled</span>
+                        </td>
                         <td>2 hours ago</td>
                         <td class="text-end pe-4">
                             <div class="action-buttons justify-content-end">
-                                <button class="btn btn-sm btn-outline-primary btn-icon" title="View"><i class="bi bi-eye"></i></button>
-                                <button class="btn btn-sm btn-outline-success btn-icon" title="Execute"><i class="bi bi-play-fill"></i></button>
-                                <button class="btn btn-sm btn-outline-danger btn-icon" title="Delete"><i class="bi bi-trash"></i></button>
+                                <button class="btn btn-sm btn-outline-primary btn-icon" title="View">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-success btn-icon" title="Execute">
+                                    <i class="bi bi-play-fill"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger btn-icon" title="Delete">
+                                    <i class="bi bi-trash"></i>
+                                </button>
                             </div>
                         </td>
                     </tr>
                     <tr>
-                        <td class="ps-4"><i class="bi bi-file-code text-primary"></i> VaccineScript</td>
-                        <td><span class="badge bg-info">Action</span></td>
+                        <td class="ps-4">
+                            <i class="bi bi-file-code text-primary"></i>
+                            VaccineScript
+                        </td>
+                        <td>
+                            <span class="badge bg-info">Action</span>
+                        </td>
                         <td>v6</td>
-                        <td><span class="badge bg-success">Compiled</span></td>
+                        <td>
+                            <span class="badge bg-success">Compiled</span>
+                        </td>
                         <td>5 hours ago</td>
                         <td class="text-end pe-4">
                             <div class="action-buttons justify-content-end">
-                                <button class="btn btn-sm btn-outline-primary btn-icon" title="View"><i class="bi bi-eye"></i></button>
-                                <button class="btn btn-sm btn-outline-success btn-icon" title="Execute"><i class="bi bi-play-fill"></i></button>
-                                <button class="btn btn-sm btn-outline-danger btn-icon" title="Delete"><i class="bi bi-trash"></i></button>
+                                <button class="btn btn-sm btn-outline-primary btn-icon" title="View">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-success btn-icon" title="Execute">
+                                    <i class="bi bi-play-fill"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger btn-icon" title="Delete">
+                                    <i class="bi bi-trash"></i>
+                                </button>
                             </div>
                         </td>
                     </tr>
@@ -97,12 +131,12 @@
         </div>
     </div>
 </div>
-
 <div class="row mt-4">
     <div class="col-md-6">
         <div class="card">
             <div class="card-header">
-                <i class="bi bi-server"></i> Ember Instances
+                <i class="bi bi-server"></i>
+                Ember Instances
             </div>
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center mb-3">
@@ -122,17 +156,39 @@
     <div class="col-md-6">
         <div class="card">
             <div class="card-header">
-                <i class="bi bi-activity"></i> Quick Actions
+                <i class="bi bi-activity"></i>
+                Quick Actions
             </div>
             <div class="card-body">
                 <a href="/create" class="btn btn-primary w-100 mb-2">
-                    <i class="bi bi-plus-circle"></i> Create New Script
+                    <i class="bi bi-plus-circle"></i>
+                    Create New Script
                 </a>
-                <button class="btn btn-outline-primary w-100 mb-2">
-                    <i class="bi bi-hammer"></i> Compile All Scripts
+                <button class="btn btn-outline-primary w-100 mb-2" @onclick="HandleCompileAllScripts"
+                        disabled="@isWorking">
+                    @if (isWorking)
+                    {
+                        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                        <span>Compiling...</span>
+                    }
+                    else
+                    {
+                        <i class="bi bi-hammer"></i>
+                        <span>Compile All Scripts</span>
+                    }
                 </button>
-                <button class="btn btn-outline-danger w-100">
-                    <i class="bi bi-trash"></i> Clear All Caches
+                <button class="btn btn-outline-primary w-100 mb-2" @onclick="HandleCompileAllScripts">
+                    <i class="bi bi-hammer"></i>
+                    <span>Compile Default Scripts From Folder</span>
+
+                </button>
+                <button class="btn btn-outline-danger w-100 mb-2" @onclick="HandleClearAllCaches">
+                    <i class="bi bi-trash"></i>
+                    Clear All Caches
+                </button>
+                <button class="btn btn-outline-danger w-100 mb-2" @onclick="HandleClearAllCaches">
+                    <i class="bi bi-trash"></i>
+                    Delete All Scripts
                 </button>
             </div>
         </div>
@@ -140,37 +196,76 @@
 </div>
 
 
+
 @code {
     private bool isLoading = true;
+    private bool isWorking = false;
     private int totalScripts = 0;
     private int compiledScripts = 0;
     private int pendingScripts = 0;
-    private int totalCaches = 0;
+    private int totalExecutions = 0;
+
+    private List<CustomerScript> CustomerScripts = [];
 
     // This lifecycle method runs when the page loads
     protected override async Task OnInitializedAsync()
     {
+        await LoadDashBoardData();
+    }
+
+    private async Task TestUpdate()
+    {
+
+        await LoadDashBoardData();
+        totalScripts++;
+        StateHasChanged();
+    }
+    private async Task LoadDashBoardData()
+    {
+        RandomMethods rm = new RandomMethods(ScriptManager);
+        CustomerScripts = await ScriptManager.ListScripts(includeCaches: true);
+        totalScripts = CustomerScripts.Count();
+        compiledScripts = 0;
+        foreach (var script in CustomerScripts)
+        {
+            compiledScripts = compiledScripts + script.CompiledCaches.Count();
+        }
+
+        StateHasChanged();
+    }
+
+    private async Task HandleCompileAllScripts()
+    {
         try
         {
-            // 1. Fetch all scripts
-            var allScripts = await ScriptManager.ListScripts(null, includeCaches: true);
-            totalScripts = allScripts.Count;
+            isWorking = true; //might have to call StateChange
+            StateHasChanged();
+            RandomMethods rm = new RandomMethods(ScriptManager);
+            string path = @"C:\Users\Gilles\Desktop\UNI\Semester 6\Code\Codebase\Scripting-Proof-of-Concept\sandbox\src\Scripts";
+            await rm.CompileAllScriptsInFolderAndSaveToDB(path, "Gilles", RandomMethods.GetEmberApiVersion());
 
-            // 2. Fetch caches
-            var caches = await ScriptManager.GetAllCompiledScriptCaches();
-            totalCaches = caches.Count;
+            isWorking = false;
+            StateHasChanged();
 
-            // 3. Simple logic to determine if compiled based on cache count
-            compiledScripts = caches.Select(c => c.ScriptId).Distinct().Count();
-            pendingScripts = totalScripts - compiledScripts;
+            await LoadDashBoardData();
         }
-        catch (Exception ex)
+        catch (Exception e)
         {
-            Console.WriteLine($"Error loading dashboard data: {ex.Message}");
+            Console.WriteLine(e.ToString());
         }
-        finally
+
+    }
+
+    private async Task HandleClearAllCaches()
+    {
+        try
         {
-            isLoading = false;
+            await ScriptManager.ClearAllCaches();
+            await LoadDashBoardData();
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e.ToString());
         }
     }
 }

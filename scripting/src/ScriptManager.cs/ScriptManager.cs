@@ -275,19 +275,19 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
     }
 
     // Generic execution that detects script type automatically
-    public async Task<object> ExecuteScriptById(Guid scriptId, GeneratorContext context, int currentApiVersion = -1)
+    public async Task<object> ExecuteScriptById(Guid scriptId, GeneratorContext context, int? apiVersion = null)
     {
         Logger.LogTrace("Entered {MethodName} in {ClassName} with scriptId: {ScriptId}.", nameof(ExecuteScriptById), nameof(ScriptManagerFacade), scriptId);
         try
         {
-            if (currentApiVersion == -1)
+            if (apiVersion == null)
             {
-                currentApiVersion = await GetRecentApiVersion();
+                apiVersion = await GetRecentApiVersion();
             }
             byte[]? compiledScript = null;
             try
             {
-                var temp = await Db.GetCompiledScripCache(scriptId, currentApiVersion);
+                var temp = await Db.GetCompiledScripCache(scriptId, (int)apiVersion);
                 compiledScript = temp.AssemblyBytes;
             }
             catch (Exception e)
@@ -295,7 +295,7 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
                 Logger.LogError("Retrieval failed jit comp launched:" + e.ToString());
                 await CompileScript(scriptId, await GetRecentApiVersion());
                 //try again, if fails again we catch error outside
-                var temp = await Db.GetCompiledScripCache(scriptId, currentApiVersion);
+                var temp = await Db.GetCompiledScripCache(scriptId, (int)apiVersion);
                 compiledScript = temp.AssemblyBytes;
             }
 

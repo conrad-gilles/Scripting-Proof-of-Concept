@@ -1,10 +1,6 @@
 # Todo
 - i thing getcompilationErros saves to db after compiling
-- make sure references are safe, more for future
 - add a constructor to the customerScript class maybe add 2, 1 empty one so stuff dont break
-- make sure when calling executebyid that you dont have to pass the required context in the useful method its super stupid rn
-- add namespaces without using
-- execute script takes always ember max supported version
 - store old source code versions in dictionary in db  map it to active api versions
 
 # Converting to a class library:

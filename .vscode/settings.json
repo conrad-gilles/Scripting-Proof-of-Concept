@@ -1,9 +1,14 @@
 {
-    "[csharp]": {
-        "editor.defaultFormatter": "ms-dotnettools.csharp",
-        "editor.formatOnSave": true,
-        "editor.codeActionsOnSave": {
-            "source.organizeImports": "explicit"
-        }
-    }
+"[csharp]": {
+    "editor.defaultFormatter": "ms-dotnettools.csdevkit",
+    "editor.formatOnSave": true,
+    "editor.formatOnType": false
+},
+
+"[aspnetcorerazor]": {
+    "editor.defaultFormatter": "ms-dotnettools.csharp", 
+    "editor.formatOnSave": true
+}
+
+    
 }
