@@ -1,226 +1,80 @@
-@* @page "/create" *@
-@rendermode InteractiveServer
-@using BlazorUI.Services
-@using Ember.Scripting
-@using Microsoft.AspNetCore.Routing.Template
-@using System.Text.RegularExpressions
-
-@inject ConsoleService Console
+@using Microsoft.JSInterop
 @inject IJSRuntime JS
-@inject ISccriptManagerDeleteAfter ScriptManager
 @implements IAsyncDisposable
 
-<PageTitle>Create Script</PageTitle>
-
-<!-- The top-level wrapper with padding -->
-<div class="create-script-container" style="padding-bottom: 350px;">
-    <!-- Top bar with action buttons -->
-    <div class="top-bar d-flex justify-content-between align-items-center mb-4">
-        <h2>Create New Script</h2>
-        <div class="d-flex gap-2">
-            <button class="btn btn-outline-info" @onclick="HandleValidate" disabled="@_isBusy">
-                <i class="bi bi-check-circle"></i> Validate
-            </button>
-            <button class="btn btn-outline-warning" @onclick="HandleCompile" disabled="@_isBusy">
-                <i class="bi bi-hammer"></i> Compile
-            </button>
-            <button class="btn btn-success" @onclick="HandleSave" disabled="@_isBusy">
-                <i class="bi bi-save"></i> Save
-            </button>
-            <a href="scripts" class="btn btn-outline-secondary">
-                <i class="bi bi-arrow-left"></i> Back
-            </a>
-        </div>
+<div class="card border-0 flex-grow-1" style="min-height: 0;">
+    <div class="card-body p-0" style="border-radius: 10px; overflow: hidden; background: #1e1e1e; height: 100%;">
+        <!-- Note: We make the ID dynamic in case you ever put TWO editors on one page -->
+        <div id="@EditorId" style="height: 100%; width: 100%;"></div>
     </div>
-
-    @* <!-- Script name input -->
-    <div class="card mb-3">
-        <div class="card-body py-2 px-3">
-            <div class="row align-items-center g-2">
-                <div class="col-auto">
-                    <label class="form-label mb-0 fw-semibold">Script Name</label>
-                </div>
-                <div class="col-md-4">
-                    <input class="form-control" @bind="_scriptName" placeholder="e.g. MyValidationScript" />
-                </div>
-                <div class="col-auto">
-                    <label class="form-label mb-0 fw-semibold">Min API Version</label>
-                </div>
-                <div class="col-md-2">
-                    <input type="number" class="form-control" @bind="_minApiVersion" placeholder="e.g. 6" />
-                </div>
-            </div>
-        </div>
-    </div> *@
-
-    <!-- Monaco Editor container -->
-    <div class="card border-0 mb-4" style="flex-grow: 1;">
-        <div class="card-body p-0" style="border-radius: 10px; overflow: hidden; background: #1e1e1e;">
-            <div id="monaco-editor-container" style="height: 50vh; min-height: 625px; width: 100%;"></div>
-        </div>
-    </div>
-
 </div>
 
-<FakeTerminal />
-
-
 @code {
+    [Parameter]
+    public string EditorId { get; set; } = "monaco-editor-container";
+
+    [Parameter]
+    public string InitialCode { get; set; } = string.Empty;
+
     private bool _editorReady = false;
-    private bool _isBusy = false;
-    private string _scriptName = string.Empty;
-    private int _minApiVersion = 6;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-
         if (firstRender)
         {
+            await Task.Delay(50);
             await JS.InvokeVoidAsync(
                 "monacoEditor.initialize",
-                "monaco-editor-container",
-                DefaultScript,
+                EditorId,
+                InitialCode,
                 "csharp"
             );
             _editorReady = true;
         }
     }
 
-    private async Task HandleValidate()
+    // Public method so the parent page can get the code
+    public async Task<string> GetValueAsync()
     {
-        var code = await JS.InvokeAsync<string>("monacoEditor.getValue");
-        Console.Log("Validating script:");
-        try
-        {
-            ScriptManager.BasicValidationBeforeCompiling(code);
-            Console.Log("Validation successfull!");
-        }
-        catch (Exception e)
-        {
-            Console.Log(e.ToString());
-        }
-        // TODO: wire up to your ScriptManager validation
+        if (!_editorReady) return string.Empty;
+        return await JS.InvokeAsync<string>("monacoEditor.getValue");
     }
 
-    @* private async Task HandleCompile()
+    // Add this to MonacoEditor.razor
+    public async Task SetValueAsync(string value)
     {
-        _isBusy = true;
-        var code = await JS.InvokeAsync<string>("monacoEditor.getValue");
-        Console.Log($"Compiling '{_scriptName}'...");
-        try
+        if (_editorReady)
         {
-            await ScriptManager.CreateScript(code);
-            Console.Log("Compilation successful, script was created and inserted into the DB.");
+            await JS.InvokeVoidAsync("monacoEditor.setValue", value);
         }
-        catch (Exception ex)
+        else
         {
-            Console.Log($"Error: {ex.Message}");
-        }
-        finally { _isBusy = false; }
-    } *@
-
-
-    private async Task HandleCompile()
-    {
-        _isBusy = true;
-        var code = await JS.InvokeAsync<string>("monacoEditor.getValue");
-
-        // Clear old red lines first
-        await JS.InvokeVoidAsync("monacoEditor.clearErrors");
-
-        Console.Log($"Compiling '{_scriptName}'...");
-
-        try
-        {
-            await ScriptManager.CreateScript(code);
-            Console.Log("Compilation successful, script was created and inserted into the DB.");
-        }
-        catch (Exception ex)
-        {
-            Console.Log($"Compilation Failed: {ex.Message}");
-
-            // Parse the error string to find Line and Col numbers
-            var errorsList = new List<object>();
-
-            // Regex looks for "Line X, Col Y: ErrorMessage"
-            var regex = new Regex(@"Line (\d+), Col (\d+): (.*)");
-            var matches = regex.Matches(ex.Message);
-
-            foreach (Match match in matches)
-            {
-                if (match.Success)
-                {
-                    errorsList.Add(new
-                    {
-                        line = int.Parse(match.Groups[1].Value),
-                        column = int.Parse(match.Groups[2].Value),
-                        message = match.Groups[3].Value
-                    });
-                }
-            }
-
-            // If we found parseable errors, send them to Javascript
-            if (errorsList.Any())
-            {
-                await JS.InvokeVoidAsync("monacoEditor.setErrors", errorsList);
-            }
-        }
-        finally
-        {
-            _isBusy = false;
+            // If the editor hasn't loaded yet, store it in InitialCode so it gets used when OnAfterRender runs
+            InitialCode = value;
         }
     }
 
-
-
-    private async Task HandleSave() //todo
+    // Public method to clear errors
+    public async Task ClearErrorsAsync()
     {
-        _isBusy = true;
-        var code = await JS.InvokeAsync<string>("monacoEditor.getValue");
-        Console.Log($"Saving '{_scriptName}'...");
-        try
+        if (_editorReady)
         {
-            // TODO: build a CustomerScript object and call ScriptManager.SaveScript(...)
-            Console.Log("Script saved successfully.");
+            await JS.InvokeVoidAsync("monacoEditor.clearErrors");
         }
-        catch (Exception ex)
-        {
-            Console.Log($"Error: {ex.Message}");
-        }
-        finally { _isBusy = false; }
     }
 
-    // Dispose the editor instance when navigating away
+    // Public method to set errors
+    public async Task SetErrorsAsync(List<object> errors)
+    {
+        if (_editorReady && errors.Any())
+        {
+            await JS.InvokeVoidAsync("monacoEditor.setErrors", errors);
+        }
+    }
+
     public async ValueTask DisposeAsync()
     {
         if (_editorReady)
             await JS.InvokeVoidAsync("monacoEditor.dispose");
     }
-
-    private static string GetTemplate()
-    {
-        string path = @"C:\Users\Gilles\Desktop\UNI\Semester 6\Code\Codebase\Scripting-Proof-of-Concept\BlazorUI\src\ScriptTemplate.cs";
-        return RandomMethods.CreateStringFromCsFile(path);
-    }
-
-    private string DefaultScript = GetTemplate();
-    @* @"using System;
-
-public class MyScript
-{
-    public bool Execute()
-    {
-        // Write your C# logic here
-        return true;
-    }
-}"; *@
-
-    public class ScriptError
-    {
-        public int Line { get; set; }
-        public int Column { get; set; }
-        public string Message { get; set; } = string.Empty;
-    }
-
-
 }

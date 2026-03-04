@@ -4,99 +4,141 @@
 @using BlazorUI.TotalExecutions
 @using BlazorUI.Services
 @using Microsoft.CodeAnalysis.Differencing
+@using System.Text.RegularExpressions
 @inject ConsoleService Console
 @inject ISccriptManagerDeleteAfter ScriptManager
 <PageTitle>Scripts</PageTitle>
 <div class="page-container">
-    <div class="top-bar">
-        <h2>All Scripts</h2>
-        <a href="/create" class="btn btn-primary">
-            <i class="bi bi-plus-circle"></i> New Script
-        </a>
-    </div>
-
-    <div class="card">
-        <div class="card-body">
-            @if (isLoading)
-            {
-                <div class="text-center py-5">
-                    <div class="spinner-border text-primary" role="status"></div>
-                    <p class="mt-2">Loading scripts...</p>
-                </div>
-            }
-            else if (ScriptsList == null || !ScriptsList.Any())
-            {
-                <div class="empty-state">
-                    <i class="bi bi-file-code"></i>
-                    <h4>No scripts found</h4>
-                    <p>Create your first C# script to get started.</p>
-                </div>
-            }
-            else
-            {
-                <div class="table-container">
-                    <table class="table table-hover">
-                        <thead>
-                            <tr>
-                                <th>Script Name</th>
-                                <th>Type</th>
-                                <th>Min API Version</th>
-                                <th>Created At</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var script in ScriptsList)
-                            {
-                                <tr>
-                                    <td><i class="bi bi-file-code text-primary"></i> @script.ScriptName</td>
-                                    <td>
-                                        @* @if (script.ScriptType == "GeneratorAction") *@
-                                        @if (script.ScriptType != null && script.ScriptType.Contains("Action"))
-                                        {
-                                            <span class="badge bg-info">Action</span>
-                                        }
-                                        else
-                                        {
-                                            <span class="badge bg-warning text-dark">Condition</span>
-                                        }
-                                    </td>
-                                    <td>v@(script.MinApiVersion)</td>
-                                    <td>@(script.CreatedAt?.ToString("yyyy-MM-dd") ?? "N/A")</td>
-                                    <td>
-                                        <div class="action-buttons">
-                                            <button class="btn btn-sm btn-outline-success btn-icon"
-                                                    @onclick="() => ExecuteScript(script.Id)" title="Execute">
-                                                <i class="bi bi-play-fill"></i>
-                                            </button>
-                                            <button class="btn btn-sm btn-outline-primary btn-icon"
-                                                    @onclick="() => EditScript(script.Id)" title="Edit">
-                                                <i class="bi bi-pencil-square"></i>
-                                            </button>
-                                            <button class="btn btn-sm btn-outline-success btn-icon"
-                                                    @onclick="() => CompileScript(script.Id)">
-                                                <i class="bi bi-hammer"></i>
-                                            </button>
-                                            <button class="btn btn-sm btn-outline-danger btn-icon"
-                                                    @onclick="() => DeleteScript(script.Id)">
-                                                <i class="bi bi-trash"></i>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
-            }
+    @if (!isEditing)
+    {
+        <div class="top-bar">
+            <h2>All Scripts</h2>
+            <a href="/create" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> New Script
+            </a>
         </div>
-    </div>
+
+        <div class="card">
+            <div class="card-body">
+                @if (isLoading)
+                {
+                    <div class="text-center py-5">
+                        <div class="spinner-border text-primary" role="status"></div>
+                        <p class="mt-2">Loading scripts...</p>
+                    </div>
+                }
+                else if (ScriptsList == null || !ScriptsList.Any())
+                {
+                    <div class="empty-state">
+                        <i class="bi bi-file-code"></i>
+                        <h4>No scripts found</h4>
+                        <p>Create your first C# script to get started.</p>
+                    </div>
+                }
+                else
+                {
+                    <div class="table-container">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Script Name</th>
+                                    <th>Type</th>
+                                    <th>Min API Version</th>
+                                    <th>Created At</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var script in ScriptsList)
+                                {
+                                    <tr>
+                                        <td><i class="bi bi-file-code text-primary"></i> @script.ScriptName</td>
+                                        <td>
+                                            @* @if (script.ScriptType == "GeneratorAction") *@
+                                            @if (script.ScriptType != null && script.ScriptType.Contains("Action"))
+                                            {
+                                                <span class="badge bg-info">Action</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-warning text-dark">Condition</span>
+                                            }
+                                        </td>
+                                        <td>v@(script.MinApiVersion)</td>
+                                        <td>@(script.CreatedAt?.ToString("yyyy-MM-dd") ?? "N/A")</td>
+                                        <td>
+                                            <div class="action-buttons">
+                                                <button class="btn btn-sm btn-outline-success btn-icon"
+                                                        @onclick="() => ExecuteScript(script.Id)" title="Execute">
+                                                    <i class="bi bi-play-fill"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-outline-primary btn-icon"
+                                                        @onclick="() => EditScript(script.Id)" title="Edit">
+                                                    <i class="bi bi-pencil-square"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-outline-success btn-icon"
+                                                        @onclick="() => CompileScript(script.Id)">
+                                                    <i class="bi bi-hammer"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-outline-danger btn-icon"
+                                                        @onclick="() => DeleteScript(script.Id)">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+    else
+    {
+        <!-- YOU NEED THIS WRAPPER DIV -->
+        <div class="d-flex flex-column" style="height: calc(100vh - 40px); overflow: hidden;">
+
+            <div class="top-bar d-flex justify-content-between align-items-center mb-3 flex-shrink-0">
+                <!-- Change the Header to show the Script Name -->
+                <h2 class="mb-0">Edit Script: @_scriptName</h2>
+
+                <div class="d-flex gap-2">
+                    <button class="btn btn-outline-info" @onclick="HandleValidate" disabled="@_isBusy">
+                        <i class="bi bi-check-circle"></i> Validate
+                    </button>
+                    <button class="btn btn-outline-warning" @onclick="HandleCompile" disabled="@_isBusy">
+                        <i class="bi bi-hammer"></i> Compile
+                    </button>
+                    <button class="btn btn-success" @onclick="HandleSave" disabled="@_isBusy">
+                        <i class="bi bi-save"></i> Save
+                    </button>
+                    <button class="btn btn-outline-secondary" @onclick="() => { isEditing = false; }">
+                        <i class="bi bi-arrow-left"></i> Cancel
+                    </button>
+                </div>
+            </div>
+
+            <!-- The Editor Component -->
+            <MonacoEditor @ref="_editor" EditorId="edit-monaco-editor" InitialCode="@_scriptCode" />
+
+            <!-- Terminal spacer -->
+            <div
+                style="height: @(Console.IsExpanded ? "300px" : "40px"); transition: height 0.3s ease-in-out; flex-shrink: 0;">
+            </div>
+        </div>
+    }
+
     <FakeTerminal />
 </div>
 
 @code {
+
     private List<CustomerScript> ScriptsList = new();
     private bool isLoading = true;
+
+    private bool isEditing = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -152,10 +194,11 @@
 
     }
 
-    private async Task EditScript(Guid id)
+    @* private async Task EditScript(Guid id)
     {
-
-    }
+        isEditing = true;
+        StateHasChanged();
+    } *@
     // Connects to a UI button
     private async Task CompileScript(Guid id)
     {
@@ -178,5 +221,134 @@
         await ScriptManager.DeleteScript(id);
         // Refresh the table
         await LoadScripts();
+    }
+
+
+    // This variable holds a reference to the child component
+    private MonacoEditor _editor = default!;
+
+    private bool _isBusy = false;
+    private string _scriptName = string.Empty;
+    private int _minApiVersion = 6;
+
+    public string DefaultScript = GetTemplate();
+
+    public static string GetTemplate()
+    {
+        string path = @"C:\Users\Gilles\Desktop\UNI\Semester 6\Code\Codebase\Scripting-Proof-of-Concept\BlazorUI\src\ScriptTemplate.cs";
+        return RandomMethods.CreateStringFromCsFile(path);
+    }
+
+    public async Task HandleValidate()
+    {
+        // CALL THE CHILD COMPONENT METHOD to get the text
+        var code = await _editor.GetValueAsync();
+        Console.Log("Validating script:");
+        try
+        {
+            ScriptManager.BasicValidationBeforeCompiling(code);
+            Console.Log("Validation successfull!");
+        }
+        catch (Exception e)
+        {
+            Console.Log(e.ToString());
+        }
+    }
+
+    public async Task HandleCompile()
+    {
+        _isBusy = true;
+
+        // GET VALUE FROM CHILD
+        var code = await _editor.GetValueAsync();
+
+        // CLEAR ERRORS IN CHILD
+        await _editor.ClearErrorsAsync();
+
+        Console.Log($"Compiling '{_scriptName}'...");
+
+        try
+        {
+            await ScriptManager.CreateScript(code);
+            Console.Log("Compilation successful, script was created and inserted into the DB.");
+        }
+        catch (Exception ex)
+        {
+            Console.Log($"Compilation Failed: {ex.Message}");
+
+            var errorsList = new List<object>();
+            var regex = new Regex(@"Line (\d+), Col (\d+): (.*)");
+            var matches = regex.Matches(ex.Message);
+
+            foreach (System.Text.RegularExpressions.Match match in matches)
+            {
+                if (match.Success)
+                {
+                    errorsList.Add(new
+                    {
+                        line = int.Parse(match.Groups[1].Value),
+                        column = int.Parse(match.Groups[2].Value),
+                        message = match.Groups[3].Value
+                    });
+                }
+            }
+
+            // SET ERRORS IN CHILD
+            if (errorsList.Any())
+            {
+                await _editor.SetErrorsAsync(errorsList);
+            }
+        }
+        finally
+        {
+            _isBusy = false;
+        }
+    }
+
+    public async Task HandleSave()
+    {
+        _isBusy = true;
+        var code = await _editor.GetValueAsync();
+        Console.Log($"Saving '{_scriptName}'...");
+        try
+        {
+            // TODO: call ScriptManager.SaveScript(...)
+            Console.Log("Script saved successfully.");
+        }
+        catch (Exception ex)
+        {
+            Console.Log($"Error: {ex.Message}");
+        }
+        finally { _isBusy = false; }
+    }
+
+    // Add these variables to hold the current script being edited
+    private string _scriptCode = string.Empty;
+    private Guid _currentScriptId;
+
+    // UPDATE the EditScript method:
+    private async Task EditScript(Guid id)
+    {
+        try
+        {
+            // 1. Fetch the script from your backend
+            CustomerScript script = await ScriptManager.GetScript(id);
+
+            if (script != null)
+            {
+                // 2. Save the details
+                _currentScriptId = id;
+                _scriptName = script.ScriptName!;
+                _scriptCode = script.SourceCode ?? string.Empty; // Use the actual DB code!
+
+                // 3. Flip the UI to editing mode
+                isEditing = true;
+                StateHasChanged();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Log($"Failed to load script: {ex.Message}");
+        }
     }
 }

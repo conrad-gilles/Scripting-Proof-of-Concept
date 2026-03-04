@@ -49,6 +49,7 @@ BlazorUI/Components/App.razor
 BlazorUI/Components/FakeTerminal.razor
 BlazorUI/Components/Layout/MainLayout.razor
 BlazorUI/Components/Layout/MainLayout.razor.css
+BlazorUI/Components/MonacoEditor.razor
 BlazorUI/Components/Pages/Cache.razor
 BlazorUI/Components/Pages/CreateScript.razor
 BlazorUI/Components/Pages/Error.razor
@@ -64,11 +65,66 @@ BlazorUI/Program.cs
 BlazorUI/Properties/launchSettings.json
 BlazorUI/src/ConsoleService.cs
 BlazorUI/src/Executions.cs
+BlazorUI/src/ScriptTemplate.cs
 BlazorUI/wwwroot/app.css
+BlazorUI/wwwroot/js/monaco-interop.js
 </directory_structure>
 
 <files>
 This section contains the contents of the repository's files.
+
+<file path="BlazorUI/appsettings.Development.json">
+{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  }
+}
+</file>
+
+<file path="BlazorUI/appsettings.json">
+{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  },
+  "AllowedHosts": "*"
+}
+</file>
+
+<file path="BlazorUI/BlazorUI.csproj">
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <ItemGroup>
+    <ProjectReference Include="..\scripting\scripting.csproj" />
+    <ProjectReference Include="..\sandbox\sandbox.csproj" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+</Project>
+</file>
+
+<file path="BlazorUI/Components/_Imports.razor">
+@using System.Net.Http
+@using System.Net.Http.Json
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.AspNetCore.Components.Routing
+@using Microsoft.AspNetCore.Components.Web
+@using static Microsoft.AspNetCore.Components.Web.RenderMode
+@using Microsoft.AspNetCore.Components.Web.Virtualization
+@using Microsoft.JSInterop
+@using BlazorUI
+@using BlazorUI.Components
+</file>
 
 <file path="BlazorUI/Components/FakeTerminal.razor">
 @using BlazorUI.Services
@@ -154,6 +210,231 @@ This section contains the contents of the repository's files.
 }
 </file>
 
+<file path="BlazorUI/Components/Layout/MainLayout.razor.css">
+#blazor-error-ui {
+    color-scheme: light only;
+    background: lightyellow;
+    bottom: 0;
+    box-shadow: 0 -1px 2px rgba(0, 0, 0, 0.2);
+    box-sizing: border-box;
+    display: none;
+    left: 0;
+    padding: 0.6rem 1.25rem 0.7rem 1.25rem;
+    position: fixed;
+    width: 100%;
+    z-index: 1000;
+}
+
+    #blazor-error-ui .dismiss {
+        cursor: pointer;
+        position: absolute;
+        right: 0.75rem;
+        top: 0.5rem;
+    }
+</file>
+
+<file path="BlazorUI/Components/MonacoEditor.razor">
+@using Microsoft.JSInterop
+@inject IJSRuntime JS
+@implements IAsyncDisposable
+
+<div class="card border-0 flex-grow-1" style="min-height: 0;">
+    <div class="card-body p-0" style="border-radius: 10px; overflow: hidden; background: #1e1e1e; height: 100%;">
+        <!-- Note: We make the ID dynamic in case you ever put TWO editors on one page -->
+        <div id="@EditorId" style="height: 100%; width: 100%;"></div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public string EditorId { get; set; } = "monaco-editor-container";
+
+    [Parameter]
+    public string InitialCode { get; set; } = string.Empty;
+
+    private bool _editorReady = false;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await Task.Delay(50);
+            await JS.InvokeVoidAsync(
+                "monacoEditor.initialize",
+                EditorId,
+                InitialCode,
+                "csharp"
+            );
+            _editorReady = true;
+        }
+    }
+
+    // Public method so the parent page can get the code
+    public async Task<string> GetValueAsync()
+    {
+        if (!_editorReady) return string.Empty;
+        return await JS.InvokeAsync<string>("monacoEditor.getValue");
+    }
+
+    // Add this to MonacoEditor.razor
+    public async Task SetValueAsync(string value)
+    {
+        if (_editorReady)
+        {
+            await JS.InvokeVoidAsync("monacoEditor.setValue", value);
+        }
+        else
+        {
+            // If the editor hasn't loaded yet, store it in InitialCode so it gets used when OnAfterRender runs
+            InitialCode = value;
+        }
+    }
+
+    // Public method to clear errors
+    public async Task ClearErrorsAsync()
+    {
+        if (_editorReady)
+        {
+            await JS.InvokeVoidAsync("monacoEditor.clearErrors");
+        }
+    }
+
+    // Public method to set errors
+    public async Task SetErrorsAsync(List<object> errors)
+    {
+        if (_editorReady && errors.Any())
+        {
+            await JS.InvokeVoidAsync("monacoEditor.setErrors", errors);
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_editorReady)
+            await JS.InvokeVoidAsync("monacoEditor.dispose");
+    }
+}
+</file>
+
+<file path="BlazorUI/Components/Pages/Error.razor">
+@page "/Error"
+@using System.Diagnostics
+
+<PageTitle>Error</PageTitle>
+
+<h1 class="text-danger">Error.</h1>
+<h2 class="text-danger">An error occurred while processing your request.</h2>
+
+@if (ShowRequestId)
+{
+    <p>
+        <strong>Request ID:</strong> <code>@RequestId</code>
+    </p>
+}
+
+<h3>Development Mode</h3>
+<p>
+    Swapping to <strong>Development</strong> environment will display more detailed information about the error that occurred.
+</p>
+<p>
+    <strong>The Development environment shouldn't be enabled for deployed applications.</strong>
+    It can result in displaying sensitive information from exceptions to end users.
+    For local debugging, enable the <strong>Development</strong> environment by setting the <strong>ASPNETCORE_ENVIRONMENT</strong> environment variable to <strong>Development</strong>
+    and restarting the app.
+</p>
+
+@code{
+    [CascadingParameter]
+    private HttpContext? HttpContext { get; set; }
+
+    private string? RequestId { get; set; }
+    private bool ShowRequestId => !string.IsNullOrEmpty(RequestId);
+
+    protected override void OnInitialized() =>
+        RequestId = Activity.Current?.Id ?? HttpContext?.TraceIdentifier;
+}
+</file>
+
+<file path="BlazorUI/Components/Pages/Monitoring.razor">
+@page "/monitoring"
+<PageTitle>Monitoring</PageTitle>
+
+<div class="top-bar">
+    <h2>Monitoring</h2>
+</div>
+
+<div class="empty-state">
+    <i class="bi bi-graph-up"></i>
+    <h4>System monitoring</h4>
+    <p>View execution logs and performance metrics</p>
+</div>
+</file>
+
+<file path="BlazorUI/Components/Pages/Settings.razor">
+@page "/settings"
+<PageTitle>Settings</PageTitle>
+
+<div class="top-bar">
+    <h2>Settings</h2>
+</div>
+
+<div class="empty-state">
+    <i class="bi bi-gear"></i>
+    <h4>System settings</h4>
+    <p>Configure system preferences</p>
+</div>
+</file>
+
+<file path="BlazorUI/Components/Pages/Versions.razor">
+@page "/versions"
+<PageTitle>API Versions</PageTitle>
+
+<div class="top-bar">
+    <h2>API Versions</h2>
+</div>
+
+<div class="empty-state">
+    <i class="bi bi-layers"></i>
+    <h4>API version management</h4>
+    <p>Manage API versions and compatibility</p>
+</div>
+</file>
+
+<file path="BlazorUI/Components/Routes.razor">
+<Router AppAssembly="typeof(Program).Assembly">
+    <Found Context="routeData">
+        <RouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)" />
+        <FocusOnNavigate RouteData="routeData" Selector="h1" />
+    </Found>
+</Router>
+</file>
+
+<file path="BlazorUI/Properties/launchSettings.json">
+{
+  "$schema": "https://json.schemastore.org/launchsettings.json",
+    "profiles": {
+      "http": {
+        "commandName": "Project",
+        "dotnetRunMessages": true,
+        "launchBrowser": true,
+        "applicationUrl": "http://localhost:5124",
+        "environmentVariables": {
+          "ASPNETCORE_ENVIRONMENT": "Development"
+        }
+      },
+      "https": {
+        "commandName": "Project",
+        "dotnetRunMessages": true,
+        "launchBrowser": true,
+        "applicationUrl": "https://localhost:7083;http://localhost:5124",
+        "environmentVariables": {
+          "ASPNETCORE_ENVIRONMENT": "Development"
+        }
+      }
+    }
+  }
+</file>
+
 <file path="BlazorUI/src/ConsoleService.cs">
 using System;
 using System.Collections.Generic;
@@ -213,80 +494,54 @@ public class TotalExecutions
 }
 </file>
 
-<file path="BlazorUI/appsettings.Development.json">
+<file path="BlazorUI/src/ScriptTemplate.cs">
+using System;   //todo this is possible to default in compiler
+using System.Threading.Tasks;
+using System.Collections.Generic;   //todo same for them
+using Ember.Scripting;
+
+public class AddPediatricTestsV3 : IGeneratorActionScriptV3
 {
-  "Logging": {
-    "LogLevel": {
-      "Default": "Information",
-      "Microsoft.AspNetCore": "Warning"
+    // public async Task<ActionResult> ExecuteAsync(IGeneratorContext context)
+    public async Task<ActionResultV3NoInheritance> ExecuteAsync(IGeneratorContext_V3.IGeneratorContext context)
+    {
+        context.Logger.Info("Adding pediatric standard tests");
+
+        // Check if test already exists (might be auto-added by business rule)
+        if (!context.LabOrder.HasTest("PED-BASIC"))
+        {
+            context.LabOrder.AddTest("PED-BASIC");
+        }
+
+        context.LabOrder.SetCustomField("ProcessedByGenerator", true);
+
+        double versionExample = context.LabOrder.RandomNewDouble;    //example of newer version
+        Console.WriteLine(versionExample);
+
+        string exampleV3 = context.LabOrder.randomNewFunctionInV3("Gilles");
+        Console.WriteLine("Return also works if here:" + exampleV3);
+
+        return ActionResultV3NoInheritance.Success("Pediatric tests added V3");
+        // return null; //just for compiler
     }
-  }
 }
 </file>
 
-<file path="BlazorUI/appsettings.json">
-{
-  "Logging": {
-    "LogLevel": {
-      "Default": "Information",
-      "Microsoft.AspNetCore": "Warning"
-    }
-  },
-  "AllowedHosts": "*"
-}
-</file>
+<file path="BlazorUI/Components/Layout/MainLayout.razor">
+@inherits LayoutComponentBase
+@using BlazorUI.Components.Pages
 
-<file path="BlazorUI/BlazorUI.csproj">
-<Project Sdk="Microsoft.NET.Sdk.Web">
+<SideBar />
 
-  <ItemGroup>
-    <ProjectReference Include="..\scripting\scripting.csproj" />
-    <ProjectReference Include="..\sandbox\sandbox.csproj" />
-  </ItemGroup>
+<div class="main-content">
+    @Body
+</div>
 
-  <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
-  </PropertyGroup>
-
-</Project>
-</file>
-
-<file path="BlazorUI/Components/_Imports.razor">
-@using System.Net.Http
-@using System.Net.Http.Json
-@using Microsoft.AspNetCore.Components.Forms
-@using Microsoft.AspNetCore.Components.Routing
-@using Microsoft.AspNetCore.Components.Web
-@using static Microsoft.AspNetCore.Components.Web.RenderMode
-@using Microsoft.AspNetCore.Components.Web.Virtualization
-@using Microsoft.JSInterop
-@using BlazorUI
-@using BlazorUI.Components
-</file>
-
-<file path="BlazorUI/Components/Layout/MainLayout.razor.css">
-#blazor-error-ui {
-    color-scheme: light only;
-    background: lightyellow;
-    bottom: 0;
-    box-shadow: 0 -1px 2px rgba(0, 0, 0, 0.2);
-    box-sizing: border-box;
-    display: none;
-    left: 0;
-    padding: 0.6rem 1.25rem 0.7rem 1.25rem;
-    position: fixed;
-    width: 100%;
-    z-index: 1000;
-}
-
-    #blazor-error-ui .dismiss {
-        cursor: pointer;
-        position: absolute;
-        right: 0.75rem;
-        top: 0.5rem;
-    }
+<div id="blazor-error-ui" data-nosnippet>
+    An unhandled error has occurred.
+    <a href="." class="reload">Reload</a>
+    <span class="dismiss">🗙</span>
+</div>
 </file>
 
 <file path="BlazorUI/Components/Pages/Cache.razor">
@@ -394,67 +649,6 @@ public class TotalExecutions
 }
 </file>
 
-<file path="BlazorUI/Components/Pages/CreateScript.razor">
-@page "/create"
-@using BlazorUI.Services
-@inject ConsoleService Console
-
-<PageTitle>Create Script</PageTitle>
-
-<div class="top-bar">
-    <h2>Create New Script</h2>
-    <a href="/scripts" class="btn btn-outline-secondary">
-        <i class="bi bi-arrow-left"></i> Back
-    </a>
-</div>
-
-<div class="card">
-    <div class="card-body">
-        <p>Script editor UI goes here...</p>
-    </div>
-</div>
-<FakeTerminal />
-</file>
-
-<file path="BlazorUI/Components/Pages/Error.razor">
-@page "/Error"
-@using System.Diagnostics
-
-<PageTitle>Error</PageTitle>
-
-<h1 class="text-danger">Error.</h1>
-<h2 class="text-danger">An error occurred while processing your request.</h2>
-
-@if (ShowRequestId)
-{
-    <p>
-        <strong>Request ID:</strong> <code>@RequestId</code>
-    </p>
-}
-
-<h3>Development Mode</h3>
-<p>
-    Swapping to <strong>Development</strong> environment will display more detailed information about the error that occurred.
-</p>
-<p>
-    <strong>The Development environment shouldn't be enabled for deployed applications.</strong>
-    It can result in displaying sensitive information from exceptions to end users.
-    For local debugging, enable the <strong>Development</strong> environment by setting the <strong>ASPNETCORE_ENVIRONMENT</strong> environment variable to <strong>Development</strong>
-    and restarting the app.
-</p>
-
-@code{
-    [CascadingParameter]
-    private HttpContext? HttpContext { get; set; }
-
-    private string? RequestId { get; set; }
-    private bool ShowRequestId => !string.IsNullOrEmpty(RequestId);
-
-    protected override void OnInitialized() =>
-        RequestId = Activity.Current?.Id ?? HttpContext?.TraceIdentifier;
-}
-</file>
-
 <file path="BlazorUI/Components/Pages/Execution.razor">
 @page "/execution"
 @using BlazorUI.Services
@@ -472,314 +666,6 @@ public class TotalExecutions
     <p>Choose a compiled script from the list to run it</p>
 </div>
 <FakeTerminal />
-</file>
-
-<file path="BlazorUI/Components/Pages/Monitoring.razor">
-@page "/monitoring"
-<PageTitle>Monitoring</PageTitle>
-
-<div class="top-bar">
-    <h2>Monitoring</h2>
-</div>
-
-<div class="empty-state">
-    <i class="bi bi-graph-up"></i>
-    <h4>System monitoring</h4>
-    <p>View execution logs and performance metrics</p>
-</div>
-</file>
-
-<file path="BlazorUI/Components/Pages/Settings.razor">
-@page "/settings"
-<PageTitle>Settings</PageTitle>
-
-<div class="top-bar">
-    <h2>Settings</h2>
-</div>
-
-<div class="empty-state">
-    <i class="bi bi-gear"></i>
-    <h4>System settings</h4>
-    <p>Configure system preferences</p>
-</div>
-</file>
-
-<file path="BlazorUI/Components/Pages/Versions.razor">
-@page "/versions"
-<PageTitle>API Versions</PageTitle>
-
-<div class="top-bar">
-    <h2>API Versions</h2>
-</div>
-
-<div class="empty-state">
-    <i class="bi bi-layers"></i>
-    <h4>API version management</h4>
-    <p>Manage API versions and compatibility</p>
-</div>
-</file>
-
-<file path="BlazorUI/Components/Routes.razor">
-<Router AppAssembly="typeof(Program).Assembly">
-    <Found Context="routeData">
-        <RouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)" />
-        <FocusOnNavigate RouteData="routeData" Selector="h1" />
-    </Found>
-</Router>
-</file>
-
-<file path="BlazorUI/Properties/launchSettings.json">
-{
-  "$schema": "https://json.schemastore.org/launchsettings.json",
-    "profiles": {
-      "http": {
-        "commandName": "Project",
-        "dotnetRunMessages": true,
-        "launchBrowser": true,
-        "applicationUrl": "http://localhost:5124",
-        "environmentVariables": {
-          "ASPNETCORE_ENVIRONMENT": "Development"
-        }
-      },
-      "https": {
-        "commandName": "Project",
-        "dotnetRunMessages": true,
-        "launchBrowser": true,
-        "applicationUrl": "https://localhost:7083;http://localhost:5124",
-        "environmentVariables": {
-          "ASPNETCORE_ENVIRONMENT": "Development"
-        }
-      }
-    }
-  }
-</file>
-
-<file path="BlazorUI/Components/App.razor">
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Ember Scripting Manager</title>
-    <base href="/" />
-    
-    <!-- Required Bootstrap & Icons -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
-    
-    <link rel="stylesheet" href="@Assets["app.css"]" />
-    <link rel="stylesheet" href="@Assets["BlazorUI.styles.css"]" />
-    <ImportMap />
-    <HeadOutlet />
-</head>
-<body>
-    <Routes />
-    <script src="_framework/blazor.web.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
-</file>
-
-<file path="BlazorUI/Components/Layout/MainLayout.razor">
-@inherits LayoutComponentBase
-@using BlazorUI.Components.Pages
-
-<SideBar />
-
-<div class="main-content">
-    @Body
-</div>
-
-<div id="blazor-error-ui" data-nosnippet>
-    An unhandled error has occurred.
-    <a href="." class="reload">Reload</a>
-    <span class="dismiss">🗙</span>
-</div>
-</file>
-
-<file path="BlazorUI/Components/Pages/Scripts.razor">
-@page "/scripts"
-@rendermode InteractiveServer
-@using Ember.Scripting
-@using BlazorUI.TotalExecutions
-@using BlazorUI.Services
-@using Microsoft.CodeAnalysis.Differencing
-@inject ConsoleService Console
-@inject ISccriptManagerDeleteAfter ScriptManager
-<PageTitle>Scripts</PageTitle>
-<div class="page-container">
-    <div class="top-bar">
-        <h2>All Scripts</h2>
-        <a href="/create" class="btn btn-primary">
-            <i class="bi bi-plus-circle"></i> New Script
-        </a>
-    </div>
-
-    <div class="card">
-        <div class="card-body">
-            @if (isLoading)
-            {
-                <div class="text-center py-5">
-                    <div class="spinner-border text-primary" role="status"></div>
-                    <p class="mt-2">Loading scripts...</p>
-                </div>
-            }
-            else if (ScriptsList == null || !ScriptsList.Any())
-            {
-                <div class="empty-state">
-                    <i class="bi bi-file-code"></i>
-                    <h4>No scripts found</h4>
-                    <p>Create your first C# script to get started.</p>
-                </div>
-            }
-            else
-            {
-                <div class="table-container">
-                    <table class="table table-hover">
-                        <thead>
-                            <tr>
-                                <th>Script Name</th>
-                                <th>Type</th>
-                                <th>Min API Version</th>
-                                <th>Created At</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var script in ScriptsList)
-                            {
-                                <tr>
-                                    <td><i class="bi bi-file-code text-primary"></i> @script.ScriptName</td>
-                                    <td>
-                                        @* @if (script.ScriptType == "GeneratorAction") *@
-                                        @if (script.ScriptType != null && script.ScriptType.Contains("Action"))
-                                        {
-                                            <span class="badge bg-info">Action</span>
-                                        }
-                                        else
-                                        {
-                                            <span class="badge bg-warning text-dark">Condition</span>
-                                        }
-                                    </td>
-                                    <td>v@(script.MinApiVersion)</td>
-                                    <td>@(script.CreatedAt?.ToString("yyyy-MM-dd") ?? "N/A")</td>
-                                    <td>
-                                        <div class="action-buttons">
-                                            <button class="btn btn-sm btn-outline-success btn-icon"
-                                                    @onclick="() => ExecuteScript(script.Id)" title="Execute">
-                                                <i class="bi bi-play-fill"></i>
-                                            </button>
-                                            <button class="btn btn-sm btn-outline-primary btn-icon"
-                                                    @onclick="() => EditScript(script.Id)" title="Edit">
-                                                <i class="bi bi-pencil-square"></i>
-                                            </button>
-                                            <button class="btn btn-sm btn-outline-success btn-icon"
-                                                    @onclick="() => CompileScript(script.Id)">
-                                                <i class="bi bi-hammer"></i>
-                                            </button>
-                                            <button class="btn btn-sm btn-outline-danger btn-icon"
-                                                    @onclick="() => DeleteScript(script.Id)">
-                                                <i class="bi bi-trash"></i>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
-            }
-        </div>
-    </div>
-    <FakeTerminal />
-</div>
-
-@code {
-    private List<CustomerScript> ScriptsList = new();
-    private bool isLoading = true;
-
-    protected override async Task OnInitializedAsync()
-    {
-        await LoadScripts();
-    }
-
-    private async Task LoadScripts()
-    {
-        isLoading = true;
-        try
-        {
-            // Call your backend facade
-            ScriptsList = await ScriptManager.ListScripts(null!, includeCaches: false);
-        }
-        finally
-        {
-            isLoading = false;
-            // Tell Blazor to re-render the HTML now that data changed
-            StateHasChanged();
-        }
-    }
-
-    private async Task ExecuteScript(Guid id)
-    {
-        try
-        {
-            Console.Log("Test if it prints");
-            RandomMethods rm = new RandomMethods(ScriptManager);
-            CustomerScript script = await ScriptManager.GetScript(id);
-            var ctx = rm.GetTestingContext<GeneratorContextV3.GeneratorContext>(justForTesting: script);
-            object resultObj = await ScriptManager.ExecuteScriptById(id, ctx);
-
-            if (typeof(bool).IsAssignableFrom(resultObj.GetType()))
-            {
-                Console.Log("Script returned a bool: " + resultObj.ToString());
-            }
-            else if (typeof(ActionResultBaseClass).IsAssignableFrom(resultObj.GetType()))
-            {
-                Console.Log("Script returned an ActionResult: " + resultObj.ToString());
-            }
-            else
-            {
-                Console.Log("Script was neither returned a bool nor an ActionResultBaseClass, it was a: " +
-                resultObj.GetType().ToString());
-            }
-            TotalExecutions.IncrementTotalExecutions();
-            await LoadScripts();
-        }
-        catch (Exception e)
-        {
-            Console.Log(e.ToString());
-        }
-
-    }
-
-    private async Task EditScript(Guid id)
-    {
-
-    }
-    // Connects to a UI button
-    private async Task CompileScript(Guid id)
-    {
-        try
-        {
-            await ScriptManager.CompileScript(id);
-            // Reload to show updated status
-            await LoadScripts();
-        }
-        catch (Exception e)
-        {
-            Console.Log(e.ToString());
-        }
-
-    }
-
-    // Connects to a UI button
-    private async Task DeleteScript(Guid id)
-    {
-        await ScriptManager.DeleteScript(id);
-        // Refresh the table
-        await LoadScripts();
-    }
-}
 </file>
 
 <file path="BlazorUI/Components/Pages/SideBar.razor">
@@ -852,48 +738,6 @@ public class TotalExecutions
         border-left-color: #60a5fa !important;
     }
 </style>
-</file>
-
-<file path="BlazorUI/Program.cs">
-using BlazorUI.Components;
-using Ember.Scripting;
-using BlazorUI.Services;
-// using sandbox; // only if RandomMethods is in the sandbox project/namespace
-
-
-var builder = WebApplication.CreateBuilder(args);
-
-// Add services to the container.
-builder.Services.AddRazorComponents()
-    .AddInteractiveServerComponents();
-
-// Register Ember scripting services (DI)
-var references = RandomMethods.GetReferences();
-int version = RandomMethods.GetEmberApiVersion();
-builder.Services.AddEmberScripting(references, version);
-
-builder.Services.AddScoped<ConsoleService>();
-
-var app = builder.Build();
-
-// Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment())
-{
-    app.UseExceptionHandler("/Error", createScopeForErrors: true);
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-    app.UseHsts();
-}
-
-app.UseHttpsRedirection();
-
-
-app.UseAntiforgery();
-
-app.MapStaticAssets();
-app.MapRazorComponents<App>()
-    .AddInteractiveServerRenderMode();
-
-app.Run();
 </file>
 
 <file path="BlazorUI/wwwroot/app.css">
@@ -1137,6 +981,650 @@ body {
 .empty-state i { font-size: 4rem; margin-bottom: 20px; opacity: 0.3; }
 .progress { height: 8px; border-radius: 4px; background-color: #e9ecef; }
 .progress-bar { border-radius: 4px; }
+</file>
+
+<file path="BlazorUI/wwwroot/js/monaco-interop.js">
+window.monacoEditor = {
+    _instance: null,
+
+    initialize: function (elementId, initialValue, language) {
+        require(['vs/editor/editor.main'], function () {
+            window.monacoEditor._instance = monaco.editor.create(
+                document.getElementById(elementId), {
+                    value: initialValue || '',
+                    language: language || 'csharp',
+                    theme: 'vs-dark',
+                    automaticLayout: true,   // resizes with container
+                    fontSize: 14,
+                    minimap: { enabled: false },
+                    scrollBeyondLastLine: false,
+                    wordWrap: 'on'
+                }
+            );
+        });
+    },
+
+    getValue: function () {
+        return window.monacoEditor._instance?.getValue() ?? '';
+    },
+
+        // ADD THIS NEW FUNCTION:
+    setErrors: function (errors) {
+        if (!window.monacoEditor._instance) return;
+        
+        // Map the errors coming from C# to Monaco's marker format
+        const markers = errors.map(err => ({
+            severity: monaco.MarkerSeverity.Error,
+            startLineNumber: err.line,
+            startColumn: err.column,
+            endLineNumber: err.line,
+            endColumn: err.column + 5, // Just highlighting 5 chars for the squiggle
+            message: err.message
+        }));
+
+        // Apply the red squiggly lines
+        const model = window.monacoEditor._instance.getModel();
+        monaco.editor.setModelMarkers(model, "csharp", markers);
+    },
+
+    // ADD THIS TO CLEAR ERRORS:
+    clearErrors: function() {
+        if (!window.monacoEditor._instance) return;
+        const model = window.monacoEditor._instance.getModel();
+        monaco.editor.setModelMarkers(model, "csharp", []);
+    },
+
+    setValue: function (value) {
+        window.monacoEditor._instance?.setValue(value);
+    },
+
+    dispose: function () {
+        window.monacoEditor._instance?.dispose();
+        window.monacoEditor._instance = null;
+    }
+};
+</file>
+
+<file path="BlazorUI/Components/App.razor">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ember Scripting Manager</title>
+    <base href="/" />
+
+    <!-- Required Bootstrap & Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+
+    <link rel="stylesheet" href="@Assets["app.css"]" />
+    <link rel="stylesheet" href="@Assets["BlazorUI.styles.css"]" />
+
+    <link rel="stylesheet" data-name="vs/editor/editor.main"
+          href="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/editor/editor.main.min.css" />
+
+    <ImportMap />
+    <HeadOutlet />
+</head>
+
+<body>
+    <Routes />
+    <script src="_framework/blazor.web.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Monaco loader (must come before your interop file) -->
+    <script>
+        var require = { paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs' } };
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/loader.js"></script>
+    <script src="js/monaco-interop.js"></script>
+
+</body>
+
+</html>
+</file>
+
+<file path="BlazorUI/Components/Pages/Scripts.razor">
+@page "/scripts"
+@rendermode InteractiveServer
+@using Ember.Scripting
+@using BlazorUI.TotalExecutions
+@using BlazorUI.Services
+@using Microsoft.CodeAnalysis.Differencing
+@using System.Text.RegularExpressions
+@inject ConsoleService Console
+@inject ISccriptManagerDeleteAfter ScriptManager
+<PageTitle>Scripts</PageTitle>
+<div class="page-container">
+    @if (!isEditing)
+    {
+        <div class="top-bar">
+            <h2>All Scripts</h2>
+            <a href="/create" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> New Script
+            </a>
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+                @if (isLoading)
+                {
+                    <div class="text-center py-5">
+                        <div class="spinner-border text-primary" role="status"></div>
+                        <p class="mt-2">Loading scripts...</p>
+                    </div>
+                }
+                else if (ScriptsList == null || !ScriptsList.Any())
+                {
+                    <div class="empty-state">
+                        <i class="bi bi-file-code"></i>
+                        <h4>No scripts found</h4>
+                        <p>Create your first C# script to get started.</p>
+                    </div>
+                }
+                else
+                {
+                    <div class="table-container">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Script Name</th>
+                                    <th>Type</th>
+                                    <th>Min API Version</th>
+                                    <th>Created At</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var script in ScriptsList)
+                                {
+                                    <tr>
+                                        <td><i class="bi bi-file-code text-primary"></i> @script.ScriptName</td>
+                                        <td>
+                                            @* @if (script.ScriptType == "GeneratorAction") *@
+                                            @if (script.ScriptType != null && script.ScriptType.Contains("Action"))
+                                            {
+                                                <span class="badge bg-info">Action</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-warning text-dark">Condition</span>
+                                            }
+                                        </td>
+                                        <td>v@(script.MinApiVersion)</td>
+                                        <td>@(script.CreatedAt?.ToString("yyyy-MM-dd") ?? "N/A")</td>
+                                        <td>
+                                            <div class="action-buttons">
+                                                <button class="btn btn-sm btn-outline-success btn-icon"
+                                                        @onclick="() => ExecuteScript(script.Id)" title="Execute">
+                                                    <i class="bi bi-play-fill"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-outline-primary btn-icon"
+                                                        @onclick="() => EditScript(script.Id)" title="Edit">
+                                                    <i class="bi bi-pencil-square"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-outline-success btn-icon"
+                                                        @onclick="() => CompileScript(script.Id)">
+                                                    <i class="bi bi-hammer"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-outline-danger btn-icon"
+                                                        @onclick="() => DeleteScript(script.Id)">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+    else
+    {
+        <!-- YOU NEED THIS WRAPPER DIV -->
+        <div class="d-flex flex-column" style="height: calc(100vh - 40px); overflow: hidden;">
+
+            <div class="top-bar d-flex justify-content-between align-items-center mb-3 flex-shrink-0">
+                <!-- Change the Header to show the Script Name -->
+                <h2 class="mb-0">Edit Script: @_scriptName</h2>
+
+                <div class="d-flex gap-2">
+                    <button class="btn btn-outline-info" @onclick="HandleValidate" disabled="@_isBusy">
+                        <i class="bi bi-check-circle"></i> Validate
+                    </button>
+                    <button class="btn btn-outline-warning" @onclick="HandleCompile" disabled="@_isBusy">
+                        <i class="bi bi-hammer"></i> Compile
+                    </button>
+                    <button class="btn btn-success" @onclick="HandleSave" disabled="@_isBusy">
+                        <i class="bi bi-save"></i> Save
+                    </button>
+                    <button class="btn btn-outline-secondary" @onclick="() => { isEditing = false; }">
+                        <i class="bi bi-arrow-left"></i> Cancel
+                    </button>
+                </div>
+            </div>
+
+            <!-- The Editor Component -->
+            <MonacoEditor @ref="_editor" EditorId="edit-monaco-editor" InitialCode="@_scriptCode" />
+
+            <!-- Terminal spacer -->
+            <div
+                style="height: @(Console.IsExpanded ? "300px" : "40px"); transition: height 0.3s ease-in-out; flex-shrink: 0;">
+            </div>
+        </div>
+    }
+
+    <FakeTerminal />
+</div>
+
+@code {
+
+    private List<CustomerScript> ScriptsList = new();
+    private bool isLoading = true;
+
+    private bool isEditing = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadScripts();
+    }
+
+    private async Task LoadScripts()
+    {
+        isLoading = true;
+        try
+        {
+            // Call your backend facade
+            ScriptsList = await ScriptManager.ListScripts(null!, includeCaches: false);
+        }
+        finally
+        {
+            isLoading = false;
+            // Tell Blazor to re-render the HTML now that data changed
+            StateHasChanged();
+        }
+    }
+
+    private async Task ExecuteScript(Guid id)
+    {
+        try
+        {
+            Console.Log("Test if it prints");
+            RandomMethods rm = new RandomMethods(ScriptManager);
+            CustomerScript script = await ScriptManager.GetScript(id);
+            var ctx = rm.GetTestingContext<GeneratorContextV3.GeneratorContext>(justForTesting: script);
+            object resultObj = await ScriptManager.ExecuteScriptById(id, ctx);
+
+            if (typeof(bool).IsAssignableFrom(resultObj.GetType()))
+            {
+                Console.Log("Script returned a bool: " + resultObj.ToString());
+            }
+            else if (typeof(ActionResultBaseClass).IsAssignableFrom(resultObj.GetType()))
+            {
+                Console.Log("Script returned an ActionResult: " + resultObj.ToString());
+            }
+            else
+            {
+                Console.Log("Script was neither returned a bool nor an ActionResultBaseClass, it was a: " +
+                resultObj.GetType().ToString());
+            }
+            TotalExecutions.IncrementTotalExecutions();
+            await LoadScripts();
+        }
+        catch (Exception e)
+        {
+            Console.Log(e.ToString());
+        }
+
+    }
+
+    @* private async Task EditScript(Guid id)
+    {
+        isEditing = true;
+        StateHasChanged();
+    } *@
+    // Connects to a UI button
+    private async Task CompileScript(Guid id)
+    {
+        try
+        {
+            await ScriptManager.CompileScript(id);
+            // Reload to show updated status
+            await LoadScripts();
+        }
+        catch (Exception e)
+        {
+            Console.Log(e.ToString());
+        }
+
+    }
+
+    // Connects to a UI button
+    private async Task DeleteScript(Guid id)
+    {
+        await ScriptManager.DeleteScript(id);
+        // Refresh the table
+        await LoadScripts();
+    }
+
+
+    // This variable holds a reference to the child component
+    private MonacoEditor _editor = default!;
+
+    private bool _isBusy = false;
+    private string _scriptName = string.Empty;
+    private int _minApiVersion = 6;
+
+    public string DefaultScript = GetTemplate();
+
+    public static string GetTemplate()
+    {
+        string path = @"C:\Users\Gilles\Desktop\UNI\Semester 6\Code\Codebase\Scripting-Proof-of-Concept\BlazorUI\src\ScriptTemplate.cs";
+        return RandomMethods.CreateStringFromCsFile(path);
+    }
+
+    public async Task HandleValidate()
+    {
+        // CALL THE CHILD COMPONENT METHOD to get the text
+        var code = await _editor.GetValueAsync();
+        Console.Log("Validating script:");
+        try
+        {
+            ScriptManager.BasicValidationBeforeCompiling(code);
+            Console.Log("Validation successfull!");
+        }
+        catch (Exception e)
+        {
+            Console.Log(e.ToString());
+        }
+    }
+
+    public async Task HandleCompile()
+    {
+        _isBusy = true;
+
+        // GET VALUE FROM CHILD
+        var code = await _editor.GetValueAsync();
+
+        // CLEAR ERRORS IN CHILD
+        await _editor.ClearErrorsAsync();
+
+        Console.Log($"Compiling '{_scriptName}'...");
+
+        try
+        {
+            await ScriptManager.CreateScript(code);
+            Console.Log("Compilation successful, script was created and inserted into the DB.");
+        }
+        catch (Exception ex)
+        {
+            Console.Log($"Compilation Failed: {ex.Message}");
+
+            var errorsList = new List<object>();
+            var regex = new Regex(@"Line (\d+), Col (\d+): (.*)");
+            var matches = regex.Matches(ex.Message);
+
+            foreach (System.Text.RegularExpressions.Match match in matches)
+            {
+                if (match.Success)
+                {
+                    errorsList.Add(new
+                    {
+                        line = int.Parse(match.Groups[1].Value),
+                        column = int.Parse(match.Groups[2].Value),
+                        message = match.Groups[3].Value
+                    });
+                }
+            }
+
+            // SET ERRORS IN CHILD
+            if (errorsList.Any())
+            {
+                await _editor.SetErrorsAsync(errorsList);
+            }
+        }
+        finally
+        {
+            _isBusy = false;
+        }
+    }
+
+    public async Task HandleSave()
+    {
+        _isBusy = true;
+        var code = await _editor.GetValueAsync();
+        Console.Log($"Saving '{_scriptName}'...");
+        try
+        {
+            // TODO: call ScriptManager.SaveScript(...)
+            Console.Log("Script saved successfully.");
+        }
+        catch (Exception ex)
+        {
+            Console.Log($"Error: {ex.Message}");
+        }
+        finally { _isBusy = false; }
+    }
+
+    // Add these variables to hold the current script being edited
+    private string _scriptCode = string.Empty;
+    private Guid _currentScriptId;
+
+    // UPDATE the EditScript method:
+    private async Task EditScript(Guid id)
+    {
+        try
+        {
+            // 1. Fetch the script from your backend
+            CustomerScript script = await ScriptManager.GetScript(id);
+
+            if (script != null)
+            {
+                // 2. Save the details
+                _currentScriptId = id;
+                _scriptName = script.ScriptName!;
+                _scriptCode = script.SourceCode ?? string.Empty; // Use the actual DB code!
+
+                // 3. Flip the UI to editing mode
+                isEditing = true;
+                StateHasChanged();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Log($"Failed to load script: {ex.Message}");
+        }
+    }
+}
+</file>
+
+<file path="BlazorUI/Program.cs">
+using BlazorUI.Components;
+using Ember.Scripting;
+using BlazorUI.Services;
+// using sandbox; // only if RandomMethods is in the sandbox project/namespace
+
+
+var builder = WebApplication.CreateBuilder(args);
+
+// Add services to the container.
+builder.Services.AddRazorComponents()
+    .AddInteractiveServerComponents();
+
+// Register Ember scripting services (DI)
+var references = RandomMethods.GetReferences();
+int version = RandomMethods.GetEmberApiVersion();
+builder.Services.AddEmberScripting(references, version);
+
+builder.Services.AddScoped<ConsoleService>();
+
+var app = builder.Build();
+
+// Configure the HTTP request pipeline.
+if (!app.Environment.IsDevelopment())
+{
+    app.UseExceptionHandler("/Error", createScopeForErrors: true);
+    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+    app.UseHsts();
+}
+
+app.UseHttpsRedirection();
+
+
+app.UseAntiforgery();
+
+app.MapStaticAssets();
+app.MapRazorComponents<App>()
+    .AddInteractiveServerRenderMode();
+
+app.Run();
+</file>
+
+<file path="BlazorUI/Components/Pages/CreateScript.razor">
+@page "/create"
+@rendermode InteractiveServer
+@using BlazorUI.Services
+@using Ember.Scripting
+@using System.Text.RegularExpressions
+
+@inject ConsoleService Console
+@inject ISccriptManagerDeleteAfter ScriptManager
+
+<PageTitle>Create Script</PageTitle>
+
+<div class="d-flex flex-column" style="height: calc(100vh - 40px); overflow: hidden;">
+    <!-- Top bar with action buttons -->
+    <div class="top-bar d-flex justify-content-between align-items-center mb-3 flex-shrink-0">
+        <h2 class="mb-0">Create New Script</h2>
+        <div class="d-flex gap-2">
+            <button class="btn btn-outline-info" @onclick="HandleValidate" disabled="@_isBusy">
+                <i class="bi bi-check-circle"></i> Validate
+            </button>
+            <button class="btn btn-outline-warning" @onclick="HandleCompile" disabled="@_isBusy">
+                <i class="bi bi-hammer"></i> Compile
+            </button>
+            <button class="btn btn-success" @onclick="HandleSave" disabled="@_isBusy">
+                <i class="bi bi-save"></i> Save
+            </button>
+            <a href="scripts" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Back
+            </a>
+        </div>
+    </div>
+
+    <!-- Here is your new Reusable Component! -->
+    <!-- We bind it to the _editor variable using @ref -->
+    <MonacoEditor @ref="_editor" InitialCode="@DefaultScript" />
+
+    <div style="height: @(Console.IsExpanded ? "300px" : "40px"); transition: height 0.3s ease-in-out; flex-shrink: 0;">
+    </div>
+</div>
+
+<FakeTerminal />
+
+@code {
+    // This variable holds a reference to the child component
+    private MonacoEditor _editor = default!;
+
+    private bool _isBusy = false;
+    private string _scriptName = string.Empty;
+    private int _minApiVersion = 6;
+
+    public string DefaultScript = GetTemplate();
+
+    public static string GetTemplate()
+    {
+        string path = @"C:\Users\Gilles\Desktop\UNI\Semester 6\Code\Codebase\Scripting-Proof-of-Concept\BlazorUI\src\ScriptTemplate.cs";
+        return RandomMethods.CreateStringFromCsFile(path);
+    }
+
+    public async Task HandleValidate()
+    {
+        // CALL THE CHILD COMPONENT METHOD to get the text
+        var code = await _editor.GetValueAsync();
+        Console.Log("Validating script:");
+        try
+        {
+            ScriptManager.BasicValidationBeforeCompiling(code);
+            Console.Log("Validation successfull!");
+        }
+        catch (Exception e)
+        {
+            Console.Log(e.ToString());
+        }
+    }
+
+    public async Task HandleCompile()
+    {
+        _isBusy = true;
+
+        // GET VALUE FROM CHILD
+        var code = await _editor.GetValueAsync();
+
+        // CLEAR ERRORS IN CHILD
+        await _editor.ClearErrorsAsync();
+
+        Console.Log($"Compiling '{_scriptName}'...");
+
+        try
+        {
+            await ScriptManager.CreateScript(code);
+            Console.Log("Compilation successful, script was created and inserted into the DB.");
+        }
+        catch (Exception ex)
+        {
+            Console.Log($"Compilation Failed: {ex.Message}");
+
+            var errorsList = new List<object>();
+            var regex = new Regex(@"Line (\d+), Col (\d+): (.*)");
+            var matches = regex.Matches(ex.Message);
+
+            foreach (Match match in matches)
+            {
+                if (match.Success)
+                {
+                    errorsList.Add(new
+                    {
+                        line = int.Parse(match.Groups[1].Value),
+                        column = int.Parse(match.Groups[2].Value),
+                        message = match.Groups[3].Value
+                    });
+                }
+            }
+
+            // SET ERRORS IN CHILD
+            if (errorsList.Any())
+            {
+                await _editor.SetErrorsAsync(errorsList);
+            }
+        }
+        finally
+        {
+            _isBusy = false;
+        }
+    }
+
+    public async Task HandleSave()
+    {
+        _isBusy = true;
+        var code = await _editor.GetValueAsync();
+        Console.Log($"Saving '{_scriptName}'...");
+        try
+        {
+            // TODO: call ScriptManager.SaveScript(...)
+            Console.Log("Script saved successfully.");
+        }
+        catch (Exception ex)
+        {
+            Console.Log($"Error: {ex.Message}");
+        }
+        finally { _isBusy = false; }
+    }
+}
 </file>
 
 <file path="BlazorUI/Components/Pages/Home.razor">
