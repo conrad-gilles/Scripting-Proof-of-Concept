@@ -515,6 +515,11 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
         return str;
     }
 
+    public async Task<Dictionary<int, List<ScriptCompiledCache>>> GetCachesForEachApiVersion()
+    {
+        return await Db.GetCachesForEachApiVersion();
+    }
+
     public string GetUserName()
     {
         Logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(GetUserName), nameof(ScriptManagerFacade));

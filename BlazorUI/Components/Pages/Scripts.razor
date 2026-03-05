@@ -5,144 +5,156 @@
 @using BlazorUI.Services
 @using Microsoft.CodeAnalysis.Differencing
 @using System.Text.RegularExpressions
+@using Serilog
 @inject ConsoleService Console
 @inject ISccriptManagerDeleteAfter ScriptManager
 <PageTitle>Scripts</PageTitle>
 <div class="page-container">
     @if (!isEditing)
     {
-        <div class="top-bar">
-            <h2>All Scripts</h2>
-            <a href="/create" class="btn btn-primary">
-                <i class="bi bi-plus-circle"></i> New Script
-            </a>
-        </div>
+        <div class="top-bar d-flex justify-content-between align-items-center mb-3">
+            <h2 class="mb-0">All Scripts</h2>
 
-        <div class="card">
-            <div class="card-body">
-                @if (isLoading)
+            <div class="d-flex align-items-center gap-3">
+                @if (currentApiVersion > 0)
                 {
-                    <div class="text-center py-5">
-                        <div class="spinner-border text-primary" role="status"></div>
-                        <p class="mt-2">Loading scripts...</p>
-                    </div>
-                }
-                else if (ScriptsList == null || !ScriptsList.Any())
-                {
-                    <div class="empty-state">
-                        <i class="bi bi-file-code"></i>
-                        <h4>No scripts found</h4>
-                        <p>Create your first C# script to get started.</p>
-                    </div>
-                }
-                else
-                {
-                    <div class="table-container">
-                        <table class="table table-hover">
-                            <thead>
-                                <tr>
-                                    <th>Script Name</th>
-                                    <th>Type</th>
-                                    <th>Min API Version</th>
-                                    <th>Created At</th>
-                                    <th>Last edit</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach (var script in ScriptsList)
+                    <div class="d-flex align-items-center gap-2">
+                        <label for="versionSelect" class="form-label mb-0 fw-bold text-nowrap">Compile and Execute API
+                            Version:</label>
+                            <select id="versionSelect" class="form-select w-auto" style="min-width: 70px;"
+                                    @bind="selectedApiVersion" @bind:after="OnVersionChanged">
+                                @for (int i = currentApiVersion; i >= 1; i--)
                                 {
-                                    <tr>
-                                        <td><i class="bi bi-file-code text-primary"></i> @script.ScriptName</td>
-                                        <td>
-                                            @* @if (script.ScriptType == "GeneratorAction") *@
-                                            @if (script.ScriptType != null && script.ScriptType.Contains("Action"))
-                                            {
-                                                <span class="badge bg-info">Action</span>
-                                            }
-                                            else
-                                            {
-                                                <span class="badge bg-warning text-dark">Condition</span>
-                                            }
-                                        </td>
-                                        <td>v@(script.MinApiVersion)</td>
-                                        <td>@(script.CreatedAt?.ToString("MM-dd HH:mm") ?? "N/A")</td>
-                                        @* @if (script.CreatedAt?.ToString("MM-dd HH:mm:ss") == script.ModifiedAt?.ToString("MM-dd HH:mm:ss")) *@
-                                        @if ((script.ModifiedAt!.Value - script.CreatedAt!.Value).TotalSeconds > 1)
-                                        {
-                                            <td>No Edit</td>
-                                        }
-                                        else
-                                        {
-                                            <td>@(script.ModifiedAt?.ToString("MM-dd HH:mm") ?? "N/A")</td>
-                                        }
-
-                                        <td>
-                                            <div class="action-buttons">
-                                                <button class="btn btn-sm btn-outline-success btn-icon"
-                                                        @onclick="() => ExecuteScript(script.Id)" title="Execute">
-                                                    <i class="bi bi-play-fill"></i>
-                                                </button>
-                                                <button class="btn btn-sm btn-outline-primary btn-icon"
-                                                        @onclick="() => EditScript(script.Id)" title="Edit">
-                                                    <i class="bi bi-pencil-square"></i>
-                                                </button>
-                                                <button class="btn btn-sm btn-outline-success btn-icon"
-                                                        @onclick="() => CompileScript(script.Id)">
-                                                    <i class="bi bi-hammer"></i>
-                                                </button>
-                                                <button class="btn btn-sm btn-outline-danger btn-icon"
-                                                        @onclick="() => DeleteScript(script.Id)">
-                                                    <i class="bi bi-trash"></i>
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
+                                    <option value="@i">V@(i)</option>
                                 }
-                            </tbody>
-                        </table>
-                    </div>
-                }
-            </div>
-        </div>
-    }
-    else
-    {
-        <!-- YOU NEED THIS WRAPPER DIV -->
-        <div class="d-flex flex-column" style="height: calc(100vh - 40px); overflow: hidden;">
-
-            <div class="top-bar d-flex justify-content-between align-items-center mb-3 flex-shrink-0">
-                <!-- Change the Header to show the Script Name -->
-                <h2 class="mb-0">Edit Script: @_scriptName</h2>
-
-                <div class="d-flex gap-2">
-                    <button class="btn btn-outline-info" @onclick="HandleValidate" disabled="@_isBusy">
-                        <i class="bi bi-check-circle"></i> Validate
-                    </button>
-                    <button class="btn btn-outline-warning" @onclick="HandleCompile" disabled="@_isBusy">
-                        <i class="bi bi-hammer"></i> Compile
-                    </button>
-                    <button class="btn btn-success" @onclick="HandleSave" disabled="@_isBusy">
-                        <i class="bi bi-save"></i> Save
-                    </button>
-                    <button class="btn btn-outline-secondary" @onclick="() => { isEditing = false; }">
-                        <i class="bi bi-arrow-left"></i> Cancel
-                    </button>
+                            </select>
+                        </div>
+                    }
+                    <a href="/create" class="btn btn-primary text-nowrap">
+                        <i class="bi bi-plus-circle"></i> New Script
+                    </a>
                 </div>
             </div>
 
-            <!-- The Editor Component -->
-            <MonacoEditor @ref="_editor" EditorId="edit-monaco-editor" InitialCode="@_scriptCode" />
+            <div class="card">
+                <div class="card-body">
+                    @if (isLoading)
+                    {
+                        <div class="text-center py-5">
+                            <div class="spinner-border text-primary" role="status"></div>
+                            <p class="mt-2">Loading scripts...</p>
+                        </div>
+                    }
+                    else if (ScriptsList == null || !ScriptsList.Any())
+                    {
+                        <div class="empty-state">
+                            <i class="bi bi-file-code"></i>
+                            <h4>No scripts found</h4>
+                            <p>Create your first C# script to get started.</p>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="table-container">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Script Name</th>
+                                        <th>Type</th>
+                                        <th>Min API Version</th>
+                                        <th>Created At</th>
+                                        <th>Last edit</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var script in ScriptsList)
+                                    {
+                                        <tr>
+                                            <td><i class="bi bi-file-code text-primary"></i> @script.ScriptName</td>
+                                            <td>
+                                                @if (script.ScriptType != null && script.ScriptType.Contains("Action"))
+                                                {
+                                                    <span class="badge bg-info">Action</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-warning text-dark">Condition</span>
+                                                }
+                                            </td>
+                                            <td>v@(script.MinApiVersion)</td>
+                                            <td>@(script.CreatedAt?.ToString("MM-dd HH:mm") ?? "N/A")</td>
+                                            @if ((script.ModifiedAt!.Value - script.CreatedAt!.Value).TotalSeconds <= 1)
+                                            {
+                                                <td>No Edit</td>
+                                            }
+                                            else
+                                            {
+                                                <td>@(script.ModifiedAt?.ToString("MM-dd HH:mm") ?? "N/A")</td>
+                                            }
 
-            <!-- Terminal spacer -->
-            <div
-                style="height: @(Console.IsExpanded ? "300px" : "40px"); transition: height 0.3s ease-in-out; flex-shrink: 0;">
+                                            <td>
+                                                <div class="action-buttons">
+                                                    <button class="btn btn-sm btn-outline-success btn-icon"
+                                                            @onclick="() => ExecuteScript(script.Id)" title="Execute">
+                                                        <i class="bi bi-play-fill"></i>
+                                                    </button>
+                                                    <button class="btn btn-sm btn-outline-primary btn-icon"
+                                                            @onclick="() => EditScript(script.Id)" title="Edit">
+                                                        <i class="bi bi-pencil-square"></i>
+                                                    </button>
+                                                    <button class="btn btn-sm btn-outline-success btn-icon"
+                                                            @onclick="() => CompileScript(script.Id)">
+                                                        <i class="bi bi-hammer"></i>
+                                                    </button>
+                                                    <button class="btn btn-sm btn-outline-danger btn-icon"
+                                                            @onclick="() => DeleteScript(script.Id)">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                </div>
             </div>
-        </div>
-    }
+        }
+    else
+        {
+            <div class="d-flex flex-column" style="height: calc(100vh - 40px); overflow: hidden;">
 
-    <FakeTerminal />
-</div>
+                <div class="top-bar d-flex justify-content-between align-items-center mb-3 flex-shrink-0">
+                    <h2 class="mb-0">Edit Script: @_scriptName</h2>
+
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-outline-info" @onclick="HandleValidate" disabled="@_isBusy">
+                            <i class="bi bi-check-circle"></i> Validate
+                        </button>
+                        <button class="btn btn-outline-warning" @onclick="HandleCompile" disabled="@_isBusy">
+                            <i class="bi bi-hammer"></i> Compile
+                        </button>
+                        <button class="btn btn-success" @onclick="HandleSave" disabled="@_isBusy">
+                            <i class="bi bi-save"></i> Save
+                        </button>
+                        <button class="btn btn-outline-secondary" @onclick="() => { isEditing = false; }">
+                            <i class="bi bi-arrow-left"></i> Cancel
+                        </button>
+                    </div>
+                </div>
+
+                <MonacoEditor @ref="_editor" EditorId="edit-monaco-editor" InitialCode="@_scriptCode" />
+
+                <div
+                    style="height: @(Console.IsExpanded ? "300px" : "40px"); transition: height 0.3s ease-in-out; flex-shrink: 0;">
+                </div>
+            </div>
+        }
+
+        <FakeTerminal />
+    </div>
 
 @code {
 
@@ -150,12 +162,41 @@
     private bool isLoading = true;
 
     private bool isEditing = false;
+    private int currentApiVersion = 0;
+    private int selectedApiVersion = 0;
 
     protected override async Task OnInitializedAsync()
     {
+        currentApiVersion = await ScriptManager.GetRecentApiVersion();
+        selectedApiVersion = currentApiVersion;
         await LoadScripts();
     }
 
+    private async Task OnVersionChanged()
+    {
+        ServiceCollection services2 = new ServiceCollection();
+
+        LoggerForScripting? logger = new LoggerForScripting();
+        Log.Debug("Sandbox launched.");
+
+        services2 = new ServiceCollection();
+        services2.AddLogging(builder =>
+        {
+            builder.AddSerilog(dispose: true);
+        });
+
+        ScriptingServiceCollectionExtensions.AddEmberScripting(services2, RandomMethods.GetReferences(),
+RandomMethods.GetEmberApiVersion(testingDiffrentVersion: selectedApiVersion));
+
+        using var provider2 = services2.BuildServiceProvider();
+
+        ScriptManager = provider2.GetRequiredService<ISccriptManagerDeleteAfter>();
+        Console.Log($"User selected API Version: {selectedApiVersion}");
+
+        // TODO: If you want to filter your script table by the selected version,
+        // you can modify LoadScripts() to accept the selectedApiVersion as a parameter
+        await LoadScripts();
+    }
     private async Task LoadScripts()
     {
         isLoading = true;

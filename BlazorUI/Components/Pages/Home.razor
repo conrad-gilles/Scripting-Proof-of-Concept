@@ -226,11 +226,19 @@ block in Home.razor -->
         CustomerScripts = await ScriptManager.ListScripts(includeCaches: true);
         totalScripts = CustomerScripts.Count();
         compiledScripts = 0;
+
         foreach (var script in CustomerScripts)
         {
-            compiledScripts = compiledScripts + script.CompiledCaches.Count();
+            List<int> versions = [];
+            foreach (var cache in script.CompiledCaches)
+            {
+                versions.Add(cache.ApiVersion);
+            }
+            if (versions.Contains(await ScriptManager.GetRecentApiVersion()) == false)
+            {
+                pendingScripts++;
+            }
         }
-        pendingScripts = totalScripts - compiledScripts;
 
         // ADD THESE LINES to populate the Recent Scripts table:
         // Order by ModifiedAt (or CreatedAt if ModifiedAt is null), descending, and take the top 5.

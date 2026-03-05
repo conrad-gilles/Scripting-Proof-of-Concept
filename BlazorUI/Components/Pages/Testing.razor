@@ -1,0 +1,254 @@
+@page "/testing"
+@rendermode InteractiveServer
+@using Ember.Scripting
+@using System.Text.Json
+@using BlazorUI.Components.Layout
+
+@inject ISccriptManagerDeleteAfter ScriptManager
+
+<PageTitle>Facade Testing</PageTitle>
+
+<div class="page-container p-4">
+    <div class="method-list-container"
+         style="max-height: 800px; overflow-y: auto; border: 1px solid #ccc; border-radius: 8px; padding: 10px; background-color: #f9f9f9;">
+
+        <!-- Script Lifecycle -->
+        <h4 style="margin-top: 10px; margin-bottom: 10px; color: #333;">Script Lifecycle</h4>
+
+        <div
+            style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: white; margin-bottom: 5px; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+            <span style="font-weight: bold;">CreateScript</span>
+            <button class="btn btn-primary" style="padding: 5px 15px; cursor: pointer;">Execute</button>
+        </div>
+
+        <div
+            style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: white; margin-bottom: 5px; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+            <span style="font-weight: bold;">UpdateScript</span>
+            <button class="btn btn-primary" style="padding: 5px 15px; cursor: pointer;">Execute</button>
+        </div>
+
+        <div
+            style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: white; margin-bottom: 5px; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+            <span style="font-weight: bold;">DeleteScript</span>
+            <button class="btn btn-primary" style="padding: 5px 15px; cursor: pointer;">Execute</button>
+        </div>
+
+        <div
+            style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: white; margin-bottom: 5px; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+            <span style="font-weight: bold;">GetScript</span>
+            <button class="btn btn-primary" style="padding: 5px 15px; cursor: pointer;">Execute</button>
+        </div>
+
+        <div
+            style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: white; margin-bottom: 5px; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+            <span style="font-weight: bold;">ListScripts</span>
+            <button class="btn btn-primary" style="padding: 5px 15px; cursor: pointer;">Execute</button>
+        </div>
+
+        <!-- Compilation Operations -->
+        <h4 style="margin-top: 20px; margin-bottom: 10px; color: #333;">Compilation Operations</h4>
+
+        <div
+            style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: white; margin-bottom: 5px; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+            <span style="font-weight: bold;">CompileScript</span>
+            <button class="btn btn-primary" style="padding: 5px 15px; cursor: pointer;">Execute</button>
+        </div>
+
+        <div
+            style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: white; margin-bottom: 5px; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+            <span style="font-weight: bold;">CompileAllScripts</span>
+            <button class="btn btn-primary" style="padding: 5px 15px; cursor: pointer;">Execute</button>
+        </div>
+
+        <div
+            style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: white; margin-bottom: 5px; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+            <span style="font-weight: bold;">SaveScriptWithoutCompiling</span>
+            <button class="btn btn-primary" style="padding: 5px 15px; cursor: pointer;">Execute</button>
+        </div>
+
+        <div
+            style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: white; margin-bottom: 5px; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+            <span style="font-weight: bold;">RecompileScript</span>
+            <button class="btn btn-primary" style="padding: 5px 15px; cursor: pointer;">Execute</button>
+        </div>
+
+        <div
+            style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: white; margin-bottom: 5px; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+            <span style="font-weight: bold;">ValidateScript</span>
+            <button class="btn btn-primary" style="padding: 5px 15px; cursor: pointer;">Execute</button>
+        </div>
+
+        <div
+            style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: white; margin-bottom: 5px; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+            <span style="font-weight: bold;">GetCompilationErrors</span>
+            <button class="btn btn-primary" style="padding: 5px 15px; cursor: pointer;">Execute</button>
+        </div>
+
+        <div
+            style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: white; margin-bottom: 5px; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+            <span style="font-weight: bold;">BasicValidationBeforeCompiling</span>
+            <button class="btn btn-primary" style="padding: 5px 15px; cursor: pointer;">Execute</button>
+        </div>
+
+        <!-- Execution Operations -->
+        <h4 style="margin-top: 20px; margin-bottom: 10px; color: #333;">Execution Operations</h4>
+
+        <div
+            style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: white; margin-bottom: 5px; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+            <span style="font-weight: bold;">ExecuteActionScript</span>
+            <button class="btn btn-primary" style="padding: 5px 15px; cursor: pointer;">Execute</button>
+        </div>
+
+        <div
+            style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: white; margin-bottom: 5px; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+            <span style="font-weight: bold;">ExecuteConditionScript</span>
+            <button class="btn btn-primary" style="padding: 5px 15px; cursor: pointer;">Execute</button>
+        </div>
+
+        <div
+            style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: white; margin-bottom: 5px; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+            <span style="font-weight: bold;">ExecuteScriptById</span>
+            <button class="btn btn-primary" style="padding: 5px 15px; cursor: pointer;">Execute</button>
+        </div>
+
+        <!-- Cache Management -->
+        <h4 style="margin-top: 20px; margin-bottom: 10px; color: #333;">Cache Management</h4>
+
+        <div
+            style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: white; margin-bottom: 5px; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+            <span style="font-weight: bold;">GetCompiledCache</span>
+            <button class="btn btn-primary" style="padding: 5px 15px; cursor: pointer;">Execute</button>
+        </div>
+
+        <div
+            style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: white; margin-bottom: 5px; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+            <span style="font-weight: bold;">ClearScriptCache</span>
+            <button class="btn btn-primary" style="padding: 5px 15px; cursor: pointer;">Execute</button>
+        </div>
+
+        <div
+            style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: white; margin-bottom: 5px; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+            <span style="font-weight: bold;">DeleteScriptCache</span>
+            <button class="btn btn-primary" style="padding: 5px 15px; cursor: pointer;">Execute</button>
+        </div>
+
+        <div
+            style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: white; margin-bottom: 5px; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+            <span style="font-weight: bold;">GetAllCompiledScriptCaches</span>
+            <button class="btn btn-primary" style="padding: 5px 15px; cursor: pointer;">Execute</button>
+        </div>
+
+        <div
+            style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: white; margin-bottom: 5px; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+            <span style="font-weight: bold;">ClearAllCaches</span>
+            <button class="btn btn-primary" style="padding: 5px 15px; cursor: pointer;">Execute</button>
+        </div>
+
+        <div
+            style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: white; margin-bottom: 5px; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+            <span style="font-weight: bold;">PrecompileForApiVersion</span>
+            <button class="btn btn-primary" style="padding: 5px 15px; cursor: pointer;">Execute</button>
+        </div>
+
+        <div
+            style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: white; margin-bottom: 5px; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+            <span style="font-weight: bold;">EnsureDeletedCreated</span>
+            <button class="btn btn-primary" style="padding: 5px 15px; cursor: pointer;">Execute</button>
+        </div>
+
+        <!-- Version Management -->
+        <h4 style="margin-top: 20px; margin-bottom: 10px; color: #333;">Version Management</h4>
+
+        <div
+            style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: white; margin-bottom: 5px; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+            <span style="font-weight: bold;">GetActiveApiVersions</span>
+            <button class="btn btn-primary" style="padding: 5px 15px; cursor: pointer;">Execute</button>
+        </div>
+
+        <div
+            style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: white; margin-bottom: 5px; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+            <span style="font-weight: bold;">GetRecentApiVersion</span>
+            <button class="btn btn-primary" style="padding: 5px 15px; cursor: pointer;">Execute</button>
+        </div>
+
+        <div
+            style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: white; margin-bottom: 5px; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+            <span style="font-weight: bold;">GetScriptCompatibility</span>
+            <button class="btn btn-primary" style="padding: 5px 15px; cursor: pointer;">Execute</button>
+        </div>
+
+        <div
+            style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: white; margin-bottom: 5px; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+            <span style="font-weight: bold;">CheckVersionCompatibility</span>
+            <button class="btn btn-primary" style="padding: 5px 15px; cursor: pointer;">Execute</button>
+        </div>
+
+        <div
+            style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: white; margin-bottom: 5px; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+            <span style="font-weight: bold;">RegisterEmberInstance</span>
+            <button class="btn btn-primary" style="padding: 5px 15px; cursor: pointer;">Execute</button>
+        </div>
+
+        <!-- Duplicate Detection & Cleanup -->
+        <h4 style="margin-top: 20px; margin-bottom: 10px; color: #333;">Duplicate Detection & Cleanup</h4>
+
+        <div
+            style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: white; margin-bottom: 5px; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+            <span style="font-weight: bold;">DetectDuplicates</span>
+            <button class="btn btn-primary" style="padding: 5px 15px; cursor: pointer;">Execute</button>
+        </div>
+
+        <div
+            style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: white; margin-bottom: 5px; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+            <span style="font-weight: bold;">RemoveDuplicates</span>
+            <button class="btn btn-primary" style="padding: 5px 15px; cursor: pointer;">Execute</button>
+        </div>
+
+        <div
+            style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: white; margin-bottom: 5px; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+            <span style="font-weight: bold;">CleanupOrphanedCaches</span>
+            <button class="btn btn-primary" style="padding: 5px 15px; cursor: pointer;">Execute</button>
+        </div>
+
+        <!-- Monitoring & Diagnostics -->
+        <h4 style="margin-top: 20px; margin-bottom: 10px; color: #333;">Monitoring & Diagnostics</h4>
+
+        <div
+            style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: white; margin-bottom: 5px; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+            <span style="font-weight: bold;">GetScriptExecutionHistory</span>
+            <button class="btn btn-primary" style="padding: 5px 15px; cursor: pointer;">Execute</button>
+        </div>
+
+        <div
+            style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: white; margin-bottom: 5px; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+            <span style="font-weight: bold;">GetCompilationStatistics</span>
+            <button class="btn btn-primary" style="padding: 5px 15px; cursor: pointer;">Execute</button>
+        </div>
+
+        <div
+            style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: white; margin-bottom: 5px; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+            <span style="font-weight: bold;">HealthCheck</span>
+            <button class="btn btn-primary" style="padding: 5px 15px; cursor: pointer;">Execute</button>
+        </div>
+
+        <div
+            style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: white; margin-bottom: 5px; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+            <span style="font-weight: bold;">GetScriptMetadata</span>
+            <button class="btn btn-primary" style="padding: 5px 15px; cursor: pointer;">Execute</button>
+        </div>
+
+        <div
+            style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: white; margin-bottom: 5px; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+            <span style="font-weight: bold;">GetCachesForEachApiVersion</span>
+            <button class="btn btn-primary" style="padding: 5px 15px; cursor: pointer;">Execute</button>
+        </div>
+
+        <div
+            style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: white; margin-bottom: 5px; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+            <span style="font-weight: bold;">GetUserName</span>
+            <button class="btn btn-primary" style="padding: 5px 15px; cursor: pointer;">Execute</button>
+        </div>
+
+    </div>
+    <FakeTerminal />
+</div>

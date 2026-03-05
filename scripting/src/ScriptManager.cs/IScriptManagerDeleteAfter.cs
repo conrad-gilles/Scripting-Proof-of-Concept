@@ -222,6 +222,12 @@ public interface ISccriptManagerDeleteAfter : IScriptManagerExtended
   /// <returns></returns>
   Task<string> GetScriptMetadata(Guid scriptId);
 
+  /// <summary>
+  /// 
+  /// </summary>
+  /// <returns></returns>
+  Task<Dictionary<int, List<ScriptCompiledCache>>> GetCachesForEachApiVersion();
+
   string GetUserName();
 
   #endregion

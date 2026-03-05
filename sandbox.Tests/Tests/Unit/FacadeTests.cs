@@ -527,5 +527,11 @@ public class ScriptManagerFacadeTests
         // Assert.AreEqual("Gilles", facade.GetUserName());
     }
 
+    [TestMethod]
+    public void GetCachesForEachApiVersionTests()
+    {
+        // facade!.GetCachesForEachApiVersion() //todo test but maybe better to test in the other class
+    }
+
     #endregion
 }

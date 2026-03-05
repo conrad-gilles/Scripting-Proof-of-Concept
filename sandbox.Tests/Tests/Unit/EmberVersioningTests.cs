@@ -95,7 +95,7 @@ public class EmberVersioningTests
         await ExecuteEachScript(facade, rm);
         int apiVersionInsideFacade = await facade.GetRecentApiVersion();
         Assert.IsTrue(apiVersionInsideFacade == v);
-
+        Assert.IsTrue(apiVersionInsideFacade == 6);
 
         ServiceCollection services2 = new ServiceCollection();
 
@@ -118,6 +118,7 @@ public class EmberVersioningTests
         await ExecuteEachScript(facade, rm);
         apiVersionInsideFacade = await facade.GetRecentApiVersion();
         Assert.IsTrue(apiVersionInsideFacade == RandomMethods.GetEmberApiVersion(testingDiffrentVersion: 1));
+        Assert.IsTrue(apiVersionInsideFacade == 1);
     }
 
     public void OldEmberVersionTest()
@@ -158,5 +159,69 @@ public class EmberVersioningTests
                 Assert.IsTrue(result.ToString()!.Contains(shouldReturn));
             }
         }
+    }
+
+    [TestMethod]
+    public async Task GetCachesForEachApiVersionTestsAsync()
+    {
+        int v = RandomMethods.GetEmberApiVersion();
+        ScriptingServiceCollectionExtensions.AddEmberScripting(services!, RandomMethods.GetReferences(), v);
+
+        using var provider = services!.BuildServiceProvider();
+
+        facade = provider.GetRequiredService<ISccriptManagerDeleteAfter>();
+        rm = new RandomMethods(facade);
+        await facade!.EnsureDeletedCreated();
+        await ExecuteEachScript(facade, rm);
+        int apiVersionInsideFacade = await facade.GetRecentApiVersion();
+
+        var versionDict = await facade!.GetCachesForEachApiVersion();
+        foreach (var item in versionDict)
+        {
+            Console.WriteLine("Key: " + item.Key);
+            foreach (var cache in item.Value)
+            {
+                Console.WriteLine(cache.CustomerScript!.ScriptName);
+            }
+        }
+
+        Assert.IsTrue(apiVersionInsideFacade == v);
+        Assert.IsTrue(apiVersionInsideFacade == 6);
+
+        ServiceCollection services2 = new ServiceCollection();
+
+        logger = new LoggerForScripting();
+        Log.Debug("Sandbox launched.");
+
+        services2 = new ServiceCollection();
+        services2.AddLogging(builder =>
+        {
+            builder.AddSerilog(dispose: true);
+        });
+
+        ScriptingServiceCollectionExtensions.AddEmberScripting(services2, RandomMethods.GetReferences(), RandomMethods.GetEmberApiVersion(testingDiffrentVersion: 1));
+
+        using var provider2 = services2.BuildServiceProvider();
+
+        facade = provider2.GetRequiredService<ISccriptManagerDeleteAfter>();
+        rm = new RandomMethods(facade);
+        // await facade!.EnsureDeletedCreated();
+        await ExecuteEachScript(facade, rm);
+        apiVersionInsideFacade = await facade.GetRecentApiVersion();
+        Assert.IsTrue(apiVersionInsideFacade == RandomMethods.GetEmberApiVersion(testingDiffrentVersion: 1));
+        Assert.IsTrue(apiVersionInsideFacade == 1);
+
+        var versionDict2 = await facade!.GetCachesForEachApiVersion();
+        foreach (var item in versionDict2)
+        {
+            Console.WriteLine("Key: " + item.Key);
+            foreach (var cache in item.Value)
+            {
+                Console.WriteLine(cache.CustomerScript!.ScriptName);
+            }
+        }
+        Assert.IsTrue(versionDict2[1].Count() == 4);
+        Assert.IsTrue(versionDict2[6].Count() == 4);
+
     }
 }

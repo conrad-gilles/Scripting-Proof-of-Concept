@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Ember.Scripting;
 using Microsoft.Extensions.Logging;
 using Microsoft.CodeAnalysis.Scripting;
+using System.ComponentModel;
 namespace Ember.Scripting;
 
 internal class DbHelper
@@ -812,5 +813,32 @@ internal class DbHelper
         {
             throw new InvalidOperationException("HealthCheck Failed: ScriptCompiler is not correctly initialized.");
         }
+    }
+
+    public async Task<Dictionary<int, List<ScriptCompiledCache>>> GetCachesForEachApiVersion()
+    {
+        Logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(GetActiveApiVersions), nameof(DbHelper));
+
+        var caches = await GetAllCompiledScriptCaches();
+        Dictionary<int, List<ScriptCompiledCache>> returnedDict = [];
+
+        List<int> ls = [];
+        foreach (var cache in caches)
+        {
+            if (returnedDict.Keys.Contains(cache.ApiVersion) == false)
+            {
+                List<ScriptCompiledCache> newList = [];
+                returnedDict.Add(cache.ApiVersion, newList);
+                returnedDict[cache.ApiVersion].Add(cache);
+            }
+            else
+            {
+                // List<ScriptCompiledCache> retrievedList = returnedDict[item.ApiVersion];
+                // retrievedList.Add(item);
+                returnedDict[cache.ApiVersion].Add(cache);
+            }
+
+        }
+        return returnedDict;
     }
 }
