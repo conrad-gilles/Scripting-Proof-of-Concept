@@ -248,10 +248,17 @@ public class ScriptManagerFacadeTests
         string result = await facade.GetCompilationErrors(id);
         Assert.IsTrue(result.Contains("Successful Compilation!"));
 
-        await Assert.ThrowsExceptionAsync<DbHelperException>(async () =>    //before was basicvalidation exception todo
+        await Assert.ThrowsExceptionAsync<ValidationBeforeCompilationException>(async () =>    //before was basicvalidation exception todo
         {
             Guid id2 = await facade.CreateScript("wrong input test could be whatever");
-            string result2 = await facade.GetCompilationErrors(id2);
+            // string result2 = await facade.GetCompilationErrors(id2);
+            bool result2 = await facade.GetCompilationErrors(id2);
+        });
+        await Assert.ThrowsExceptionAsync<CompilationFailedException>(async () =>    //before was basicvalidation exception todo
+        {
+            Guid id2 = await facade.CreateScript("public class Test : IFakeInterface{}");
+            // string result2 = await facade.GetCompilationErrors(id2);
+            bool result2 = await facade.GetCompilationErrors(id2);
         });
     }
 
