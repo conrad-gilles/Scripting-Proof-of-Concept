@@ -13,6 +13,7 @@ namespace BlazorUI.Services
 
         public void Log(string message)
         {
+            Console.WriteLine(message);
             Logs.Add((DateTime.Now, message));
             if (message.Contains("Error"))
             {

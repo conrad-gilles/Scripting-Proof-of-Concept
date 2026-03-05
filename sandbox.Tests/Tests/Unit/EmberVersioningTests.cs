@@ -6,7 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
 [TestClass]
-public class EmberVersioning
+public class EmberVersioningTests
 {
 
 
@@ -119,6 +119,7 @@ public class EmberVersioning
         apiVersionInsideFacade = await facade.GetRecentApiVersion();
         Assert.IsTrue(apiVersionInsideFacade == RandomMethods.GetEmberApiVersion(testingDiffrentVersion: 1));
     }
+
     public void OldEmberVersionTest()
     {
 

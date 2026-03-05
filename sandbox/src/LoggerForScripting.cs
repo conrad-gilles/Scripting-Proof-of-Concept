@@ -3,11 +3,15 @@ using Serilog;
 using Ember.Scripting;
 using Serilog.Extensions.Logging;
 using Microsoft.Extensions.Logging;
+// using BlazorUi.
 
 public class LoggerForScripting
 {
     private Serilog.Core.Logger? serilogLogger = null;
     private ILoggerFactory? factory = null;
+
+//  public BlazorSink MemorySink { get; } = new BlazorSink();
+
     public LoggerForScripting()
     {
 
@@ -22,6 +26,7 @@ public class LoggerForScripting
         rollingInterval: RollingInterval.Day,
         retainedFileCountLimit: 5).WriteTo.Console(restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Warning)
         .WriteTo.Seq("http://localhost:5341", bufferBaseFilename: "logs/seq-offline-buffer")
+        // .WriteTo.Sink(MemorySink)   //for seeing it in blazor webapp
         .CreateLogger();
 
         return serilogLoggerSet;

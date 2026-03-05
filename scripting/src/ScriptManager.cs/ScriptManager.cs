@@ -48,19 +48,29 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
     }
 
     // Updates existing script source code and recompiles for all compatible API versions
-    public async Task UpdateScript(Guid scriptId, string newSourceCode, string userName = "Default", int apiVersion = -1)
+    public async Task UpdateScript(Guid scriptId, string newSourceCode, string? userName = null, int? apiVersion = null)
     {
         Logger.LogTrace("Entered {MethodName} in {ClassName} with scriptId: {ScriptId}.", nameof(UpdateScript), nameof(ScriptManagerFacade), scriptId);
 
-        if (apiVersion == -1)
-        {
-            apiVersion = await GetRecentApiVersion();
-        }
-        var customerScript = await Db.GetCustomerScript(scriptId);
-        var creationDate = customerScript.CreatedAt;
-        await Db.DeleteCustomerScript(scriptId);    //todo update is still inefficient
-        await Db.CreateAndInsertCustomerScript(newSourceCode, scriptId, userName, createdAt: (DateTime)creationDate!); //todo unsafe af
-        // await RecompileScript(scriptId);    //todo inefficient also untested, ineff because compiles 2 for 1 api v
+        // if (apiVersion == -1)
+        // {
+        //     apiVersion = await GetRecentApiVersion();
+        // }
+        // var customerScript = await Db.GetCustomerScript(scriptId);
+        // var creationDate = customerScript.CreatedAt;
+        // try
+        // {
+        //     await Db.DeleteCustomerScript(scriptId);    //todo update is still inefficient
+        //     await Db.CreateAndInsertCustomerScript(newSourceCode, scriptId, userName, createdAt: (DateTime)creationDate!); //todo unsafe af 
+        // }
+        // catch
+        // {
+        //     await Db.SaveScriptWithoutCompiling(scriptId, newSourceCode, userName);
+        //     Logger.LogTrace("Could not save the actual Script so had to save without compiling");
+        //     throw;
+        // }
+        // // await RecompileScript(scriptId);    //todo inefficient also untested, ineff because compiles 2 for 1 api v
+        await Db.UpdateScript(scriptId, newSourceCode, userName, apiVersion);
     }
 
     // Removes script and all associated compiled caches
@@ -120,6 +130,13 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
 
         int currentApiVersion = await GetRecentApiVersion();
         await Db.CompileAllStoredScripts(currentApiVersion);
+    }
+
+    public async Task SaveScriptWithoutCompiling(Guid id, string sourceCode)
+    {
+        Logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(SaveScriptWithoutCompiling), nameof(ScriptManagerFacade));
+        // Guid id = Guid.NewGuid();
+        await Db.SaveScriptWithoutCompiling(id, sourceCode);
     }
 
     // Recompiles script for all active API versions
@@ -344,10 +361,10 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
         await Db.ClearScriptCache(scriptId);
     }
 
-     public async Task DeleteScriptCache(Guid id, int ApiVersion)
+    public async Task DeleteScriptCache(Guid id, int ApiVersion)
     {
-         Logger.LogTrace("Entered {MethodName} in {ClassName} with ApiVersion: {ScriptId}.", nameof(DeleteScriptCache), nameof(ScriptManagerFacade), ApiVersion);
-         await Db.DeleteScriptCache(id,ApiVersion);
+        Logger.LogTrace("Entered {MethodName} in {ClassName} with ApiVersion: {ScriptId}.", nameof(DeleteScriptCache), nameof(ScriptManagerFacade), ApiVersion);
+        await Db.DeleteScriptCache(id, ApiVersion);
     }
 
     public async Task<List<ScriptCompiledCache>> GetAllCompiledScriptCaches()

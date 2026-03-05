@@ -118,7 +118,7 @@ public class ScriptManagerFacadeTests
         await facade.DeleteScript(id);
 
 
-        await Assert.ThrowsExceptionAsync<DbHelperException>(async () =>    //todo check that this implements the correct exception
+        await Assert.ThrowsExceptionAsync<System.InvalidOperationException>(async () =>    //todo check that this implements the correct exception
         {
             CustomerScript script = await facade.GetScript(id);
         });
@@ -252,13 +252,13 @@ public class ScriptManagerFacadeTests
         {
             Guid id2 = await facade.CreateScript("wrong input test could be whatever");
             // string result2 = await facade.GetCompilationErrors(id2);
-            bool result2 = await facade.GetCompilationErrors(id2);
+            string result2 = await facade.GetCompilationErrors(id2);
         });
         await Assert.ThrowsExceptionAsync<CompilationFailedException>(async () =>    //before was basicvalidation exception todo
         {
             Guid id2 = await facade.CreateScript("public class Test : IFakeInterface{}");
             // string result2 = await facade.GetCompilationErrors(id2);
-            bool result2 = await facade.GetCompilationErrors(id2);
+            string result2 = await facade.GetCompilationErrors(id2);
         });
     }
 

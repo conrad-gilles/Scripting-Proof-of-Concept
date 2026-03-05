@@ -45,6 +45,7 @@
                                     <th>Type</th>
                                     <th>Min API Version</th>
                                     <th>Created At</th>
+                                    <th>Last edit</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
@@ -65,7 +66,17 @@
                                             }
                                         </td>
                                         <td>v@(script.MinApiVersion)</td>
-                                        <td>@(script.CreatedAt?.ToString("yyyy-MM-dd") ?? "N/A")</td>
+                                        <td>@(script.CreatedAt?.ToString("MM-dd HH:mm") ?? "N/A")</td>
+                                        @* @if (script.CreatedAt?.ToString("MM-dd HH:mm:ss") == script.ModifiedAt?.ToString("MM-dd HH:mm:ss")) *@
+                                        @if ((script.ModifiedAt!.Value - script.CreatedAt!.Value).TotalSeconds > 1)
+                                        {
+                                            <td>No Edit</td>
+                                        }
+                                        else
+                                        {
+                                            <td>@(script.ModifiedAt?.ToString("MM-dd HH:mm") ?? "N/A")</td>
+                                        }
+
                                         <td>
                                             <div class="action-buttons">
                                                 <button class="btn btn-sm btn-outline-success btn-icon"
@@ -233,6 +244,11 @@
 
     public string DefaultScript = GetTemplate();
 
+    // Add these variables to hold the current script being edited
+    private string _scriptCode = string.Empty;
+    private Guid _currentScriptId;
+
+
     public static string GetTemplate()
     {
         string path = @"C:\Users\Gilles\Desktop\UNI\Semester 6\Code\Codebase\Scripting-Proof-of-Concept\BlazorUI\src\ScriptTemplate.cs";
@@ -269,12 +285,13 @@
 
         try
         {
-            await ScriptManager.CreateScript(code);
-            Console.Log("Compilation successful, script was created and inserted into the DB.");
+            @* await ScriptManager.CreateScript(code); *@
+            await ScriptManager.UpdateScript(_currentScriptId, code);
+            Console.Log("Update compiled successfully, script was updated and inserted into the DB.");
         }
         catch (Exception ex)
         {
-            Console.Log($"Compilation Failed: {ex.Message}");
+            Console.Log($"Compilation Failed: {ex.ToString()}");
 
             var errorsList = new List<object>();
             var regex = new Regex(@"Line (\d+), Col (\d+): (.*)");
@@ -312,6 +329,16 @@
         Console.Log($"Saving '{_scriptName}'...");
         try
         {
+            try
+            {
+                await ScriptManager.UpdateScript(_currentScriptId, code);
+            }
+            catch
+            {
+                Console.Log("Script did not compile successfully but still trying to save it.");
+                await ScriptManager.SaveScriptWithoutCompiling(_currentScriptId, code);
+            }
+
             // TODO: call ScriptManager.SaveScript(...)
             Console.Log("Script saved successfully.");
         }
@@ -322,9 +349,6 @@
         finally { _isBusy = false; }
     }
 
-    // Add these variables to hold the current script being edited
-    private string _scriptCode = string.Empty;
-    private Guid _currentScriptId;
 
     // UPDATE the EditScript method:
     private async Task EditScript(Guid id)
@@ -344,6 +368,7 @@
                 // 3. Flip the UI to editing mode
                 isEditing = true;
                 StateHasChanged();
+                await LoadScripts();
             }
         }
         catch (Exception ex)

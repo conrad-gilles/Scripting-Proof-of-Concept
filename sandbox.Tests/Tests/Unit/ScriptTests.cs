@@ -171,4 +171,34 @@ public class ScriptTests
     //     }
     //     //todo make negative test
     // }
+
+    [TestMethod]
+    public async Task TestCreatedAt()
+    {
+        await facade!.EnsureDeletedCreated();
+        // string path = @"C:\Users\Gilles\Desktop\UNI\Semester 6\Code\Codebase\Scripting-Proof-of-Concept\scripting\src";
+        // await rm!.CompileAllScriptsInFolderAndSaveToDB(path, "Default", await facade.GetRecentApiVersion());
+
+        Guid id = await facade!.CreateScript(sourceCodePedia!);
+        CustomerScript retrievedScript = await facade.GetScript(id);
+        DateTime? beforeUpdateCA = retrievedScript.CreatedAt;
+        DateTime? beforeUpdateMA = retrievedScript.ModifiedAt;
+
+        var context = rm!.GetTestingContext<GeneratorContextNoInherVaccine.GeneratorContext>(justForTesting: retrievedScript);
+        object result = await facade.ExecuteScriptById(id, context);
+
+        await Task.Delay(2000);
+        await facade!.UpdateScript(retrievedScript.Id, "new source code doesnt matter if wrong shoudl save to db");
+
+        CustomerScript updatedScript = await facade.GetScript(id);
+        DateTime? afterUpdateCA = updatedScript.CreatedAt;
+        DateTime? afterUpdateMA = updatedScript.ModifiedAt;
+
+        // Assert that CreatedAt remained exactly the same
+        Assert.AreEqual(beforeUpdateCA, afterUpdateCA, "CreatedAt should not change on update.");
+
+        // Assert that ModifiedAt actually changed and is now greater than CreatedAt
+        Assert.IsTrue(afterUpdateMA > beforeUpdateMA, "ModifiedAt should be updated to a newer time.");
+        Assert.IsTrue(afterUpdateMA > afterUpdateCA, "ModifiedAt should be greater than CreatedAt after an edit.");
+    }
 }

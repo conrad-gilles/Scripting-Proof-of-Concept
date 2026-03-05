@@ -3,6 +3,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.EntityFrameworkCore;
 using Ember.Scripting;
 using Microsoft.Extensions.Logging;
+using Microsoft.CodeAnalysis.Scripting;
 namespace Ember.Scripting;
 
 internal class DbHelper
@@ -431,20 +432,39 @@ internal class DbHelper
             throw new DbHelperException(nameof(DeleteScriptCache) + " failed in " + nameof(DbHelper), e);
         }
     }
-    public void UpdateCustomerScript(CustomerScript customerScript)
+    public async Task UpdateScript(Guid scriptId, string newSourceCode, string? userName = null, int? apiVersion = null)
     {
-        try
+        Logger.LogTrace("Entered {MethodName} in {ClassName} with scriptId: {ScriptId}.", nameof(UpdateScript), nameof(DbHelper), scriptId);
+        if (userName == null)
         {
-            Logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(UpdateCustomerScript), nameof(DbHelper));
-
-            using (var db = new MyContext())
-            {
-                //todo
-            }
+            userName = "Default";
         }
-        catch (Exception e)
+        // if (apiVersion == null)
+        // {
+        //     apiVersion = GetRecentApiVersion();
+        // }
+
+        using (var db = new MyContext())
         {
-            throw new DbHelperException(nameof(UpdateCustomerScript) + " failed in " + nameof(DbHelper), e);
+            CustomerScript? existingScript = await db.CustomerScripts.FindAsync(scriptId);
+
+            if (existingScript != null)
+            {
+                existingScript.SourceCode = newSourceCode;
+                existingScript.ModifiedAt = DateTime.UtcNow;
+
+                if (userName != null)
+                {
+                    existingScript.CreatedBy = userName;
+                }
+            }
+            else
+            {
+                Logger.LogDebug("Somethign went wrong retrieving your script, we could not find it.");
+                throw new DbHelperException("Could not find the script what needs to be updated.");
+            }
+
+            await db.SaveChangesAsync();
         }
     }
     public async Task InsertScriptCompiledCache(ScriptCompiledCache scriptCompiledCache)
@@ -486,32 +506,32 @@ internal class DbHelper
     }
     public async Task<CustomerScript> GetCustomerScript(Guid id, bool includeCaches = false)
     {
-        try
+        // try
+        // {
+        Logger.LogTrace("Entered {MethodName} in {ClassName} with ID: {ScriptId}.", nameof(GetCustomerScript), nameof(DbHelper), id);
+
+        if (includeCaches == true)
         {
-            Logger.LogTrace("Entered {MethodName} in {ClassName} with ID: {ScriptId}.", nameof(GetCustomerScript), nameof(DbHelper), id);
-
-            if (includeCaches == true)
+            using (var db = new MyContext())
             {
-                using (var db = new MyContext())
-                {
 
-                    var script = await db.CustomerScripts.Include(s => s.CompiledCaches).SingleAsync(b => b.Id == id);
-                    return script;
-                }
-            }
-            else
-            {
-                using (var db = new MyContext())
-                {
-                    var script = await db.CustomerScripts.SingleAsync(b => b.Id == id);
-                    return script;
-                }
+                var script = await db.CustomerScripts.Include(s => s.CompiledCaches).SingleAsync(b => b.Id == id);
+                return script;
             }
         }
-        catch (Exception e)
+        else
         {
-            throw new DbHelperException(nameof(GetCustomerScript) + " failed in " + nameof(DbHelper), e);
+            using (var db = new MyContext())
+            {
+                var script = await db.CustomerScripts.SingleAsync(b => b.Id == id);
+                return script;
+            }
         }
+        // }
+        // catch (Exception e)
+        // {
+        //     throw new DbHelperException(nameof(GetCustomerScript) + " failed in " + nameof(DbHelper), e);
+        // }
     }
 
 
@@ -535,6 +555,42 @@ internal class DbHelper
         {
             Logger.LogError(e.ToString());
             throw new DbHelperException(nameof(CompileAllStoredScripts) + " failed in " + nameof(DbHelper), e);
+        }
+    }
+
+    public async Task SaveScriptWithoutCompiling(Guid id, string sourceCode, string? userName = null)
+    {
+        using (var db = new MyContext())
+        {
+            CustomerScript? existingScript = await db.CustomerScripts.FindAsync(id);
+
+            if (existingScript != null)
+            {
+                existingScript.SourceCode = sourceCode;
+                existingScript.ModifiedAt = DateTime.UtcNow;
+
+                if (userName != null)
+                {
+                    existingScript.CreatedBy = userName;
+                }
+            }
+            else
+            {
+                CustomerScript testScript = new CustomerScript
+                {
+                    Id = id,
+                    ScriptName = null,
+                    ScriptType = null,
+                    SourceCode = sourceCode,
+                    MinApiVersion = GetRecentApiVersion(),
+                    CreatedAt = DateTime.UtcNow,
+                    ModifiedAt = DateTime.UtcNow,
+                    CreatedBy = null
+                };
+                db.CustomerScripts.Add(testScript);
+
+            }
+            await db.SaveChangesAsync();
         }
     }
     public async Task DeleteAllCachedScripts()
