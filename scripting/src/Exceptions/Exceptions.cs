@@ -121,3 +121,39 @@ public class FacadeException : Exception
     public FacadeException(string message, Exception innerException) : base(message, innerException) { }
 }
 
+public class ExceptionHelper    //for future to traverse exception chain
+{
+    public static Exception GetExceptionFromChain(Exception ex, int i)
+    {
+        Exception baseException = ex.GetBaseException();
+        int indexInChain = 0;
+
+        Exception innerEx = ex;
+        while (innerEx.Equals(baseException) == false && indexInChain != i)
+        {
+            innerEx = innerEx.InnerException!;
+            indexInChain++;
+        }
+        return innerEx;
+    }
+    public static Exception GetExceptionFromChainReversed(Exception ex, int i)
+    {
+        List<Exception> exceptionsReversed = [];
+        Exception baseException = ex.GetBaseException();
+
+        while (ex.Equals(baseException) == false)
+        {
+            exceptionsReversed.Add(ex);
+            ex = ex.InnerException!;
+        }
+
+        for (int j = 0; j < exceptionsReversed.Count(); j++)
+        {
+            if (j == i)
+            {
+                return exceptionsReversed[i];
+            }
+        }
+        throw new Exception(message: "Could not find your exception in the List!");
+    }
+}

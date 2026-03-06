@@ -4,7 +4,6 @@
 - this data needs to be standardized maybe using something like fluentvalidation idk
 - fix basic val still doesnt check if implements correct class
 - in ui when compile all scripts with 1 corrupt one more than 1 dont cpompile because it aborts the process
-- make a more efficient IsDuplicateScript function in dbhelper
 
 # Converting to a class library:
 ### In sandbox.csproj make sure to uncomment:
