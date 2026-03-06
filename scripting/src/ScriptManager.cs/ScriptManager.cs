@@ -169,38 +169,41 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
     }
 
     // Retrieves compilation error details
-    public async Task<string> GetCompilationErrors(Guid scriptId, int apiVersion = -1)
+    public async Task<string> GetCompilationErrors(Guid scriptId, int? apiVersion = null)
     {
         Logger.LogTrace("Entered {MethodName} in {ClassName} with scriptId: {ScriptId}.", nameof(GetCompilationErrors), nameof(ScriptManagerFacade), scriptId);
         try
         {
             (string className, string baseTypeName, int versionInt)? metaData = null;
-            CustomerScript script = await GetScript(scriptId);
+            CustomerScript script;
+            string sourceCode;
+
+            if (apiVersion == null)
+            {
+                script = await GetScript(scriptId);
+                sourceCode = script.SourceCode!;
+            }
+            else
+            {
+                ScriptCompiledCache cache = await Db.GetCompiledScripCache(scriptId, (int)apiVersion);
+                sourceCode = cache.OldSourceCode!;
+            }
             try
             {
-                metaData = Compiler.BasicValidationBeforeCompiling(script.SourceCode!);
+                metaData = Compiler.BasicValidationBeforeCompiling(sourceCode);
             }
             catch (Exception e)
             {
                 Logger.LogError("Validation in GetCompilationErrors failed but will still try to compile." + e.ToString());
             }
 
-            if (apiVersion == -1)
-            {
-                apiVersion = await GetRecentApiVersion();
-                Compiler.RunCompilation(script.SourceCode!, metaData: metaData);
-            }
-            else
-            {
-                Compiler.RunCompilation(script.SourceCode!, metaData: metaData);
-            }
+            Compiler.RunCompilation(sourceCode, metaData: metaData);
 
             return "Successful Compilation!";
-
         }
         catch (Exception e)
         {
-            return "Failed to compilate script:" + scriptId + " " + e.ToString();
+            return "Failed to compile script:" + scriptId + " " + e.ToString();
             // throw new FacadeException(e.ToString(), e);
         }
     }

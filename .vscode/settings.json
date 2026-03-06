@@ -6,9 +6,281 @@
 },
 
 "[aspnetcorerazor]": {
-    "editor.defaultFormatter": "ms-dotnettools.csharp", 
+    "editor.defaultFormatter": "ms-dotnettools.csharp",
     "editor.formatOnSave": true
 }
 
-    
+
 }
+
+// {
+//   // ══════════════════════════════════════════════
+//   //  C# — formatting, hints, analysis
+//   // ══════════════════════════════════════════════
+//   "[csharp]": {
+//     "editor.defaultFormatter": "ms-dotnettools.csharp",
+//     "editor.formatOnSave": true,
+//     "editor.formatOnType": false,
+//     "editor.inlayHints.enabled": "on",
+//     "editor.codeActionsOnSave": {
+//       // Removes unused `using` directives automatically on save
+//       "source.organizeImports": "explicit"
+//     }
+//   },
+
+//   // ══════════════════════════════════════════════
+//   //  Blazor / Razor
+//   // ══════════════════════════════════════════════
+//   "[aspnetcorerazor]": {
+//     "editor.defaultFormatter": "ms-dotnettools.csharp",
+//     "editor.formatOnSave": true,
+//     // Quick suggestions inside razor @code blocks
+//     "editor.quickSuggestions": {
+//       "other": true,
+//       "comments": false,
+//       "strings": false
+//     }
+//   },
+
+//   // ══════════════════════════════════════════════
+//   //  C# Dev Kit / Roslyn LSP settings
+//   // ══════════════════════════════════════════════
+
+//   // Show parameter name hints (e.g. DbHelper(compiler: ..., references: ...))
+//   "dotnet.inlayHints.enableInlayHintsForParameters": true,
+//   "dotnet.inlayHints.enableInlayHintsForLiteralParameters": true,
+//   "dotnet.inlayHints.enableInlayHintsForObjectCreationParameters": true,
+//   "dotnet.inlayHints.enableInlayHintsForIndexerParameters": true,
+//   "dotnet.inlayHints.enableInlayHintsForOtherParameters": true,
+
+//   // Show inferred type hints for `var` — very useful when working with
+//   // Roslyn types like SyntaxTree, CompilationOptions, etc.
+//   "dotnet.inlayHints.enableInlayHintsForTypes": true,
+//   "dotnet.inlayHints.enableInlayHintsForImplicitVariableTypes": true,
+//   "dotnet.inlayHints.enableInlayHintsForLambdaParameterTypes": true,
+
+//   // Auto-import namespaces on completion (critical for Roslyn APIs)
+//   "dotnet.completion.showCompletionItemsFromUnimportedNamespaces": true,
+
+//   // Semantic coloring: interfaces, generics, static methods all get distinct colors
+//   "csharp.semanticHighlighting.enabled": true,
+
+//   // Roslyn analyzers for code quality warnings (nullable, unused vars, etc.)
+//   "omnisharp.enableRoslynAnalyzers": true,
+//   "omnisharp.enableEditorConfigSupport": true,
+
+//   // ══════════════════════════════════════════════
+//   //  JavaScript — Monaco Editor interop file
+//   // ══════════════════════════════════════════════
+//   "[javascript]": {
+//     "editor.defaultFormatter": "esbenp.prettier-vscode",
+//     "editor.formatOnSave": true,
+//     "editor.tabSize": 2
+//   },
+
+//   // ══════════════════════════════════════════════
+//   //  CSS — app.css + MainLayout.razor.css
+//   // ══════════════════════════════════════════════
+//   "[css]": {
+//     "editor.defaultFormatter": "esbenp.prettier-vscode",
+//     "editor.formatOnSave": true,
+//     "editor.tabSize": 2
+//   },
+
+//   // ══════════════════════════════════════════════
+//   //  JSON — appsettings.json, launchSettings.json
+//   // ══════════════════════════════════════════════
+//   "[json]": {
+//     "editor.defaultFormatter": "esbenp.prettier-vscode",
+//     "editor.formatOnSave": true
+//   },
+//   "[jsonc]": {
+//     "editor.defaultFormatter": "esbenp.prettier-vscode",
+//     "editor.formatOnSave": true
+//   },
+
+//   // ══════════════════════════════════════════════
+//   //  YAML — docker-compose.yml
+//   // ══════════════════════════════════════════════
+//   "[yaml]": {
+//     "editor.defaultFormatter": "redhat.vscode-yaml",
+//     "editor.formatOnSave": true,
+//     "editor.insertSpaces": true,
+//     "editor.tabSize": 2
+//   },
+
+//   // ══════════════════════════════════════════════
+//   //  SQL — init.sql (PostgreSQL)
+//   // ══════════════════════════════════════════════
+//   "[sql]": {
+//     "editor.formatOnSave": true,
+//     "editor.tabSize": 4
+//   },
+
+//   // ══════════════════════════════════════════════
+//   //  XML — .csproj files
+//   // ══════════════════════════════════════════════
+//   "[xml]": {
+//     "editor.defaultFormatter": "redhat.vscode-xml",
+//     "editor.formatOnSave": true,
+//     "editor.tabSize": 2
+//   },
+
+//   // ══════════════════════════════════════════════
+//   //  PlantUML — diagrams/*.puml
+//   // ══════════════════════════════════════════════
+//   "plantuml.diagramsRoot": "diagrams",
+//   "plantuml.exportOutDir": "diagrams/out",
+//   // Use the public PlantUML server to render — no local Java needed
+//   "plantuml.render": "PlantUMLServer",
+//   "plantuml.server": "https://www.plantuml.com/plantuml",
+//   "plantuml.previewAutoUpdate": true,
+
+//   // ══════════════════════════════════════════════
+//   //  Editor — global quality-of-life
+//   // ══════════════════════════════════════════════
+//   "editor.formatOnSave": true,
+//   "editor.formatOnPaste": true,
+//   "editor.tabSize": 4,
+//   "editor.insertSpaces": true,
+//   "editor.detectIndentation": true,
+
+//   // Ruler at 120 chars — good for Roslyn/EF verbose lines
+//   "editor.rulers": [120],
+
+//   // Sticky scroll — keeps class/method signature visible while scrolling
+//   // very helpful in large ScriptManager.cs
+//   "editor.stickyScroll.enabled": true,
+//   "editor.stickyScroll.maxLineCount": 5,
+
+//   // Bracket pair colorization — critical when reading nested Roslyn/LINQ
+//   "editor.bracketPairColorization.enabled": true,
+//   "editor.guides.bracketPairs": "active",
+
+//   // Inline ghost-text preview of suggestions
+//   "editor.suggest.preview": true,
+//   "editor.suggestSelection": "first",
+//   "editor.quickSuggestionsDelay": 80,
+
+//   // Linked editing: rename matching HTML/Razor tags simultaneously
+//   "editor.linkedEditing": true,
+
+//   // Semantic highlights (Roslyn types, interfaces, generics get distinct colors)
+//   "editor.semanticHighlighting.enabled": true,
+
+//   // Show whitespace between words — helps spot mixed tabs/spaces in .cs and .razor
+//   "editor.renderWhitespace": "boundary",
+
+//   // Minimap without character rendering — cleaner for long files
+//   "editor.minimap.enabled": true,
+//   "editor.minimap.renderCharacters": false,
+
+//   // ══════════════════════════════════════════════
+//   //  Files
+//   // ══════════════════════════════════════════════
+//   "files.trimTrailingWhitespace": true,
+//   "files.insertFinalNewline": true,
+//   "files.trimFinalNewlines": true,
+//   "files.encoding": "utf8",
+//   "files.eol": "\n",
+
+//   // File type associations
+//   "files.associations": {
+//     "*.razor": "aspnetcorerazor",
+//     "*.puml": "plantuml",
+//     "*.csproj": "xml",
+//     "*.sln": "ini",
+//     "docker-compose*.yml": "dockercompose",
+//     "appsettings*.json": "jsonc"
+//   },
+
+//   // Hide build artifacts from the Explorer — bin/obj are huge and irrelevant
+//   "files.exclude": {
+//     "**/bin": true,
+//     "**/obj": true,
+//     "**/.vs": true,
+//     "**/node_modules": true,
+//     "**/logs/*.clef": true
+//   },
+
+//   // Also stop the file watcher from thrashing on build output
+//   "files.watcherExclude": {
+//     "**/bin/**": true,
+//     "**/obj/**": true,
+//     "**/node_modules/**": true,
+//     "**/logs/**": true,
+//     "**/.git/objects/**": true
+//   },
+
+//   // ══════════════════════════════════════════════
+//   //  Search
+//   // ══════════════════════════════════════════════
+//   "search.exclude": {
+//     "**/bin": true,
+//     "**/obj": true,
+//     "**/node_modules": true,
+//     // Exclude Serilog + Seq offline buffer logs from search results
+//     "**/logs": true,
+//     "repomix-output.xml": true
+//   },
+
+//   // ══════════════════════════════════════════════
+//   //  Explorer — file nesting
+//   //  Collapses related files under their parent so the tree stays clean
+//   // ══════════════════════════════════════════════
+//   "explorer.fileNesting.enabled": true,
+//   "explorer.fileNesting.expand": false,
+//   "explorer.fileNesting.patterns": {
+//     // Razor code-behind + scoped CSS under the .razor file
+//     "*.razor": "${capture}.razor.cs, ${capture}.razor.css",
+//     // Group project metadata under .csproj
+//     "*.csproj": "*.user, *.props, *.targets",
+//     // Group environment-specific appsettings under the base file
+//     "appsettings.json": "appsettings.*.json, launchSettings.json",
+//     // docker-compose overrides under main file
+//     "docker-compose.yml": "docker-compose.*.yml, init.sql",
+//     // Solution-level docs under .sln
+//     "ember-scripting.sln": "README.md, Notes.md, Todo.md, .gitignore, .editorconfig"
+//   },
+
+//   // ══════════════════════════════════════════════
+//   //  .NET Test Explorer
+//   // ══════════════════════════════════════════════
+//   "dotnet-test-explorer.testProjectPath": "**/*.Tests.csproj",
+//   "dotnet-test-explorer.autoWatch": true,
+//   "dotnet-test-explorer.testArguments": "--logger trx",
+
+//   // ══════════════════════════════════════════════
+//   //  Docker
+//   // ══════════════════════════════════════════════
+//   "docker.showStartPage": false,
+//   // Adds docker-compose IntelliSense for your postgres + seq services
+//   "docker.dockerComposeBuild": true,
+
+//   // ══════════════════════════════════════════════
+//   //  Terminal
+//   // ══════════════════════════════════════════════
+//   "terminal.integrated.fontSize": 13,
+//   "terminal.integrated.scrollback": 5000,
+//   // Persist terminal history across VS Code restarts
+//   "terminal.integrated.persistentSessionReviveProcess": "onExitAndWindowClose",
+
+//   // ══════════════════════════════════════════════
+//   //  Git
+//   // ══════════════════════════════════════════════
+//   "git.autofetch": true,
+//   "git.confirmSync": false,
+//   "git.enableSmartCommit": true,
+//   // Show inline blame — helpful when tracking Roslyn API version changes
+//   "gitlens.currentLine.enabled": true,
+//   "gitlens.hovers.currentLine.over": "line",
+
+//   // ══════════════════════════════════════════════
+//   //  Workbench
+//   // ══════════════════════════════════════════════
+//   "workbench.editor.labelFormat": "short",
+//   "workbench.editor.highlightModifiedTabs": true,
+//   // Disable preview mode — stops files from being replaced when you click another
+//   "workbench.editor.enablePreview": false,
+//   "workbench.editor.enablePreviewFromQuickOpen": false
+// }

@@ -19,6 +19,8 @@ namespace IGeneratorContext_V1
     {
         new ILabOrderRWInterface LabOrder { get; }
 
+        // List<Patient> Patients;
+
     }
 }
 

@@ -23,7 +23,7 @@ internal class ScriptCompiler
         References2 = references2;
         Logger = logger;
     }
-    public byte[] RunCompilation(string script, int apiVersion = -1, (string className, string baseTypeName, int versionInt)? metaData = null) //references param there to enable later on users to define custom references
+    public byte[] RunCompilation(string script, int? apiVersion = null, (string className, string baseTypeName, int versionInt)? metaData = null) //references param there to enable later on users to define custom references
     {
         try
         {
@@ -44,10 +44,10 @@ internal class ScriptCompiler
                 Logger.LogInformation("References 2 added references in {MethodName}.", nameof(RunCompilation));
                 references = References2;
             }
-            if (apiVersion != -1)
+            if (apiVersion != null)
             {
                 Logger.LogInformation("Added custom references in {MethodName}.", nameof(RunCompilation));  //if this works remove the if references is null if stat above
-                references = GetReferencesForOldVersion(apiVersion, stdReferences: references);
+                references = GetReferencesForOldVersion((int)apiVersion);
             }
             //this initiates the process of the compilation (does not produce bytes yet), it binds the source code with the refrences and the config options
             CSharpCompilation compilation = CSharpCompilation.Create(
@@ -61,9 +61,10 @@ internal class ScriptCompiler
             using var ms = new MemoryStream();
             var emitResult = compilation.Emit(ms);  //this line is the line that uses a lot of resources and time
 
+            //The following if statement was AI Generated
             if (!emitResult.Success)
             {
-                //The following 3 lines were AI Generated
+
                 string? errors = string.Join(Environment.NewLine, emitResult.Diagnostics
                 .Where(d => d.IsWarningAsError || d.Severity == Microsoft.CodeAnalysis.DiagnosticSeverity.Error)
                 // .Select(d => $"{d.Id}: {d.GetMessage()}"));
@@ -169,8 +170,8 @@ internal class ScriptCompiler
     private void ValidateNamespaceUsage(SyntaxTree tree, SemanticModel model)
     {
         Logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(ValidateNamespaceUsage), nameof(ScriptCompiler));
-        HashSet<string> illegalNamespaces = new() //no duplicates unlike list
-            {
+        List<string> illegalNamespaces = [
+
                 "System.IO",
                 "System.Net",
                 "System.Net.Http",
@@ -184,7 +185,7 @@ internal class ScriptCompiler
                 "System.Threading.Mutex",
                 "System.Threading.Semaphore",
                 "System.Threading.SemaphoreSlim",
-            };
+            ];
         var usings = tree.GetRoot()
             .DescendantNodes()
             .OfType<UsingDirectiveSyntax>()
@@ -230,9 +231,9 @@ internal class ScriptCompiler
         return areSame;
     }
 
-    public List<MetadataReference> GetReferencesForOldVersion(int version, List<MetadataReference> stdReferences, List<string>? customDlls = null, bool loadCurrentRT = true)  //todo fix this
+    public List<MetadataReference> GetReferencesForOldVersion(int version, List<string>? customDlls = null, bool loadCurrentRT = true)  //todo fix this
     {
-        stdReferences = StandardRefrencesForAllScripts;
+        var stdReferences = StandardRefrencesForAllScripts;
         Logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(GetReferencesForOldVersion), nameof(ScriptCompiler));
         var references = new List<MetadataReference>();
 

@@ -48,7 +48,7 @@ public interface ISccriptManagerDeleteAfter : IScriptManagerExtended
   /// <param name="scriptId"></param>
   /// <param name="apiVersion"></param>
   /// <returns></returns>
-  Task<string> GetCompilationErrors(Guid scriptId, int apiVersion = -1);
+  Task<string> GetCompilationErrors(Guid scriptId, int? apiVersion = null);
 
   /// <summary>
   /// Gets the tuple from a script containing Class Name, base type name and the last integer of the declared version in the name

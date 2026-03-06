@@ -201,4 +201,23 @@ public class ScriptTests
         Assert.IsTrue(afterUpdateMA > beforeUpdateMA, "ModifiedAt should be updated to a newer time.");
         Assert.IsTrue(afterUpdateMA > afterUpdateCA, "ModifiedAt should be greater than CreatedAt after an edit.");
     }
+
+    // [TestMethod]
+    // public async Task BasicValidationTest()
+    // {
+    //     string scriptString = @"    public class AddPediatricTestsV2 : IGeneratorActionScriptV2
+    //                                 {public async Task<ActionResultV2> ExecuteAsync(IGeneratorContext_V2.IGeneratorContext context){}}";
+
+    //     var returnedValidation = facade!.BasicValidationBeforeCompiling(sourceCodeActionV1!);
+    //     Assert.IsTrue(returnedValidation.baseTypeName == "");
+    //     Assert.IsTrue(returnedValidation.className == "");
+    //     Assert.IsTrue(returnedValidation.versionInt == 1);
+
+    //     await Assert.ThrowsExceptionAsync<ValidationBeforeCompilationException>(async () =>
+    //      {
+    //          var returnedValidation = facade!.BasicValidationBeforeCompiling(scriptString!);
+    //      });
+    // }
+
+
 }
