@@ -134,24 +134,30 @@ public class ExceptionHelper    //for future to traverse exception chain
             innerEx = innerEx.InnerException!;
             indexInChain++;
         }
+        if (indexInChain < i)
+        {
+            throw new Exception(message: "Index is out of bounds of the Exception chain!");
+        }
         return innerEx;
     }
-    public static Exception GetExceptionFromChainReversed(Exception ex, int i)
+    public static Exception GetExceptionFromChainReversed(Exception ex, int i)  //todo fix use index base lookup get rid of for loop
     {
-        List<Exception> exceptionsReversed = [];
+        List<Exception> exceptions = [];
         Exception baseException = ex.GetBaseException();
 
         while (ex.Equals(baseException) == false)
         {
-            exceptionsReversed.Add(ex);
+            exceptions.Add(ex);
             ex = ex.InnerException!;
         }
 
-        for (int j = 0; j < exceptionsReversed.Count(); j++)
+        exceptions.Reverse();
+
+        for (int j = 0; j < exceptions.Count(); j++)
         {
             if (j == i)
             {
-                return exceptionsReversed[i];
+                return exceptions[i];
             }
         }
         throw new Exception(message: "Could not find your exception in the List!");

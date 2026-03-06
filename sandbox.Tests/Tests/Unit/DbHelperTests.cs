@@ -153,4 +153,123 @@ public class DbHelperTests
         Assert.IsTrue(allScripts3.Count() == 6);
     }
 
+    [TestMethod]
+    public async Task ExceptionHelperTestsAsync()
+    {
+        try
+        {
+            try
+            {
+                try
+                {
+
+                    try
+                    {
+                        try
+                        {
+                            throw new NoFileWithThisClassNameFoundException();
+                        }
+                        catch (Exception e)
+                        {
+
+                            throw new CompilationFailedException("random message1", e);
+                        }
+                    }
+                    catch (Exception e)
+                    {
+
+                        throw new ScriptExecutionException("random message2", e);
+                    }
+                }
+                catch (Exception e)
+                {
+
+                    throw new GetScriptPathFromFolderException("random message3", e);
+                }
+            }
+            catch (Exception e)
+            {
+
+                throw new CreateStringFromCsFileException("random message4", e);
+            }
+        }
+        catch (Exception e)
+        {
+
+            Exception baseException = e.GetBaseException();
+            Assert.IsInstanceOfType(baseException, typeof(NoFileWithThisClassNameFoundException));
+
+            Exception exAtIndex0 = ExceptionHelper.GetExceptionFromChain(e, 0);
+            Console.WriteLine(exAtIndex0.GetType().Name);
+            Assert.IsInstanceOfType(exAtIndex0, typeof(CreateStringFromCsFileException));
+
+            Exception exAtIndex1 = ExceptionHelper.GetExceptionFromChain(e, 1);
+            Console.WriteLine(exAtIndex1.GetType().Name);
+            Assert.IsInstanceOfType(exAtIndex1, typeof(GetScriptPathFromFolderException));
+
+            Exception exAtIndex2 = ExceptionHelper.GetExceptionFromChain(e, 2);
+            Console.WriteLine(exAtIndex2.GetType().Name);
+            Assert.IsInstanceOfType(exAtIndex2, typeof(ScriptExecutionException));
+
+            Exception exAtIndex3 = ExceptionHelper.GetExceptionFromChain(e, 3);
+            Console.WriteLine(exAtIndex3.GetType().Name);
+            Assert.IsInstanceOfType(exAtIndex3, typeof(CompilationFailedException));
+
+            Exception exAtIndex4 = ExceptionHelper.GetExceptionFromChain(e, 4);
+            Console.WriteLine(exAtIndex4.GetType().Name);
+            Assert.IsInstanceOfType(exAtIndex4, typeof(NoFileWithThisClassNameFoundException));
+
+
+            await Assert.ThrowsExceptionAsync<Exception>(async () =>
+      {
+          Exception exAtIndex5 = ExceptionHelper.GetExceptionFromChain(e, 5);
+          Console.WriteLine(exAtIndex5.GetType().Name);
+          // Assert.IsInstanceOfType(exAtIndex5, typeof(CreateStringFromCsFileException));
+      });
+
+            await Assert.ThrowsExceptionAsync<Exception>(async () =>
+    {
+        Exception exAtIndex6 = ExceptionHelper.GetExceptionFromChain(e, 6);
+        Console.WriteLine(exAtIndex6.GetType().Name);
+        //    Assert.IsInstanceOfType(exAtIndex6, typeof(CreateStringFromCsFileException));
+    });
+
+
+            Exception exAtNegIndex0 = ExceptionHelper.GetExceptionFromChain(e, 0);
+            Console.WriteLine(exAtNegIndex0.GetType().Name);
+            Assert.IsInstanceOfType(exAtNegIndex0, typeof(NoFileWithThisClassNameFoundException));
+
+            Exception exAtNegIndex1 = ExceptionHelper.GetExceptionFromChain(e, 1);
+            Console.WriteLine(exAtNegIndex1.GetType().Name);
+            Assert.IsInstanceOfType(exAtNegIndex1, typeof(CompilationFailedException));
+
+            Exception exAtNegIndex2 = ExceptionHelper.GetExceptionFromChain(e, 2);
+            Console.WriteLine(exAtNegIndex2.GetType().Name);
+            Assert.IsInstanceOfType(exAtNegIndex2, typeof(ScriptExecutionException));
+
+            Exception exAtNegIndex3 = ExceptionHelper.GetExceptionFromChain(e, 3);
+            Console.WriteLine(exAtNegIndex3.GetType().Name);
+            Assert.IsInstanceOfType(exAtNegIndex3, typeof(GetScriptPathFromFolderException));
+
+            Exception exAtNegIndex4 = ExceptionHelper.GetExceptionFromChain(e, 4);
+            Console.WriteLine(exAtNegIndex4.GetType().Name);
+            Assert.IsInstanceOfType(exAtNegIndex4, typeof(CreateStringFromCsFileException));
+
+
+            await Assert.ThrowsExceptionAsync<Exception>(async () =>
+      {
+          Exception exAtNegIndex5 = ExceptionHelper.GetExceptionFromChain(e, 5);
+          Console.WriteLine(exAtNegIndex5.GetType().Name);
+          //    Assert.IsInstanceOfType(exAtNegIndex5, typeof(CreateStringFromCsFileException));
+      });
+            await Assert.ThrowsExceptionAsync<Exception>(async () =>
+           {
+               Exception exAtNegIndex6 = ExceptionHelper.GetExceptionFromChain(e, 6);
+               Console.WriteLine(exAtNegIndex6.GetType().Name);
+               //    Assert.IsInstanceOfType(exAtNegIndex6, typeof(CreateStringFromCsFileException));
+           });
+
+        }
+    }
+
 }
