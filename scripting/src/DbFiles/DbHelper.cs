@@ -261,7 +261,7 @@ internal class DbHelper
         }
 
     }
-    public async Task<CustomerScript> CreateAndInsertCustomerScript(string scriptString, Guid randomGUID, string createdBy, int oldApiV = -1, DateTime? createdAt = null)
+    public async Task<CustomerScript> CreateAndInsertCustomerScript(string scriptString, Guid randomGUID, string createdBy, int? oldApiV = null, DateTime? createdAt = null, bool alsoCompAndSave = false)
     //todo make sure compiling happens after verification of isDuplicate
     {
         try
@@ -297,30 +297,35 @@ internal class DbHelper
 
                 if (testBool == false)
                 {
-                    byte[] tempComp;
-                    if (oldApiV != -1)
-                    {
-                        tempComp = Compiler.RunCompilation(scriptString, apiVersion: oldApiV, metaData: getTupleFromVal);
-                        currentApiVersion = oldApiV;
-                    }
-                    else
-                    {
-                        currentApiVersion = GetRecentApiVersion();
-                        tempComp = Compiler.RunCompilation(scriptString, metaData: getTupleFromVal);
-                    }
-
-                    randomTestScript2.CompiledCaches.Add(new ScriptCompiledCache
-                    {
-                        ScriptId = randomGUID,
-                        ApiVersion = currentApiVersion,
-                        AssemblyBytes = tempComp,
-                        CompilationDate = DateTime.UtcNow,
-                        CompilationSuccess = true,
-                        CompilationErrors = "",
-                        OldSourceCode = scriptString    //todo
-                    });
                     db.CustomerScripts.Add(randomTestScript2);
                     await db.SaveChangesAsync();
+
+                    await CreateAndInsertCompiledCache(randomTestScript2, oldApiV);
+
+                    // byte[] tempComp;
+                    // if (oldApiV != null)
+                    // {
+                    //     tempComp = Compiler.RunCompilation(scriptString, apiVersion: (int)oldApiV, metaData: getTupleFromVal);
+                    //     currentApiVersion = (int)oldApiV;
+                    // }
+                    // else
+                    // {
+                    //     currentApiVersion = GetRecentApiVersion();
+                    //     tempComp = Compiler.RunCompilation(scriptString, metaData: getTupleFromVal);
+                    // }
+
+                    // randomTestScript2.CompiledCaches.Add(new ScriptCompiledCache
+                    // {
+                    //     ScriptId = randomGUID,
+                    //     ApiVersion = currentApiVersion,
+                    //     AssemblyBytes = tempComp,
+                    //     CompilationDate = DateTime.UtcNow,
+                    //     CompilationSuccess = true,
+                    //     CompilationErrors = "",
+                    //     OldSourceCode = scriptString    //todo
+                    // });
+                    // db.CustomerScripts.Add(randomTestScript2);
+                    // await db.SaveChangesAsync();
                     return randomTestScript2;
                 }
                 else

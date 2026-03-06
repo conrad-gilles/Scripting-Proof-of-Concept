@@ -1,13 +1,13 @@
 # Todo
-- maybe change in dbhelper create script create cache so it uses create cache
 - add a constructor to the customerScript class maybe add 2, 1 empty one so stuff dont break
-- store old source code versions in dictionary in db  map it to active api versions
+- store old source code versions in dictionary in db  map it to active api versions should be fine but maybe test?
 - pass data in context so when you execute script(id,context) it gives data to the script
 - this data needs to be standardized maybe using something like fluentvalidation idk
 - fix basic val still doesnt check if implements correct class
 - give user possibility to save not working script
 - in ui when compile all scripts with 1 corrupt one more than 1 dont cpompile because it aborts the process
 - make a function in random methods to init injection faster
+- make a more efficient IsDuplicateScript function in dbhelper
 
 # Converting to a class library:
 ### In sandbox.csproj make sure to uncomment:

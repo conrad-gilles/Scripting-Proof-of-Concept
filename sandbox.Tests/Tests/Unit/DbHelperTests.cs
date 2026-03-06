@@ -116,4 +116,13 @@ public class DbHelperTests
         Assert.IsTrue(after2.CompiledCaches.Any(c => c.AssemblyBytes != null && c.AssemblyBytes.Length >= 1));
     }
 
+    // [TestMethod]
+    // public async Task OldSourceCodeVersionsTest()
+    // {
+    //     Guid id = await facade!.CreateScript(sourceCodePedia!);
+    //     await facade.ClearScriptCache(id);
+
+
+    // }
+
 }

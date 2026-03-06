@@ -26,16 +26,6 @@ public class EmberVersioningTests
     public
      void Setup()
     {
-        logger = new LoggerForScripting();
-        Log.Debug("Sandbox launched.");
-
-        services = new ServiceCollection();
-        services.AddLogging(builder =>
-        {
-            // Assuming you use Serilog, this forwards standard MS Logging to Serilog
-            builder.AddSerilog(dispose: true);
-        });
-
         ActionResultVersionSpecific = "[Message contains either failure or succes: ] ";  //change this if action result version changes it will thraow cause of message contains
         sourceCodeActionV1 = RandomMethods.CreateStringFromCsFile(
            Path.GetFullPath(Path.Combine(
@@ -85,11 +75,8 @@ public class EmberVersioningTests
     public async Task RecentEmberVersionTestAsync()
     {
         int v = RandomMethods.GetEmberApiVersion();
-        ScriptingServiceCollectionExtensions.AddEmberScripting(services!, RandomMethods.GetReferences(), v);
 
-        using var provider = services!.BuildServiceProvider();
-
-        facade = provider.GetRequiredService<ISccriptManagerDeleteAfter>();
+        facade = RandomMethods.GetNewScriptManagerInstance(v);
         rm = new RandomMethods(facade);
         await facade!.EnsureDeletedCreated();
         await ExecuteEachScript(facade, rm);
@@ -97,22 +84,7 @@ public class EmberVersioningTests
         Assert.IsTrue(apiVersionInsideFacade == v);
         Assert.IsTrue(apiVersionInsideFacade == 6);
 
-        ServiceCollection services2 = new ServiceCollection();
-
-        logger = new LoggerForScripting();
-        Log.Debug("Sandbox launched.");
-
-        services2 = new ServiceCollection();
-        services2.AddLogging(builder =>
-        {
-            builder.AddSerilog(dispose: true);
-        });
-
-        ScriptingServiceCollectionExtensions.AddEmberScripting(services2, RandomMethods.GetReferences(), RandomMethods.GetEmberApiVersion(testingDiffrentVersion: 1));
-
-        using var provider2 = services2.BuildServiceProvider();
-
-        facade = provider2.GetRequiredService<ISccriptManagerDeleteAfter>();
+        facade = RandomMethods.GetNewScriptManagerInstance(1);
         rm = new RandomMethods(facade);
         await facade!.EnsureDeletedCreated();
         await ExecuteEachScript(facade, rm);
@@ -165,11 +137,8 @@ public class EmberVersioningTests
     public async Task GetCachesForEachApiVersionTestsAsync()
     {
         int v = RandomMethods.GetEmberApiVersion();
-        ScriptingServiceCollectionExtensions.AddEmberScripting(services!, RandomMethods.GetReferences(), v);
 
-        using var provider = services!.BuildServiceProvider();
-
-        facade = provider.GetRequiredService<ISccriptManagerDeleteAfter>();
+        facade = RandomMethods.GetNewScriptManagerInstance(v);
         rm = new RandomMethods(facade);
         await facade!.EnsureDeletedCreated();
         await ExecuteEachScript(facade, rm);
@@ -188,24 +157,8 @@ public class EmberVersioningTests
         Assert.IsTrue(apiVersionInsideFacade == v);
         Assert.IsTrue(apiVersionInsideFacade == 6);
 
-        ServiceCollection services2 = new ServiceCollection();
-
-        logger = new LoggerForScripting();
-        Log.Debug("Sandbox launched.");
-
-        services2 = new ServiceCollection();
-        services2.AddLogging(builder =>
-        {
-            builder.AddSerilog(dispose: true);
-        });
-
-        ScriptingServiceCollectionExtensions.AddEmberScripting(services2, RandomMethods.GetReferences(), RandomMethods.GetEmberApiVersion(testingDiffrentVersion: 1));
-
-        using var provider2 = services2.BuildServiceProvider();
-
-        facade = provider2.GetRequiredService<ISccriptManagerDeleteAfter>();
+        facade = RandomMethods.GetNewScriptManagerInstance(1);
         rm = new RandomMethods(facade);
-        // await facade!.EnsureDeletedCreated();
         await ExecuteEachScript(facade, rm);
         apiVersionInsideFacade = await facade.GetRecentApiVersion();
         Assert.IsTrue(apiVersionInsideFacade == RandomMethods.GetEmberApiVersion(testingDiffrentVersion: 1));
@@ -223,5 +176,29 @@ public class EmberVersioningTests
         Assert.IsTrue(versionDict2[1].Count() == 4);
         Assert.IsTrue(versionDict2[6].Count() == 4);
 
+    }
+
+    [TestMethod]
+    public async Task OldSourceCodeVersionsTest()
+    {
+        facade = RandomMethods.GetNewScriptManagerInstance(1);
+        Guid id = await facade!.CreateScript(sourceCodeActionV1!);
+
+        facade = RandomMethods.GetNewScriptManagerInstance(2);
+        await facade.UpdateScript(id, sourceCodeActionV2!);
+        await facade.CompileScript(id);
+
+        string sourceCodeAV = (await facade.GetCompiledCache(id)).OldSourceCode!;
+        string sourceCodeV1 = (await facade.GetCompiledCache(id, 1)).OldSourceCode!;
+        string sourceCodeV2 = (await facade.GetCompiledCache(id, 2)).OldSourceCode!;
+
+        Assert.IsTrue(sourceCodeAV == sourceCodeActionV2);
+        Assert.IsTrue(sourceCodeV1 == sourceCodeActionV1);
+        Assert.IsTrue(sourceCodeAV == sourceCodeActionV2);
+        Assert.IsTrue(sourceCodeAV == sourceCodeV2);
+        Assert.IsFalse(sourceCodeAV == sourceCodeV1);
+        // Console.WriteLine(sourceCodeAV);
+        // Console.WriteLine(sourceCodeV1);
+        // Assert.IsTrue(false);
     }
 }

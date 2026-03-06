@@ -3,6 +3,10 @@ using System.Reflection;
 using Ember.Scripting;
 using Microsoft.CodeAnalysis;
 using Serilog;
+using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+
 public class RandomMethods
 {
     private readonly ISccriptManagerDeleteAfter Facade;
@@ -20,6 +24,27 @@ public class RandomMethods
         }
 
         return 6;
+    }
+
+    public static ISccriptManagerDeleteAfter GetNewScriptManagerInstance(int? apiVersion = null)
+    {
+        ISccriptManagerDeleteAfter facade;
+        ServiceCollection services2 = new ServiceCollection();
+
+        LoggerForScripting logger = new LoggerForScripting();
+        Log.Debug("New instance.");
+
+        services2 = new ServiceCollection();
+        services2.AddLogging(builder =>
+        {
+            builder.AddSerilog(dispose: true);
+        });
+
+        ScriptingServiceCollectionExtensions.AddEmberScripting(services2, RandomMethods.GetReferences(), RandomMethods.GetEmberApiVersion(testingDiffrentVersion: apiVersion));
+
+        using var provider2 = services2.BuildServiceProvider();
+
+        return facade = provider2.GetRequiredService<ISccriptManagerDeleteAfter>();
     }
     public async Task<Dictionary<int, Guid>> ListAllCompiledFromDB()
     {
