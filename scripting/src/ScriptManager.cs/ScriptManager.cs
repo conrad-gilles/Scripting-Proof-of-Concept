@@ -28,7 +28,7 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
 
     #region Script Lifecycle
 
-    public async Task<Guid> CreateScript(string sourceCode, string userName = "Default", int? apiVersion = null, DateTime? createdAt = null)    //maybe minApiVersion is better?
+    public async Task<Guid> CreateScript(string sourceCode, string userName = "Default", int? apiVersion = null, DateTime? createdAt = null, bool checkForDuplicates = false)    //maybe minApiVersion is better?
     {
         Logger.LogDebug("Entered {MethodName} in {ClassName} apiVersion: {apiVersion}.", nameof(CreateScript), nameof(ScriptManagerFacade), apiVersion);
 
@@ -37,11 +37,11 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
 
         if (apiVersion == null)
         {
-            await Db.CreateAndInsertCustomerScript(sourceCode, id, userName, createdAt: createdAt);
+            await Db.CreateAndInsertCustomerScript(sourceCode, id, userName, createdAt: createdAt, checkForDuplicates: checkForDuplicates);
         }
         else
         {
-            await Db.CreateAndInsertCustomerScript(sourceCode, id, userName, (int)apiVersion, createdAt: createdAt);
+            await Db.CreateAndInsertCustomerScript(sourceCode, id, userName, (int)apiVersion, createdAt: createdAt, checkForDuplicates: checkForDuplicates);
         }
         return id;
 

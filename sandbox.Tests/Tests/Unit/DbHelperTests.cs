@@ -116,13 +116,41 @@ public class DbHelperTests
         Assert.IsTrue(after2.CompiledCaches.Any(c => c.AssemblyBytes != null && c.AssemblyBytes.Length >= 1));
     }
 
-    // [TestMethod]
-    // public async Task OldSourceCodeVersionsTest()
-    // {
-    //     Guid id = await facade!.CreateScript(sourceCodePedia!);
-    //     await facade.ClearScriptCache(id);
+    [TestMethod]
+    public async Task IsDuplicateTestAndListScriptsFilterTest()
+    {
+        Guid id1 = await facade!.CreateScript(sourceCodePedia!);
+        CustomerScript script1 = await facade.GetScript(id1);
 
+        Guid id2 = await facade!.CreateScript(sourceCodePedia!);
+        CustomerScript script2 = await facade.GetScript(id2);
 
-    // }
+        Assert.IsTrue(script1.Equals(script2));
+        var e = await Assert.ThrowsExceptionAsync<Ember.Scripting.DbHelperException>(async () =>
+        {
+            Guid id3 = await facade!.CreateScript(sourceCodePedia!, checkForDuplicates: true);
+        });
+
+        var allScripts = await facade.ListScripts();
+        Console.WriteLine("Count of allScrips= " + allScripts.Count());
+        Assert.IsTrue(allScripts.Count() == 2);
+
+        CustomerScriptFilter filter = new CustomerScriptFilter(scriptName: script1.ScriptName, sourceCode: script1.SourceCode);
+        var allScripts2 = await facade.ListScripts(filter);
+        Console.WriteLine("Count of allScrips= " + allScripts2.Count());
+        Assert.IsTrue(allScripts2.Count() == 2);
+
+        await facade!.CreateScript(sourceCodeActionV1!);
+        await facade!.CreateScript(sourceCodeActionV3!);
+        await facade!.CreateScript(sourceCodeActionV3!);
+
+        await facade!.CreateScript(sourceCodePedia!);
+        await facade!.CreateScript(sourceCodePedia!);
+        await facade!.CreateScript(sourceCodePedia!);
+        await facade!.CreateScript(sourceCodePedia!);
+        var allScripts3 = await facade.ListScripts(filter);
+        Console.WriteLine("Count of allScrips= " + allScripts3.Count());
+        Assert.IsTrue(allScripts3.Count() == 6);
+    }
 
 }

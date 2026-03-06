@@ -83,5 +83,15 @@ public class CustomerScript
         str = str.Replace("@", Environment.NewLine);
         return str;
     }
+
+    public bool Equals(CustomerScript script)
+    {
+        if (this.ScriptName == script.ScriptName
+        && this.SourceCode == script.SourceCode)
+        {
+            return true;
+        }
+        return false;
+    }
 }
 

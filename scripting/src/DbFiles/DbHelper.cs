@@ -261,7 +261,7 @@ internal class DbHelper
         }
 
     }
-    public async Task<CustomerScript> CreateAndInsertCustomerScript(string scriptString, Guid randomGUID, string createdBy, int? oldApiV = null, DateTime? createdAt = null, bool alsoCompAndSave = false)
+    public async Task<CustomerScript> CreateAndInsertCustomerScript(string scriptString, Guid randomGUID, string createdBy, int? oldApiV = null, DateTime? createdAt = null, bool alsoCompAndSave = false, bool checkForDuplicates = false)
     //todo make sure compiling happens after verification of isDuplicate
     {
         try
@@ -291,11 +291,12 @@ internal class DbHelper
                     CreatedBy = createdBy
                 };
 
-                bool testBool = false;
-                // testBool = await IsDuplicateScript(randomTestScript2);  //uncomment this if you dont want to check for duplicate existing in db when inserting
+                if (checkForDuplicates)
+                {
+                    checkForDuplicates = await IsDuplicateScript(randomTestScript2);  //uncomment this if you dont want to check for duplicate existing in db when inserting
+                }
 
-
-                if (testBool == false)
+                if (checkForDuplicates == false)
                 {
                     db.CustomerScripts.Add(randomTestScript2);
                     await db.SaveChangesAsync();
@@ -618,20 +619,24 @@ internal class DbHelper
         try
         {
             Logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(IsDuplicateScript), nameof(DbHelper));
+            // CustomerScriptFilter filter = new CustomerScriptFilter(scriptName: script.ScriptName, sourceCode: script.SourceCode);
+            CustomerScriptFilter filter = new CustomerScriptFilter(scriptName: script.ScriptName);
+            List<CustomerScript> allScripts = await GetAllCustomerScripts(filters: filter);
 
-            List<CustomerScript> allScripts = await GetAllCustomerScripts(includeCaches: true);
 
+
+            if (allScripts.Count() == 0)
+            {
+                return false;
+            }
             foreach (var item in allScripts)
             {
-                if (item.Id == script.Id
-                    || item.ScriptName == script.ScriptName
-                    || item.SourceCode == script.SourceCode
-                    || Compiler.IsTheSameTree(item.SourceCode!, script.SourceCode!))
+                if (Compiler.IsTheSameTree(item.SourceCode!, script.SourceCode!))
                 {
                     return true;
                 }
             }
-            return false;
+            return false;   //but name is duplicate! only source code is unique, also this could be an issue if the name of the script is not taken from the source code as it could lead to a script having a diffrent name but the same source code as another this would lead to this algorithm not finginh the duplicate script
         }
         catch (Exception e)
         {
