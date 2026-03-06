@@ -242,7 +242,8 @@ async Task MainProgramSwitch(IServiceProvider provider)
 
                     case "GetCompiledCache":
                         scriptId = await rm.GetIdInConsoleAsync();
-                        byte[] arr = await facade.GetCompiledCache(scriptId, currentApiVersion);
+                        ScriptCompiledCache cache = await facade.GetCompiledCache(scriptId, currentApiVersion);
+                        byte[] arr = cache.AssemblyBytes!;
                         Console.WriteLine(arr.ToString());
                         break;
 

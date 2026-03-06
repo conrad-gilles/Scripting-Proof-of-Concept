@@ -367,10 +367,11 @@ public class ScriptManagerFacadeTests
     {
         Guid id = await facade!.CreateScript(sourceCodePedia!);
 
-        byte[] cache = await facade.GetCompiledCache(id);
+        ScriptCompiledCache cache = await facade.GetCompiledCache(id);
+        byte[] cacheAB = cache.AssemblyBytes!;
 
-        Assert.IsNotNull(cache);
-        Assert.IsTrue(cache.Length > 0);
+        Assert.IsNotNull(cacheAB);
+        Assert.IsTrue(cacheAB.Length > 0);
     }
 
     [TestMethod]
@@ -378,8 +379,9 @@ public class ScriptManagerFacadeTests
     {
         Guid id = await facade!.CreateScript(sourceCodePedia!);
 
-        byte[] cache = await facade.GetCompiledCache(id);
-        Assert.IsTrue(cache.Length > 0);
+        ScriptCompiledCache cache = await facade.GetCompiledCache(id);
+        byte[] cacheAB = cache.AssemblyBytes!;
+        Assert.IsTrue(cacheAB.Length > 0);
 
         await facade.ClearScriptCache(id);
 

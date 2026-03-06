@@ -28,20 +28,20 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
 
     #region Script Lifecycle
 
-    public async Task<Guid> CreateScript(string sourceCode, string userName = "Default", int apiVersion = -1, DateTime? createdAt = null)    //maybe minApiVersion is better?
+    public async Task<Guid> CreateScript(string sourceCode, string userName = "Default", int? apiVersion = null, DateTime? createdAt = null)    //maybe minApiVersion is better?
     {
         Logger.LogDebug("Entered {MethodName} in {ClassName} apiVersion: {apiVersion}.", nameof(CreateScript), nameof(ScriptManagerFacade), apiVersion);
 
         int currentApiVersion = await GetRecentApiVersion();
         Guid id = Guid.NewGuid();
 
-        if (apiVersion == -1)
+        if (apiVersion == null)
         {
             await Db.CreateAndInsertCustomerScript(sourceCode, id, userName, createdAt: createdAt);
         }
         else
         {
-            await Db.CreateAndInsertCustomerScript(sourceCode, id, userName, apiVersion, createdAt: createdAt);
+            await Db.CreateAndInsertCustomerScript(sourceCode, id, userName, (int)apiVersion, createdAt: createdAt);
         }
         return id;
 
@@ -105,22 +105,16 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
     #region Compilation Operations
 
     // Compiles a specific script for a target API version, if target version not specified just takes the recent one
-    public async Task CompileScript(Guid scriptId, int targetApiVersion = -1)
+    public async Task CompileScript(Guid scriptId, int? targetApiVersion = null)
     {
         Logger.LogTrace("Entered {MethodName} in {ClassName} with scriptId: {ScriptId} and targetApiVersion: {TargetApiVersion}.", nameof(CompileScript), nameof(ScriptManagerFacade), scriptId, targetApiVersion);
 
-        if (targetApiVersion == -1)
-        {
-            CustomerScript script = await Db.GetCustomerScript(scriptId);
-            await Db.CreateAndInsertCompiledCache(script);
-        }
-        else
+        if (targetApiVersion == null)
         {
             targetApiVersion = await GetRecentApiVersion();
-            CustomerScript script = await Db.GetCustomerScript(scriptId);
-            await Db.CreateAndInsertCompiledCache(script, oldApiV: targetApiVersion);
         }
-
+        CustomerScript script = await Db.GetCustomerScript(scriptId);
+        await Db.CreateAndInsertCompiledCache(script, apiV: targetApiVersion);
     }
 
     // Compiles all compatible scripts for a new API version
@@ -218,12 +212,12 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
     #region Execution Operations
 
     // Executes a Generator Action script with provided context, realisitcally not needed
-    public async Task<ActionResultBaseClass> ExecuteActionScript(Guid scriptId, GeneratorContext context, int currentApiVersion = -1)    //lowkey so many errors better to have one
+    public async Task<ActionResultBaseClass> ExecuteActionScript(Guid scriptId, GeneratorContext context, int? currentApiVersion = null)    //lowkey so many errors better to have one
     {
         Logger.LogTrace("Entered {MethodName} in {ClassName} with scriptId: {ScriptId}.", nameof(ExecuteActionScript), nameof(ScriptManagerFacade), scriptId);
         try
         {
-            if (currentApiVersion == -1)
+            if (currentApiVersion == null)
             {
                 currentApiVersion = await GetRecentApiVersion();
             }
@@ -231,7 +225,7 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
             byte[]? compiledScript = null;
             try
             {
-                var temp = await Db.GetCompiledScripCache(scriptId, currentApiVersion);
+                var temp = await Db.GetCompiledScripCache(scriptId, (int)currentApiVersion);
                 compiledScript = temp.AssemblyBytes;
             }
             catch (Exception e)
@@ -239,7 +233,7 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
                 Logger.LogError("Retrieval failed jit comp launched:" + e.ToString());
                 await CompileScript(scriptId, currentApiVersion);
                 //try again, if fails again we catch error outside
-                var temp = await Db.GetCompiledScripCache(scriptId, currentApiVersion);
+                var temp = await Db.GetCompiledScripCache(scriptId, (int)currentApiVersion);
                 compiledScript = temp.AssemblyBytes;
             }
 
@@ -257,12 +251,12 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
     }
 
     // Executes a Generator Condition script and returns boolean result, realisitcally not needed
-    public async Task<bool> ExecuteConditionScript(Guid scriptId, GeneratorContext context, int ApiVersion = -1)
+    public async Task<bool> ExecuteConditionScript(Guid scriptId, GeneratorContext context, int? ApiVersion = null)
     {
         Logger.LogTrace("Entered {MethodName} in {ClassName} with scriptId: {ScriptId}.", nameof(ExecuteConditionScript), nameof(ScriptManagerFacade), scriptId);
         try
         {
-            if (ApiVersion == -1)
+            if (ApiVersion == null)
             {
                 ApiVersion = await GetRecentApiVersion();
             }
@@ -270,7 +264,7 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
             byte[]? compiledScript = null;
             try
             {
-                var temp = await Db.GetCompiledScripCache(scriptId, ApiVersion);
+                var temp = await Db.GetCompiledScripCache(scriptId, (int)ApiVersion);
                 compiledScript = temp.AssemblyBytes;
             }
             catch (Exception e)
@@ -278,7 +272,7 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
                 Logger.LogError("Retrieval failed jit comp launched:" + e.ToString());
                 await CompileScript(scriptId, await GetRecentApiVersion());
                 //try again, if fails again we catch error outside
-                var temp = await Db.GetCompiledScripCache(scriptId, ApiVersion);
+                var temp = await Db.GetCompiledScripCache(scriptId, (int)ApiVersion);
                 compiledScript = temp.AssemblyBytes;
             }
 
@@ -336,18 +330,20 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
     #region Cache Management
 
     // Retrieves compiled assembly bytes from cache
-    public async Task<byte[]> GetCompiledCache(Guid scriptId, int currentApiVersion = -1)
+    // public async Task<byte[]> GetCompiledCache(Guid scriptId, int? currentApiVersion = null)
+    public async Task<ScriptCompiledCache> GetCompiledCache(Guid scriptId, int? currentApiVersion = null)
     {
         Logger.LogTrace("Entered {MethodName} in {ClassName} with scriptId: {ScriptId}.", nameof(GetCompiledCache), nameof(ScriptManagerFacade), scriptId);
-        if (currentApiVersion == -1)
+        if (currentApiVersion == null)
         {
             currentApiVersion = await GetRecentApiVersion();
         }
         try
         {
-            var temp = await Db.GetCompiledScripCache(scriptId, currentApiVersion);
-            byte[]? compiledScript = temp.AssemblyBytes;
-            return compiledScript!;
+            var temp = await Db.GetCompiledScripCache(scriptId, (int)currentApiVersion);
+            // byte[]? compiledScript = temp.AssemblyBytes;
+            return temp;
+            // return compiledScript!;
         }
         catch (Exception e)
         {

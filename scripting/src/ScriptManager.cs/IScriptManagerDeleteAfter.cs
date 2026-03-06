@@ -14,7 +14,7 @@ public interface ISccriptManagerDeleteAfter : IScriptManagerExtended
   /// <param name="scriptId"></param>
   /// <param name="targetApiVersion"></param>
   /// <returns></returns>
-  Task CompileScript(Guid scriptId, int targetApiVersion = -1);
+  Task CompileScript(Guid scriptId, int? targetApiVersion = null);
 
   /// <summary>
   /// Compiles all compatible scripts for a new API version
@@ -68,7 +68,7 @@ public interface ISccriptManagerDeleteAfter : IScriptManagerExtended
   /// <param name="context"></param>
   /// <param name="apiVersion"></param>
   /// <returns></returns>
-  Task<ActionResultBaseClass> ExecuteActionScript(Guid scriptId, GeneratorContext context, int apiVersion = -1);
+  Task<ActionResultBaseClass> ExecuteActionScript(Guid scriptId, GeneratorContext context, int? apiVersion = null);
 
   /// <summary>
   /// Executes a Generator Condition script and returns boolean result, realisitcally not needed
@@ -77,7 +77,7 @@ public interface ISccriptManagerDeleteAfter : IScriptManagerExtended
   /// <param name="context"></param>
   /// <param name="apiVersion"></param>
   /// <returns></returns>
-  Task<bool> ExecuteConditionScript(Guid scriptId, GeneratorContext context, int apiVersion = -1);
+  Task<bool> ExecuteConditionScript(Guid scriptId, GeneratorContext context, int? apiVersion = null);
 
   // /// <summary>
   // /// Generic execution that detects script type automatically
@@ -98,7 +98,7 @@ public interface ISccriptManagerDeleteAfter : IScriptManagerExtended
   /// <param name="scriptId"></param>
   /// <param name="currentApiVersion"></param>
   /// <returns></returns>
-  Task<byte[]> GetCompiledCache(Guid scriptId, int currentApiVersion = -1);
+  Task<ScriptCompiledCache> GetCompiledCache(Guid scriptId, int? currentApiVersion = null);
 
   /// <summary>
   /// Removes all compiled versions of a script

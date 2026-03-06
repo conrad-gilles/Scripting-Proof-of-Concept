@@ -337,7 +337,7 @@ internal class DbHelper
             // throw new DbHelperException(nameof(CreateAndInsertCustomerScript) + " failed in " + nameof(DbHelper), e);
         }
     }
-    public async Task CreateAndInsertCompiledCache(CustomerScript script, int oldApiV = -1)
+    public async Task CreateAndInsertCompiledCache(CustomerScript script, int? apiV = null)
     {
         try
         {
@@ -345,38 +345,35 @@ internal class DbHelper
 
             using (var db = new MyContext())
             {
-                int currentApiVersion = GetRecentApiVersion();
+                // int currentApiVersion;
+                if (apiV == null)
+                {
+                    apiV = GetRecentApiVersion();
+                }
 
                 var getTupleFromVal = Compiler.BasicValidationBeforeCompiling(script.SourceCode!);
 
-                if (await db.ScriptCompiledCaches.AnyAsync(c => c.ScriptId == script.Id && c.ApiVersion == currentApiVersion))
+                if (await db.ScriptCompiledCaches.AnyAsync(c => c.ScriptId == script.Id && c.ApiVersion == apiV))
                 {
                     Logger.LogInformation("Skipping insert of: " + getTupleFromVal.className + " because it already exists already exists.");
                     Console.WriteLine("Skipping insert of: " + getTupleFromVal.className + " because it already exists already exists.");
-                    return;
+                    throw new DbHelperException(nameof(CreateAndInsertCompiledCache) + " failed in " + nameof(DbHelper) + "more details: " + "Skipping insert of: " + getTupleFromVal.className + " because it already exists already exists."); ;
+                    // return;
                 }
                 else
                 {
                     byte[] tempComp;
-                    if (oldApiV != -1)
-                    {
-                        // List<MetadataReference> refs = Compiler.GetReferencesForVersion(oldApiV, References);
-                        tempComp = Compiler.RunCompilation(script.SourceCode!, metaData: getTupleFromVal);
-                        currentApiVersion = oldApiV;
-                    }
-                    else
-                    {
-                        tempComp = Compiler.RunCompilation(script.SourceCode!, metaData: getTupleFromVal);
-                    }
+                    tempComp = Compiler.RunCompilation(script.SourceCode!, metaData: getTupleFromVal);
+
                     ScriptCompiledCache tempCache = new ScriptCompiledCache
                     {
                         ScriptId = script.Id,
-                        ApiVersion = currentApiVersion,
+                        ApiVersion = (int)apiV,
                         AssemblyBytes = tempComp,
                         CompilationDate = DateTime.UtcNow,
                         CompilationSuccess = true,
                         CompilationErrors = "",
-                        OldSourceCode = script.SourceCode   //todo
+                        OldSourceCode = script.SourceCode
                     };
                     await InsertScriptCompiledCache(tempCache);
                     await db.SaveChangesAsync();
