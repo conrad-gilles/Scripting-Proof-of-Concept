@@ -94,4 +94,36 @@ public class SanboxTests
          });
         Assert.IsTrue(ex.Message.Contains("No Context class defined in") && ex.Message.Contains("for the passed API version."));
     }
+
+    [TestMethod]
+    public async Task GetDictionaryTest()
+    {
+        Dictionary<int, Type> contextVersionMap = new()
+        {
+            // {0, typeof(GeneratorContext)},
+            {1, typeof(ReadOnlyContext.GeneratorContext)},
+            {2, typeof(RWContext.GeneratorContext)},
+            {3, typeof(GeneratorContextV2.GeneratorContext)},
+            {4, typeof(GeneratorContextV3.GeneratorContext)},
+            {5, typeof(GeneratorContextNoInherVaccine.GeneratorContext)},
+        };
+
+        ScriptFactory sf;
+        facade = EmberMethods.GetNewScriptManagerInstance(1);
+        sf = new ScriptFactory(facade);
+        Dictionary<int, Type> retrievedDict = sf.GetDictionary();
+        retrievedDict.Reverse();
+        PrintDictToConsole(contextVersionMap);
+        PrintDictToConsole(retrievedDict);
+        CollectionAssert.AreEquivalent(contextVersionMap, retrievedDict);
+    }
+
+    public void PrintDictToConsole(Dictionary<int, Type> dict)
+    {
+        Console.WriteLine("Start of dict String:");
+        foreach (var pair in dict)
+        {
+            Console.WriteLine("Key: " + pair.Key + ", Value: " + pair.Value);
+        }
+    }
 }
