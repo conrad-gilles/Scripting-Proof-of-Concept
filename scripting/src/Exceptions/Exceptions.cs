@@ -151,6 +151,7 @@ public class ExceptionHelper    //for future to traverse exception chain
             ex = ex.InnerException!;
         }
 
+        exceptions.Add(baseException);
         exceptions.Reverse();
 
         for (int j = 0; j < exceptions.Count(); j++)

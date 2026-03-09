@@ -167,7 +167,7 @@ public class DbHelperTests
                     {
                         try
                         {
-                            throw new NoFileWithThisClassNameFoundException();
+                            throw new NoFileWithThisClassNameFoundException("random message0");
                         }
                         catch (Exception e)
                         {
@@ -198,10 +198,12 @@ public class DbHelperTests
 
             Exception baseException = e.GetBaseException();
             Assert.IsInstanceOfType(baseException, typeof(NoFileWithThisClassNameFoundException));
+            // Assert.IsTrue(e.)
 
             Exception exAtIndex0 = ExceptionHelper.GetExceptionFromChain(e, 0);
             Console.WriteLine(exAtIndex0.GetType().Name);
             Assert.IsInstanceOfType(exAtIndex0, typeof(CreateStringFromCsFileException));
+            Assert.IsTrue(exAtIndex0.Message == "random message4");
 
             Exception exAtIndex1 = ExceptionHelper.GetExceptionFromChain(e, 1);
             Console.WriteLine(exAtIndex1.GetType().Name);
@@ -214,6 +216,7 @@ public class DbHelperTests
             Exception exAtIndex3 = ExceptionHelper.GetExceptionFromChain(e, 3);
             Console.WriteLine(exAtIndex3.GetType().Name);
             Assert.IsInstanceOfType(exAtIndex3, typeof(CompilationFailedException));
+            Assert.IsTrue(exAtIndex3.Message == "random message1");
 
             Exception exAtIndex4 = ExceptionHelper.GetExceptionFromChain(e, 4);
             Console.WriteLine(exAtIndex4.GetType().Name);
@@ -234,41 +237,43 @@ public class DbHelperTests
         //    Assert.IsInstanceOfType(exAtIndex6, typeof(CreateStringFromCsFileException));
     });
 
+            Console.WriteLine("First tests ran.");
 
-            Exception exAtNegIndex0 = ExceptionHelper.GetExceptionFromChain(e, 0);
+            Exception exAtNegIndex0 = ExceptionHelper.GetExceptionFromChainReversed(e, 0);
             Console.WriteLine(exAtNegIndex0.GetType().Name);
             Assert.IsInstanceOfType(exAtNegIndex0, typeof(NoFileWithThisClassNameFoundException));
 
-            Exception exAtNegIndex1 = ExceptionHelper.GetExceptionFromChain(e, 1);
+            Exception exAtNegIndex1 = ExceptionHelper.GetExceptionFromChainReversed(e, 1);
             Console.WriteLine(exAtNegIndex1.GetType().Name);
             Assert.IsInstanceOfType(exAtNegIndex1, typeof(CompilationFailedException));
 
-            Exception exAtNegIndex2 = ExceptionHelper.GetExceptionFromChain(e, 2);
+            Exception exAtNegIndex2 = ExceptionHelper.GetExceptionFromChainReversed(e, 2);
             Console.WriteLine(exAtNegIndex2.GetType().Name);
             Assert.IsInstanceOfType(exAtNegIndex2, typeof(ScriptExecutionException));
 
-            Exception exAtNegIndex3 = ExceptionHelper.GetExceptionFromChain(e, 3);
+            Exception exAtNegIndex3 = ExceptionHelper.GetExceptionFromChainReversed(e, 3);
             Console.WriteLine(exAtNegIndex3.GetType().Name);
             Assert.IsInstanceOfType(exAtNegIndex3, typeof(GetScriptPathFromFolderException));
 
-            Exception exAtNegIndex4 = ExceptionHelper.GetExceptionFromChain(e, 4);
+            Exception exAtNegIndex4 = ExceptionHelper.GetExceptionFromChainReversed(e, 4);
             Console.WriteLine(exAtNegIndex4.GetType().Name);
             Assert.IsInstanceOfType(exAtNegIndex4, typeof(CreateStringFromCsFileException));
 
 
             await Assert.ThrowsExceptionAsync<Exception>(async () =>
-      {
-          Exception exAtNegIndex5 = ExceptionHelper.GetExceptionFromChain(e, 5);
-          Console.WriteLine(exAtNegIndex5.GetType().Name);
-          //    Assert.IsInstanceOfType(exAtNegIndex5, typeof(CreateStringFromCsFileException));
-      });
+              {
+                  Exception exAtNegIndex5 = ExceptionHelper.GetExceptionFromChainReversed(e, 5);
+                  Console.WriteLine(exAtNegIndex5.GetType().Name);
+                  Assert.IsInstanceOfType(exAtNegIndex5, typeof(CreateStringFromCsFileException));
+              });
             await Assert.ThrowsExceptionAsync<Exception>(async () =>
-           {
-               Exception exAtNegIndex6 = ExceptionHelper.GetExceptionFromChain(e, 6);
-               Console.WriteLine(exAtNegIndex6.GetType().Name);
-               //    Assert.IsInstanceOfType(exAtNegIndex6, typeof(CreateStringFromCsFileException));
-           });
+               {
+                   Exception exAtNegIndex6 = ExceptionHelper.GetExceptionFromChainReversed(e, 6);
+                   Console.WriteLine(exAtNegIndex6.GetType().Name);
+                   Assert.IsInstanceOfType(exAtNegIndex6, typeof(CreateStringFromCsFileException));
+               });
 
+            // Assert.IsTrue(false);
         }
     }
 

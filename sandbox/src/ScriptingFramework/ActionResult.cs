@@ -95,7 +95,7 @@ public class ActionResultV3NoInheritance : ActionResultBaseClass
     {
         return $"[Message contains either failure or succes: ] {Message}";
     }
-    public static ActionResultV3NoInheritance UpgradeV2(ActionResultV2 actionResult)
+    public static ActionResultV3NoInheritance UpgradeV2(ActionResultV2 actionResult)    //interface plus downgrade async
     {
         string tempMessage = "";
         if (actionResult.Message != null)
