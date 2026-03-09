@@ -10,7 +10,7 @@ public class ScriptTests
 
 
     ISccriptManagerDeleteAfter? facade;
-    RandomMethods? rm;
+    EmberMethods? em;
     string? ActionResultVersionSpecific;
     string? sourceCodeActionV1;
     string? sourceCodeActionV2;
@@ -33,43 +33,43 @@ public class ScriptTests
             builder.AddSerilog(dispose: true);
         });
 
-        ScriptingServiceCollectionExtensions.AddEmberScripting(services, RandomMethods.GetReferences(), RandomMethods.GetEmberApiVersion());
+        ScriptingServiceCollectionExtensions.AddEmberScripting(services, EmberMethods.GetReferences(), EmberMethods.GetEmberApiVersion());
 
         using var provider = services.BuildServiceProvider();
 
         facade = provider.GetRequiredService<ISccriptManagerDeleteAfter>();
-        rm = new RandomMethods(facade);
+        em = new EmberMethods(facade);
 
         ActionResultVersionSpecific = "[Message contains either failure or succes: ] ";  //change this if action result version changes it will thraow cause of message contains
-        sourceCodeActionV1 = RandomMethods.CreateStringFromCsFile(
+        sourceCodeActionV1 = EmberMethods.CreateStringFromCsFile(
            Path.GetFullPath(Path.Combine(
                AppDomain.CurrentDomain.BaseDirectory,
                "..", "..", "..", "..",
                "sandbox", "src", "Scripts", "ActionScripts", "AddPediatricTestsV1.cs"
            ))
        );
-        sourceCodeActionV2 = RandomMethods.CreateStringFromCsFile(
+        sourceCodeActionV2 = EmberMethods.CreateStringFromCsFile(
         Path.GetFullPath(Path.Combine(
             AppDomain.CurrentDomain.BaseDirectory,
             "..", "..", "..", "..",
             "sandbox", "src", "Scripts", "ActionScripts", "AddPediatricTestsV2.cs"
         ))
     );
-        sourceCodeActionV3 = RandomMethods.CreateStringFromCsFile(
+        sourceCodeActionV3 = EmberMethods.CreateStringFromCsFile(
        Path.GetFullPath(Path.Combine(
            AppDomain.CurrentDomain.BaseDirectory,
            "..", "..", "..", "..",
            "sandbox", "src", "Scripts", "ActionScripts", "AddPediatricTestsV3.cs"
        ))
    );
-        sourceCodeVaccineAction = RandomMethods.CreateStringFromCsFile(
+        sourceCodeVaccineAction = EmberMethods.CreateStringFromCsFile(
           Path.GetFullPath(Path.Combine(
           AppDomain.CurrentDomain.BaseDirectory,
           "..", "..", "..", "..",
           "sandbox", "src", "Scripts", "ActionScripts", "VaccineScript.cs"
       ))
       );
-        sourceCodePedia = RandomMethods.CreateStringFromCsFile(
+        sourceCodePedia = EmberMethods.CreateStringFromCsFile(
        Path.GetFullPath(Path.Combine(
            AppDomain.CurrentDomain.BaseDirectory,
                    "..", "..", "..", "..",
@@ -85,9 +85,9 @@ public class ScriptTests
         await facade!.EnsureDeletedCreated();
         Guid id = await facade!.CreateScript(sourceCodeActionV1!);
         CustomerScript retrievedScript = await facade.GetScript(id);
-        var context = rm!.GetTestingContext<GeneratorContextNoInherVaccine.GeneratorContext>(justForTesting: retrievedScript);
+        var context = em!.GetTestingContext<GeneratorContextNoInherVaccine.GeneratorContext>(justForTesting: retrievedScript);
         object resultBeforeUpgrade = await facade.ExecuteScriptById(id, context);
-        ActionResultV3NoInheritance result = RandomMethods.UpgradeActionResult(resultBeforeUpgrade);
+        ActionResultV3NoInheritance result = EmberMethods.UpgradeActionResult(resultBeforeUpgrade);
         string shouldReturn = ActionResultVersionSpecific + "Pediatric tests added";
         Assert.IsInstanceOfType(result, typeof(ActionResultBaseClass));
         Assert.IsInstanceOfType(result, typeof(ActionResultV3NoInheritance));
@@ -100,9 +100,9 @@ public class ScriptTests
     {
         Guid id = await facade!.CreateScript(sourceCodeActionV2!);
         CustomerScript retrievedScript = await facade.GetScript(id);
-        var context = rm!.GetTestingContext<GeneratorContextNoInherVaccine.GeneratorContext>(justForTesting: retrievedScript);
+        var context = em!.GetTestingContext<GeneratorContextNoInherVaccine.GeneratorContext>(justForTesting: retrievedScript);
         object resultBeforeUpgrade = await facade.ExecuteScriptById(id, context);
-        ActionResultV3NoInheritance result = RandomMethods.UpgradeActionResult(resultBeforeUpgrade);
+        ActionResultV3NoInheritance result = EmberMethods.UpgradeActionResult(resultBeforeUpgrade);
         string shouldReturn = ActionResultVersionSpecific + "Pediatric tests added";
         Assert.IsInstanceOfType(result, typeof(ActionResultBaseClass));
         Assert.IsInstanceOfType(result, typeof(ActionResultV3NoInheritance));
@@ -115,9 +115,9 @@ public class ScriptTests
     {
         Guid id = await facade!.CreateScript(sourceCodeActionV3!);
         CustomerScript retrievedScript = await facade.GetScript(id);
-        var context = rm!.GetTestingContext<GeneratorContextNoInherVaccine.GeneratorContext>(justForTesting: retrievedScript);
+        var context = em!.GetTestingContext<GeneratorContextNoInherVaccine.GeneratorContext>(justForTesting: retrievedScript);
         object resultBeforeUpgrade = await facade.ExecuteScriptById(id, context);
-        ActionResultV3NoInheritance result = RandomMethods.UpgradeActionResult(resultBeforeUpgrade);
+        ActionResultV3NoInheritance result = EmberMethods.UpgradeActionResult(resultBeforeUpgrade);
         string shouldReturn = ActionResultVersionSpecific + "Pediatric tests added V3";
         Assert.IsInstanceOfType(result, typeof(ActionResultBaseClass));
         Assert.IsInstanceOfType(result, typeof(ActionResultV3NoInheritance));
@@ -130,7 +130,7 @@ public class ScriptTests
     {
         Guid id = await facade!.CreateScript(sourceCodeVaccineAction!);
         CustomerScript retrievedScript = await facade.GetScript(id);
-        var context = rm!.GetTestingContext<GeneratorContextNoInherVaccine.GeneratorContext>(justForTesting: retrievedScript);
+        var context = em!.GetTestingContext<GeneratorContextNoInherVaccine.GeneratorContext>(justForTesting: retrievedScript);
         object result = await facade.ExecuteScriptById(id, context);
         string shouldReturn = ActionResultVersionSpecific + "Polio Vaccine added";
         Assert.IsInstanceOfType(result, typeof(ActionResultBaseClass));
@@ -145,7 +145,7 @@ public class ScriptTests
     {
         Guid id = await facade!.CreateScript(sourceCodePedia!);
         CustomerScript retrievedScript = await facade.GetScript(id);
-        var context = rm!.GetTestingContext<GeneratorContextNoInherVaccine.GeneratorContext>(justForTesting: retrievedScript);
+        var context = em!.GetTestingContext<GeneratorContextNoInherVaccine.GeneratorContext>(justForTesting: retrievedScript);
         object result = await facade.ExecuteScriptById(id, context);
         string shouldReturn = "True";
         Assert.IsInstanceOfType(result, typeof(bool));
@@ -184,7 +184,7 @@ public class ScriptTests
         DateTime? beforeUpdateCA = retrievedScript.CreatedAt;
         DateTime? beforeUpdateMA = retrievedScript.ModifiedAt;
 
-        var context = rm!.GetTestingContext<GeneratorContextNoInherVaccine.GeneratorContext>(justForTesting: retrievedScript);
+        var context = em!.GetTestingContext<GeneratorContextNoInherVaccine.GeneratorContext>(justForTesting: retrievedScript);
         object result = await facade.ExecuteScriptById(id, context);
 
         await Task.Delay(2000);

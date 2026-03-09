@@ -41,7 +41,7 @@ try
         builder.AddSerilog(dispose: true);
     });
 
-    ScriptingServiceCollectionExtensions.AddEmberScripting(services, RandomMethods.GetReferences(), RandomMethods.GetEmberApiVersion());
+    ScriptingServiceCollectionExtensions.AddEmberScripting(services, EmberMethods.GetReferences(), EmberMethods.GetEmberApiVersion());
 
     using var provider = services.BuildServiceProvider();
     await MainProgramSwitch(provider);
@@ -59,11 +59,11 @@ async Task MainProgramSwitch(IServiceProvider provider)
         // ScriptManagerFacade facade = provider.GetRequiredService<ScriptManagerFacade>();
         ISccriptManagerDeleteAfter facade = provider.GetRequiredService<ISccriptManagerDeleteAfter>();
         IScriptManager facade1 = provider.GetRequiredService<IScriptManager>();
-        currentApiVersion = await facade.GetRecentApiVersion();
+        currentApiVersion = await facade.GetRunningApiVersion();
 
-        RandomMethods rm = new RandomMethods(facade);
+        EmberMethods em = new EmberMethods(facade);
 
-        Dictionary<int, Guid> sourceDict = await rm.ListAllStoredSourceCodes();
+        Dictionary<int, Guid> sourceDict = await em.ListAllStoredSourceCodes();
         Dictionary<int, Guid> cacheDict = [];
         Guid scriptId = new Guid();
 
@@ -88,33 +88,33 @@ async Task MainProgramSwitch(IServiceProvider provider)
                         break;
                     case "source":
 
-                        await rm.GetSourceCodeInSwitch();
+                        await em.GetSourceCodeInSwitch();
                         break;
                     case "reset":
                         await facade.EnsureDeletedCreated();
-                        await rm.ListAllCompiledFromDB();
+                        await em.ListAllCompiledFromDB();
                         break;
                     case "comp":
-                        await rm.CompileAllScriptsInFolderAndSaveToDB(scriptFolderPath, userName, currentApiVersion);
+                        await em.CompileAllScriptsInFolderAndSaveToDB(scriptFolderPath, userName, currentApiVersion);
 
-                        await rm.ListAllCompiledFromDB();
+                        await em.ListAllCompiledFromDB();
                         break;
                     case "comp source":
 
                         await facade.CompileAllScripts();
                         break;
                     case "comp mv":
-                        scriptId = await rm.GetIdInConsoleAsync(fromSrc: true);
+                        scriptId = await em.GetIdInConsoleAsync(fromSrc: true);
                         for (int i = 0; i < 5; i++)
                         {
                             await facade.CompileScript(scriptId, i);
                         }
                         break;
                     case "ls":
-                        cacheDict = await rm.ListAllCompiledFromDB();
+                        cacheDict = await em.ListAllCompiledFromDB();
                         break;
                     case "ls source":
-                        sourceDict = await rm.ListAllStoredSourceCodes();
+                        sourceDict = await em.ListAllStoredSourceCodes();
                         break;
                     case "dupes":
                         await facade.RemoveDuplicates();
@@ -126,16 +126,16 @@ async Task MainProgramSwitch(IServiceProvider provider)
                     #region Script Lifecycle
 
                     case "CreateScript":
-                        string sourceCode = RandomMethods.CreateStringFromCsFile(Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "src", "Scripts", "ConditionScripts", "PediatricCondition.cs")));
+                        string sourceCode = EmberMethods.CreateStringFromCsFile(Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "src", "Scripts", "ConditionScripts", "PediatricCondition.cs")));
                         await facade.CreateScript(sourceCode, "Gilles");
                         break;
                     case "CreateScriptWithOld":
-                        string sourceCodeOld = RandomMethods.CreateStringFromCsFile(Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "src", "Scripts", "ConditionScripts", "PediatricCondition.cs")));
+                        string sourceCodeOld = EmberMethods.CreateStringFromCsFile(Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "src", "Scripts", "ConditionScripts", "PediatricCondition.cs")));
                         await facade.CreateScript(sourceCodeOld, "Gilles", 2);
                         break;
 
                     case "UpdateScript":
-                        Guid idEdit = await rm.GetIdInConsoleAsync(fromSrc: true);
+                        Guid idEdit = await em.GetIdInConsoleAsync(fromSrc: true);
 
                         var customerScript = await facade.GetScript(idEdit);
                         var creationDate = customerScript.CreatedAt;
@@ -143,7 +143,7 @@ async Task MainProgramSwitch(IServiceProvider provider)
                         Console.WriteLine("Copy paste your new version file path now:");
                         string? userInput2 = Console.ReadLine();
 
-                        string? str = RandomMethods.CreateStringFromCsFile(userInput2!);
+                        string? str = EmberMethods.CreateStringFromCsFile(userInput2!);
 
                         //In reality it would be better like this but doesnt work because cant paste too much in console:
                         // Console.WriteLine("Copy paste your new version now:");
@@ -153,12 +153,12 @@ async Task MainProgramSwitch(IServiceProvider provider)
                         break;
 
                     case "DeleteScript":
-                        scriptId = await rm.GetIdInConsoleAsync(fromSrc: true);
+                        scriptId = await em.GetIdInConsoleAsync(fromSrc: true);
                         await facade.DeleteScript(scriptId);
                         break;
 
                     case "GetScript":
-                        scriptId = await rm.GetIdInConsoleAsync(fromSrc: true);
+                        scriptId = await em.GetIdInConsoleAsync(fromSrc: true);
                         CustomerScript s = await facade.GetScript(scriptId);
                         Console.WriteLine(s.ToString());
                         break;
@@ -176,7 +176,7 @@ async Task MainProgramSwitch(IServiceProvider provider)
                     #region Compilation Operations
 
                     case "CompileScript":   //todo check
-                        scriptId = await rm.GetIdInConsoleAsync(fromSrc: true);
+                        scriptId = await em.GetIdInConsoleAsync(fromSrc: true);
                         await facade.CompileScript(scriptId);    //should not compile if already present in db;
                         break;
 
@@ -185,19 +185,19 @@ async Task MainProgramSwitch(IServiceProvider provider)
                         break;
 
                     case "RecompileScript":
-                        scriptId = await rm.GetIdInConsoleAsync(fromSrc: true);
+                        scriptId = await em.GetIdInConsoleAsync(fromSrc: true);
                         await facade.RecompileScript(scriptId);
                         break;
 
                     case "ValidateScript":
-                        scriptId = await rm.GetIdInConsoleAsync(fromSrc: true);
+                        scriptId = await em.GetIdInConsoleAsync(fromSrc: true);
                         var script = await facade.GetScript(scriptId);
                         string answer = facade.ValidateScript(script.SourceCode!);
                         Console.WriteLine(answer);
                         break;
 
                     case "GetCompilationErrors":    //todo test by turning off auto check when adding same with above
-                        scriptId = await rm.GetIdInConsoleAsync(fromSrc: true);
+                        scriptId = await em.GetIdInConsoleAsync(fromSrc: true);
                         string compAnswer = await facade.GetCompilationErrors(scriptId);
                         Console.WriteLine(compAnswer);
                         break;
@@ -207,20 +207,20 @@ async Task MainProgramSwitch(IServiceProvider provider)
                     #region Execution Operations
 
                     case "ExecuteActionScript":
-                        scriptId = await rm.GetIdInConsoleAsync(fromSrc: true);
-                        ActionResultBaseClass result = await facade.ExecuteActionScript(scriptId, rm.GetTestingContext<GeneratorContextV3.GeneratorContext>());
+                        scriptId = await em.GetIdInConsoleAsync(fromSrc: true);
+                        ActionResultBaseClass result = await facade.ExecuteActionScript(scriptId, em.GetTestingContext<GeneratorContextV3.GeneratorContext>());
                         Console.WriteLine(result.ToString());   //you could do whatever with it
                         break;
 
                     case "ExecuteConditionScript":
-                        scriptId = await rm.GetIdInConsoleAsync(fromSrc: true);
-                        bool resultCond = await facade.ExecuteConditionScript(scriptId, rm.GetTestingContext<GeneratorContextV3.GeneratorContext>());
+                        scriptId = await em.GetIdInConsoleAsync(fromSrc: true);
+                        bool resultCond = await facade.ExecuteConditionScript(scriptId, em.GetTestingContext<GeneratorContextV3.GeneratorContext>());
                         Console.WriteLine(resultCond);
                         break;
 
                     case "ExecuteScriptById":
-                        scriptId = await rm.GetIdInConsoleAsync(fromSrc: true);
-                        object resultObj = await facade.ExecuteScriptById(scriptId, rm.GetTestingContext<GeneratorContextV3.GeneratorContext>());
+                        scriptId = await em.GetIdInConsoleAsync(fromSrc: true);
+                        object resultObj = await facade.ExecuteScriptById(scriptId, em.GetTestingContext<GeneratorContextV3.GeneratorContext>());
 
                         if (typeof(bool).IsAssignableFrom(resultObj.GetType()))       //good idea to check what type was returne, you could also just check the property from db normally
                         {
@@ -241,14 +241,14 @@ async Task MainProgramSwitch(IServiceProvider provider)
                     #region Cache Management
 
                     case "GetCompiledCache":
-                        scriptId = await rm.GetIdInConsoleAsync();
+                        scriptId = await em.GetIdInConsoleAsync();
                         ScriptCompiledCache cache = await facade.GetCompiledCache(scriptId, currentApiVersion);
                         byte[] arr = cache.AssemblyBytes!;
                         Console.WriteLine(arr.ToString());
                         break;
 
                     case "ClearScriptCache":
-                        scriptId = await rm.GetIdInConsoleAsync(fromSrc: true);
+                        scriptId = await em.GetIdInConsoleAsync(fromSrc: true);
                         await facade.ClearScriptCache(scriptId);
                         break;
 
@@ -275,13 +275,13 @@ async Task MainProgramSwitch(IServiceProvider provider)
                         break;
 
                     case "GetScriptCompatibility":
-                        scriptId = await rm.GetIdInConsoleAsync(fromSrc: true);
+                        scriptId = await em.GetIdInConsoleAsync(fromSrc: true);
                         int compa = await facade.GetScriptCompatibility(scriptId);
                         Console.WriteLine("Min api version: " + compa);
                         break;
 
                     case "CheckVersionCompatibility":
-                        scriptId = await rm.GetIdInConsoleAsync(fromSrc: true);
+                        scriptId = await em.GetIdInConsoleAsync(fromSrc: true);
                         bool check = await facade.CheckVersionCompatibility(scriptId, currentApiVersion);
                         Console.WriteLine("CheckVersionCompatibility with ApiV: " + currentApiVersion + " is " + check);
                         break;
@@ -337,7 +337,7 @@ async Task MainProgramSwitch(IServiceProvider provider)
                         break;
 
                     case "GetScriptMetadata":
-                        scriptId = await rm.GetIdInConsoleAsync(fromSrc: true);
+                        scriptId = await em.GetIdInConsoleAsync(fromSrc: true);
                         string strr = await facade.GetScriptMetadata(scriptId);
                         Console.WriteLine(strr);
                         break;
@@ -349,10 +349,10 @@ async Task MainProgramSwitch(IServiceProvider provider)
                     #endregion
 
                     default:
-                        sourceDict = await rm.ListAllStoredSourceCodes(dontPrint: true);
+                        sourceDict = await em.ListAllStoredSourceCodes(dontPrint: true);
                         scriptId = sourceDict[Int32.Parse(userInput)];
                         CustomerScript justForTesting = await facade.GetScript(scriptId);
-                        object resultObj2 = await facade.ExecuteScriptById(scriptId, rm.GetTestingContext<GeneratorContextNoInherVaccine.GeneratorContext>(justForTesting: justForTesting));
+                        object resultObj2 = await facade.ExecuteScriptById(scriptId, em.GetTestingContext<GeneratorContextNoInherVaccine.GeneratorContext>(justForTesting: justForTesting));
 
                         if (typeof(bool).IsAssignableFrom(resultObj2.GetType()))       //good idea to check what type was returne, you could also just check the property from db normally
                         {

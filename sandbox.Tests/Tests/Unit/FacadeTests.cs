@@ -13,7 +13,7 @@ public class ScriptManagerFacadeTests
     string? sourceCodePedia;
     private string? sourceCodeActionV1;
     private string? sourceCodeActionV3;
-    private RandomMethods? rm;
+    private EmberMethods? em;
 
     [TestInitialize]
     public async Task Setup()
@@ -29,12 +29,12 @@ public class ScriptManagerFacadeTests
             builder.AddSerilog(dispose: true);
         });
 
-        ScriptingServiceCollectionExtensions.AddEmberScripting(services, RandomMethods.GetReferences(), RandomMethods.GetEmberApiVersion());
+        ScriptingServiceCollectionExtensions.AddEmberScripting(services, EmberMethods.GetReferences(), EmberMethods.GetEmberApiVersion());
 
         using var provider = services.BuildServiceProvider();
 
         facade = provider.GetRequiredService<ISccriptManagerDeleteAfter>();
-        rm = new RandomMethods(facade);
+        em = new EmberMethods(facade);
 
         // var logger = new LoggerForScripting();
         // // var microsoftLogger = logger.GetMicrosoftLogger<ScriptManagerFacade>();
@@ -52,7 +52,7 @@ public class ScriptManagerFacadeTests
             await facade.DeleteScript(s.Id);
 
         // Load source files
-        sourceCodePedia = RandomMethods.CreateStringFromCsFile(
+        sourceCodePedia = EmberMethods.CreateStringFromCsFile(
             Path.GetFullPath(Path.Combine(
                 AppDomain.CurrentDomain.BaseDirectory,
                 "..", "..", "..", "..",
@@ -60,7 +60,7 @@ public class ScriptManagerFacadeTests
             ))
         );
 
-        sourceCodeActionV1 = RandomMethods.CreateStringFromCsFile(
+        sourceCodeActionV1 = EmberMethods.CreateStringFromCsFile(
             Path.GetFullPath(Path.Combine(
                 AppDomain.CurrentDomain.BaseDirectory,
                 "..", "..", "..", "..",
@@ -68,7 +68,7 @@ public class ScriptManagerFacadeTests
             ))
         );
 
-        sourceCodeActionV3 = RandomMethods.CreateStringFromCsFile(
+        sourceCodeActionV3 = EmberMethods.CreateStringFromCsFile(
             Path.GetFullPath(Path.Combine(
                 AppDomain.CurrentDomain.BaseDirectory,
                 "..", "..", "..", "..",
@@ -93,7 +93,7 @@ public class ScriptManagerFacadeTests
 
         Guid id = await facade!.CreateScript(sourceCodePedia!, apiVersion: 2);
         CustomerScript retrievedScript = await facade.GetScript(id);
-        var context = rm!.GetTestingContext<GeneratorContextNoInherVaccine.GeneratorContext>(retrievedScript);
+        var context = em!.GetTestingContext<GeneratorContextNoInherVaccine.GeneratorContext>(retrievedScript);
         await facade.ExecuteScriptById(retrievedScript.Id, context);
 
         Assert.AreEqual(retrievedScript.SourceCode, sourceCodePedia);
@@ -151,7 +151,7 @@ public class ScriptManagerFacadeTests
         string scriptFolderPath = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "..",
                 "sandbox", "src", "Scripts"));
         await facade!.EnsureDeletedCreated();
-        await rm!.CompileAllScriptsInFolderAndSaveToDB(scriptFolderPath, "Gilles", RandomMethods.GetEmberApiVersion());
+        await em!.CompileAllScriptsInFolderAndSaveToDB(scriptFolderPath, "Gilles", EmberMethods.GetEmberApiVersion());
         List<CustomerScript> scripts = await facade!.ListScripts(includeCaches: true);
         Assert.IsNotNull(scripts);
         Assert.IsTrue(scripts.Count == 5);
@@ -316,14 +316,14 @@ public class ScriptManagerFacadeTests
     public async Task ExecuteActionScriptTest()
     {
         Guid id = await facade!.CreateScript(sourceCodeActionV1!);
-        var testingContext = rm!.GetTestingContext<GeneratorContextV3.GeneratorContext>();
+        var testingContext = em!.GetTestingContext<GeneratorContextV3.GeneratorContext>();
 
         ActionResultBaseClass result = await facade.ExecuteActionScript(id, testingContext);
 
         Assert.IsNotNull(result);
         // Assert.IsTrue(result.IsSuccess);
         // Assert.IsTrue(result.Message.Contains("Pediatric"));
-        result = RandomMethods.UpgradeActionResult(result);
+        result = EmberMethods.UpgradeActionResult(result);
         Assert.IsInstanceOfType(result, typeof(ActionResultV3NoInheritance));
 
         Guid id2 = await facade.CreateScript(sourceCodePedia!);
@@ -338,7 +338,7 @@ public class ScriptManagerFacadeTests
     public async Task ExecuteConditionScriptTest()
     {
         Guid id = await facade!.CreateScript(sourceCodePedia!);
-        var testingContext = rm!.GetTestingContext<GeneratorContextV3.GeneratorContext>();
+        var testingContext = em!.GetTestingContext<GeneratorContextV3.GeneratorContext>();
 
         bool result = await facade.ExecuteConditionScript(id, testingContext);
 
@@ -355,7 +355,7 @@ public class ScriptManagerFacadeTests
     [TestMethod]
     public async Task ExecuteScriptByIdTest()
     {
-        var context = rm!.GetTestingContext<GeneratorContextV3.GeneratorContext>();
+        var context = em!.GetTestingContext<GeneratorContextV3.GeneratorContext>();
 
         Guid condId = await facade!.CreateScript(sourceCodePedia!);
         object condResult = await facade.ExecuteScriptById(condId, context);
@@ -439,7 +439,7 @@ public class ScriptManagerFacadeTests
     public async Task GetActiveApiVersionsTest()
     {
         Guid id = await facade!.CreateScript(sourceCodePedia!);
-        int currentVersion = await facade.GetRecentApiVersion();
+        int currentVersion = await facade.GetRunningApiVersion();
 
         List<int> versions = await facade.GetActiveApiVersions();
 
@@ -451,7 +451,7 @@ public class ScriptManagerFacadeTests
     [TestMethod]
     public async Task GetRecentApiVersionTest()
     {
-        int v = await facade!.GetRecentApiVersion();
+        int v = await facade!.GetRunningApiVersion();
         Assert.IsInstanceOfType(v, typeof(System.Int32));   //todo implement maybe real
     }
 
@@ -469,7 +469,7 @@ public class ScriptManagerFacadeTests
     public async Task CheckVersionCompatibilityTest()
     {
         Guid id = await facade!.CreateScript(sourceCodePedia!);
-        int currentVersion = await facade.GetRecentApiVersion();
+        int currentVersion = await facade.GetRunningApiVersion();
 
         bool hasRecent = await facade.CheckVersionCompatibility(id, currentVersion);
 

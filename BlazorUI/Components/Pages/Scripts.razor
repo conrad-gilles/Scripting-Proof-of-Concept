@@ -167,7 +167,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        currentApiVersion = await ScriptManager.GetRecentApiVersion();
+        currentApiVersion = await ScriptManager.GetRunningApiVersion();
         selectedApiVersion = currentApiVersion;
         await LoadScripts();
     }
@@ -185,8 +185,8 @@
             builder.AddSerilog(dispose: true);
         });
 
-        ScriptingServiceCollectionExtensions.AddEmberScripting(services2, RandomMethods.GetReferences(),
-RandomMethods.GetEmberApiVersion(testingDiffrentVersion: selectedApiVersion));
+        ScriptingServiceCollectionExtensions.AddEmberScripting(services2, EmberMethods.GetReferences(),
+EmberMethods.GetEmberApiVersion(testingDiffrentVersion: selectedApiVersion));
 
         using var provider2 = services2.BuildServiceProvider();
 
@@ -218,9 +218,9 @@ RandomMethods.GetEmberApiVersion(testingDiffrentVersion: selectedApiVersion));
         try
         {
             Console.Log("Test if it prints");
-            RandomMethods rm = new RandomMethods(ScriptManager);
+            EmberMethods em = new EmberMethods(ScriptManager);
             CustomerScript script = await ScriptManager.GetScript(id);
-            var ctx = rm.GetTestingContext<GeneratorContextV3.GeneratorContext>(justForTesting: script);
+            var ctx = em.GetTestingContext<GeneratorContextV3.GeneratorContext>(justForTesting: script);
             object resultObj = await ScriptManager.ExecuteScriptById(id, ctx);
 
             if (typeof(bool).IsAssignableFrom(resultObj.GetType()))
@@ -293,7 +293,7 @@ RandomMethods.GetEmberApiVersion(testingDiffrentVersion: selectedApiVersion));
     public static string GetTemplate()
     {
         string path = @"C:\Users\Gilles\Desktop\UNI\Semester 6\Code\Codebase\Scripting-Proof-of-Concept\BlazorUI\src\ScriptTemplate.cs";
-        return RandomMethods.CreateStringFromCsFile(path);
+        return EmberMethods.CreateStringFromCsFile(path);
     }
 
     public async Task HandleValidate()

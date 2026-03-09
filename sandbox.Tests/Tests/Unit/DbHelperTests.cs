@@ -13,7 +13,7 @@ public class DbHelperTests
     string? sourceCodePedia;
     private string? sourceCodeActionV1;
     private string? sourceCodeActionV3;
-    private RandomMethods? rm;
+    private EmberMethods? em;
 
     [TestInitialize]
     public async Task Setup()
@@ -29,12 +29,12 @@ public class DbHelperTests
             builder.AddSerilog(dispose: true);
         });
 
-        ScriptingServiceCollectionExtensions.AddEmberScripting(services, RandomMethods.GetReferences(), RandomMethods.GetEmberApiVersion());
+        ScriptingServiceCollectionExtensions.AddEmberScripting(services, EmberMethods.GetReferences(), EmberMethods.GetEmberApiVersion());
 
         using var provider = services.BuildServiceProvider();
 
         facade = provider.GetRequiredService<ISccriptManagerDeleteAfter>();
-        rm = new RandomMethods(facade);
+        em = new EmberMethods(facade);
 
         // var logger = new LoggerForScripting();
         // // var microsoftLogger = logger.GetMicrosoftLogger<ScriptManagerFacade>();
@@ -52,7 +52,7 @@ public class DbHelperTests
             await facade.DeleteScript(s.Id);
 
         // Load source files
-        sourceCodePedia = RandomMethods.CreateStringFromCsFile(
+        sourceCodePedia = EmberMethods.CreateStringFromCsFile(
             Path.GetFullPath(Path.Combine(
                 AppDomain.CurrentDomain.BaseDirectory,
                 "..", "..", "..", "..",
@@ -60,7 +60,7 @@ public class DbHelperTests
             ))
         );
 
-        sourceCodeActionV1 = RandomMethods.CreateStringFromCsFile(
+        sourceCodeActionV1 = EmberMethods.CreateStringFromCsFile(
             Path.GetFullPath(Path.Combine(
                 AppDomain.CurrentDomain.BaseDirectory,
                 "..", "..", "..", "..",
@@ -68,7 +68,7 @@ public class DbHelperTests
             ))
         );
 
-        sourceCodeActionV3 = RandomMethods.CreateStringFromCsFile(
+        sourceCodeActionV3 = EmberMethods.CreateStringFromCsFile(
             Path.GetFullPath(Path.Combine(
                 AppDomain.CurrentDomain.BaseDirectory,
                 "..", "..", "..", "..",
@@ -90,14 +90,14 @@ public class DbHelperTests
         await facade.CompileScript(id);
 
         var after = await facade.GetScript(id, includeCaches: true);
-        var getCache = await facade.GetCompiledCache(id, RandomMethods.GetEmberApiVersion());
+        var getCache = await facade.GetCompiledCache(id, EmberMethods.GetEmberApiVersion());
         Assert.IsTrue(after.CompiledCaches.Count == 1);
-        Assert.IsTrue(getCache != null && (getCache.ApiVersion == RandomMethods.GetEmberApiVersion()));
+        Assert.IsTrue(getCache != null && (getCache.ApiVersion == EmberMethods.GetEmberApiVersion()));
         Assert.IsTrue(after.CompiledCaches.Any(c => c.AssemblyBytes != null && c.AssemblyBytes.Length >= 1));
 
         var e = await Assert.ThrowsExceptionAsync<Ember.Scripting.DbHelperException>(async () =>
          {
-             await facade.CompileScript(id, RandomMethods.GetEmberApiVersion());
+             await facade.CompileScript(id, EmberMethods.GetEmberApiVersion());
              var after3 = await facade.GetScript(id, includeCaches: true);
              Assert.IsTrue(after3.CompiledCaches.Count == 1);
              Assert.IsTrue(after3.CompiledCaches.Any(c => c.AssemblyBytes != null && c.AssemblyBytes.Length >= 1));
@@ -195,6 +195,9 @@ public class DbHelperTests
         }
         catch (Exception e)
         {
+
+            int baseExceptionIndex = ExceptionHelper.GetBaseExceptionIndex(e);
+            Assert.IsTrue(baseExceptionIndex == 4);
 
             Exception baseException = e.GetBaseException();
             Assert.IsInstanceOfType(baseException, typeof(NoFileWithThisClassNameFoundException));

@@ -11,8 +11,8 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
 // Register Ember scripting services (DI)
-var references = RandomMethods.GetReferences();
-int version = RandomMethods.GetEmberApiVersion();
+var references = EmberMethods.GetReferences();
+int version = EmberMethods.GetEmberApiVersion();
 builder.Services.AddEmberScripting(references, version);
 
 builder.Services.AddScoped<ConsoleService>();

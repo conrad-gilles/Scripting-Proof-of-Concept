@@ -144,7 +144,7 @@ public interface ISccriptManagerDeleteAfter : IScriptManagerExtended
   /// <returns></returns>
   Task<List<int>> GetActiveApiVersions();
 
-  Task<int> GetRecentApiVersion();
+  Task<int> GetRunningApiVersion();
 
   /// <summary>
   /// Returns which API versions a script is compatible with

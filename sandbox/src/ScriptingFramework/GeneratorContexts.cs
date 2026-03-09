@@ -15,6 +15,7 @@ namespace IGeneratorReadOnlyContext
 
 namespace IGeneratorContext_V1
 {
+    // int Version = 1;
     public interface IGeneratorContext : IGeneratorReadOnlyContext.IGeneratorContext
     {
         new ILabOrderRWInterface LabOrder { get; }
@@ -58,6 +59,9 @@ namespace ReadOnlyContext
 {
     public class GeneratorContext : Ember.Scripting.GeneratorContext, IGeneratorReadOnlyContext.IGeneratorContext
     {
+        // public static int IVersion => 1;
+        public override int Version => 1;
+
         public ILabOrderInterface labOrder;
         public PatientInterface patient;
 
@@ -84,6 +88,10 @@ namespace RWContext
 {
     public class GeneratorContext : Ember.Scripting.GeneratorContext, IGeneratorContext_V1.IGeneratorContext
     {
+        // public static int IVersion => 2;
+        public override int Version => 2;
+
+
         public ILabOrderRWInterface labOrder;
         public PatientInterface patient;
 
@@ -116,6 +124,9 @@ namespace GeneratorContextV2
 {
     public class GeneratorContext : RWContext.GeneratorContext, IGeneratorContext_V2.IGeneratorContext
     {
+        // public static new int IVersion => 3;
+        public override int Version => 3;
+
         public ILabOrderInterfaceV2 labOrderV2;
         public new PatientInterface patient;
 
@@ -141,6 +152,9 @@ namespace GeneratorContextV3
 {
     public class GeneratorContext : GeneratorContextV2.GeneratorContext, IGeneratorContext_V3.IGeneratorContext  //todo implement Adapter pattern
     {
+        // public static new int IVersion => 4;
+        public override int Version => 4;
+
         public ILabOrderInterfaceV3 labOrderV3;
         public new PatientInterface patient;
 
@@ -166,6 +180,9 @@ namespace GeneratorContextNoInherVaccine
 {
     public class GeneratorContext : Ember.Scripting.GeneratorContext, IGeneratorContextNoInheritance_V4.IGeneratorContext   //into diffrent namespaces blocks later folders
     {
+        // public static int IVersion => 5;
+        public override int Version => 5;
+
         ILabOrderInterfaceV4NoInheritence LabOrder;
         IVaccineInterface Vaccine;
         public GeneratorContext(ILabOrderInterfaceV4NoInheritence labOrder, IVaccineInterface vaccine)

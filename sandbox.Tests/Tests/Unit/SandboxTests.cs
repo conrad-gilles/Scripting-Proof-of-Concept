@@ -6,36 +6,24 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
 [TestClass]
-public class UpdateScriptTests
+public class SanboxTests
 {
 
 
     ISccriptManagerDeleteAfter? facade;
-    EmberMethods? rm;
+    EmberMethods? em;
     string? ActionResultVersionSpecific;
     string? sourceCodeActionV1;
     string? sourceCodeActionV2;
     string? sourceCodeActionV3;
     string? sourceCodeVaccineAction;
     string? sourceCodePedia;
-    LoggerForScripting? logger;
-    ServiceCollection? services;
     List<string>? sourceCodes;
 
     [TestInitialize]
     public
      void Setup()
     {
-        logger = new LoggerForScripting();
-        Log.Debug("Sandbox launched.");
-
-        services = new ServiceCollection();
-        services.AddLogging(builder =>
-        {
-            // Assuming you use Serilog, this forwards standard MS Logging to Serilog
-            builder.AddSerilog(dispose: true);
-        });
-
         ActionResultVersionSpecific = "[Message contains either failure or succes: ] ";  //change this if action result version changes it will thraow cause of message contains
         sourceCodeActionV1 = EmberMethods.CreateStringFromCsFile(
            Path.GetFullPath(Path.Combine(
@@ -79,10 +67,31 @@ public class UpdateScriptTests
         sourceCodes!.Add(sourceCodeVaccineAction);
         // sourceCodes!.Add(sourceCodePedia);
     }
-
     [TestMethod]
-    public void TestCreatedAt()
+    public async Task CreateContextText()
     {
+        ScriptFactory sf;
+        GeneratorContext ctx;
 
+        facade = EmberMethods.GetNewScriptManagerInstance(1);
+        sf = new ScriptFactory(facade);
+        ctx = await sf.CreateContext();
+
+        Assert.IsTrue(ctx.GetType() == typeof(ReadOnlyContext.GeneratorContext));
+
+        facade = EmberMethods.GetNewScriptManagerInstance(2);
+        sf = new ScriptFactory(facade);
+        ctx = await sf.CreateContext();
+
+        Assert.IsTrue(ctx.GetType() == typeof(RWContext.GeneratorContext));
+
+        facade = EmberMethods.GetNewScriptManagerInstance();
+        sf = new ScriptFactory(facade);
+
+        Exception ex = await Assert.ThrowsExceptionAsync<Exception>(async () =>
+         {
+             ctx = await sf.CreateContext();
+         });
+        Assert.IsTrue(ex.Message.Contains("No Context class defined in") && ex.Message.Contains("for the passed API version."));
     }
 }

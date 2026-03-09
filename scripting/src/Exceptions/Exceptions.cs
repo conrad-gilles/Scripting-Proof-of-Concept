@@ -142,16 +142,7 @@ public class ExceptionHelper    //for future to traverse exception chain
     }
     public static Exception GetExceptionFromChainReversed(Exception ex, int i)  //todo fix use index base lookup get rid of for loop
     {
-        List<Exception> exceptions = [];
-        Exception baseException = ex.GetBaseException();
-
-        while (ex.Equals(baseException) == false)
-        {
-            exceptions.Add(ex);
-            ex = ex.InnerException!;
-        }
-
-        exceptions.Add(baseException);
+        List<Exception> exceptions = GetExceptionList(ex);
         exceptions.Reverse();
 
         for (int j = 0; j < exceptions.Count(); j++)
@@ -162,5 +153,23 @@ public class ExceptionHelper    //for future to traverse exception chain
             }
         }
         throw new Exception(message: "Could not find your exception in the List!");
+    }
+    public static int GetBaseExceptionIndex(Exception ex)
+    {
+        List<Exception> exceptions = GetExceptionList(ex);
+        return exceptions.Count() - 1;
+    }
+    private static List<Exception> GetExceptionList(Exception ex)
+    {
+        List<Exception> exceptions = [];
+        Exception baseException = ex.GetBaseException();
+
+        while (ex.Equals(baseException) == false)
+        {
+            exceptions.Add(ex);
+            ex = ex.InnerException!;
+        }
+        exceptions.Add(baseException);
+        return exceptions;
     }
 }

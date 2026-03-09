@@ -32,7 +32,7 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
     {
         Logger.LogDebug("Entered {MethodName} in {ClassName} apiVersion: {apiVersion}.", nameof(CreateScript), nameof(ScriptManagerFacade), apiVersion);
 
-        int currentApiVersion = await GetRecentApiVersion();
+        int currentApiVersion = await GetRunningApiVersion();
         Guid id = Guid.NewGuid();
 
         if (apiVersion == null)
@@ -111,7 +111,7 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
 
         if (targetApiVersion == null)
         {
-            targetApiVersion = await GetRecentApiVersion();
+            targetApiVersion = await GetRunningApiVersion();
         }
         CustomerScript script = await Db.GetCustomerScript(scriptId);
         await Db.CreateAndInsertCompiledCache(script, apiV: targetApiVersion);
@@ -122,7 +122,7 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
     {
         Logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(CompileAllScripts), nameof(ScriptManagerFacade));
 
-        int currentApiVersion = await GetRecentApiVersion();
+        int currentApiVersion = await GetRunningApiVersion();
         await Db.CompileAllStoredScripts(currentApiVersion);
     }
 
@@ -219,7 +219,7 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
         {
             if (currentApiVersion == null)
             {
-                currentApiVersion = await GetRecentApiVersion();
+                currentApiVersion = await GetRunningApiVersion();
             }
 
             byte[]? compiledScript = null;
@@ -258,7 +258,7 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
         {
             if (ApiVersion == null)
             {
-                ApiVersion = await GetRecentApiVersion();
+                ApiVersion = await GetRunningApiVersion();
             }
 
             byte[]? compiledScript = null;
@@ -270,7 +270,7 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
             catch (Exception e)
             {
                 Logger.LogError("Retrieval failed jit comp launched:" + e.ToString());
-                await CompileScript(scriptId, await GetRecentApiVersion());
+                await CompileScript(scriptId, await GetRunningApiVersion());
                 //try again, if fails again we catch error outside
                 var temp = await Db.GetCompiledScripCache(scriptId, (int)ApiVersion);
                 compiledScript = temp.AssemblyBytes;
@@ -296,7 +296,7 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
         {
             if (apiVersion == null)
             {
-                apiVersion = await GetRecentApiVersion();
+                apiVersion = await GetRunningApiVersion();
             }
             byte[]? compiledScript = null;
             try
@@ -307,7 +307,7 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
             catch (Exception e)
             {
                 Logger.LogError("Retrieval failed jit comp launched:" + e.ToString());
-                await CompileScript(scriptId, await GetRecentApiVersion());
+                await CompileScript(scriptId, await GetRunningApiVersion());
                 //try again, if fails again we catch error outside
                 var temp = await Db.GetCompiledScripCache(scriptId, (int)apiVersion);
                 compiledScript = temp.AssemblyBytes;
@@ -336,7 +336,7 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
         Logger.LogTrace("Entered {MethodName} in {ClassName} with scriptId: {ScriptId}.", nameof(GetCompiledCache), nameof(ScriptManagerFacade), scriptId);
         if (currentApiVersion == null)
         {
-            currentApiVersion = await GetRecentApiVersion();
+            currentApiVersion = await GetRunningApiVersion();
         }
         try
         {
@@ -384,7 +384,7 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
     {
         Logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(PrecompileForApiVersion), nameof(ScriptManagerFacade));
 
-        int currentApiVersion = await GetRecentApiVersion();
+        int currentApiVersion = await GetRunningApiVersion();
         await Db.AutomaticCompilationOnVersionUpdate(currentApiVersion);
     }
 
@@ -404,9 +404,9 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
         return await Db.GetActiveApiVersions(); //shit implementation not really functional in rl
     }
 
-    public async Task<int> GetRecentApiVersion() //todo implement
+    public async Task<int> GetRunningApiVersion() //todo implement
     {
-        Logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(GetRecentApiVersion), nameof(ScriptManagerFacade));
+        Logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(GetRunningApiVersion), nameof(ScriptManagerFacade));
 
         return Db.GetRecentApiVersion();
     }
@@ -462,7 +462,7 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
     {
         Logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(RemoveDuplicates), nameof(ScriptManagerFacade));
 
-        int currentApiVersion = await GetRecentApiVersion();
+        int currentApiVersion = await GetRunningApiVersion();
         await Db.RemoveDuplicates();   //automatically get dupes from function in dbhelper dont have to pass therefore
     }
 
@@ -471,7 +471,7 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
     {
         Logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(CleanupOrphanedCaches), nameof(ScriptManagerFacade));
 
-        int currentApiVersion = await GetRecentApiVersion();
+        int currentApiVersion = await GetRunningApiVersion();
         await Db.AutomaticCompilationOnVersionUpdate(currentApiVersion);    //this also does this maybe implement real funcion later
     }
 

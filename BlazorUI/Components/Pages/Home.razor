@@ -221,8 +221,8 @@ block in Home.razor -->
     }
     private async Task LoadDashBoardData()
     {
-        RandomMethods rm = new RandomMethods(ScriptManager);
-        currentEmberVersionApi = await ScriptManager.GetRecentApiVersion();
+        EmberMethods em = new EmberMethods(ScriptManager);
+        currentEmberVersionApi = await ScriptManager.GetRunningApiVersion();
         CustomerScripts = await ScriptManager.ListScripts(includeCaches: true);
         totalScripts = CustomerScripts.Count();
         compiledScripts = 0;
@@ -234,7 +234,7 @@ block in Home.razor -->
             {
                 versions.Add(cache.ApiVersion);
             }
-            if (versions.Contains(await ScriptManager.GetRecentApiVersion()) == false)
+            if (versions.Contains(await ScriptManager.GetRunningApiVersion()) == false)
             {
                 pendingScripts++;
             }
@@ -261,9 +261,9 @@ block in Home.razor -->
         {
             isWorking = true; //might have to call StateChange
             StateHasChanged();
-            RandomMethods rm = new RandomMethods(ScriptManager);
+            EmberMethods rm = new EmberMethods(ScriptManager);
             string path = @"C:\Users\Gilles\Desktop\UNI\Semester 6\Code\Codebase\Scripting-Proof-of-Concept\sandbox\src\Scripts";
-            await rm.CompileAllScriptsInFolderAndSaveToDB(path, "Gilles", RandomMethods.GetEmberApiVersion());
+            await rm.CompileAllScriptsInFolderAndSaveToDB(path, "Gilles", EmberMethods.GetEmberApiVersion());
 
             isWorking = false;
             StateHasChanged();

@@ -7,17 +7,17 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
-public class RandomMethods
+public class EmberMethods
 {
     private readonly ISccriptManagerDeleteAfter Facade;
 
-    public RandomMethods(ISccriptManagerDeleteAfter facade)
+    public EmberMethods(ISccriptManagerDeleteAfter facade)
     {
         Facade = facade;
     }
     public static int GetEmberApiVersion(int? testingDiffrentVersion = null)
     {
-        Log.Debug("Entered {MethodName} in {ClassName}.", nameof(GetEmberApiVersion), nameof(RandomMethods));
+        Log.Debug("Entered {MethodName} in {ClassName}.", nameof(GetEmberApiVersion), nameof(EmberMethods));
         if (testingDiffrentVersion != null)
         {
             return (int)testingDiffrentVersion;
@@ -40,7 +40,7 @@ public class RandomMethods
             builder.AddSerilog(dispose: true);
         });
 
-        ScriptingServiceCollectionExtensions.AddEmberScripting(services2, RandomMethods.GetReferences(), RandomMethods.GetEmberApiVersion(testingDiffrentVersion: apiVersion));
+        ScriptingServiceCollectionExtensions.AddEmberScripting(services2, EmberMethods.GetReferences(), EmberMethods.GetEmberApiVersion(testingDiffrentVersion: apiVersion));
 
         using var provider2 = services2.BuildServiceProvider();
 
@@ -48,7 +48,7 @@ public class RandomMethods
     }
     public async Task<Dictionary<int, Guid>> ListAllCompiledFromDB()
     {
-        Serilog.Log.Verbose("Entered {MethodName} in {ClassName}.", nameof(ListAllCompiledFromDB), nameof(RandomMethods));
+        Serilog.Log.Verbose("Entered {MethodName} in {ClassName}.", nameof(ListAllCompiledFromDB), nameof(EmberMethods));
         // var db = new DbHelper(UsefulMethods.GetReferences());
         List<ScriptCompiledCache> caches = await Facade.GetAllCompiledScriptCaches();
 
@@ -67,7 +67,7 @@ public class RandomMethods
 
     public async Task<Dictionary<int, Guid>> ListAllStoredSourceCodes(bool dontPrint = false)
     {
-        Serilog.Log.Verbose("Entered {MethodName} in {ClassName}.", nameof(ListAllStoredSourceCodes), nameof(RandomMethods));
+        Serilog.Log.Verbose("Entered {MethodName} in {ClassName}.", nameof(ListAllStoredSourceCodes), nameof(EmberMethods));
         // var db = new DbHelper(UsefulMethods.GetReferences());
         List<CustomerScript> sourceCodes = await Facade.ListScripts(includeCaches: true);
 
@@ -91,7 +91,7 @@ public class RandomMethods
 
     public async Task CompileAllScriptsInFolderAndSaveToDB(string folderPath, string userName, int currentApiVersion)
     {
-        Serilog.Log.Verbose("Entered {MethodName} in {ClassName}.", nameof(CompileAllScriptsInFolderAndSaveToDB), nameof(RandomMethods));
+        Serilog.Log.Verbose("Entered {MethodName} in {ClassName}.", nameof(CompileAllScriptsInFolderAndSaveToDB), nameof(EmberMethods));
 
         string[] files = Directory.GetFiles(folderPath, "*.cs", SearchOption.AllDirectories);  //todo check for infinite loop  https://msdn.microsoft.com/en-us/library/ms143316(v=vs.110).aspx
         for (int i = 0; i < files.Length; i++)
@@ -122,7 +122,7 @@ public class RandomMethods
 
     public async Task EditScriptInSwitch(Guid id, string userName, int currentApiVersion)
     {
-        Serilog.Log.Verbose("Entered {MethodName} in {ClassName} with scriptId: {ScriptId}.", nameof(EditScriptInSwitch), nameof(RandomMethods), id);
+        Serilog.Log.Verbose("Entered {MethodName} in {ClassName} with scriptId: {ScriptId}.", nameof(EditScriptInSwitch), nameof(EmberMethods), id);
         // var db = new DbHelper(UsefulMethods.GetReferences());
         var customerScript = await Facade.GetScript(id);
         var creationDate = customerScript.CreatedAt;
@@ -145,7 +145,7 @@ public class RandomMethods
     }
     public async Task GetSourceCodeInSwitch()
     {
-        Serilog.Log.Verbose("Entered {MethodName} in {ClassName}.", nameof(GetSourceCodeInSwitch), nameof(RandomMethods));
+        Serilog.Log.Verbose("Entered {MethodName} in {ClassName}.", nameof(GetSourceCodeInSwitch), nameof(EmberMethods));
         Console.WriteLine("Enter the the script you want to read: ");
         string userInput = Console.ReadLine()!;
         // var db = new DbHelper(UsefulMethods.GetReferences());
@@ -170,7 +170,7 @@ public class RandomMethods
     }
     public static ActionResultV3NoInheritance UpgradeActionResult(object resultValue)
     {
-        Serilog.Log.Verbose("Entered {MethodName} in {ClassName}.", nameof(UpgradeActionResult), nameof(RandomMethods));
+        Serilog.Log.Verbose("Entered {MethodName} in {ClassName}.", nameof(UpgradeActionResult), nameof(EmberMethods));
 
         // var facade = new ScriptManagerFacade(UsefulMethods.GetReferences());
         // var newestVersion = await facade.GetRecentApiVersion();
@@ -220,7 +220,7 @@ public class RandomMethods
     }
     public async Task<Guid> GetIdInConsoleAsync(bool fromSrc = false)
     {
-        Serilog.Log.Verbose("Entered {MethodName} in {ClassName}.", nameof(GetIdInConsoleAsync), nameof(RandomMethods));
+        Serilog.Log.Verbose("Entered {MethodName} in {ClassName}.", nameof(GetIdInConsoleAsync), nameof(EmberMethods));
         Dictionary<int, Guid> cacheDict = [];
         if (fromSrc == false)
         { cacheDict = await ListAllCompiledFromDB(); }
@@ -258,7 +258,7 @@ public class RandomMethods
     }
     public GeneratorContext GetTestingContext<T>(CustomerScript? justForTesting = null) where T : GeneratorContext
     {
-        Serilog.Log.Verbose("Entered {MethodName} in {ClassName}.", nameof(GetTestingContext), nameof(RandomMethods));
+        Serilog.Log.Verbose("Entered {MethodName} in {ClassName}.", nameof(GetTestingContext), nameof(EmberMethods));
         try
         {
             LabOrder labOrder = new LabOrder("1", "Pediatrics");
@@ -329,7 +329,7 @@ public class RandomMethods
 
     public static string CreateStringFromCsFile(string scriptPath)
     {
-        Serilog.Log.Verbose("Entered {MethodName} in {ClassName} with path: {ScriptPath}.", nameof(CreateStringFromCsFile), nameof(RandomMethods), scriptPath);
+        Serilog.Log.Verbose("Entered {MethodName} in {ClassName} with path: {ScriptPath}.", nameof(CreateStringFromCsFile), nameof(EmberMethods), scriptPath);
         try
         {
             // Display the lines that are read from the file
@@ -348,7 +348,7 @@ public class RandomMethods
     }
     public string GetScriptPathFromFolder(string scriptFolderPath, string classOfScriptToExecute)
     {
-        Serilog.Log.Verbose("Entered {MethodName} in {ClassName}.", nameof(GetScriptPathFromFolder), nameof(RandomMethods));
+        Serilog.Log.Verbose("Entered {MethodName} in {ClassName}.", nameof(GetScriptPathFromFolder), nameof(EmberMethods));
         try
         {
             string[] files =

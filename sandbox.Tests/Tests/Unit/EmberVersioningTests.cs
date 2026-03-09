@@ -11,7 +11,7 @@ public class EmberVersioningTests
 
 
     ISccriptManagerDeleteAfter? facade;
-    RandomMethods? rm;
+    EmberMethods? em;
     string? ActionResultVersionSpecific;
     string? sourceCodeActionV1;
     string? sourceCodeActionV2;
@@ -27,35 +27,35 @@ public class EmberVersioningTests
      void Setup()
     {
         ActionResultVersionSpecific = "[Message contains either failure or succes: ] ";  //change this if action result version changes it will thraow cause of message contains
-        sourceCodeActionV1 = RandomMethods.CreateStringFromCsFile(
+        sourceCodeActionV1 = EmberMethods.CreateStringFromCsFile(
            Path.GetFullPath(Path.Combine(
                AppDomain.CurrentDomain.BaseDirectory,
                "..", "..", "..", "..",
                "sandbox", "src", "Scripts", "ActionScripts", "AddPediatricTestsV1.cs"
            ))
        );
-        sourceCodeActionV2 = RandomMethods.CreateStringFromCsFile(
+        sourceCodeActionV2 = EmberMethods.CreateStringFromCsFile(
         Path.GetFullPath(Path.Combine(
             AppDomain.CurrentDomain.BaseDirectory,
             "..", "..", "..", "..",
             "sandbox", "src", "Scripts", "ActionScripts", "AddPediatricTestsV2.cs"
         ))
     );
-        sourceCodeActionV3 = RandomMethods.CreateStringFromCsFile(
+        sourceCodeActionV3 = EmberMethods.CreateStringFromCsFile(
        Path.GetFullPath(Path.Combine(
            AppDomain.CurrentDomain.BaseDirectory,
            "..", "..", "..", "..",
            "sandbox", "src", "Scripts", "ActionScripts", "AddPediatricTestsV3.cs"
        ))
    );
-        sourceCodeVaccineAction = RandomMethods.CreateStringFromCsFile(
+        sourceCodeVaccineAction = EmberMethods.CreateStringFromCsFile(
           Path.GetFullPath(Path.Combine(
           AppDomain.CurrentDomain.BaseDirectory,
           "..", "..", "..", "..",
           "sandbox", "src", "Scripts", "ActionScripts", "VaccineScript.cs"
       ))
       );
-        sourceCodePedia = RandomMethods.CreateStringFromCsFile(
+        sourceCodePedia = EmberMethods.CreateStringFromCsFile(
        Path.GetFullPath(Path.Combine(
            AppDomain.CurrentDomain.BaseDirectory,
                    "..", "..", "..", "..",
@@ -74,22 +74,22 @@ public class EmberVersioningTests
     [TestMethod]
     public async Task RecentEmberVersionTestAsync()
     {
-        int v = RandomMethods.GetEmberApiVersion();
+        int v = EmberMethods.GetEmberApiVersion();
 
-        facade = RandomMethods.GetNewScriptManagerInstance(v);
-        rm = new RandomMethods(facade);
+        facade = EmberMethods.GetNewScriptManagerInstance(v);
+        em = new EmberMethods(facade);
         await facade!.EnsureDeletedCreated();
-        await ExecuteEachScript(facade, rm);
-        int apiVersionInsideFacade = await facade.GetRecentApiVersion();
+        await ExecuteEachScript(facade, em);
+        int apiVersionInsideFacade = await facade.GetRunningApiVersion();
         Assert.IsTrue(apiVersionInsideFacade == v);
         Assert.IsTrue(apiVersionInsideFacade == 6);
 
-        facade = RandomMethods.GetNewScriptManagerInstance(1);
-        rm = new RandomMethods(facade);
+        facade = EmberMethods.GetNewScriptManagerInstance(1);
+        em = new EmberMethods(facade);
         await facade!.EnsureDeletedCreated();
-        await ExecuteEachScript(facade, rm);
-        apiVersionInsideFacade = await facade.GetRecentApiVersion();
-        Assert.IsTrue(apiVersionInsideFacade == RandomMethods.GetEmberApiVersion(testingDiffrentVersion: 1));
+        await ExecuteEachScript(facade, em);
+        apiVersionInsideFacade = await facade.GetRunningApiVersion();
+        Assert.IsTrue(apiVersionInsideFacade == EmberMethods.GetEmberApiVersion(testingDiffrentVersion: 1));
         Assert.IsTrue(apiVersionInsideFacade == 1);
     }
 
@@ -97,7 +97,7 @@ public class EmberVersioningTests
     {
 
     }
-    public async Task<List<Guid>> SaturateDBAsync(ISccriptManagerDeleteAfter facade, RandomMethods rm)
+    public async Task<List<Guid>> SaturateDBAsync(ISccriptManagerDeleteAfter facade, EmberMethods rm)
     {
         List<Guid> ids = [];
         foreach (var item in sourceCodes!)
@@ -107,7 +107,7 @@ public class EmberVersioningTests
         }
         return ids;
     }
-    public async Task ExecuteEachScript(ISccriptManagerDeleteAfter facade, RandomMethods rm)
+    public async Task ExecuteEachScript(ISccriptManagerDeleteAfter facade, EmberMethods rm)
     {
         foreach (var id in await SaturateDBAsync(facade, rm))
         {
@@ -117,7 +117,7 @@ public class EmberVersioningTests
 
             if (resultBeforeUpgrade is ActionResultBaseClass)
             {
-                ActionResultV3NoInheritance result = RandomMethods.UpgradeActionResult(resultBeforeUpgrade);
+                ActionResultV3NoInheritance result = EmberMethods.UpgradeActionResult(resultBeforeUpgrade);
                 string shouldReturn = ActionResultVersionSpecific + "Pediatric tests added";
                 Assert.IsInstanceOfType(result, typeof(ActionResultBaseClass));
                 Assert.IsInstanceOfType(result, typeof(ActionResultV3NoInheritance));
@@ -136,13 +136,13 @@ public class EmberVersioningTests
     [TestMethod]
     public async Task GetCachesForEachApiVersionTestsAsync()
     {
-        int v = RandomMethods.GetEmberApiVersion();
+        int v = EmberMethods.GetEmberApiVersion();
 
-        facade = RandomMethods.GetNewScriptManagerInstance(v);
-        rm = new RandomMethods(facade);
+        facade = EmberMethods.GetNewScriptManagerInstance(v);
+        em = new EmberMethods(facade);
         await facade!.EnsureDeletedCreated();
-        await ExecuteEachScript(facade, rm);
-        int apiVersionInsideFacade = await facade.GetRecentApiVersion();
+        await ExecuteEachScript(facade, em);
+        int apiVersionInsideFacade = await facade.GetRunningApiVersion();
 
         var versionDict = await facade!.GetCachesForEachApiVersion();
         foreach (var item in versionDict)
@@ -157,11 +157,11 @@ public class EmberVersioningTests
         Assert.IsTrue(apiVersionInsideFacade == v);
         Assert.IsTrue(apiVersionInsideFacade == 6);
 
-        facade = RandomMethods.GetNewScriptManagerInstance(1);
-        rm = new RandomMethods(facade);
-        await ExecuteEachScript(facade, rm);
-        apiVersionInsideFacade = await facade.GetRecentApiVersion();
-        Assert.IsTrue(apiVersionInsideFacade == RandomMethods.GetEmberApiVersion(testingDiffrentVersion: 1));
+        facade = EmberMethods.GetNewScriptManagerInstance(1);
+        em = new EmberMethods(facade);
+        await ExecuteEachScript(facade, em);
+        apiVersionInsideFacade = await facade.GetRunningApiVersion();
+        Assert.IsTrue(apiVersionInsideFacade == EmberMethods.GetEmberApiVersion(testingDiffrentVersion: 1));
         Assert.IsTrue(apiVersionInsideFacade == 1);
 
         var versionDict2 = await facade!.GetCachesForEachApiVersion();
@@ -181,10 +181,10 @@ public class EmberVersioningTests
     [TestMethod]
     public async Task OldSourceCodeVersionsTest()
     {
-        facade = RandomMethods.GetNewScriptManagerInstance(1);
+        facade = EmberMethods.GetNewScriptManagerInstance(1);
         Guid id = await facade!.CreateScript(sourceCodeActionV1!);
 
-        facade = RandomMethods.GetNewScriptManagerInstance(2);
+        facade = EmberMethods.GetNewScriptManagerInstance(2);
         await facade.UpdateScript(id, sourceCodeActionV2!);
         await facade.CompileScript(id);
 
