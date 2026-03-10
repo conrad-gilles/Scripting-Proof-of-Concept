@@ -131,7 +131,18 @@ namespace RWContextV2
 
         public override Ember.Scripting.GeneratorContext Downgrade()
         {
-            return null;
+            try
+            {
+                ILabOrderInterface labOrderV1 = (ILabOrderInterface)labOrder;
+                Patient patientV1 = (Patient)patient;
+                ConsoleLogger loggerV1 = new ConsoleLogger();
+                DataAccess dataV1 = new DataAccess();
+                return new ReadOnlyContextV1.GeneratorContext(labOrderV1!, patientV1!, loggerV1!, dataV1!);
+            }
+            catch (Exception e)
+            {
+                throw new Exception("Could not downgrade your Context V" + Version + " to the previous version.", e);
+            }
         }
     }
 }
@@ -162,7 +173,18 @@ namespace GeneratorContextV3
         ILabOrderInterfaceV2 IGeneratorContext_V3.IGeneratorContext.LabOrder => labOrderV2;
         public override Ember.Scripting.GeneratorContext Downgrade()
         {
-            return null;
+            try
+            {
+                ILabOrderRWInterface labOrderV22 = (ILabOrderRWInterface)labOrderV2;
+                Patient patientV2 = (Patient)patient;
+                ConsoleLogger loggerV2 = new ConsoleLogger();
+                DataAccess dataV2 = new DataAccess();
+                return new RWContextV2.GeneratorContext(labOrderV22!, patientV2!, loggerV2!, dataV2!);
+            }
+            catch (Exception e)
+            {
+                throw new Exception("Could not downgrade your Context V" + Version + " to the previous version.", e);
+            }
         }
     }
 }
@@ -194,7 +216,18 @@ namespace GeneratorContextV4
 
         public override Ember.Scripting.GeneratorContext Downgrade()
         {
-            return null;
+            try
+            {
+                ILabOrderInterfaceV2 labOrderV33 = (ILabOrderInterfaceV2)labOrderV3;
+                Patient patientV3 = (Patient)patient;
+                ConsoleLogger loggerV3 = new ConsoleLogger();
+                DataAccess dataV3 = new DataAccess();
+                return new GeneratorContextV3.GeneratorContext(labOrderV33!, patientV3!, loggerV3!, dataV3!);
+            }
+            catch (Exception e)
+            {
+                throw new Exception("Could not downgrade your Context V" + Version + " to the previous version.", e);
+            }
         }
     }
 }
@@ -230,7 +263,7 @@ namespace GeneratorContextNoInherVaccineV5
             }
             catch (Exception e)
             {
-                throw new Exception("Could not downgrade your Context to the previous version.", e);
+                throw new Exception("Could not downgrade your Context V" + Version + " to the previous version.", e);
             }
         }
     }
