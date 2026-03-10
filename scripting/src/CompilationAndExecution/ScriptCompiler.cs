@@ -91,6 +91,24 @@ internal class ScriptCompiler
 
     }
 
+    public INamedTypeSymbol GetBaseType(string script)
+    {
+        SyntaxTree tree = CSharpSyntaxTree.ParseText(script);   //being called twice also in RunCompilation() might be better for performance to remove twice but also you want to be able to compile without having to parse always
+        var Mscorlib = MetadataReference.CreateFromFile(typeof(object).Assembly.Location);
+        var compilation = CSharpCompilation.Create("MyCompilation",
+            syntaxTrees: new[] { tree }, references: new[] { Mscorlib });   // i might be able to use this method to init the refrences also above?
+        var model = compilation.GetSemanticModel(tree);
+        var classesInTree = tree.GetRoot().DescendantNodes().OfType<ClassDeclarationSyntax>();
+        if (classesInTree.Count() > 1)
+        {
+            Logger.LogError("More Than one class found in Script string.");
+            throw new MoreThanOneClassFoundInScriptException("More Than one class found in Script string. in if (classesInTree.Count() > 1)"); //this might throw even if there is one class in script if compiler adds classes or something like that, so if it does maybe change this if statement
+        }
+        var myClass = classesInTree.Last();
+        var myClassSymbol = model.GetDeclaredSymbol(myClass) as ITypeSymbol;
+        var baseType = myClassSymbol!.BaseType!;
+        return baseType;
+    }
     public (string className, string baseTypeName, int versionInt) BasicValidationBeforeCompiling(string script)
     {
         Logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(BasicValidationBeforeCompiling), nameof(ScriptCompiler));
@@ -136,14 +154,16 @@ internal class ScriptCompiler
                 }
             }
 
-            Console.WriteLine("Extracted Context Parameter Type: " + contextParameterTypeName);
+            // Console.WriteLine("Extracted Context Parameter Type: " + contextParameterTypeName);
             Logger.LogTrace("Extracted Context Parameter Type: " + contextParameterTypeName);
 
             Dictionary<int, Type> activeContexts = ContextVersionScanner.GetInterfaceDictionary();
-            Console.WriteLine("Start of dict String:");
+            // Console.WriteLine("Start of dict String:");
+            Logger.LogTrace("Start of dict String:");
             foreach (var pair in activeContexts)
             {
-                Console.WriteLine("Key: " + pair.Key + ", Value: " + pair.Value);
+                // Console.WriteLine("Key: " + pair.Key + ", Value: " + pair.Value);
+                Logger.LogTrace("Key: " + pair.Key + ", Value: " + pair.Value);
             }
 
             foreach (var ctx in activeContexts)

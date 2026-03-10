@@ -71,11 +71,11 @@ namespace GeneratorScriptsV2
 }
 namespace GeneratorScriptsV3
 {
-    public interface IGeneratorActionScriptV3 : IGeneratorActionScript
+    public interface IGeneratorActionScriptV3 : Ember.Scripting.IGeneratorActionScript
     {
         Task<ActionResultV3NoInheritance> ExecuteAsync(IGeneratorContext_V4.IGeneratorContext context);
 
-        Task<ActionResultBaseClass> IGeneratorActionScript.ExecuteAsync(IGeneratorBaseInterface context)     //if bugs maybe put as async and await ExecuteAsync
+        Task<ActionResultBaseClass> Ember.Scripting.IGeneratorActionScript.ExecuteAsync(IGeneratorBaseInterface context)     //if bugs maybe put as async and await ExecuteAsync
         {
             return ExecuteAsync(context);
         }
@@ -83,11 +83,11 @@ namespace GeneratorScriptsV3
 }
 namespace GeneratorScriptsV4
 {
-    public interface IGeneratorActionScriptV4Vaccine : IGeneratorActionScript
+    public interface IGeneratorActionScriptV4Vaccine : Ember.Scripting.IGeneratorActionScript
     {
         Task<ActionResultV3NoInheritance> ExecuteAsync(IGeneratorContextNoInheritance_V5.IGeneratorContext context);
 
-        Task<ActionResultBaseClass> IGeneratorActionScript.ExecuteAsync(IGeneratorBaseInterface context)     //if bugs maybe put as async and await ExecuteAsync
+        Task<ActionResultBaseClass> Ember.Scripting.IGeneratorActionScript.ExecuteAsync(IGeneratorBaseInterface context)     //if bugs maybe put as async and await ExecuteAsync
         {
             return ExecuteAsync(context);
         }

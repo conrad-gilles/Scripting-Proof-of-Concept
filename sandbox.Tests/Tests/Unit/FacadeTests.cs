@@ -93,7 +93,7 @@ public class ScriptManagerFacadeTests
 
         Guid id = await facade!.CreateScript(sourceCodePedia!, apiVersion: 2);
         CustomerScript retrievedScript = await facade.GetScript(id);
-        var context = em!.GetTestingContext<GeneratorContextNoInherVaccineV5.GeneratorContext>(retrievedScript);
+        var context = await em!.GetTestingContext<GeneratorContextNoInherVaccineV5.GeneratorContext>(retrievedScript);
         await facade.ExecuteScriptById(retrievedScript.Id, context);
 
         Assert.AreEqual(retrievedScript.SourceCode, sourceCodePedia);
@@ -316,7 +316,7 @@ public class ScriptManagerFacadeTests
     public async Task ExecuteActionScriptTest()
     {
         Guid id = await facade!.CreateScript(sourceCodeActionV1!);
-        var testingContext = em!.GetTestingContext<GeneratorContextV4.GeneratorContext>();
+        var testingContext = await em!.GetTestingContext<GeneratorContextV4.GeneratorContext>();
 
         ActionResultBaseClass result = await facade.ExecuteActionScript(id, testingContext);
 
@@ -338,7 +338,7 @@ public class ScriptManagerFacadeTests
     public async Task ExecuteConditionScriptTest()
     {
         Guid id = await facade!.CreateScript(sourceCodePedia!);
-        var testingContext = em!.GetTestingContext<GeneratorContextV4.GeneratorContext>();
+        var testingContext = await em!.GetTestingContext<GeneratorContextV4.GeneratorContext>();
 
         bool result = await facade.ExecuteConditionScript(id, testingContext);
 
@@ -355,7 +355,7 @@ public class ScriptManagerFacadeTests
     [TestMethod]
     public async Task ExecuteScriptByIdTest()
     {
-        var context = em!.GetTestingContext<GeneratorContextV4.GeneratorContext>();
+        var context = await em!.GetTestingContext<GeneratorContextV4.GeneratorContext>();
 
         Guid condId = await facade!.CreateScript(sourceCodePedia!);
         object condResult = await facade.ExecuteScriptById(condId, context);

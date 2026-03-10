@@ -1,3 +1,5 @@
+using Microsoft.CodeAnalysis;
+
 namespace Ember.Scripting;
 
 public interface ISccriptManagerDeleteAfter : IScriptManagerExtended
@@ -56,6 +58,8 @@ public interface ISccriptManagerDeleteAfter : IScriptManagerExtended
   /// <param name="script"></param>
   /// <returns></returns>
   (string className, string baseTypeName, int versionInt) BasicValidationBeforeCompiling(string script);
+
+  INamedTypeSymbol GetBaseType(string script);
 
   #endregion
 

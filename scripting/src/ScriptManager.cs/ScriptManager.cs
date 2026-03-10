@@ -207,6 +207,11 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
         return Compiler.BasicValidationBeforeCompiling(script);
     }
 
+    public INamedTypeSymbol GetBaseType(string script)
+    {
+        return Compiler.GetBaseType(script);
+    }
+
     #endregion
 
     #region Execution Operations

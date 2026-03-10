@@ -107,12 +107,12 @@ public class EmberVersioningTests
         }
         return ids;
     }
-    public async Task ExecuteEachScript(ISccriptManagerDeleteAfter facade, EmberMethods rm)
+    public async Task ExecuteEachScript(ISccriptManagerDeleteAfter facade, EmberMethods em)
     {
-        foreach (var id in await SaturateDBAsync(facade, rm))
+        foreach (var id in await SaturateDBAsync(facade, em))
         {
             CustomerScript retrievedScript = await facade!.GetScript(id);
-            var context = rm!.GetTestingContext<GeneratorContextNoInherVaccineV5.GeneratorContext>(justForTesting: retrievedScript);
+            var context = await em!.GetTestingContext<GeneratorContextNoInherVaccineV5.GeneratorContext>(justForTesting: retrievedScript);
             object resultBeforeUpgrade = await facade.ExecuteScriptById(id, context);   //here somehow figure out how to get the version that is being executed todo
 
             if (resultBeforeUpgrade is ActionResultBaseClass)

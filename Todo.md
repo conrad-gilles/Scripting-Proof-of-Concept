@@ -14,11 +14,12 @@
 - maybe refactor basic val so he gets the version int from parameter outside where from maybe sandbox the version int is determined using the ScriptFactory
 - other option is injecting scriptfactory somehow and then determining it inside the class lib without having to ive access to the entire sandbox!
 - change verion abstract int to annotation 
+- also add verson int or annotation to the ActionResult classes
 
 # Developers in Ember simply do this:
  
-var context = await RoutingDecisionSpecialCaseScriptFactory.CreateContext(...);
-var result = await ScriptManager.ExecuteScript(Scripts.RoutingDecisionSpecialCaseScript, context);
+- var context = await RoutingDecisionSpecialCaseScriptFactory.CreateContext(...);
+- var result = await ScriptManager.ExecuteScript(Scripts.RoutingDecisionSpecialCaseScript, context);
  
 ### This has the following implications:
   - The context is always of the newest version

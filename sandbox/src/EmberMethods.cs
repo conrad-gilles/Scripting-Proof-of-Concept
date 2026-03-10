@@ -175,10 +175,11 @@ public class EmberMethods
         // var facade = new ScriptManagerFacade(UsefulMethods.GetReferences());
         // var newestVersion = await facade.GetRecentApiVersion();
         object finalActionResult = resultValue;
-        int loopBreaker = 0;   //I am assuming not 1000 versions will be written                // will probably fail in real application todo fix mabe with reflection i heard?
-        while (finalActionResult is not ActionResultV3NoInheritance && loopBreaker < 1000)    //could fail if loaded from diffrent assembly should probably replace the is statements with something like get type.name
+        int iterations = 0;              // will probably fail in real application todo fix mabe with reflection i heard?
+        int maxIterations = ContextVersionScanner.GetClassDictionary().Keys.Count() + 3;  //just making sure my logic is fine to prevent infinite loop  todo chacnge this t onot genrerator clas version but maybe action result version
+        while (finalActionResult is not ActionResultV3NoInheritance && iterations <= maxIterations)    //could fail if loaded from diffrent assembly should probably replace the is statements with something like get type.name
         {
-            loopBreaker++;
+
             // if (finalActionResult is ActionResultV2 v2Script)
             if (finalActionResult.GetType().Name == "ActionResultV2")
             {
@@ -206,7 +207,13 @@ public class EmberMethods
                     Serilog.Log.Error(e.ToString());
                 }
             }
+            if (iterations > maxIterations)
+            {
+                throw new Exception("Somethign went wrong trying to upgrade the ActionResult");
+            }
+            iterations++;
         }
+
         // if (finalActionResult is ActionResultV3NoInheritance v3Script)
         if (finalActionResult.GetType().Name == "ActionResultV3NoInheritance")
         {
@@ -256,7 +263,7 @@ public class EmberMethods
         // GeneratorContext ctx = GetTestingContext();
         return "Gilles";
     }
-    public GeneratorContext GetTestingContext<T>(CustomerScript? justForTesting = null) where T : GeneratorContext
+    public async Task<GeneratorContext> GetTestingContext<T>(CustomerScript? justForTesting = null) where T : GeneratorContext
     {
         Serilog.Log.Verbose("Entered {MethodName} in {ClassName}.", nameof(GetTestingContext), nameof(EmberMethods));
         try
@@ -278,43 +285,53 @@ public class EmberMethods
             };
             if (justForTesting != null) //this is ofc just for testing purposes in the real application you would never automatically distribute the context because it is unsafe you want to be able to control who gets which context precisely
             {
-                // var microsoftLogger = new LoggerForScripting().GetMicrosoftLogger<ScriptManagerFacade>();
-                var refs = GetReferences();
-                // ScriptCompiler compiler = new ScriptCompiler(refs, new LoggerForScripting().GetMicrosoftLogger<ScriptCompiler>());
-                string implementedInterface = Facade.BasicValidationBeforeCompiling(justForTesting.SourceCode!).baseTypeName;
-                switch (implementedInterface)
-                {
-                    case "IGeneratorActionScript":
-                        // ctx = new RWContext(labOrder, patient, logger, testDataAccess);
-                        int v = Facade.BasicValidationBeforeCompiling(justForTesting.SourceCode!).versionInt;
-                        ctx = v switch
-                        {
-                            1 => new RWContextV2.GeneratorContext(labOrder, patient, logger, testDataAccess),
-                            2 => new GeneratorContextV3.GeneratorContext(labOrder, patient, logger, testDataAccess),
-                            3 => new GeneratorContextV4.GeneratorContext(labOrder, patient, logger, testDataAccess),
-                            4 => new GeneratorContextNoInherVaccineV5.GeneratorContext(labOrder, vaccine),
-                            _ => throw new NotImplementedException(),
-                        };
-                        break;
-                    case "IGeneratorActionScriptV2":
-                        ctx = new GeneratorContextV3.GeneratorContext(labOrder, patient, logger, testDataAccess);
-                        break;
-                    case "IGeneratorActionScriptV3":
-                        ctx = new GeneratorContextV4.GeneratorContext(labOrder, patient, logger, testDataAccess);
-                        break;
-                    case "IGeneratorActionScriptV4Vaccine":
-                        ctx = new GeneratorContextNoInherVaccineV5.GeneratorContext(labOrder, vaccine);
-                        break;
-                    case "IGeneratorConditionScript":
-                        ctx = new ReadOnlyContextV1.GeneratorContext(labOrder, patient, logger, testDataAccess);
-                        break;
-                    default:
-                        Console.WriteLine("Error in testing switch");
-                        throw new Exception();
-                }
-            }
+                // // var microsoftLogger = new LoggerForScripting().GetMicrosoftLogger<ScriptManagerFacade>();
+                // var refs = GetReferences();
+                // // ScriptCompiler compiler = new ScriptCompiler(refs, new LoggerForScripting().GetMicrosoftLogger<ScriptCompiler>());
+                // string implementedInterface = Facade.BasicValidationBeforeCompiling(justForTesting.SourceCode!).baseTypeName;
+                // switch (implementedInterface)
+                // {
+                //     case "IGeneratorActionScript":
+                //         int v = Facade.BasicValidationBeforeCompiling(justForTesting.SourceCode!).versionInt;
+                //         ctx = v switch
+                //         {
+                //             1 => new RWContextV2.GeneratorContext(labOrder, patient, logger, testDataAccess),
+                //             2 => new GeneratorContextV3.GeneratorContext(labOrder, patient, logger, testDataAccess),
+                //             3 => new GeneratorContextV4.GeneratorContext(labOrder, patient, logger, testDataAccess),
+                //             4 => new GeneratorContextNoInherVaccineV5.GeneratorContext(labOrder, vaccine),
+                //             _ => throw new NotImplementedException(),
+                //         };
+                //         break;
+                //     case "IGeneratorActionScriptV2":
+                //         ctx = new GeneratorContextV3.GeneratorContext(labOrder, patient, logger, testDataAccess);
+                //         break;
+                //     case "IGeneratorActionScriptV3":
+                //         ctx = new GeneratorContextV4.GeneratorContext(labOrder, patient, logger, testDataAccess);
+                //         break;
+                //     case "IGeneratorActionScriptV4Vaccine":
+                //         ctx = new GeneratorContextNoInherVaccineV5.GeneratorContext(labOrder, vaccine);
+                //         break;
+                //     case "IGeneratorConditionScript":
+                //         ctx = new ReadOnlyContextV1.GeneratorContext(labOrder, patient, logger, testDataAccess);
+                //         break;
+                //     default:
+                //         Console.WriteLine("Error in testing switch");
+                //         throw new Exception();
+                // }
 
-            // return (T)ctx;
+                // var dict = ContextVersionScanner.GetInterfaceDictionary();
+                // foreach (Type item in dict.Values)
+                // {
+                //     if (item.Name == Facade.GetBaseType(justForTesting.SourceCode!).Name)
+                //     {
+
+                //     }
+                // }
+                ScriptFactory sf = new ScriptFactory(Facade);
+                int v = Facade.BasicValidationBeforeCompiling(justForTesting.SourceCode!).versionInt;
+                ctx = await sf.CreateContextForApiV(v);
+
+            }
             return ctx;
         }
         catch (Exception e)

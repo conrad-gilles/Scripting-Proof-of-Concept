@@ -75,13 +75,13 @@ public class SanboxTests
 
         facade = EmberMethods.GetNewScriptManagerInstance(1);
         sf = new ScriptFactory(facade);
-        ctx = await sf.CreateContext();
+        ctx = await sf.CreateContextForApiV();
 
         Assert.IsTrue(ctx.GetType() == typeof(ReadOnlyContextV1.GeneratorContext));
 
         facade = EmberMethods.GetNewScriptManagerInstance(2);
         sf = new ScriptFactory(facade);
-        ctx = await sf.CreateContext();
+        ctx = await sf.CreateContextForApiV();
 
         Assert.IsTrue(ctx.GetType() == typeof(RWContextV2.GeneratorContext));
 
@@ -90,7 +90,7 @@ public class SanboxTests
 
         Exception ex = await Assert.ThrowsExceptionAsync<Exception>(async () =>
          {
-             ctx = await sf.CreateContext();
+             ctx = await sf.CreateContextForApiV();
          });
         Assert.IsTrue(ex.Message.Contains("No Context class defined in") && ex.Message.Contains("for the passed API version."));
     }
@@ -111,7 +111,7 @@ public class SanboxTests
         ScriptFactory sf;
         facade = EmberMethods.GetNewScriptManagerInstance(1);
         sf = new ScriptFactory(facade);
-        Dictionary<int, Type> retrievedDict = sf.GetDictionary();
+        Dictionary<int, Type> retrievedDict = ContextVersionScanner.GetClassDictionary();
         retrievedDict.Reverse();
         PrintDictToConsole(contextVersionMap);
         PrintDictToConsole(retrievedDict);
@@ -183,5 +183,49 @@ public class SanboxTests
 
         // Assert.IsTrue(false);
 
+    }
+
+    [TestMethod]
+    public async Task CreateContextForApiTest()
+    {
+        Guid id;
+        ScriptFactory sf;
+        (string className, string baseTypeName, int versionInt) valResult;
+
+        facade = EmberMethods.GetNewScriptManagerInstance();
+        valResult = facade.BasicValidationBeforeCompiling(sourceCodeActionV2!);
+        id = await facade.CreateScript(sourceCodeActionV2!);
+
+        sf = new ScriptFactory(facade);
+        await facade.ExecuteScriptById(id, await sf.CreateContextForApiV(valResult.versionInt));
+
+        for (int i = 0; i < 6; i++)
+        {
+            facade = EmberMethods.GetNewScriptManagerInstance(i);
+            valResult = facade.BasicValidationBeforeCompiling(sourceCodeActionV2!);
+            id = await facade.CreateScript(sourceCodeActionV2!);
+
+            sf = new ScriptFactory(facade);
+            await facade.ExecuteScriptById(id, await sf.CreateContextForApiV(valResult.versionInt));
+        }
+
+        for (int i = 0; i < 6; i++)
+        {
+            facade = EmberMethods.GetNewScriptManagerInstance(i);
+            valResult = facade.BasicValidationBeforeCompiling(sourceCodeVaccineAction!);
+            id = await facade.CreateScript(sourceCodeVaccineAction!);
+
+            sf = new ScriptFactory(facade);
+            await facade.ExecuteScriptById(id, await sf.CreateContextForApiV(valResult.versionInt));
+        }
+        for (int i = 0; i < 6; i++)
+        {
+            facade = EmberMethods.GetNewScriptManagerInstance(i);
+            valResult = facade.BasicValidationBeforeCompiling(sourceCodePedia!);
+            id = await facade.CreateScript(sourceCodePedia!);
+
+            sf = new ScriptFactory(facade);
+            await facade.ExecuteScriptById(id, await sf.CreateContextForApiV(valResult.versionInt));
+        }
     }
 }
