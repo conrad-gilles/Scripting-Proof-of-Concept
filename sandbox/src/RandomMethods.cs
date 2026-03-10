@@ -243,7 +243,7 @@ public class EmberMethods
                         // MetadataReference.CreateFromFile(typeof(IGeneratorActionScript).Assembly.Location),
                         // MetadataReference.CreateFromFile(typeof(IGeneratorBaseInterface).Assembly.Location),
                         // MetadataReference.CreateFromFile(typeof(Ember.Scripting.GeneratorContext).Assembly.Location),
-                        MetadataReference.CreateFromFile(typeof(IGeneratorReadOnlyContext.IGeneratorContext).Assembly.Location),//try removing if works good i guess but still need to pass from sandbox];
+                        MetadataReference.CreateFromFile(typeof(IGeneratorReadOnlyContextV1.IGeneratorContext).Assembly.Location),//try removing if works good i guess but still need to pass from sandbox];
                         //   MetadataReference.CreateFromFile(typeof(Ember.Scripting.ScriptManagerFacade).Assembly.Location)
                           ];
     public static List<MetadataReference> GetReferences()
@@ -269,11 +269,11 @@ public class EmberMethods
 
             GeneratorContext ctx = typeof(T) switch
             {
-                var t when t == typeof(ReadOnlyContext.GeneratorContext) => new ReadOnlyContext.GeneratorContext(labOrder, patient, logger, testDataAccess),
-                var t when t == typeof(RWContext.GeneratorContext) => new RWContext.GeneratorContext(labOrder, patient, logger, testDataAccess),
-                var t when t == typeof(GeneratorContextV2.GeneratorContext) => new GeneratorContextV2.GeneratorContext(labOrder, patient, logger, testDataAccess),
+                var t when t == typeof(ReadOnlyContextV1.GeneratorContext) => new ReadOnlyContextV1.GeneratorContext(labOrder, patient, logger, testDataAccess),
+                var t when t == typeof(RWContextV2.GeneratorContext) => new RWContextV2.GeneratorContext(labOrder, patient, logger, testDataAccess),
                 var t when t == typeof(GeneratorContextV3.GeneratorContext) => new GeneratorContextV3.GeneratorContext(labOrder, patient, logger, testDataAccess),
-                var t when t == typeof(GeneratorContextNoInherVaccine.GeneratorContext) => new GeneratorContextNoInherVaccine.GeneratorContext(labOrder, vaccine),
+                var t when t == typeof(GeneratorContextV4.GeneratorContext) => new GeneratorContextV4.GeneratorContext(labOrder, patient, logger, testDataAccess),
+                var t when t == typeof(GeneratorContextNoInherVaccineV5.GeneratorContext) => new GeneratorContextNoInherVaccineV5.GeneratorContext(labOrder, vaccine),
                 _ => throw new ArgumentException($"Unsupported context type: {typeof(T).Name}")
             };
             if (justForTesting != null) //this is ofc just for testing purposes in the real application you would never automatically distribute the context because it is unsafe you want to be able to control who gets which context precisely
@@ -289,24 +289,24 @@ public class EmberMethods
                         int v = Facade.BasicValidationBeforeCompiling(justForTesting.SourceCode!).versionInt;
                         ctx = v switch
                         {
-                            1 => new RWContext.GeneratorContext(labOrder, patient, logger, testDataAccess),
-                            2 => new GeneratorContextV2.GeneratorContext(labOrder, patient, logger, testDataAccess),
-                            3 => new GeneratorContextV3.GeneratorContext(labOrder, patient, logger, testDataAccess),
-                            4 => new GeneratorContextNoInherVaccine.GeneratorContext(labOrder, vaccine),
+                            1 => new RWContextV2.GeneratorContext(labOrder, patient, logger, testDataAccess),
+                            2 => new GeneratorContextV3.GeneratorContext(labOrder, patient, logger, testDataAccess),
+                            3 => new GeneratorContextV4.GeneratorContext(labOrder, patient, logger, testDataAccess),
+                            4 => new GeneratorContextNoInherVaccineV5.GeneratorContext(labOrder, vaccine),
                             _ => throw new NotImplementedException(),
                         };
                         break;
                     case "IGeneratorActionScriptV2":
-                        ctx = new GeneratorContextV2.GeneratorContext(labOrder, patient, logger, testDataAccess);
-                        break;
-                    case "IGeneratorActionScriptV3":
                         ctx = new GeneratorContextV3.GeneratorContext(labOrder, patient, logger, testDataAccess);
                         break;
+                    case "IGeneratorActionScriptV3":
+                        ctx = new GeneratorContextV4.GeneratorContext(labOrder, patient, logger, testDataAccess);
+                        break;
                     case "IGeneratorActionScriptV4Vaccine":
-                        ctx = new GeneratorContextNoInherVaccine.GeneratorContext(labOrder, vaccine);
+                        ctx = new GeneratorContextNoInherVaccineV5.GeneratorContext(labOrder, vaccine);
                         break;
                     case "IGeneratorConditionScript":
-                        ctx = new ReadOnlyContext.GeneratorContext(labOrder, patient, logger, testDataAccess);
+                        ctx = new ReadOnlyContextV1.GeneratorContext(labOrder, patient, logger, testDataAccess);
                         break;
                     default:
                         Console.WriteLine("Error in testing switch");

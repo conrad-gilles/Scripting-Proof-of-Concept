@@ -39,11 +39,11 @@ public class ScriptFactory
 
         GeneratorContext ctx = recentType switch
         {
-            var t when t == typeof(ReadOnlyContext.GeneratorContext) => new ReadOnlyContext.GeneratorContext(objs.labOrder, objs.patient, objs.logger, objs.testDataAccess),
-            var t when t == typeof(RWContext.GeneratorContext) => new RWContext.GeneratorContext(objs.labOrder, objs.patient, objs.logger, objs.testDataAccess),
-            var t when t == typeof(GeneratorContextV2.GeneratorContext) => new GeneratorContextV2.GeneratorContext(objs.labOrder, objs.patient, objs.logger, objs.testDataAccess),
+            var t when t == typeof(ReadOnlyContextV1.GeneratorContext) => new ReadOnlyContextV1.GeneratorContext(objs.labOrder, objs.patient, objs.logger, objs.testDataAccess),
+            var t when t == typeof(RWContextV2.GeneratorContext) => new RWContextV2.GeneratorContext(objs.labOrder, objs.patient, objs.logger, objs.testDataAccess),
             var t when t == typeof(GeneratorContextV3.GeneratorContext) => new GeneratorContextV3.GeneratorContext(objs.labOrder, objs.patient, objs.logger, objs.testDataAccess),
-            var t when t == typeof(GeneratorContextNoInherVaccine.GeneratorContext) => new GeneratorContextNoInherVaccine.GeneratorContext(objs.labOrder, objs.vaccine),
+            var t when t == typeof(GeneratorContextV4.GeneratorContext) => new GeneratorContextV4.GeneratorContext(objs.labOrder, objs.patient, objs.logger, objs.testDataAccess),
+            var t when t == typeof(GeneratorContextNoInherVaccineV5.GeneratorContext) => new GeneratorContextNoInherVaccineV5.GeneratorContext(objs.labOrder, objs.vaccine),
             _ => throw new ArgumentException($"Unsupported context type: {recentType.Name}")
         };
 
@@ -63,32 +63,33 @@ public class ScriptFactory
 
     public Dictionary<int, Type> GetDictionary()
     {
-        Dictionary<int, Type> contextVersionMap = new() { };
+        // Dictionary<int, Type> contextVersionMap = new() { };
 
-        // the following 5 lines were ai generated i simply asked how to get subclasses in c# dotnet
-        Type baseType = typeof(Ember.Scripting.GeneratorContext);
-        var subClasses = AppDomain.CurrentDomain.GetAssemblies()
-            .SelectMany(assembly => assembly.GetTypes())
-            .Where(t => t.IsClass && !t.IsAbstract && t.IsSubclassOf(baseType))
-            .ToList();
+        // // the following 5 lines were ai generated i simply asked how to get subclasses in c# dotnet
+        // Type baseType = typeof(Ember.Scripting.GeneratorContext);
+        // var subClasses = AppDomain.CurrentDomain.GetAssemblies()
+        //     .SelectMany(assembly => assembly.GetTypes())
+        //     .Where(t => t.IsClass && !t.IsAbstract && t.IsSubclassOf(baseType))
+        //     .ToList();
 
-        for (int i = 0; i < subClasses.Count(); i++)
-        {
-            Type currentType = subClasses[i];
-            var uninitializedContext = (Ember.Scripting.GeneratorContext)RuntimeHelpers.GetUninitializedObject(currentType);
+        // for (int i = 0; i < subClasses.Count(); i++)
+        // {
+        //     Type currentType = subClasses[i];
+        //     var uninitializedContext = (Ember.Scripting.GeneratorContext)RuntimeHelpers.GetUninitializedObject(currentType);
 
-            int version = uninitializedContext.Version;
-            if (contextVersionMap.Values.Contains(currentType))
-            {
-                throw new Exception("Type was more than once in the assembly probably with more than 1 Version property");
-            }
-            if (contextVersionMap.Keys.Contains(version))
-            {
-                throw new Exception("Api version int more than once in the assembly should not happen.");
-            }
-            contextVersionMap.Add(version, currentType);
-        }
+        //     int version = uninitializedContext.Version;
+        //     if (contextVersionMap.Values.Contains(currentType))
+        //     {
+        //         throw new Exception("Type was more than once in the assembly probably with more than 1 Version property");
+        //     }
+        //     if (contextVersionMap.Keys.Contains(version))
+        //     {
+        //         throw new Exception("Api version int more than once in the assembly should not happen.");
+        //     }
+        //     contextVersionMap.Add(version, currentType);
+        // }
 
-        return contextVersionMap;
+        // return contextVersionMap
+        return ContextVersionScanner.GetClassDictionary();
     }
 }

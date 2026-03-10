@@ -1,6 +1,7 @@
 using System.Threading.Tasks;
 using System;
 using Ember.Scripting;
+using GeneratorScriptsV4;
 
 // public class VaccineScript : IGeneratorActionScript<IGeneratorContextNoInheritance_V4.IGeneratorContext, ActionResultV3NoInheritance>
 // {
@@ -21,7 +22,7 @@ using Ember.Scripting;
 
 public class VaccineScript : IGeneratorActionScriptV4Vaccine
 {
-    public async Task<ActionResultV3NoInheritance> ExecuteAsync(IGeneratorContextNoInheritance_V4.IGeneratorContext context)
+    public async Task<ActionResultV3NoInheritance> ExecuteAsync(IGeneratorContextNoInheritance_V5.IGeneratorContext context)
     {
         string number = context.LabOrder.OrderNumber;
         if (number == "1")

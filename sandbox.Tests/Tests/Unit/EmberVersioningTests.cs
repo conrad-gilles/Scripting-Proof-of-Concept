@@ -112,7 +112,7 @@ public class EmberVersioningTests
         foreach (var id in await SaturateDBAsync(facade, rm))
         {
             CustomerScript retrievedScript = await facade!.GetScript(id);
-            var context = rm!.GetTestingContext<GeneratorContextNoInherVaccine.GeneratorContext>(justForTesting: retrievedScript);
+            var context = rm!.GetTestingContext<GeneratorContextNoInherVaccineV5.GeneratorContext>(justForTesting: retrievedScript);
             object resultBeforeUpgrade = await facade.ExecuteScriptById(id, context);   //here somehow figure out how to get the version that is being executed todo
 
             if (resultBeforeUpgrade is ActionResultBaseClass)

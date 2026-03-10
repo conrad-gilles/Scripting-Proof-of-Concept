@@ -77,13 +77,13 @@ public class SanboxTests
         sf = new ScriptFactory(facade);
         ctx = await sf.CreateContext();
 
-        Assert.IsTrue(ctx.GetType() == typeof(ReadOnlyContext.GeneratorContext));
+        Assert.IsTrue(ctx.GetType() == typeof(ReadOnlyContextV1.GeneratorContext));
 
         facade = EmberMethods.GetNewScriptManagerInstance(2);
         sf = new ScriptFactory(facade);
         ctx = await sf.CreateContext();
 
-        Assert.IsTrue(ctx.GetType() == typeof(RWContext.GeneratorContext));
+        Assert.IsTrue(ctx.GetType() == typeof(RWContextV2.GeneratorContext));
 
         facade = EmberMethods.GetNewScriptManagerInstance();
         sf = new ScriptFactory(facade);
@@ -101,11 +101,11 @@ public class SanboxTests
         Dictionary<int, Type> contextVersionMap = new()
         {
             // {0, typeof(GeneratorContext)},
-            {1, typeof(ReadOnlyContext.GeneratorContext)},
-            {2, typeof(RWContext.GeneratorContext)},
-            {3, typeof(GeneratorContextV2.GeneratorContext)},
-            {4, typeof(GeneratorContextV3.GeneratorContext)},
-            {5, typeof(GeneratorContextNoInherVaccine.GeneratorContext)},
+            {1, typeof(ReadOnlyContextV1.GeneratorContext)},
+            {2, typeof(RWContextV2.GeneratorContext)},
+            {3, typeof(GeneratorContextV3.GeneratorContext)},
+            {4, typeof(GeneratorContextV4.GeneratorContext)},
+            {5, typeof(GeneratorContextNoInherVaccineV5.GeneratorContext)},
         };
 
         ScriptFactory sf;
@@ -125,5 +125,63 @@ public class SanboxTests
         {
             Console.WriteLine("Key: " + pair.Key + ", Value: " + pair.Value);
         }
+    }
+
+    [TestMethod]
+    public async Task BasicValidationTestUsingGetDictionary()
+    {
+        facade = EmberMethods.GetNewScriptManagerInstance();
+        (string className, string baseTypeName, int versionInt) valResult = facade.BasicValidationBeforeCompiling(sourceCodeActionV2!);
+
+        Console.WriteLine(nameof(valResult.baseTypeName) + " : " + valResult.baseTypeName);
+        Console.WriteLine(nameof(valResult.className) + " : " + valResult.className);
+        Console.WriteLine(nameof(valResult.versionInt) + " : " + valResult.versionInt);
+
+        Assert.IsTrue(valResult.baseTypeName == "IGeneratorActionScriptV2");
+        Assert.IsTrue(valResult.className == "AddPediatricTestsV3");
+        Assert.IsTrue(valResult.versionInt == 3);
+
+        valResult = facade.BasicValidationBeforeCompiling(sourceCodeActionV1!);
+
+        Console.WriteLine(nameof(valResult.baseTypeName) + " : " + valResult.baseTypeName);
+        Console.WriteLine(nameof(valResult.className) + " : " + valResult.className);
+        Console.WriteLine(nameof(valResult.versionInt) + " : " + valResult.versionInt);
+
+        Assert.IsTrue(valResult.baseTypeName == "IGeneratorActionScript");
+        Assert.IsTrue(valResult.className == "AddPediatricTestsV2");
+        Assert.IsTrue(valResult.versionInt == 2);
+
+        valResult = facade.BasicValidationBeforeCompiling(sourceCodeActionV3!);
+
+        Console.WriteLine(nameof(valResult.baseTypeName) + " : " + valResult.baseTypeName);
+        Console.WriteLine(nameof(valResult.className) + " : " + valResult.className);
+        Console.WriteLine(nameof(valResult.versionInt) + " : " + valResult.versionInt);
+
+        Assert.IsTrue(valResult.baseTypeName == "IGeneratorActionScriptV3");
+        Assert.IsTrue(valResult.className == "AddPediatricTestsV4");
+        Assert.IsTrue(valResult.versionInt == 4);
+
+        valResult = facade.BasicValidationBeforeCompiling(sourceCodeVaccineAction!);
+
+        Console.WriteLine(nameof(valResult.baseTypeName) + " : " + valResult.baseTypeName);
+        Console.WriteLine(nameof(valResult.className) + " : " + valResult.className);
+        Console.WriteLine(nameof(valResult.versionInt) + " : " + valResult.versionInt);
+
+        Assert.IsTrue(valResult.baseTypeName == "IGeneratorActionScriptV4Vaccine");
+        Assert.IsTrue(valResult.className == "VaccineScript");
+        Assert.IsTrue(valResult.versionInt == 5);
+
+        valResult = facade.BasicValidationBeforeCompiling(sourceCodePedia!);
+
+        Console.WriteLine(nameof(valResult.baseTypeName) + " : " + valResult.baseTypeName);
+        Console.WriteLine(nameof(valResult.className) + " : " + valResult.className);
+        Console.WriteLine(nameof(valResult.versionInt) + " : " + valResult.versionInt);
+
+        Assert.IsTrue(valResult.baseTypeName == "IGeneratorConditionScript");
+        Assert.IsTrue(valResult.className == "PediatricCondition");
+        Assert.IsTrue(valResult.versionInt == 1);
+
+        // Assert.IsTrue(false);
+
     }
 }

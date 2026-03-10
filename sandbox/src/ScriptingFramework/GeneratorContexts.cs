@@ -1,11 +1,14 @@
 using Microsoft.Extensions.Logging;
 using Ember.Scripting;
-using IGeneratorReadOnlyContext;
+using IGeneratorReadOnlyContextV1;
 
-namespace IGeneratorReadOnlyContext
+//todo version the Interfaces IGenerator bla bla
+
+namespace IGeneratorReadOnlyContextV1
 {
     public interface IGeneratorContext : IGeneratorBaseInterface
     {
+        new static sealed int IVersion => 1;
         ILabOrderInterface LabOrder { get; }      // Read current order data
         PatientInterface Patient { get; }     // Read patient data
         ConsoleLoggerInterface Logger { get; }
@@ -13,11 +16,11 @@ namespace IGeneratorReadOnlyContext
     }
 }
 
-namespace IGeneratorContext_V1
+namespace IGeneratorContext_V2
 {
-    // int Version = 1;
-    public interface IGeneratorContext : IGeneratorReadOnlyContext.IGeneratorContext
+    public interface IGeneratorContext : IGeneratorReadOnlyContextV1.IGeneratorContext
     {
+        new static sealed int IVersion => 2;
         new ILabOrderRWInterface LabOrder { get; }
 
         // List<Patient> Patients;
@@ -25,26 +28,29 @@ namespace IGeneratorContext_V1
     }
 }
 
-namespace IGeneratorContext_V2
+namespace IGeneratorContext_V3
 {
-    public interface IGeneratorContext : IGeneratorContext_V1.IGeneratorContext
+    public interface IGeneratorContext : IGeneratorContext_V2.IGeneratorContext
     {
+        new static sealed int IVersion => 3;
         new ILabOrderInterfaceV2 LabOrder { get; }
     }
 }
 
 
-namespace IGeneratorContext_V3
+namespace IGeneratorContext_V4
 {
-    public interface IGeneratorContext : IGeneratorContext_V2.IGeneratorContext
+    public interface IGeneratorContext : IGeneratorContext_V3.IGeneratorContext
     {
+        new static sealed int IVersion => 4;
         new ILabOrderInterfaceV3 LabOrder { get; }
     }
 }
-namespace IGeneratorContextNoInheritance_V4
+namespace IGeneratorContextNoInheritance_V5
 {
     public interface IGeneratorContext : IGeneratorBaseInterface
     {
+        new static sealed int IVersion => 5;
         ILabOrderInterfaceV4NoInheritence LabOrder { get; }
         IVaccineInterface Vaccine { get; }
     }
@@ -55,12 +61,12 @@ namespace IGeneratorContextNoInheritance_V4
 /// <summary>
 /// Classes of context come here
 /// </summary>
-namespace ReadOnlyContext
+namespace ReadOnlyContextV1
 {
-    public class GeneratorContext : Ember.Scripting.GeneratorContext, IGeneratorReadOnlyContext.IGeneratorContext
+    public class GeneratorContext : Ember.Scripting.GeneratorContext, IGeneratorReadOnlyContextV1.IGeneratorContext
     {
-        // public static int IVersion => 1;
         public override int Version => 1;
+        public int IVersion => Version;
 
         public ILabOrderInterface labOrder;
         public PatientInterface patient;
@@ -77,20 +83,19 @@ namespace ReadOnlyContext
             data = pdata;
 
         }
-        ILabOrderInterface IGeneratorReadOnlyContext.IGeneratorContext.LabOrder => labOrder;
-        PatientInterface IGeneratorReadOnlyContext.IGeneratorContext.Patient => patient;
-        ConsoleLoggerInterface IGeneratorReadOnlyContext.IGeneratorContext.Logger => logger;
-        DataAccessInterface IGeneratorReadOnlyContext.IGeneratorContext.Data => data;
+        ILabOrderInterface IGeneratorReadOnlyContextV1.IGeneratorContext.LabOrder => labOrder;
+        PatientInterface IGeneratorReadOnlyContextV1.IGeneratorContext.Patient => patient;
+        ConsoleLoggerInterface IGeneratorReadOnlyContextV1.IGeneratorContext.Logger => logger;
+        DataAccessInterface IGeneratorReadOnlyContextV1.IGeneratorContext.Data => data;
     }
 }
 
-namespace RWContext
+namespace RWContextV2
 {
-    public class GeneratorContext : Ember.Scripting.GeneratorContext, IGeneratorContext_V1.IGeneratorContext
+    public class GeneratorContext : Ember.Scripting.GeneratorContext, IGeneratorContext_V2.IGeneratorContext
     {
-        // public static int IVersion => 2;
         public override int Version => 2;
-
+        public int IVersion => Version;
 
         public ILabOrderRWInterface labOrder;
         public PatientInterface patient;
@@ -116,16 +121,16 @@ namespace RWContext
 
         public DataAccessInterface Data => data;
 
-        ILabOrderInterface IGeneratorReadOnlyContext.IGeneratorContext.LabOrder => LabOrder;
+        ILabOrderInterface IGeneratorReadOnlyContextV1.IGeneratorContext.LabOrder => LabOrder;
     }
 }
 
-namespace GeneratorContextV2
+namespace GeneratorContextV3
 {
-    public class GeneratorContext : RWContext.GeneratorContext, IGeneratorContext_V2.IGeneratorContext
+    public class GeneratorContext : RWContextV2.GeneratorContext, IGeneratorContext_V3.IGeneratorContext
     {
-        // public static new int IVersion => 3;
         public override int Version => 3;
+        // public int IVersion => Version;
 
         public ILabOrderInterfaceV2 labOrderV2;
         public new PatientInterface patient;
@@ -143,17 +148,17 @@ namespace GeneratorContextV2
             data = pdata;
 
         }
-        ILabOrderInterfaceV2 IGeneratorContext_V2.IGeneratorContext.LabOrder => labOrderV2;
+        ILabOrderInterfaceV2 IGeneratorContext_V3.IGeneratorContext.LabOrder => labOrderV2;
 
     }
 }
 
-namespace GeneratorContextV3
+namespace GeneratorContextV4
 {
-    public class GeneratorContext : GeneratorContextV2.GeneratorContext, IGeneratorContext_V3.IGeneratorContext  //todo implement Adapter pattern
+    public class GeneratorContext : GeneratorContextV3.GeneratorContext, IGeneratorContext_V4.IGeneratorContext  //todo implement Adapter pattern
     {
-        // public static new int IVersion => 4;
         public override int Version => 4;
+        // public int IVersion => Version;
 
         public ILabOrderInterfaceV3 labOrderV3;
         public new PatientInterface patient;
@@ -171,17 +176,17 @@ namespace GeneratorContextV3
             data = pdata;
 
         }
-        ILabOrderInterfaceV3 IGeneratorContext_V3.IGeneratorContext.LabOrder => labOrderV3;
+        ILabOrderInterfaceV3 IGeneratorContext_V4.IGeneratorContext.LabOrder => labOrderV3;
 
     }
 }
 
-namespace GeneratorContextNoInherVaccine
+namespace GeneratorContextNoInherVaccineV5
 {
-    public class GeneratorContext : Ember.Scripting.GeneratorContext, IGeneratorContextNoInheritance_V4.IGeneratorContext   //into diffrent namespaces blocks later folders
+    public class GeneratorContext : Ember.Scripting.GeneratorContext, IGeneratorContextNoInheritance_V5.IGeneratorContext   //into diffrent namespaces blocks later folders
     {
-        // public static int IVersion => 5;
         public override int Version => 5;
+        public int IVersion => Version;
 
         ILabOrderInterfaceV4NoInheritence LabOrder;
         IVaccineInterface Vaccine;
@@ -191,9 +196,9 @@ namespace GeneratorContextNoInherVaccine
             Vaccine = vaccine;
         }
 
-        ILabOrderInterfaceV4NoInheritence IGeneratorContextNoInheritance_V4.IGeneratorContext.LabOrder => LabOrder;
+        ILabOrderInterfaceV4NoInheritence IGeneratorContextNoInheritance_V5.IGeneratorContext.LabOrder => LabOrder;
 
-        IVaccineInterface IGeneratorContextNoInheritance_V4.IGeneratorContext.Vaccine => Vaccine;
+        IVaccineInterface IGeneratorContextNoInheritance_V5.IGeneratorContext.Vaccine => Vaccine;
     }
 }
 

@@ -1,0 +1,3694 @@
+This file is a merged representation of a subset of the codebase, containing specifically included files, combined into a single document by Repomix.
+
+<file_summary>
+This section contains a summary of this file.
+
+<purpose>
+This file contains a packed representation of a subset of the repository's contents that is considered the most important context.
+It is designed to be easily consumable by AI systems for analysis, code review,
+or other automated processes.
+</purpose>
+
+<file_format>
+The content is organized as follows:
+1. This summary section
+2. Repository information
+3. Directory structure
+4. Repository files (if enabled)
+5. Multiple file entries, each consisting of:
+  - File path as an attribute
+  - Full contents of the file
+</file_format>
+
+<usage_guidelines>
+- This file should be treated as read-only. Any changes should be made to the
+  original repository files, not this packed version.
+- When processing this file, use the file path to distinguish
+  between different files in the repository.
+- Be aware that this file may contain sensitive information. Handle it with
+  the same level of security as you would the original repository.
+</usage_guidelines>
+
+<notes>
+- Some files may have been excluded based on .gitignore rules and Repomix's configuration
+- Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
+- Only files matching these patterns are included: sandbox/src/ScriptingFramework, scripting
+- Files matching patterns in .gitignore are excluded
+- Files matching default ignore patterns are excluded
+- Files are sorted by Git change count (files with more changes are at the bottom)
+</notes>
+
+</file_summary>
+
+<directory_structure>
+sandbox/src/ScriptingFramework/ActionResult.cs
+sandbox/src/ScriptingFramework/GeneratorContexts.cs
+sandbox/src/ScriptingFramework/GeneratorScripts.cs
+sandbox/src/ScriptingFramework/ScriptFactory.cs
+scripting/scripting.csproj
+scripting/src/CompilationAndExecution/ContextVersionScanner.cs
+scripting/src/CompilationAndExecution/ScriptCompiler.cs
+scripting/src/CompilationAndExecution/ScriptExecutor.cs
+scripting/src/DbFiles/CustomerScript.cs
+scripting/src/DbFiles/DbHelper.cs
+scripting/src/DbFiles/EmberInstances.cs
+scripting/src/DbFiles/MyContext.cs
+scripting/src/DbFiles/ScriptCompiledCache.cs
+scripting/src/Exceptions/Exceptions.cs
+scripting/src/ScriptingFramework/ActionResult.cs
+scripting/src/ScriptingFramework/GeneratorContexts.cs
+scripting/src/ScriptingFramework/GeneratorScripts.cs
+scripting/src/ScriptingServiceCollectionExtensions.cs
+scripting/src/ScriptManager.cs/IScripManagerAdvanced.cs
+scripting/src/ScriptManager.cs/IScriptManager.cs
+scripting/src/ScriptManager.cs/IScriptManagerDeleteAfter.cs
+scripting/src/ScriptManager.cs/ScriptManager.cs
+</directory_structure>
+
+<files>
+This section contains the contents of the repository's files.
+
+<file path="scripting/src/CompilationAndExecution/ContextVersionScanner.cs">
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using System.Runtime.CompilerServices;
+
+namespace Ember.Scripting;
+
+public static class ContextVersionScanner
+{
+    // Moved exactly as it was from ScriptFactory
+    public static Dictionary<int, Type> GetClassDictionary()
+    {
+        Type baseType = typeof(Ember.Scripting.GeneratorContext);
+        return GetBaseTypeDictionary(baseType);
+    }
+
+    public static Dictionary<int, Type> GetInterfaceDictionary()
+    {
+        // Dictionary<int, Type> contextVersionMap = new();
+
+        Type baseType = typeof(Ember.Scripting.IGeneratorBaseInterface);
+        return GetBaseTypeDictionaryIntrfc(baseType);
+    }
+
+    private static Dictionary<int, Type> GetBaseTypeDictionary(Type baseType)
+    {
+        Dictionary<int, Type> contextVersionMap = new();
+        var subClasses = AppDomain.CurrentDomain.GetAssemblies()
+                   .SelectMany(assembly => assembly.GetTypes())
+                   .Where(t => t.IsClass && !t.IsAbstract && t.IsSubclassOf(baseType))
+                   .ToList();
+
+        for (int i = 0; i < subClasses.Count(); i++)
+        {
+            Type currentType = subClasses[i];
+            var uninitializedContext = (Ember.Scripting.GeneratorContext)RuntimeHelpers.GetUninitializedObject(currentType);
+
+            int version = uninitializedContext.Version;
+
+            if (contextVersionMap.Values.Contains(currentType))
+            {
+                throw new Exception("Type was more than once in the assembly probably with more than 1 Version property");
+            }
+            if (contextVersionMap.ContainsKey(version))
+            {
+                throw new Exception("Api version int more than once in the assembly should not happen.");
+            }
+            contextVersionMap.Add(version, currentType);
+        }
+        return contextVersionMap;
+    }
+    // private static Dictionary<int, Type> GetBaseTypeDictionaryIntrfc(Type baseType)
+    // {
+    //     Dictionary<int, Type> contextVersionMap = new();
+    //     var subClasses = AppDomain.CurrentDomain.GetAssemblies()
+    //                 // Note: Interfaces are not "SubclassOf", we must check if they implement the base interface
+    //                 .SelectMany(assembly => assembly.GetTypes())
+    //                 .Where(t => t.IsInterface && baseType.IsAssignableFrom(t) && t != baseType)
+    //                 .ToList();
+
+    //     // for (int i = 0; i < subClasses.Count(); i++)
+    //     // {
+    //     //     Type currentType = subClasses[i];
+
+    //     //     var uninitializedContext = (Ember.Scripting.IGeneratorBaseInterface)RuntimeHelpers.GetUninitializedObject(currentType);
+
+
+    //     //     int version = uninitializedContext.IVersion;
+
+    //     //     if (contextVersionMap.Values.Contains(currentType))
+    //     //     {
+    //     //         throw new Exception("Type was more than once in the assembly probably with more than 1 Version property");
+    //     //     }
+    //     //     if (contextVersionMap.ContainsKey(version))
+    //     //     {
+    //     //         throw new Exception("Api version int more than once in the assembly should not happen.");
+    //     //     }
+    //     //     contextVersionMap.Add(version, currentType);
+    //     // }
+    //     // return contextVersionMap;
+
+    //     for (int i = 0; i < subClasses.Count(); i++)
+    //     {
+    //         Type currentType = subClasses[i];
+
+    //         // 1. Get the static property 'IVersion' from the interface type
+    //         // Because it's static abstract, we look for Public | Static bindings
+    //         PropertyInfo? versionProperty = currentType.GetProperty("IVersion", BindingFlags.Public | BindingFlags.Static);
+
+    //         if (versionProperty == null)
+    //         {
+    //             // Skip if this specific interface doesn't define/override IVersion
+    //             continue;
+    //         }
+
+    //         // 2. Read the static value. Since it's a static property, we pass 'null' for the instance
+    //         object? value = versionProperty.GetValue(null);
+
+    //         if (value is int version)
+    //         {
+    //             if (contextVersionMap.Values.Contains(currentType))
+    //             {
+    //                 throw new Exception("Type was more than once in the assembly probably with more than 1 Version property");
+    //             }
+    //             if (contextVersionMap.ContainsKey(version))
+    //             {
+    //                 throw new Exception("Api version int more than once in the assembly should not happen.");
+    //             }
+    //             contextVersionMap.Add(version, currentType);
+    //         }
+    //     }
+    //     if (contextVersionMap.Count() <= 0)
+    //     {
+    //         throw new Exception("The dictionary was empty after Getting it using Reflection this should not be the case.");
+    //     }
+    //     return contextVersionMap;
+    // }
+    private static Dictionary<int, Type> GetBaseTypeDictionaryIntrfc(Type baseType)
+    {
+        Dictionary<int, Type> contextVersionMap = new();
+
+        var subClasses = AppDomain.CurrentDomain.GetAssemblies()
+                    .SelectMany(assembly => assembly.GetTypes())
+                    .Where(t => t.IsInterface && baseType.IsAssignableFrom(t) && t != baseType)
+                    .ToList();
+
+        for (int i = 0; i < subClasses.Count(); i++)
+        {
+            Type currentType = subClasses[i];
+
+            // Default version is 1 for ReadOnlyContext / Context_V1
+            int version = 1;
+
+            string namespaceName = currentType.Namespace ?? "";
+            string fullName = currentType.FullName ?? "";
+
+            // Safely parse the version integer from the Namespace string (e.g. "IGeneratorContext_V2")
+            if (namespaceName.Contains("_V"))
+            {
+                // Find the index of "_V"
+                int vIndex = namespaceName.IndexOf("_V") + 2;
+
+                // Extract the numbers after "_V"
+                string versionString = new string(namespaceName.Substring(vIndex).TakeWhile(char.IsDigit).ToArray());
+
+                if (!string.IsNullOrEmpty(versionString))
+                {
+                    version = int.Parse(versionString);
+                }
+            }
+            // For V3 or V4 if you used direct naming like 'GeneratorContextV3'
+            else if (fullName.Contains("V3")) version = 4; // Or whatever ID maps to V3
+            else if (fullName.Contains("V4")) version = 5;
+
+            // Prevent duplicate Keys/Values
+            if (!contextVersionMap.Values.Contains(currentType) && !contextVersionMap.ContainsKey(version))
+            {
+                contextVersionMap.Add(version, currentType);
+            }
+        }
+
+        return contextVersionMap;
+    }
+
+
+
+}
+</file>
+
+<file path="sandbox/src/ScriptingFramework/ScriptFactory.cs">
+using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Runtime.Serialization;
+using System.Threading.Tasks;
+using Ember.Scripting;
+
+public class ScriptFactory
+{
+    private readonly ISccriptManagerDeleteAfter ScriptManager;
+    public ScriptFactory(ISccriptManagerDeleteAfter scriptManager)
+    {
+        ScriptManager = scriptManager;
+    }
+    // internal static readonly Dictionary<int, Type> contextVersionMap = new()
+    //     {
+    //         {0, typeof(GeneratorContext)},
+    //         {1, typeof(ReadOnlyContext.GeneratorContext)},
+    //         {2, typeof(RWContext.GeneratorContext)},
+    //         {3, typeof(GeneratorContextV2.GeneratorContext)},
+    //         {4, typeof(GeneratorContextV3.GeneratorContext)},
+    //         {5, typeof(GeneratorContextNoInherVaccine.GeneratorContext)},
+    //     };
+    public async Task<GeneratorContext> CreateContext()
+    {
+        // int apiV = EmberMethods.GetEmberApiVersion(ScriptManager.GetRecentApiVersion());
+        int apiV = await ScriptManager.GetRunningApiVersion();
+
+        Type recentType;
+        Dictionary<int, Type> contextVersionMap = GetDictionary();
+
+        if (contextVersionMap.Keys.Contains(apiV) == false)
+        {
+            throw new Exception("No Context class defined in " + nameof(contextVersionMap) + " for the passed API version.");
+            // might be better to instead return latest version?
+            // recentType = contextVersionMap.Last().Value;
+        }
+        recentType = contextVersionMap[apiV];
+        var objs = ScriptObjects();
+
+        GeneratorContext ctx = recentType switch
+        {
+            var t when t == typeof(ReadOnlyContextV1.GeneratorContext) => new ReadOnlyContextV1.GeneratorContext(objs.labOrder, objs.patient, objs.logger, objs.testDataAccess),
+            var t when t == typeof(RWContextV2.GeneratorContext) => new RWContextV2.GeneratorContext(objs.labOrder, objs.patient, objs.logger, objs.testDataAccess),
+            var t when t == typeof(GeneratorContextV3.GeneratorContext) => new GeneratorContextV3.GeneratorContext(objs.labOrder, objs.patient, objs.logger, objs.testDataAccess),
+            var t when t == typeof(GeneratorContextV4.GeneratorContext) => new GeneratorContextV4.GeneratorContext(objs.labOrder, objs.patient, objs.logger, objs.testDataAccess),
+            var t when t == typeof(GeneratorContextNoInherVaccineV5.GeneratorContext) => new GeneratorContextNoInherVaccineV5.GeneratorContext(objs.labOrder, objs.vaccine),
+            _ => throw new ArgumentException($"Unsupported context type: {recentType.Name}")
+        };
+
+        return ctx;
+    }
+
+    private (LabOrder labOrder, Patient patient, ConsoleLogger logger, DataAccess testDataAccess, Vaccine vaccine) ScriptObjects()
+    {
+        LabOrder labOrder = new LabOrder("1", "Pediatrics");
+        Patient patient = new Patient("1", "TestFirst", "TestLast", new DateTime(2010, 6, 1, 7, 47, 0), "M");   //mfu
+        ConsoleLogger logger = new ConsoleLogger();
+        DataAccess testDataAccess = new DataAccess();
+        Vaccine vaccine = new Vaccine("Polio", 1, DateTime.UtcNow);
+
+        return (labOrder, patient, logger, testDataAccess, vaccine);
+    }
+
+    public Dictionary<int, Type> GetDictionary()
+    {
+        // Dictionary<int, Type> contextVersionMap = new() { };
+
+        // // the following 5 lines were ai generated i simply asked how to get subclasses in c# dotnet
+        // Type baseType = typeof(Ember.Scripting.GeneratorContext);
+        // var subClasses = AppDomain.CurrentDomain.GetAssemblies()
+        //     .SelectMany(assembly => assembly.GetTypes())
+        //     .Where(t => t.IsClass && !t.IsAbstract && t.IsSubclassOf(baseType))
+        //     .ToList();
+
+        // for (int i = 0; i < subClasses.Count(); i++)
+        // {
+        //     Type currentType = subClasses[i];
+        //     var uninitializedContext = (Ember.Scripting.GeneratorContext)RuntimeHelpers.GetUninitializedObject(currentType);
+
+        //     int version = uninitializedContext.Version;
+        //     if (contextVersionMap.Values.Contains(currentType))
+        //     {
+        //         throw new Exception("Type was more than once in the assembly probably with more than 1 Version property");
+        //     }
+        //     if (contextVersionMap.Keys.Contains(version))
+        //     {
+        //         throw new Exception("Api version int more than once in the assembly should not happen.");
+        //     }
+        //     contextVersionMap.Add(version, currentType);
+        // }
+
+        // return contextVersionMap
+        return ContextVersionScanner.GetClassDictionary();
+    }
+}
+</file>
+
+<file path="scripting/src/ScriptingFramework/ActionResult.cs">
+namespace Ember.Scripting;
+
+public abstract class ActionResultBaseClass
+{
+
+}
+</file>
+
+<file path="scripting/src/ScriptingFramework/GeneratorScripts.cs">
+namespace Ember.Scripting;
+
+public interface IGeneratorConditionScript
+{
+    // int VersionScript { get; }
+    // Task<bool> EvaluateAsync(IGeneratorReadOnlyContext context);
+    Task<bool> EvaluateAsync(IGeneratorBaseInterface context);
+}
+public interface IGeneratorActionScript
+{
+    // int VersionSript { get; }
+    // Task<ActionResultBaseClass> ExecuteAsync(IGeneratorContext context);
+    Task<ActionResultBaseClass> ExecuteAsync(IGeneratorBaseInterface context);
+}
+</file>
+
+<file path="scripting/scripting.csproj">
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net9.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+<ItemGroup>
+  <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.10.0" />
+  <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="4.10.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.0" />
+  <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.2" />
+</ItemGroup>
+
+</Project>
+</file>
+
+<file path="scripting/src/DbFiles/MyContext.cs">
+using Ember.Scripting;
+using Microsoft.EntityFrameworkCore;
+
+namespace EFModeling.EntityProperties.FluentAPI.Required;
+
+public class MyContext : DbContext
+{
+    public MyContext(DbContextOptions<MyContext> options) : base(options)
+    {
+    }
+    public MyContext()
+    {
+    }
+
+    public DbSet<CustomerScript> CustomerScripts { get; set; }
+    public DbSet<ScriptCompiledCache> ScriptCompiledCaches { get; set; }
+    public DbSet<EmberInstance> EmberInstances { get; set; }
+
+    #region Required
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<CustomerScript>()   //enforces source code not null
+            .Property(b => b.SourceCode)
+            .IsRequired();
+    }
+    #endregion
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        if (optionsBuilder.IsConfigured == false)
+        {
+            optionsBuilder.UseNpgsql(
+            @"Host=localhost;Port=5432;Database=script_registry;Username=admin;Password=your_secure_password");
+        }
+
+    }
+}
+</file>
+
+<file path="scripting/src/ScriptManager.cs/IScriptManager.cs">
+namespace Ember.Scripting;
+
+public interface IScriptManager
+{
+    /// <summary>
+    /// Generic execution that detects script type automatically
+    /// </summary>
+    /// <param name="scriptId"></param>
+    /// <param name="context"></param>
+    /// <param name="currentApiVersion"></param>
+    /// <returns></returns>
+    Task<object> ExecuteScriptById(Guid scriptId, GeneratorContext context, int? currentApiVersion = null);
+}
+</file>
+
+<file path="scripting/src/DbFiles/EmberInstances.cs">
+using System;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace Ember.Scripting;
+
+[Table("ember_instances")]
+public class EmberInstance
+{
+    [Key]
+    [Column("instance_id")]
+    public Guid InstanceId { get; set; }
+
+    [Column("instance_name")]
+    public string? InstanceName { get; set; }
+
+    [Column("ember_version")]
+    public string? EmberVersion { get; set; }
+
+    [Column("sdk_version")]
+    public int SdkVersion { get; set; }
+
+    [Column("last_heartbeat")]
+    public DateTime LastHeartbeat { get; set; }
+
+    [Column("hostname")]
+    public string? Hostname { get; set; }
+
+    public override string ToString()
+    {
+        string str = "Instance id: " + InstanceId.ToString();
+        str = str.Replace("@", Environment.NewLine);
+        return str;
+    }
+}
+</file>
+
+<file path="scripting/src/DbFiles/ScriptCompiledCache.cs">
+using System;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace Ember.Scripting;
+
+[Microsoft.EntityFrameworkCore.PrimaryKey(nameof(ScriptId), nameof(ApiVersion))]    //composite key because one script id can link multiple compiled
+[Table("script_compiled_cache")]
+public class ScriptCompiledCache
+{
+    // [Key]
+    [ForeignKey(nameof(CustomerScript))]
+    [Column("script_id")]
+    public Guid ScriptId { get; set; }
+
+    [Column("api_version")]
+    public int ApiVersion { get; set; }
+
+    [Column("assembly_bytes")]
+    public byte[]? AssemblyBytes { get; set; }  //i changed this to allow null to store if a script failed for later recompilation maybe?
+
+    [Column("compilation_date")]
+    public DateTime CompilationDate { get; set; }
+
+    [Column("compilation_success")]
+    public bool CompilationSuccess { get; set; }
+
+    [Column("copilation_errors")]
+    public string? CompilationErrors { get; set; }
+
+    [Column("old_source_code")]
+    public string? OldSourceCode { get; set; }
+
+    // Navigation property back to the script
+    public CustomerScript? CustomerScript { get; set; }
+
+    public override string ToString()
+    {
+        string str = "Compiled Script: Script Name: " + CustomerScript!.ScriptName + ", Script ID: " + ScriptId.ToString() +
+        ", Compiled: " + CompilationDate + ", Version: " + ApiVersion
+        // " Script Created: " + CustomerScript.CreatedAt
+        ;
+        // str = str.Replace("@", Environment.NewLine);
+        return str;
+    }
+    public string ToStringBetter()
+    {
+        string str = "Compiled Script: Script Name: " + CustomerScript!.ScriptName + ", Compiled for V" + ApiVersion + ", Created: " + CompilationDate +
+        ", Script Created: " + CustomerScript.CreatedAt;
+        return str;
+    }
+}
+</file>
+
+<file path="scripting/src/ScriptingFramework/GeneratorContexts.cs">
+using Microsoft.Extensions.Logging;
+using Ember.Scripting;
+using System.Runtime.InteropServices;
+namespace Ember.Scripting;
+
+public interface IGeneratorBaseInterface
+{
+    int IVersion { get; }
+}
+
+// [TypeLibVersion (4)]
+public abstract class GeneratorContext
+{
+    public abstract int Version { get; }
+}
+</file>
+
+<file path="scripting/src/DbFiles/CustomerScript.cs">
+using System;
+using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.Extensions.Logging;
+
+namespace Ember.Scripting;
+
+[Table("customer_scripts")]
+public class CustomerScript
+{
+    [Column("id")]
+    public Guid Id { get; set; }
+
+    [Column("script_name")]
+    public string? ScriptName { get; set; }
+
+    [Column("script_type")]
+    public string? ScriptType { get; set; } // "GeneratorCondition" or "GeneratorAction"
+
+    [Column("source_code")]
+    public string? SourceCode { get; set; } //todo not urgent fix make this not be ablte to be null
+
+    [Column("min_api_version")]
+    public int MinApiVersion { get; set; }  //maybe do ?
+
+    [Column("created_at")]
+    public DateTime? CreatedAt { get; set; } = DateTime.UtcNow;
+
+    [Column("modified_at")]
+    public DateTime? ModifiedAt { get; set; } = DateTime.UtcNow;
+
+    [Column("created_by")]
+    public string? CreatedBy { get; set; }
+
+    public List<ScriptCompiledCache> CompiledCaches { get; set; }
+
+    public CustomerScript()
+    {
+        CompiledCaches = new List<ScriptCompiledCache>();
+    }
+    //todo maybe add factories?
+    // public CustomerScript(Guid? id=null,string? scriptName=null,string? scriptType)
+    // {
+    //     CompiledCaches = new List<ScriptCompiledCache>();
+    // }
+    // public CustomerScript CreateScript()
+    // {
+    //     Guid newRandomId = Guid.NewGuid();
+
+    // }
+
+    public override string ToString()
+    {
+        string str = "ID: " + Id.ToString() + "@" + "Script Name: " + ScriptName + "@" + "Script Type: "
+        + ScriptType + "@"
+        + "Source Code: " + SourceCode
+        + "@" + "MinApiVersion: "
+        + MinApiVersion.ToString() + "@" + "Created at: " + CreatedAt.ToString() + "@"
+        + "Modified at: " + ModifiedAt.ToString() + "@" + "Created by " + CreatedBy;
+
+        string compiledCachesString = "@ Compiled Caches: { @";
+        for (int i = 0; i < CompiledCaches.Count(); i++)
+        {
+            compiledCachesString = compiledCachesString + "@" + CompiledCaches[i].ToString();
+        }
+        compiledCachesString = compiledCachesString + "@ }";
+        str = str + compiledCachesString;
+        str = str.Replace("@", Environment.NewLine);
+        return str;
+    }
+    public string ToStringShorter()
+    {
+        string str = "Script Name: " + ScriptName + ", Script Type: " + ScriptType + ", MinApiVersion: "
+        + MinApiVersion.ToString() + ", Created at: " + CreatedAt.ToString() + ", Modified at: "
+        + ModifiedAt.ToString() + ", Created by " + CreatedBy;
+
+        string compiledCachesString = "@ Compiled Caches: { @";
+        for (int i = 0; i < CompiledCaches.Count(); i++)
+        {
+            compiledCachesString = compiledCachesString + "@" + CompiledCaches[i].ToStringBetter();
+        }
+        compiledCachesString = compiledCachesString + "@ }";
+        str = str + compiledCachesString;
+        str = str.Replace("@", Environment.NewLine);
+        return str;
+    }
+
+    public bool Equals(CustomerScript script)
+    {
+        if (this.ScriptName == script.ScriptName
+        && this.SourceCode == script.SourceCode)
+        {
+            return true;
+        }
+        return false;
+    }
+}
+</file>
+
+<file path="sandbox/src/ScriptingFramework/ActionResult.cs">
+using Ember.Scripting;
+
+public class ActionResult : ActionResultBaseClass
+{
+    public bool IsSuccess { get; private set; }
+    public string Message { get; private set; }
+    public string ErrorCode { get; private set; }
+
+    // private constructor to force usage of factory methods
+    protected ActionResult(bool isSuccess, string message, string? errorCode = null)
+    {
+        IsSuccess = isSuccess;
+        Message = message;
+        ErrorCode = errorCode!;
+    }
+
+    // Factory method for success
+    public static ActionResult Success(string message)
+    {
+        return new ActionResult(true, message);
+    }
+
+    // Factory method for failure
+    public static ActionResult Failure(string message, string errorCode = "GENERIC_ERROR")
+    {
+        return new ActionResult(false, message, errorCode);
+    }
+    public override string ToString()
+    {
+        return IsSuccess ? $"[Success] {Message}" : $"[Error: {ErrorCode}] {Message}";
+    }
+}
+public class ActionResultV2 : ActionResult
+{
+    public List<string> LoggedActions { get; private set; }
+
+    private ActionResultV2(bool isSuccess, string message, string? errorCode, List<string> loggedActions) : base(isSuccess, message, errorCode!)
+    {
+        LoggedActions = loggedActions;
+    }
+    public new static ActionResultV2 Success(string message)
+    {
+        // return new ActionResult(true, message);
+        return new ActionResultV2(true, message, null, new List<string>()); //todo check inheritance use base idk
+    }
+    public static ActionResultV2 Failure(string message, List<string> loggedActions, string errorCode = "GENERIC_ERROR")
+    {
+        return new ActionResultV2(false, message, errorCode, loggedActions);
+    }
+    public void AppendLoggedActions(string action)
+    {
+        LoggedActions.Add(action);
+    }
+
+    public List<string> GetLoggedActions()
+    {
+        return LoggedActions;
+    }
+
+    public static ActionResultV2 UpgradeV1(ActionResult actionResult
+        // bool isSuccess, string message, string errorCode
+        , List<string> loggedActions
+        )
+    {
+        return new ActionResultV2(actionResult.IsSuccess, actionResult.Message, actionResult.ErrorCode, loggedActions);
+        // return new ActionResultV2(isSuccess, message, errorCode, loggedActions);
+    }
+}
+
+public class ActionResultV3NoInheritance : ActionResultBaseClass
+{
+    public bool FailedOrNot { get; private set; }
+    public string Message { get; private set; }
+
+
+    protected ActionResultV3NoInheritance(bool failedOrNot, string message)
+    {
+        FailedOrNot = failedOrNot;
+        Message = message;
+    }
+
+    // Factory method
+    public static ActionResultV3NoInheritance Success(string message)
+    {
+        return new ActionResultV3NoInheritance(true, message);
+    }
+
+    // Factory method
+    public static ActionResultV3NoInheritance Failure(string message)
+    {
+        return new ActionResultV3NoInheritance(false, message);
+    }
+
+    public override string ToString()
+    {
+        return $"[Message contains either failure or succes: ] {Message}";
+    }
+    public static ActionResultV3NoInheritance UpgradeV2(ActionResultV2 actionResult)    //interface plus downgrade async
+    {
+        string tempMessage = "";
+        if (actionResult.Message != null)
+        {
+            tempMessage = tempMessage + actionResult.Message;
+        }
+        if (actionResult.ErrorCode != null)
+        {
+            tempMessage = tempMessage + actionResult.ErrorCode;
+        }
+        return new ActionResultV3NoInheritance(actionResult.IsSuccess, tempMessage);
+    }
+}
+</file>
+
+<file path="scripting/src/ScriptingServiceCollectionExtensions.cs">
+using Microsoft.CodeAnalysis;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+
+namespace Ember.Scripting;
+
+//Ai Generated
+public static class ScriptingServiceCollectionExtensions
+{
+    public static IServiceCollection AddEmberScripting(this IServiceCollection services, List<MetadataReference> references, int maxSupportedApiVersion)
+    {
+        // 1. Register the references so they can be injected into constructors
+        services.AddSingleton(references);
+
+        // 2. Register the internal classes
+        // DI can instantiate internal classes as long as their constructors are marked 'public'
+        services.AddTransient<ScriptCompiler>();
+        services.AddTransient<ScriptExecutor>();
+
+        // 3. Register DbHelper using a factory so we can keep its constructor internal
+        services.AddTransient<DbHelper>(sp => new DbHelper(
+            sp.GetRequiredService<ScriptCompiler>(),
+            sp.GetRequiredService<List<MetadataReference>>(),
+            sp.GetRequiredService<ILogger<DbHelper>>(),
+            maxSupportedApiVersion
+        ));
+
+        // 4. Register the Facade using a factory to hide the internal parameters
+        // Step A: Register the concrete class using the factory so it can use the internal constructor
+        services.AddTransient<ScriptManagerFacade>(sp => new ScriptManagerFacade(
+            sp.GetRequiredService<DbHelper>(),
+            sp.GetRequiredService<ScriptCompiler>(),
+            sp.GetRequiredService<ScriptExecutor>(),
+            sp.GetRequiredService<List<MetadataReference>>(),
+            sp.GetRequiredService<ILogger<ScriptManagerFacade>>(),
+            maxSupportedApiVersion
+        ));
+
+        // Step B: Point both interfaces to the exact same concrete registration above
+        services.AddTransient<IScriptManager>(sp => sp.GetRequiredService<ScriptManagerFacade>());
+        services.AddTransient<IScriptManagerExtended>(sp => sp.GetRequiredService<ScriptManagerFacade>());
+        services.AddTransient<ISccriptManagerDeleteAfter>(sp => sp.GetRequiredService<ScriptManagerFacade>());
+
+        return services;
+    }
+}
+</file>
+
+<file path="scripting/src/ScriptManager.cs/IScripManagerAdvanced.cs">
+namespace Ember.Scripting;
+
+public interface IScriptManagerExtended : IScriptManager
+{
+    #region Script Lifecycle
+
+    /// <summary>
+    /// Validates, compiles, and stores a new script
+    /// </summary>
+    /// <param name="sourceCode"></param>
+    /// <param name="scriptType"></param>
+    /// <param name="userName"></param>
+    /// <param name="apiVersion"></param>
+    /// <param name="createdAt"></param>
+    /// <returns></returns>
+    Task<Guid> CreateScript(string sourceCode, string userName = "Default", int? apiVersion = null, DateTime? createdAt = null, bool checkForDuplicates = false);
+
+    /// <summary>
+    /// Updates existing script source code and recompiles for all compatible API versions
+    /// </summary>
+    /// <param name="scriptId"></param>
+    /// <param name="newSourceCode"></param>
+    /// <param name="userName"></param>
+    /// <param name="apiVersion"></param>
+    /// <returns></returns>
+    Task UpdateScript(Guid scriptId, string newSourceCode, string? userName = null, int? apiVersion = null);
+
+    /// <summary>
+    /// Removes script and all associated compiled caches
+    /// </summary>
+    /// <param name="scriptId"></param>
+    /// <returns></returns>
+    Task DeleteScript(Guid scriptId);
+
+    /// <summary>
+    /// Retrieves script metadata and source code
+    /// </summary>
+    /// <param name="scriptId"></param>
+    /// <param name="includeCaches"></param>
+    /// <returns></returns>
+    Task<CustomerScript> GetScript(Guid scriptId, bool includeCaches = false);
+
+    /// <summary>
+    /// Returns all scripts with optional filtering by type, API version, or creation date
+    /// </summary>
+    /// <param name="filters"></param>
+    /// <param name="includeCaches"></param>
+    /// <returns></returns>
+    // Task<List<CustomerScript>> ListScripts(CustomerScriptFilter filters = null!, bool includeCaches = false);
+
+    // #endregion
+
+    // #region Compilation Operations
+
+    // /// <summary>
+    // /// Compiles a specific script for a target API version, if target version not specified just takes the recent one
+    // /// </summary>
+    // /// <param name="scriptId"></param>
+    // /// <param name="targetApiVersion"></param>
+    // /// <returns></returns>
+    // Task CompileScript(Guid scriptId, int targetApiVersion = -1);
+
+    // /// <summary>
+    // /// Compiles all compatible scripts for a new API version
+    // /// </summary>
+    // /// <returns></returns>
+    // Task CompileAllScripts();
+
+    // /// <summary>
+    // /// Recompiles script for all active API versions
+    // /// </summary>
+    // /// <param name="scriptId"></param>
+    // /// <returns></returns>
+    // Task RecompileScript(Guid scriptId);
+
+    // /// <summary>
+    // /// Performs syntax and interface validation without saving
+    // /// </summary>
+    // /// <param name="sourceCode"></param>
+    // /// <returns></returns>
+    // Task<string> ValidateScript(string sourceCode);
+
+    // /// <summary>
+    // /// Retrieves compilation error details
+    // /// </summary>
+    // /// <param name="scriptId"></param>
+    // /// <param name="apiVersion"></param>
+    // /// <returns></returns>
+    // Task<string> GetCompilationErrors(Guid scriptId, int apiVersion = -1);
+
+    // /// <summary>
+    // /// Gets the tuple from a script containing Class Name, base type name and the last integer of the declared version in the name
+    // /// </summary>
+    // /// <param name="script"></param>
+    // /// <returns></returns>
+    // (string className, string baseTypeName, int versionInt) BasicValidationBeforeCompiling(string script);
+
+    // #endregion
+
+    // #region Execution Operations
+
+    // /// <summary>
+    // /// Executes a Generator Action script with provided context, realisitcally not needed
+    // /// </summary>
+    // /// <param name="scriptId"></param>
+    // /// <param name="context"></param>
+    // /// <param name="apiVersion"></param>
+    // /// <returns></returns>
+    // Task<ActionResultBaseClass> ExecuteActionScript(Guid scriptId, GeneratorContext context, int apiVersion = -1);
+
+    // /// <summary>
+    // /// Executes a Generator Condition script and returns boolean result, realisitcally not needed
+    // /// </summary>
+    // /// <param name="scriptId"></param>
+    // /// <param name="context"></param>
+    // /// <param name="apiVersion"></param>
+    // /// <returns></returns>
+    // Task<bool> ExecuteConditionScript(Guid scriptId, GeneratorContext context, int apiVersion = -1);
+
+    // // /// <summary>
+    // // /// Generic execution that detects script type automatically
+    // // /// </summary>
+    // // /// <param name="scriptId"></param>
+    // // /// <param name="context"></param>
+    // // /// <param name="currentApiVersion"></param>
+    // // /// <returns></returns>
+    // // Task<object> ExecuteScriptById(Guid scriptId, GeneratorContext context, int currentApiVersion = -1);
+
+    // #endregion
+
+    // #region Cache Management
+
+    // /// <summary>
+    // /// Retrieves compiled assembly bytes from cache
+    // /// </summary>
+    // /// <param name="scriptId"></param>
+    // /// <param name="currentApiVersion"></param>
+    // /// <returns></returns>
+    // Task<byte[]> GetCompiledCache(Guid scriptId, int currentApiVersion = -1);
+
+    // /// <summary>
+    // /// Removes all compiled versions of a script
+    // /// </summary>
+    // /// <param name="scriptId"></param>
+    // /// <returns></returns>
+    // Task ClearScriptCache(Guid scriptId);
+
+    // /// <summary>
+    // /// Gets all Compiled Script Caches in the Database
+    // /// </summary>
+    // /// <returns></returns>
+    // Task<List<ScriptCompiledCache>> GetAllCompiledScriptCaches();
+
+    // /// <summary>
+    // /// Removes all compiled caches (maintenance operation)
+    // /// </summary>
+    // /// <returns></returns>
+    // Task ClearAllCaches();
+
+    // /// <summary>
+    // /// Background job to precompile all compatible scripts
+    // /// </summary>
+    // /// <returns></returns>
+    // Task PrecompileForApiVersion();
+
+    // /// <summary>
+    // ///Deletes the entire Database
+    // /// </summary>
+    // /// <returns></returns>
+    // Task EnsureDeletedCreated();
+
+    // #endregion
+
+    // #region Version Management
+
+    // /// <summary>
+    // /// Returns list of currently active API versions from Ember instances
+    // /// </summary>
+    // /// <returns></returns>
+    // Task<List<int>> GetActiveApiVersions();
+
+    // Task<int> GetRecentApiVersion();
+
+    // /// <summary>
+    // /// Returns which API versions a script is compatible with
+    // /// </summary>
+    // /// <param name="scriptId"></param>
+    // /// <returns></returns>
+    // Task<int> GetScriptCompatibility(Guid scriptId);
+
+    // /// <summary>
+    // /// Validates if script can run on target version
+    // /// </summary>
+    // /// <param name="scriptId"></param>
+    // /// <param name="targetApiVersion"></param>
+    // /// <returns></returns>
+    // Task<bool> CheckVersionCompatibility(Guid scriptId, int targetApiVersion);
+
+    // /// <summary>
+    // /// Registers a new Ember instance in the system
+    // /// </summary>
+    // /// <param name="instanceId"></param>
+    // /// <param name="emberVersion"></param>
+    // /// <param name="apiVersion"></param>
+    // /// <returns></returns>
+    // Task RegisterEmberInstance(Guid instanceId, string emberVersion, int apiVersion);
+
+    // #endregion
+
+    // #region Duplicate Detection & Cleanup
+
+    // /// <summary>
+    // /// Identifies duplicate scripts based on source code equivalence
+    // /// </summary>
+    // /// <returns></returns>
+    // Task<(List<Guid> scriptGUIDs, Dictionary<Guid, int> cacheGUIDs)> DetectDuplicates();
+
+    // /// <summary>
+    // /// Removes duplicate scripts and orphaned caches
+    // /// </summary>
+    // /// <returns></returns>
+    // Task RemoveDuplicates();
+
+    // /// <summary>
+    // /// Removes caches without associated scripts
+    // /// </summary>
+    // /// <returns></returns>
+    // Task CleanupOrphanedCaches();
+
+    // #endregion
+
+    // #region Monitoring & Diagnostics
+
+    // /// <summary>
+    // /// Returns execution logs and metrics
+    // /// </summary>
+    // /// <param name="scriptId"></param>
+    // /// <returns></returns>
+    // Task GetScriptExecutionHistory(Guid scriptId);
+
+    // /// <summary>
+    // /// Returns compilation success/failure rates and performance metrics
+    // /// </summary>
+    // /// <returns></returns>
+    // Task GetCompilationStatistics();
+
+    // /// <summary>
+    // /// Validates database connectivity, API version consistency, and system state
+    // /// </summary>
+    // /// <returns></returns>
+    // Task HealthCheck();
+
+    // /// <summary>
+    // /// Extracts className, baseTypeName, and version from script
+    // /// </summary>
+    // /// <param name="scriptId"></param>
+    // /// <returns></returns>
+    // Task<string> GetScriptMetadata(Guid scriptId);
+
+    // string GetUserName();
+
+    #endregion
+}
+
+public class CustomerScriptFilter
+{
+    public string? ScriptName;
+
+    public string? ScriptType;
+
+    public string? SourceCode;
+
+    public int? MinApiVersion;
+
+    public DateTime? CreatedAt;
+
+    public DateTime? ModifiedAt;
+
+    public string? CreatedBy;
+    public CustomerScriptFilter(string? scriptName = null, string? scriptType = null, string? sourceCode = null, int? minApiVersion = null,
+     DateTime? createdAt = null, DateTime? modifiedAt = null, string? createdBy = null)
+    {
+        ScriptName = scriptName;
+        ScriptType = scriptType;
+        SourceCode = sourceCode;
+        MinApiVersion = minApiVersion;
+        CreatedAt = createdAt;
+        ModifiedAt = modifiedAt;
+        CreatedBy = createdBy;
+    }
+
+}
+</file>
+
+<file path="scripting/src/CompilationAndExecution/ScriptExecutor.cs">
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.Scripting;
+using Microsoft.Extensions.Logging;
+using System.Reflection;
+using System.Threading.Tasks;
+
+namespace Ember.Scripting;
+
+internal class ScriptExecutor
+{
+    private readonly static int ScriptTimeout = 5000;   // ms of how much time scripts get to execute
+    private readonly ILogger<ScriptExecutor> Logger;
+    public ScriptExecutor(ILogger<ScriptExecutor> logger)
+    {
+        Logger = logger;
+    }
+
+    public T RunScriptExecution<T>(byte[] compiledScript, GeneratorContext genContext)
+    {
+        Logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(RunScriptExecution), nameof(ScriptExecutor));
+        try
+        {
+            if (compiledScript.Length > 5 * 1024 * 1024) // 5 mb maximum size
+            {
+                throw new ScriptExecutionException(nameof(RunScriptExecution) + " failed in if (compiledScript.Length > 5 * 1024 * 1024)");
+            }
+
+            Assembly assembly = Assembly.Load(compiledScript);
+
+            Type[] unfilteredTypeArray = assembly.GetTypes();   //even though there can be only one class defined in the script file, the compiler adds classes making the array.lenght over 1 which is unsafe so it is better to filer based on our predefined classes for scripts
+            List<Type> typeArrayList = [];
+            for (int i = 0; i < unfilteredTypeArray.Length; i++)
+            {
+                if (typeof(IGeneratorActionScript).IsAssignableFrom(unfilteredTypeArray[i]))
+                {
+                    typeArrayList.Add(unfilteredTypeArray[i]);
+                }
+                if (typeof(IGeneratorConditionScript).IsAssignableFrom(unfilteredTypeArray[i]))
+                {
+                    typeArrayList.Add(unfilteredTypeArray[i]);
+                }
+            }
+            Type[] typeArray = typeArrayList.ToArray();
+
+            if (typeArray.Length == 0)
+            {
+                throw new NoClassFoundInScriptFileException(nameof(RunScriptExecution) + "failed in if (typeArray.Length == 0)");
+            }
+            else if (typeArray.Length > 1)
+            {
+                Logger.LogInformation("more than one class found in script");
+                throw new MoreThanOneClassFoundInScriptException("more than one class found in script");   //to implement more than one name you would need to pass name of class into this class
+            }
+
+            Type type = typeArray[0];
+
+            object scriptInstance = Activator.CreateInstance(type)!;     //if null here probably typo in file name somewhere, like pedriatic instead of pediatic :(
+
+            // if (typeof(IGeneratorConditionScript).IsAssignableFrom(type))
+            if (typeof(IGeneratorConditionScript).IsAssignableFrom(type))    //checks if type implements the generator specific interface  //check if runs
+            {
+                var result = RunConditionScript(type, scriptInstance, genContext);
+                return (T)(object)result;
+            }
+            else if (typeof(IGeneratorActionScript).IsAssignableFrom(type))
+            {
+                var result = RunActionScript(type, scriptInstance, genContext);
+                return (T)(object)result;
+            }
+            else
+            {
+                Logger.LogInformation("Could not run your script because it is neither a ActionScript nor a ConditionScript.");
+                throw new ScriptExecutionException("Could not run your script because it is neither a ActionScript nor a ConditionScript.");
+            }
+        }
+        catch (Exception e)
+        {
+            Logger.LogInformation("Something went wrong when trying to execute your code, here are some details:");
+            Logger.LogError(e.ToString());
+            throw new ScriptExecutionException("Something went wrong when trying to execute your code, here are some details:", e);
+        }
+
+    }
+    public bool RunConditionScript(Type type, object scriptInstance, GeneratorContext genContext)
+    {
+        Logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(RunConditionScript), nameof(ScriptExecutor));
+        try
+        {
+            MethodInfo method = type.GetMethod("EvaluateAsync")!;
+
+            var resultTask = (Task)method.Invoke(scriptInstance, new object[] { genContext })!;
+
+            if (!resultTask.Wait(ScriptTimeout))
+            {
+                throw new ScriptTimeoutException("Condition script exceeded time limit.");
+            }
+
+            var resultProperty = resultTask.GetType().GetProperty("Result");
+            var resultValue = resultProperty!.GetValue(resultTask);
+
+            Logger.LogInformation($"Result: {resultValue}");
+            return (bool)resultValue!;
+        }
+        catch (Exception e)
+        {
+            Logger.LogInformation(e.ToString());
+            throw new ConditionScriptExecutionException("RunConditionScrptFailed.", e);
+        }
+
+    }
+    public ActionResultBaseClass RunActionScript(Type type, object scriptInstance, GeneratorContext genContext)
+    {
+        Logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(RunActionScript), nameof(ScriptExecutor));
+        try
+        {
+            MethodInfo method = type.GetMethod("ExecuteAsync")!;
+
+            var resultTask = (Task)method.Invoke(scriptInstance, new object[] { genContext })!;
+
+            if (!resultTask.Wait(ScriptTimeout))
+            {
+                throw new ScriptTimeoutException("Action script exceeded time limit.");
+            }
+
+            var resultProperty = resultTask.GetType().GetProperty("Result");
+            var resultValue = resultProperty!.GetValue(resultTask);
+
+            Logger.LogInformation($"Result in 86 sExecuter: {resultValue}");
+
+            return (ActionResultBaseClass)resultValue!;  //this might fail because not baseclass idk, if it does maybe change whole structure to only one function
+        }
+        catch (Exception e)
+        {
+            Logger.LogError(e.ToString());
+            Logger.LogWarning("You might have passed the wrong GeneratorContext class, ex V1 instead of V2");
+            throw new ActionScriptExecutionException("You might have passed the wrong GeneratorContext class, ex V1 instead of V2", e);
+        }
+
+    }
+}
+</file>
+
+<file path="scripting/src/ScriptManager.cs/IScriptManagerDeleteAfter.cs">
+namespace Ember.Scripting;
+
+public interface ISccriptManagerDeleteAfter : IScriptManagerExtended
+{
+  Task<List<CustomerScript>> ListScripts(CustomerScriptFilter filters = null!, bool includeCaches = false);
+
+
+
+  #region Compilation Operations
+
+  /// <summary>
+  /// Compiles a specific script for a target API version, if target version not specified just takes the recent one
+  /// </summary>
+  /// <param name="scriptId"></param>
+  /// <param name="targetApiVersion"></param>
+  /// <returns></returns>
+  Task CompileScript(Guid scriptId, int? targetApiVersion = null);
+
+  /// <summary>
+  /// Compiles all compatible scripts for a new API version
+  /// </summary>
+  /// <returns></returns>
+  Task CompileAllScripts();
+
+  /// <summary>
+  /// Saves a script source code to the DB even if it doesnt compile, later you could call GetCompilationErrors to get errors in it.
+  /// </summary>
+  /// <returns></returns>
+  Task SaveScriptWithoutCompiling(Guid id, string sourceCode);
+
+  /// <summary>
+  /// Recompiles script for all active API versions
+  /// </summary>
+  /// <param name="scriptId"></param>
+  /// <returns></returns>
+  Task RecompileScript(Guid scriptId);
+
+  /// <summary>
+  /// Performs syntax and interface validation without saving
+  /// </summary>
+  /// <param name="sourceCode"></param>
+  /// <returns></returns>
+  string ValidateScript(string sourceCode);
+
+  /// <summary>
+  /// Retrieves compilation error details
+  /// </summary>
+  /// <param name="scriptId"></param>
+  /// <param name="apiVersion"></param>
+  /// <returns></returns>
+  Task<string> GetCompilationErrors(Guid scriptId, int? apiVersion = null);
+
+  /// <summary>
+  /// Gets the tuple from a script containing Class Name, base type name and the last integer of the declared version in the name
+  /// </summary>
+  /// <param name="script"></param>
+  /// <returns></returns>
+  (string className, string baseTypeName, int versionInt) BasicValidationBeforeCompiling(string script);
+
+  #endregion
+
+  #region Execution Operations
+
+  /// <summary>
+  /// Executes a Generator Action script with provided context, realisitcally not needed
+  /// </summary>
+  /// <param name="scriptId"></param>
+  /// <param name="context"></param>
+  /// <param name="apiVersion"></param>
+  /// <returns></returns>
+  Task<ActionResultBaseClass> ExecuteActionScript(Guid scriptId, GeneratorContext context, int? apiVersion = null);
+
+  /// <summary>
+  /// Executes a Generator Condition script and returns boolean result, realisitcally not needed
+  /// </summary>
+  /// <param name="scriptId"></param>
+  /// <param name="context"></param>
+  /// <param name="apiVersion"></param>
+  /// <returns></returns>
+  Task<bool> ExecuteConditionScript(Guid scriptId, GeneratorContext context, int? apiVersion = null);
+
+  // /// <summary>
+  // /// Generic execution that detects script type automatically
+  // /// </summary>
+  // /// <param name="scriptId"></param>
+  // /// <param name="context"></param>
+  // /// <param name="currentApiVersion"></param>
+  // /// <returns></returns>
+  // Task<object> ExecuteScriptById(Guid scriptId, GeneratorContext context, int currentApiVersion = -1);
+
+  #endregion
+
+  #region Cache Management
+
+  /// <summary>
+  /// Retrieves compiled assembly bytes from cache
+  /// </summary>
+  /// <param name="scriptId"></param>
+  /// <param name="currentApiVersion"></param>
+  /// <returns></returns>
+  Task<ScriptCompiledCache> GetCompiledCache(Guid scriptId, int? currentApiVersion = null);
+
+  /// <summary>
+  /// Removes all compiled versions of a script
+  /// </summary>
+  /// <param name="scriptId"></param>
+  /// <returns></returns>
+  Task ClearScriptCache(Guid scriptId);
+
+
+  Task DeleteScriptCache(Guid id, int ApiVersion);
+
+  /// <summary>
+  /// Gets all Compiled Script Caches in the Database
+  /// </summary>
+  /// <returns></returns>
+  Task<List<ScriptCompiledCache>> GetAllCompiledScriptCaches();
+
+  /// <summary>
+  /// Removes all compiled caches (maintenance operation)
+  /// </summary>
+  /// <returns></returns>
+  Task ClearAllCaches();
+
+  /// <summary>
+  /// Background job to precompile all compatible scripts
+  /// </summary>
+  /// <returns></returns>
+  Task PrecompileForApiVersion();
+
+  /// <summary>
+  ///Deletes the entire Database
+  /// </summary>
+  /// <returns></returns>
+  Task EnsureDeletedCreated();
+
+  #endregion
+
+  #region Version Management
+
+  /// <summary>
+  /// Returns list of currently active API versions from Ember instances
+  /// </summary>
+  /// <returns></returns>
+  Task<List<int>> GetActiveApiVersions();
+
+  Task<int> GetRunningApiVersion();
+
+  /// <summary>
+  /// Returns which API versions a script is compatible with
+  /// </summary>
+  /// <param name="scriptId"></param>
+  /// <returns></returns>
+  Task<int> GetScriptCompatibility(Guid scriptId);
+
+  /// <summary>
+  /// Validates if script can run on target version
+  /// </summary>
+  /// <param name="scriptId"></param>
+  /// <param name="targetApiVersion"></param>
+  /// <returns></returns>
+  Task<bool> CheckVersionCompatibility(Guid scriptId, int targetApiVersion);
+
+  /// <summary>
+  /// Registers a new Ember instance in the system
+  /// </summary>
+  /// <param name="instanceId"></param>
+  /// <param name="emberVersion"></param>
+  /// <param name="apiVersion"></param>
+  /// <returns></returns>
+  void RegisterEmberInstance(Guid instanceId, string emberVersion, int apiVersion);
+
+  #endregion
+
+  #region Duplicate Detection & Cleanup
+
+  /// <summary>
+  /// Identifies duplicate scripts based on source code equivalence
+  /// </summary>
+  /// <returns></returns>
+  Task<(List<Guid> scriptGUIDs, Dictionary<Guid, int> cacheGUIDs)> DetectDuplicates();
+
+  /// <summary>
+  /// Removes duplicate scripts and orphaned caches
+  /// </summary>
+  /// <returns></returns>
+  Task RemoveDuplicates();
+
+  /// <summary>
+  /// Removes caches without associated scripts
+  /// </summary>
+  /// <returns></returns>
+  Task CleanupOrphanedCaches();
+
+  #endregion
+
+  #region Monitoring & Diagnostics
+
+  /// <summary>
+  /// Returns execution logs and metrics
+  /// </summary>
+  /// <param name="scriptId"></param>
+  /// <returns></returns>
+  void GetScriptExecutionHistory(Guid scriptId);
+
+  /// <summary>
+  /// Returns compilation success/failure rates and performance metrics
+  /// </summary>
+  /// <returns></returns>
+  void GetCompilationStatistics();
+
+  /// <summary>
+  /// Validates database connectivity, API version consistency, and system state
+  /// </summary>
+  /// <returns></returns>
+  Task HealthCheck();
+
+  /// <summary>
+  /// Extracts className, baseTypeName, and version from script
+  /// </summary>
+  /// <param name="scriptId"></param>
+  /// <returns></returns>
+  Task<string> GetScriptMetadata(Guid scriptId);
+
+  /// <summary>
+  /// 
+  /// </summary>
+  /// <returns></returns>
+  Task<Dictionary<int, List<ScriptCompiledCache>>> GetCachesForEachApiVersion();
+
+  string GetUserName();
+
+  #endregion
+}
+</file>
+
+<file path="sandbox/src/ScriptingFramework/GeneratorScripts.cs">
+using Ember.Scripting;
+
+namespace GeneratorScriptsGenericSimple
+{
+    /// <summary>
+    /// Simplest implementation of the Condition script probably should make them private in real application to prevent user from using
+    /// </summary>
+    /// <summary>
+    /// Implementation using 1 generic for Context
+    /// </summary>
+    public interface IGeneratorConditionScript<TContext> : IGeneratorConditionScript    //todo this needs to get tested still
+    where TContext : IGeneratorReadOnlyContextV1.IGeneratorContext
+    {
+        Task<bool> EvaluateAsync(TContext context);
+        // Task<bool> IGeneratorConditionScript.EvaluateAsync(IGeneratorReadOnlyContext context)
+        Task<bool> IGeneratorConditionScript.EvaluateAsync(IGeneratorBaseInterface context)
+        {
+            return EvaluateAsync((TContext)context);
+        }
+    }
+    public interface IGeneratorActionScript<TContext> : IGeneratorActionScript
+    where TContext : IGeneratorContext_V2.IGeneratorContext
+    {
+        Task<ActionResultBaseClass> ExecuteAsync(TContext context);
+
+        //explicit default implementation for the base interface
+        // Task<ActionResultBaseClass> IGeneratorActionScript.ExecuteAsync(IGeneratorContext context)
+        Task<ActionResultBaseClass> IGeneratorActionScript.ExecuteAsync(IGeneratorBaseInterface context)
+        {
+            return ExecuteAsync((TContext)context);
+        }
+    }
+}
+
+namespace GeneratorScriptsGeneric
+{
+    /// <summary>
+    /// Implementation using 2 generics, one for context and one additional for ActionResult
+    /// </summary>
+
+    public interface IGeneratorActionScript<TContext, TActionResult> : IGeneratorActionScript
+    where TContext : IGeneratorBaseInterface    //changed from IGeneratorContext
+    where TActionResult : ActionResultBaseClass
+    {
+        Task<TActionResult> ExecuteAsync(TContext context);
+
+        //explicit default implementation for the base interface
+        async Task<ActionResultBaseClass> IGeneratorActionScript.ExecuteAsync(IGeneratorBaseInterface context)
+        {
+            return await ExecuteAsync((TContext)context);
+        }
+    }
+}
+
+
+/// <summary>
+/// Implementation using versioning of Generator scripts good for string control over what version of context and what version of the return type the user uses
+/// </summary>
+
+namespace GeneratorScriptsV2
+{
+    public interface IGeneratorActionScriptV2 : Ember.Scripting.IGeneratorActionScript
+    {
+        Task<ActionResultV2> ExecuteAsync(IGeneratorContext_V3.IGeneratorContext context);
+
+        Task<ActionResultBaseClass> Ember.Scripting.IGeneratorActionScript.ExecuteAsync(IGeneratorBaseInterface context)     //if bugs maybe put as async and await ExecuteAsync
+        {
+            return ExecuteAsync(context);
+        }
+    }
+}
+namespace GeneratorScriptsV3
+{
+    public interface IGeneratorActionScriptV3 : IGeneratorActionScript
+    {
+        Task<ActionResultV3NoInheritance> ExecuteAsync(IGeneratorContext_V4.IGeneratorContext context);
+
+        Task<ActionResultBaseClass> IGeneratorActionScript.ExecuteAsync(IGeneratorBaseInterface context)     //if bugs maybe put as async and await ExecuteAsync
+        {
+            return ExecuteAsync(context);
+        }
+    }
+}
+namespace GeneratorScriptsV4
+{
+    public interface IGeneratorActionScriptV4Vaccine : IGeneratorActionScript
+    {
+        Task<ActionResultV3NoInheritance> ExecuteAsync(IGeneratorContextNoInheritance_V5.IGeneratorContext context);
+
+        Task<ActionResultBaseClass> IGeneratorActionScript.ExecuteAsync(IGeneratorBaseInterface context)     //if bugs maybe put as async and await ExecuteAsync
+        {
+            return ExecuteAsync(context);
+        }
+    }
+}
+</file>
+
+<file path="scripting/src/CompilationAndExecution/ScriptCompiler.cs">
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Scripting;
+using Microsoft.Extensions.Logging;
+using System.Reflection;
+
+namespace Ember.Scripting;
+
+internal class ScriptCompiler
+{
+    private readonly List<MetadataReference>? References2 = null;
+    private readonly ILogger<ScriptCompiler> Logger;
+
+    private readonly List<MetadataReference> StandardRefrencesForAllScripts = [MetadataReference.CreateFromFile(typeof(object).Assembly.Location),
+                        MetadataReference.CreateFromFile(typeof(Console).Assembly.Location),
+                        MetadataReference.CreateFromFile(Assembly.Load("System.Runtime").Location),
+                        MetadataReference.CreateFromFile(typeof(Task<>).Assembly.Location),
+                        MetadataReference.CreateFromFile(typeof(DateTime).Assembly.Location),
+                        ];
+    public ScriptCompiler(List<MetadataReference> references2, ILogger<ScriptCompiler> logger)
+    {
+        References2 = references2;
+        Logger = logger;
+    }
+    public byte[] RunCompilation(string script, int? apiVersion = null, (string className, string baseTypeName, int versionInt)? metaData = null) //references param there to enable later on users to define custom references
+    {
+        try
+        {
+            References2!.AddRange(StandardRefrencesForAllScripts);
+
+            List<MetadataReference>? references = [];
+
+            Logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(RunCompilation), nameof(ScriptCompiler));
+            if (metaData != null)
+            {
+                Logger.LogTrace("Trying to compile script:" + metaData.Value.className);
+            }
+
+            //Takes C# source string and turns it into a "Roslyn parsed syntax tree representation" of a normal C# file
+            SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(script);
+            if (References2 != null)
+            {
+                Logger.LogInformation("References 2 added references in {MethodName}.", nameof(RunCompilation));
+                references = References2;
+            }
+            if (apiVersion != null)
+            {
+                Logger.LogInformation("Added custom references in {MethodName}.", nameof(RunCompilation));  //if this works remove the if references is null if stat above
+                references = GetReferencesForOldVersion((int)apiVersion);
+            }
+            //this initiates the process of the compilation (does not produce bytes yet), it binds the source code with the refrences and the config options
+            CSharpCompilation compilation = CSharpCompilation.Create(
+                "MyDynamicAssembly",
+                syntaxTrees: new[] { syntaxTree },
+                references: references,
+                options: new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary)
+            );
+
+            //actual build phase, success emits raw bytes of a .dll file
+            using var ms = new MemoryStream();
+            var emitResult = compilation.Emit(ms);  //this line is the line that uses a lot of resources and time
+
+            //The following if statement was AI Generated
+            if (!emitResult.Success)
+            {
+
+                string? errors = string.Join(Environment.NewLine, emitResult.Diagnostics
+                .Where(d => d.IsWarningAsError || d.Severity == Microsoft.CodeAnalysis.DiagnosticSeverity.Error)
+                // .Select(d => $"{d.Id}: {d.GetMessage()}"));
+                .Select(d => $"Line {d.Location.GetLineSpan().StartLinePosition.Line + 1}, Col {d.Location.GetLineSpan().StartLinePosition.Character + 1}: {d.Id} - {d.GetMessage()}"));
+
+
+                foreach (var diag in emitResult.Diagnostics)
+                {
+                    Logger.LogInformation(diag.ToString());
+                }
+                ;   //Iterates through the list of compiler messages
+                Logger.LogError("Error in ScriptCompiler RunCompilation method compilation probably failed in if (!emitResult.Success)");
+                throw new CompilationFailedException("Error in ScriptCompiler RunCompilation method compilation probably failed in if (!emitResult.Success) errors: " + errors);
+            }
+
+            byte[] assemblyBytes = ms.ToArray();
+            return assemblyBytes;
+        }
+        catch (Exception e)
+        {
+            Logger.LogError(e.ToString());
+            throw new CompilationFailedException("RunCompilation failed exception caught.", e);
+        }
+
+    }
+
+    public (string className, string baseTypeName, int versionInt) BasicValidationBeforeCompiling(string script)
+    {
+        Logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(BasicValidationBeforeCompiling), nameof(ScriptCompiler));
+        try
+        {
+            //Does basic validation such as correct interface usage, or if only one class is in the script file.
+            //Also extracts class name, type of the scrip(ex. Action) and verison of interface.
+
+            //Gets base class name like IGeneratorScript and so on
+            // Source - https://stackoverflow.com/a/33095466
+
+            SyntaxTree tree = CSharpSyntaxTree.ParseText(script);   //being called twice also in RunCompilation() might be better for performance to remove twice but also you want to be able to compile without having to parse always
+            var Mscorlib = MetadataReference.CreateFromFile(typeof(object).Assembly.Location);
+            var compilation = CSharpCompilation.Create("MyCompilation",
+                syntaxTrees: new[] { tree }, references: new[] { Mscorlib });   // i might be able to use this method to init the refrences also above?
+            var model = compilation.GetSemanticModel(tree);
+            var classesInTree = tree.GetRoot().DescendantNodes().OfType<ClassDeclarationSyntax>();
+            if (classesInTree.Count() > 1)
+            {
+                Logger.LogError("More Than one class found in Script string.");
+                throw new MoreThanOneClassFoundInScriptException("More Than one class found in Script string. in if (classesInTree.Count() > 1)"); //this might throw even if there is one class in script if compiler adds classes or something like that, so if it does maybe change this if statement
+            }
+            var myClass = classesInTree.Last();
+            var myClassSymbol = model.GetDeclaredSymbol(myClass) as ITypeSymbol;
+            var baseTypeName = myClassSymbol!.BaseType!.Name;
+            var className = myClassSymbol.ToString();
+            var parentSymbol = myClassSymbol!.Interfaces.FirstOrDefault() ?? myClassSymbol.BaseType;
+            int? versionInt = null;
+            string implementedIntrf = parentSymbol.Name;
+
+            string? contextParameterTypeName = null;
+
+            var executeMethod = myClass.DescendantNodes()
+                                       .OfType<MethodDeclarationSyntax>()
+                                       .FirstOrDefault(m => m.Identifier.Text == "ExecuteAsync" || m.Identifier.Text == "EvaluateAsync");
+
+            if (executeMethod != null)
+            {
+                var firstParameter = executeMethod.ParameterList.Parameters.FirstOrDefault();
+                if (firstParameter != null && firstParameter.Type != null)
+                {
+                    contextParameterTypeName = firstParameter.Type.ToString();
+                }
+            }
+
+            Console.WriteLine("Extracted Context Parameter Type: " + contextParameterTypeName);
+            Logger.LogTrace("Extracted Context Parameter Type: " + contextParameterTypeName);
+
+            Dictionary<int, Type> activeContexts = ContextVersionScanner.GetInterfaceDictionary();
+            Console.WriteLine("Start of dict String:");
+            foreach (var pair in activeContexts)
+            {
+                Console.WriteLine("Key: " + pair.Key + ", Value: " + pair.Value);
+            }
+
+            foreach (var ctx in activeContexts)
+            {
+                string dictTypeFullName = ctx.Value.FullName ?? "";
+
+                if (ctx.Value.FullName == contextParameterTypeName)
+                {
+                    if (versionInt != null)
+                    {
+                        throw new Exception("Context name occured more than once for some reason that should not happen.");
+                    }
+                    versionInt = ctx.Key;
+                }
+            }
+
+            if (versionInt == null)
+            {
+                throw new Exception("Version int was null in BasicValidation");
+            }
+
+            if (versionInt == null)
+            {
+                throw new ValidationBeforeCompilationException("Version Int was not assigned probably because the foeach loop faliled maybe because the Context name of the script was not in the dictionary.");
+            }
+            if (baseTypeName == null || className == null)
+            {
+                Logger.LogError("BaseTypeName or classname null in BasicValidationBeforeCompiling.");
+                throw new ClassNameOrBaseNameNullException("BaseTypeName or classname null in BasicValidationBeforeCompiling. in if (baseTypeName == null || className == null)");
+            }
+            Logger.LogTrace("Class Name = " + className);
+            Logger.LogTrace("BaseClass Name = " + baseTypeName);
+            Logger.LogTrace("Version Int = " + versionInt);
+
+            ValidateNamespaceUsage(tree, model);
+            return (className, baseTypeName, (int)versionInt!);
+        }
+        catch (Exception e)
+        {
+            Logger.LogError("BasicValidation failed:" + e.ToString());
+            throw new ValidationBeforeCompilationException(e.ToString(), e);
+        }
+
+    }
+    private void ValidateNamespaceUsage(SyntaxTree tree, SemanticModel model)
+    {
+        Logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(ValidateNamespaceUsage), nameof(ScriptCompiler));
+        List<string> illegalNamespaces = [
+
+                "System.IO",
+                "System.Net",
+                "System.Net.Http",
+                "System.Reflection",
+                "System.Diagnostics",
+                "System.Runtime.InteropServices",
+
+                "System.Threading.Thread",
+                "System.Threading.ThreadPool",
+                "System.Threading.Timer",
+                "System.Threading.Mutex",
+                "System.Threading.Semaphore",
+                "System.Threading.SemaphoreSlim",
+            ];
+        var usings = tree.GetRoot()
+            .DescendantNodes()
+            .OfType<UsingDirectiveSyntax>()
+            .Select(s => s.Name!.ToString());
+
+        IEnumerable<IdentifierNameSyntax> identifiers = tree.GetRoot().DescendantNodes().OfType<IdentifierNameSyntax>();
+
+        foreach (var illegal in illegalNamespaces)
+        {
+            foreach (var usingItem in usings)
+            {
+                if (illegal == usingItem || usingItem.StartsWith(illegal + "."))  //to prevent usage of for example System.IO and then System.IO.Compression
+                {
+                    Logger.LogError("Script tried to use a illegal namespace.");
+                    throw new ForbiddenNamespaceException($"Script uses forbidden namespace: {illegal}");
+                }
+            }
+            foreach (var id in identifiers) //to prevent system.io.file stuff like that
+            {
+                var symbol = model.GetSymbolInfo(id).Symbol;
+                if (symbol != null)
+                {
+                    var nameSpaceEx = symbol.ContainingNamespace?.ToString();
+                    if (nameSpaceEx != null && (illegal == nameSpaceEx || nameSpaceEx.StartsWith(illegal + ".")))
+                    {
+                        Logger.LogError("Script tried to use a illegal type.");
+                        throw new ForbiddenNamespaceException($"Usage of forbidden type: {symbol.ToDisplayString()}");
+                    }
+                }
+            }
+        }
+    }
+
+    public bool IsTheSameTree(string script1, string script2)
+    {
+        //This function i quickly generated with AI
+        Logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(IsTheSameTree), nameof(ScriptCompiler));
+        SyntaxTree tree1 = CSharpSyntaxTree.ParseText(script1);
+        SyntaxTree tree2 = CSharpSyntaxTree.ParseText(script2);
+
+        bool areSame = tree1.IsEquivalentTo(tree2, topLevel: false);
+
+        return areSame;
+    }
+
+    public List<MetadataReference> GetReferencesForOldVersion(int version, List<string>? customDlls = null, bool loadCurrentRT = true)  //todo fix this
+    {
+        var stdReferences = StandardRefrencesForAllScripts;
+        Logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(GetReferencesForOldVersion), nameof(ScriptCompiler));
+        var references = new List<MetadataReference>();
+
+        string tempPath = Path.GetFullPath(
+            Path.Combine(AppDomain.CurrentDomain.BaseDirectory,
+                         "..", "..", "..", "..", "..", "..")
+        );
+
+        string versionPath = Path.Combine(tempPath, "OldVersions", version.ToString());
+
+        if (!Directory.Exists(versionPath))
+        {
+            Logger.LogError("Could not find references.");
+            throw new Exception($"References for version {version} not found at {versionPath}");
+        }
+
+        List<string> dllsToLoad =
+        [
+        "Framework.dll",               // application assembly
+        "System.Private.CoreLib.dll",
+        "System.Runtime.dll",
+        "System.Console.dll",
+        "System.Collections.dll"
+        ];
+
+        if (loadCurrentRT)
+        {
+            Logger.LogTrace("loadCurrentRT true.");
+            dllsToLoad = ["Framework.dll"];
+            references.AddRange(stdReferences);
+        }
+        if (customDlls != null)
+        {
+            Logger.LogTrace("customDlls was not not null");
+            foreach (var item in customDlls)
+            {
+                dllsToLoad.Add(item);
+            }
+        }
+
+        foreach (var dllName in dllsToLoad)
+        {
+            string fullPath = Path.Combine(versionPath, dllName);
+            if (File.Exists(fullPath))
+            {
+                // Create reference from the file on disk, not the loaded assembly
+                references.Add(MetadataReference.CreateFromFile(fullPath));
+            }
+        }
+
+        return references;
+    }
+    // static void RemoveReferencesByAssemblyName(List<MetadataReference> refs, params string[] simpleNames)
+    // {
+    //     refs.RemoveAll(r =>
+    //     {
+    //         if (r is not PortableExecutableReference pe || string.IsNullOrWhiteSpace(pe.FilePath))
+    //             return false;
+
+    //         try
+    //         {
+    //             var an = AssemblyName.GetAssemblyName(pe.FilePath);
+    //             return simpleNames.Any(n => string.Equals(n, an.Name, StringComparison.OrdinalIgnoreCase));
+    //         }
+    //         catch
+    //         {
+    //             return false; // ignore non-file refs
+    //         }
+    //     });
+    // }
+}
+</file>
+
+<file path="scripting/src/Exceptions/Exceptions.cs">
+using System;
+using System.Collections.Generic;
+
+namespace Ember.Scripting;
+
+public class NoFileWithThisClassNameFoundException : Exception
+{
+    public NoFileWithThisClassNameFoundException() : base() { }
+    public NoFileWithThisClassNameFoundException(string message) : base(message) { }
+    public NoFileWithThisClassNameFoundException(string message, Exception innerException) : base(message, innerException) { }
+}
+
+public class CompilationFailedException : Exception
+{
+    string? CompilerErrors { get; }
+
+    public CompilationFailedException() : base() { }
+    public CompilationFailedException(string message) : base(message) { }
+    public CompilationFailedException(string message, Exception innerException) : base(message, innerException) { }
+
+    public CompilationFailedException(string message, string compilerErrors) : base(message)
+    {
+        CompilerErrors = compilerErrors;
+    }
+}
+
+public class ScriptExecutionException : Exception
+{
+    public ScriptExecutionException() : base() { }
+    public ScriptExecutionException(string message) : base(message) { }
+    public ScriptExecutionException(string message, Exception innerException) : base(message, innerException) { }
+}
+
+public class ActionScriptExecutionException : ScriptExecutionException
+{
+    public ActionScriptExecutionException() : base() { }
+    public ActionScriptExecutionException(string message) : base(message) { }
+    public ActionScriptExecutionException(string message, Exception innerException) : base(message, innerException) { }
+}
+
+public class ConditionScriptExecutionException : ScriptExecutionException
+{
+    public ConditionScriptExecutionException() : base() { }
+    public ConditionScriptExecutionException(string message) : base(message) { }
+    public ConditionScriptExecutionException(string message, Exception innerException) : base(message, innerException) { }
+}
+
+public class GetScriptPathFromFolderException : Exception
+{
+    public GetScriptPathFromFolderException() : base() { }
+    public GetScriptPathFromFolderException(string message) : base(message) { }
+    public GetScriptPathFromFolderException(string message, Exception innerException) : base(message, innerException) { }
+}
+
+public class CreateStringFromCsFileException : Exception
+{
+    public CreateStringFromCsFileException() : base() { }
+    public CreateStringFromCsFileException(string message) : base(message) { }
+    public CreateStringFromCsFileException(string message, Exception innerException) : base(message, innerException) { }
+}
+
+public class NoClassFoundInScriptFileException : Exception
+{
+    public NoClassFoundInScriptFileException() : base() { }
+    public NoClassFoundInScriptFileException(string message) : base(message) { }
+    public NoClassFoundInScriptFileException(string message, Exception innerException) : base(message, innerException) { }
+}
+
+public class MoreThanOneClassFoundInScriptException : Exception
+{
+    public MoreThanOneClassFoundInScriptException() : base() { }
+    public MoreThanOneClassFoundInScriptException(string message) : base(message) { }
+    public MoreThanOneClassFoundInScriptException(string message, Exception innerException) : base(message, innerException) { }
+}
+
+public class ValidationBeforeCompilationException : Exception
+{
+    public ValidationBeforeCompilationException() : base() { }
+    public ValidationBeforeCompilationException(string message) : base(message) { }
+    public ValidationBeforeCompilationException(string message, Exception innerException) : base(message, innerException) { }
+}
+
+public class ClassNameOrBaseNameNullException : Exception
+{
+    public ClassNameOrBaseNameNullException() : base() { }
+    public ClassNameOrBaseNameNullException(string message) : base(message) { }
+    public ClassNameOrBaseNameNullException(string message, Exception innerException) : base(message, innerException) { }
+}
+
+public class ForbiddenNamespaceException : Exception
+{
+    public string? AttemptedNamespace { get; }
+
+    public ForbiddenNamespaceException() : base() { }
+    public ForbiddenNamespaceException(string message) : base(message) { }
+    public ForbiddenNamespaceException(string message, Exception innerException) : base(message, innerException) { }
+
+    public ForbiddenNamespaceException(string message, string attemptedNamespace) : base(message)
+    {
+        AttemptedNamespace = attemptedNamespace;
+    }
+}
+
+public class ScriptTimeoutException : Exception
+{
+    public ScriptTimeoutException() : base() { }
+    public ScriptTimeoutException(string message) : base(message) { }
+    public ScriptTimeoutException(string message, Exception innerException) : base(message, innerException) { }
+}
+
+public class DbHelperException : Exception
+{
+    public DbHelperException() : base() { }
+    public DbHelperException(string message) : base(message) { }
+    public DbHelperException(string message, Exception innerException) : base(message, innerException) { }
+}
+public class FacadeException : Exception
+{
+    public FacadeException() : base() { }
+    public FacadeException(string message) : base(message) { }
+    public FacadeException(string message, Exception innerException) : base(message, innerException) { }
+}
+
+public class ExceptionHelper    //for future to traverse exception chain
+{
+    public static Exception GetExceptionFromChain(Exception ex, int i)
+    {
+        Exception baseException = ex.GetBaseException();
+        int indexInChain = 0;
+
+        Exception innerEx = ex;
+        while (innerEx.Equals(baseException) == false && indexInChain != i)
+        {
+            innerEx = innerEx.InnerException!;
+            indexInChain++;
+        }
+        if (indexInChain < i)
+        {
+            throw new Exception(message: "Index is out of bounds of the Exception chain!");
+        }
+        return innerEx;
+    }
+    public static Exception GetExceptionFromChainReversed(Exception ex, int i)  //todo fix use index base lookup get rid of for loop
+    {
+        List<Exception> exceptions = GetExceptionList(ex);
+        exceptions.Reverse();
+
+        for (int j = 0; j < exceptions.Count(); j++)
+        {
+            if (j == i)
+            {
+                return exceptions[i];
+            }
+        }
+        throw new Exception(message: "Could not find your exception in the List!");
+    }
+    public static int GetBaseExceptionIndex(Exception ex)
+    {
+        List<Exception> exceptions = GetExceptionList(ex);
+        return exceptions.Count() - 1;
+    }
+    private static List<Exception> GetExceptionList(Exception ex)
+    {
+        List<Exception> exceptions = [];
+        Exception baseException = ex.GetBaseException();
+
+        while (ex.Equals(baseException) == false)
+        {
+            exceptions.Add(ex);
+            ex = ex.InnerException!;
+        }
+        exceptions.Add(baseException);
+        return exceptions;
+    }
+}
+</file>
+
+<file path="sandbox/src/ScriptingFramework/GeneratorContexts.cs">
+using Microsoft.Extensions.Logging;
+using Ember.Scripting;
+using IGeneratorReadOnlyContextV1;
+
+//todo version the Interfaces IGenerator bla bla
+
+namespace IGeneratorReadOnlyContextV1
+{
+    public interface IGeneratorContext : IGeneratorBaseInterface
+    {
+        new sealed int IVersion => 1;
+        ILabOrderInterface LabOrder { get; }      // Read current order data
+        PatientInterface Patient { get; }     // Read patient data
+        ConsoleLoggerInterface Logger { get; }
+        DataAccessInterface Data { get; }
+    }
+}
+
+namespace IGeneratorContext_V2
+{
+    public interface IGeneratorContext : IGeneratorReadOnlyContextV1.IGeneratorContext
+    {
+        new sealed int IVersion => 2;
+        new ILabOrderRWInterface LabOrder { get; }
+
+        // List<Patient> Patients;
+
+    }
+}
+
+namespace IGeneratorContext_V3
+{
+    public interface IGeneratorContext : IGeneratorContext_V2.IGeneratorContext
+    {
+        new sealed int IVersion => 3;
+        new ILabOrderInterfaceV2 LabOrder { get; }
+    }
+}
+
+
+namespace IGeneratorContext_V4
+{
+    public interface IGeneratorContext : IGeneratorContext_V3.IGeneratorContext
+    {
+        new sealed int IVersion => 4;
+        new ILabOrderInterfaceV3 LabOrder { get; }
+    }
+}
+namespace IGeneratorContextNoInheritance_V5
+{
+    public interface IGeneratorContext : IGeneratorBaseInterface
+    {
+        new sealed int IVersion => 5;
+        ILabOrderInterfaceV4NoInheritence LabOrder { get; }
+        IVaccineInterface Vaccine { get; }
+    }
+}
+
+
+
+/// <summary>
+/// Classes of context come here
+/// </summary>
+namespace ReadOnlyContextV1
+{
+    public class GeneratorContext : Ember.Scripting.GeneratorContext, IGeneratorReadOnlyContextV1.IGeneratorContext
+    {
+        public override int Version => 1;
+        public int IVersion => Version;
+
+        public ILabOrderInterface labOrder;
+        public PatientInterface patient;
+
+        public ConsoleLoggerInterface logger;
+        public DataAccessInterface data;
+
+
+        public GeneratorContext(ILabOrderInterface pLabOrder, PatientInterface pPatient, ConsoleLoggerInterface plogger, DataAccessInterface pdata)
+        {
+            labOrder = pLabOrder;
+            patient = pPatient;
+            logger = plogger;
+            data = pdata;
+
+        }
+        ILabOrderInterface IGeneratorReadOnlyContextV1.IGeneratorContext.LabOrder => labOrder;
+        PatientInterface IGeneratorReadOnlyContextV1.IGeneratorContext.Patient => patient;
+        ConsoleLoggerInterface IGeneratorReadOnlyContextV1.IGeneratorContext.Logger => logger;
+        DataAccessInterface IGeneratorReadOnlyContextV1.IGeneratorContext.Data => data;
+    }
+}
+
+namespace RWContextV2
+{
+    public class GeneratorContext : Ember.Scripting.GeneratorContext, IGeneratorContext_V2.IGeneratorContext
+    {
+        public override int Version => 2;
+        public int IVersion => Version;
+
+        public ILabOrderRWInterface labOrder;
+        public PatientInterface patient;
+
+        public ConsoleLoggerInterface logger;
+        public DataAccessInterface data;
+
+
+        public GeneratorContext(ILabOrderRWInterface pLabOrder, PatientInterface pPatient, ConsoleLoggerInterface plogger, DataAccessInterface pdata)
+        {
+            labOrder = pLabOrder;
+            patient = pPatient;
+            logger = plogger;
+            data = pdata;
+
+        }
+
+        public ILabOrderRWInterface LabOrder => labOrder;
+
+        public PatientInterface Patient => patient;
+
+        public ConsoleLoggerInterface Logger => logger;
+
+        public DataAccessInterface Data => data;
+
+        ILabOrderInterface IGeneratorReadOnlyContextV1.IGeneratorContext.LabOrder => LabOrder;
+    }
+}
+
+namespace GeneratorContextV3
+{
+    public class GeneratorContext : RWContextV2.GeneratorContext, IGeneratorContext_V3.IGeneratorContext
+    {
+        public override int Version => 3;
+        // public int IVersion => Version;
+
+        public ILabOrderInterfaceV2 labOrderV2;
+        public new PatientInterface patient;
+
+        public new ConsoleLoggerInterface logger;
+        public new DataAccessInterface data;
+
+
+        public GeneratorContext(ILabOrderInterfaceV2 pLabOrder, PatientInterface pPatient, ConsoleLoggerInterface plogger, DataAccessInterface pdata)
+        : base(pLabOrder, pPatient, plogger, pdata)
+        {
+            labOrderV2 = pLabOrder;
+            patient = pPatient;
+            logger = plogger;
+            data = pdata;
+
+        }
+        ILabOrderInterfaceV2 IGeneratorContext_V3.IGeneratorContext.LabOrder => labOrderV2;
+
+    }
+}
+
+namespace GeneratorContextV4
+{
+    public class GeneratorContext : GeneratorContextV3.GeneratorContext, IGeneratorContext_V4.IGeneratorContext  //todo implement Adapter pattern
+    {
+        public override int Version => 4;
+        // public int IVersion => Version;
+
+        public ILabOrderInterfaceV3 labOrderV3;
+        public new PatientInterface patient;
+
+        public new ConsoleLoggerInterface logger;
+        public new DataAccessInterface data;
+
+
+        public GeneratorContext(ILabOrderInterfaceV3 pLabOrderV3, PatientInterface pPatient, ConsoleLoggerInterface plogger, DataAccessInterface pdata)
+        : base(pLabOrderV3, pPatient, plogger, pdata)
+        {
+            labOrderV3 = pLabOrderV3;
+            patient = pPatient;
+            logger = plogger;
+            data = pdata;
+
+        }
+        ILabOrderInterfaceV3 IGeneratorContext_V4.IGeneratorContext.LabOrder => labOrderV3;
+
+    }
+}
+
+namespace GeneratorContextNoInherVaccineV5
+{
+    public class GeneratorContext : Ember.Scripting.GeneratorContext, IGeneratorContextNoInheritance_V5.IGeneratorContext   //into diffrent namespaces blocks later folders
+    {
+        public override int Version => 5;
+        public int IVersion => Version;
+
+        ILabOrderInterfaceV4NoInheritence LabOrder;
+        IVaccineInterface Vaccine;
+        public GeneratorContext(ILabOrderInterfaceV4NoInheritence labOrder, IVaccineInterface vaccine)
+        {
+            LabOrder = labOrder;
+            Vaccine = vaccine;
+        }
+
+        ILabOrderInterfaceV4NoInheritence IGeneratorContextNoInheritance_V5.IGeneratorContext.LabOrder => LabOrder;
+
+        IVaccineInterface IGeneratorContextNoInheritance_V5.IGeneratorContext.Vaccine => Vaccine;
+    }
+}
+
+
+//context not always backwards comp, make sure right context passed factory
+</file>
+
+<file path="scripting/src/DbFiles/DbHelper.cs">
+using EFModeling.EntityProperties.FluentAPI.Required;
+using Microsoft.CodeAnalysis;
+using Microsoft.EntityFrameworkCore;
+using Ember.Scripting;
+using Microsoft.Extensions.Logging;
+using Microsoft.CodeAnalysis.Scripting;
+using System.ComponentModel;
+namespace Ember.Scripting;
+
+internal class DbHelper
+{
+    private readonly List<MetadataReference> References;
+    private readonly ScriptCompiler Compiler;
+    private readonly ILogger<DbHelper> Logger;
+    private readonly int RecentApiVersion;
+    public DbHelper(ScriptCompiler compiler, List<MetadataReference> references, ILogger<DbHelper> logger, int recentApiVersion)
+    {
+        References = references;
+        Compiler = compiler;
+        Logger = logger;
+        RecentApiVersion = recentApiVersion;
+    }
+    public async Task EnsureDeletedCreated()    //todo delete this for obvious safety reasons before production
+    {
+        try
+        {
+            Logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(EnsureDeletedCreated), nameof(DbHelper));
+
+            using (var db = new MyContext())
+            {
+                await db.Database.EnsureDeletedAsync();
+                await db.Database.EnsureCreatedAsync();
+            }
+        }
+
+        catch (Exception e)
+        {
+            Logger.LogError(e.ToString());
+            throw new DbHelperException(nameof(EnsureDeletedCreated) + " failed in " + nameof(DbHelper), e);
+        }
+    }
+    public async Task<List<CustomerScript>> GetAllCustomerScripts(bool includeCaches = false, CustomerScriptFilter? filters = null)
+    {
+        try
+        {
+            Logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(GetAllCustomerScripts), nameof(DbHelper));
+
+            if (filters != null)
+            {
+                using (var db = new MyContext())
+                {
+                    IQueryable<CustomerScript> query = db.CustomerScripts;
+                    if (includeCaches)
+                    {
+                        query = query.Include(s => s.CompiledCaches);
+                    }
+                    if (filters.ScriptName != null && filters.ScriptName != "")
+                    {
+                        query = query.Where(s => s.ScriptName == filters.ScriptName);
+                    }
+                    if (filters.ScriptType != null && filters.ScriptType != "")
+                    {
+                        query = query.Where(s => s.ScriptType == filters.ScriptType);
+                    }
+                    if (filters.SourceCode != null && filters.SourceCode != "")
+                    {
+                        query = query.Where(s => s.SourceCode == filters.SourceCode);
+                    }
+                    if (filters.MinApiVersion != null)
+                    {
+                        query = query.Where(s => s.MinApiVersion == filters.MinApiVersion);
+                    }
+                    if (filters.CreatedAt != null)
+                    {
+                        query = query.Where(s => s.CreatedAt == filters.CreatedAt);
+                    }
+                    if (filters.ModifiedAt != null)
+                    {
+                        query = query.Where(s => s.ModifiedAt == filters.ModifiedAt);
+                    }
+                    if (filters.CreatedBy != null && filters.CreatedBy != "")
+                    {
+                        query = query.Where(s => s.CreatedBy == filters.CreatedBy);
+                    }
+
+                    return await query.ToListAsync();
+                }
+            }
+            if (includeCaches == false)
+            {
+                using (var db = new MyContext())
+                {
+                    var scripts = await db.CustomerScripts.ToListAsync();
+                    return scripts;
+                }
+            }
+            else
+            {
+                using (var db = new MyContext())
+                {
+                    var scripts = await db.CustomerScripts.Include(s => s.CompiledCaches).ToListAsync();
+                    return scripts;
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            throw new DbHelperException(nameof(GetAllCustomerScripts) + " failed in " + nameof(DbHelper), e);
+        }
+
+    }
+    public async Task<List<ScriptCompiledCache>> GetAllCompiledScriptCaches(bool includeScripts = true)
+    {
+        try
+        {
+            Logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(GetAllCompiledScriptCaches), nameof(DbHelper));
+            if (!includeScripts)
+            {
+                using (var db = new MyContext())
+                {
+                    var caches = await db.ScriptCompiledCaches
+                    .ToListAsync();
+                    return caches;
+                }
+            }
+            using (var db = new MyContext())
+            {
+                var caches = await db.ScriptCompiledCaches
+                .Include(c => c.CustomerScript)
+                .ToListAsync();
+                return caches;
+            }
+        }
+        catch (Exception e)
+        {
+            throw new DbHelperException(nameof(GetAllCompiledScriptCaches) + " failed in " + nameof(DbHelper), e);
+        }
+    }
+    public int GetRecentApiVersion()
+    {
+        Logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(GetRecentApiVersion), nameof(DbHelper));
+        return RecentApiVersion;
+    }
+    public async Task ClearScriptCache(Guid scriptId)
+    {
+        Logger.LogTrace("Entered {MethodName} in {ClassName} with scriptId: {ScriptId}.", nameof(ClearScriptCache), nameof(DbHelper), scriptId);
+
+        int currentApiVersion = GetRecentApiVersion();
+        int highestV = currentApiVersion;
+        foreach (var item in await GetActiveApiVersions())
+        {
+            if (item > highestV)
+            {
+                throw new DbHelperException(nameof(ClearScriptCache) + " failed in " + nameof(DbHelper) + " because for some reason the passed Recent Version is not the highest in the db.");
+            }
+        }
+        for (int i = 0; i <= currentApiVersion; i++)    //checks above if current APi is highest
+        {
+            try
+            {
+                await DeleteScriptCache(scriptId, i);
+                Logger.LogInformation("Deleted: " + i);
+                Console.WriteLine("Deleted: " + i);
+            }
+            catch (Exception e)
+            {
+                Logger.LogError(e.ToString());
+                throw new DbHelperException(nameof(ClearScriptCache) + " failed", e);
+            }
+
+        }
+
+    }
+    public async Task RecompileScript(Guid scriptId, bool deleteAlso = false)
+    {
+        Logger.LogTrace("Entered {MethodName} in {ClassName} with scriptId: {ScriptId}.", nameof(RecompileScript), nameof(DbHelper), scriptId);
+
+        try
+        {
+            int currentApiVersion = GetRecentApiVersion();
+            CustomerScript script = await GetCustomerScript(scriptId, includeCaches: true);
+
+            int start = script.MinApiVersion;
+            int count = currentApiVersion - start + 1;
+            int[] versions = Enumerable.Range(start, count).ToArray();
+            if (deleteAlso)
+            {
+                await ClearScriptCache(scriptId);
+            }
+            foreach (var itemN in script.CompiledCaches)    //todo fix this once old version implemented
+            {
+                if (versions.Contains(itemN.ApiVersion) == false)
+                {
+                    try
+                    {
+                        await CreateAndInsertCompiledCache(script, itemN.ApiVersion);
+                        Logger.LogInformation("Mock recompilation of old V" + itemN.ApiVersion);
+                        Console.WriteLine("Mock recompilation of old V" + itemN.ApiVersion);
+                    }
+                    catch (Exception e) { Logger.LogError("Compilation of old version failed" + e.ToString()); }
+
+                }
+                if (itemN.ApiVersion == currentApiVersion)  //this is only temporary until the if statement above works
+                {
+                    await CreateAndInsertCompiledCache(script);
+                    Logger.LogInformation("Real recompilation of new V" + itemN.ApiVersion + " , normal if twice");
+                    Console.WriteLine("Real recompilation of new V" + itemN.ApiVersion + " , normal if twice");
+                    break;
+                }
+            }
+
+        }
+        catch (Exception e)
+        {
+            Logger.LogError(e.ToString());
+            throw new DbHelperException(nameof(RecompileScript) + " failed in " + nameof(DbHelper), e);
+        }
+    }
+    public async Task AutomaticCompilationOnVersionUpdate(int currentApiVersion)
+    {
+        Logger.LogTrace("Entered {MethodName} in {ClassName} with currentApiVersion: {ApiVersion}.", nameof(AutomaticCompilationOnVersionUpdate), nameof(DbHelper), currentApiVersion);
+
+        try
+        {
+            foreach (var item in await GetAllCustomerScripts(includeCaches: true))
+            {
+                bool currentImplementation = false;
+                foreach (var itemN in item.CompiledCaches)
+                {
+                    int start = item.MinApiVersion;
+                    int count = currentApiVersion - start + 1;
+
+                    int[] versions = Enumerable.Range(start, count).ToArray();
+                    if (versions.Contains(itemN.ApiVersion) == false)
+                    {
+                        // await CreateAndInsertCompiledCache(item, currentApiVersion); //todo create a method to compile to all older versions also
+                    }
+
+                    if (itemN.ApiVersion == currentApiVersion)
+                    {
+                        currentImplementation = true;
+                    }
+                    if (itemN.ApiVersion < item.MinApiVersion)
+                    {
+                        await DeleteScriptCache(itemN.ScriptId, currentApiVersion);
+                        Logger.LogInformation("Deleted an old Script Cache!");
+                        Console.WriteLine("Deleted an old Script Cache!");
+                    }
+                }
+
+                if (currentImplementation == false)
+                {
+                    await CreateAndInsertCompiledCache(item);
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            Logger.LogError(e.ToString());
+            throw new DbHelperException(nameof(AutomaticCompilationOnVersionUpdate) + " failed in " + nameof(DbHelper), e);
+        }
+
+    }
+    public async Task<CustomerScript> CreateAndInsertCustomerScript(string scriptString, Guid randomGUID, string createdBy, int? oldApiV = null, DateTime? createdAt = null, bool alsoCompAndSave = false, bool checkForDuplicates = false)
+    //todo make sure compiling happens after verification of isDuplicate
+    {
+        try
+        {
+            Logger.LogTrace("Entered {MethodName} in {ClassName} with ID: {ScriptId}.", nameof(CreateAndInsertCustomerScript), nameof(DbHelper), randomGUID);
+
+
+            using (var db = new MyContext())
+            {
+                int currentApiVersion = GetRecentApiVersion();
+                if (createdAt == null)
+                {
+                    createdAt = DateTime.UtcNow;
+                }
+                // ScriptCompiler compiler = new ScriptCompiler(References);
+                var getTupleFromVal = Compiler.BasicValidationBeforeCompiling(scriptString);
+
+                CustomerScript randomTestScript2 = new CustomerScript
+                {
+                    Id = randomGUID,
+                    ScriptName = getTupleFromVal.className,
+                    ScriptType = getTupleFromVal.baseTypeName,
+                    SourceCode = scriptString,
+                    MinApiVersion = getTupleFromVal.versionInt,
+                    CreatedAt = createdAt,
+                    ModifiedAt = DateTime.UtcNow,
+                    CreatedBy = createdBy
+                };
+
+                if (checkForDuplicates)
+                {
+                    checkForDuplicates = await IsDuplicateScript(randomTestScript2);  //uncomment this if you dont want to check for duplicate existing in db when inserting
+                }
+
+                if (checkForDuplicates == false)
+                {
+                    db.CustomerScripts.Add(randomTestScript2);
+                    await db.SaveChangesAsync();
+
+                    await CreateAndInsertCompiledCache(randomTestScript2, oldApiV);
+
+                    // byte[] tempComp;
+                    // if (oldApiV != null)
+                    // {
+                    //     tempComp = Compiler.RunCompilation(scriptString, apiVersion: (int)oldApiV, metaData: getTupleFromVal);
+                    //     currentApiVersion = (int)oldApiV;
+                    // }
+                    // else
+                    // {
+                    //     currentApiVersion = GetRecentApiVersion();
+                    //     tempComp = Compiler.RunCompilation(scriptString, metaData: getTupleFromVal);
+                    // }
+
+                    // randomTestScript2.CompiledCaches.Add(new ScriptCompiledCache
+                    // {
+                    //     ScriptId = randomGUID,
+                    //     ApiVersion = currentApiVersion,
+                    //     AssemblyBytes = tempComp,
+                    //     CompilationDate = DateTime.UtcNow,
+                    //     CompilationSuccess = true,
+                    //     CompilationErrors = "",
+                    //     OldSourceCode = scriptString    //todo
+                    // });
+                    // db.CustomerScripts.Add(randomTestScript2);
+                    // await db.SaveChangesAsync();
+                    return randomTestScript2;
+                }
+                else
+                {
+                    // return randomTestScript2;
+                    throw new DbHelperException(nameof(CreateAndInsertCustomerScript) + " failed in " + nameof(DbHelper) + " because a duplicate script was already in the database!");
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            Logger.LogError(e.ToString());
+            throw;
+            // throw new DbHelperException(nameof(CreateAndInsertCustomerScript) + " failed in " + nameof(DbHelper), e);
+        }
+    }
+    public async Task CreateAndInsertCompiledCache(CustomerScript script, int? apiV = null)
+    {
+        try
+        {
+            Logger.LogTrace("Entered {MethodName} in {ClassName} with ID: {ScriptId}.", nameof(CreateAndInsertCompiledCache), nameof(DbHelper), script.Id);
+
+            using (var db = new MyContext())
+            {
+                // int currentApiVersion;
+                if (apiV == null)
+                {
+                    apiV = GetRecentApiVersion();
+                }
+
+                var getTupleFromVal = Compiler.BasicValidationBeforeCompiling(script.SourceCode!);
+
+                if (await db.ScriptCompiledCaches.AnyAsync(c => c.ScriptId == script.Id && c.ApiVersion == apiV))
+                {
+                    Logger.LogInformation("Skipping insert of: " + getTupleFromVal.className + " because it already exists already exists.");
+                    Console.WriteLine("Skipping insert of: " + getTupleFromVal.className + " because it already exists already exists.");
+                    throw new DbHelperException(nameof(CreateAndInsertCompiledCache) + " failed in " + nameof(DbHelper) + "more details: " + "Skipping insert of: " + getTupleFromVal.className + " because it already exists already exists."); ;
+                    // return;
+                }
+                else
+                {
+                    byte[] tempComp;
+                    tempComp = Compiler.RunCompilation(script.SourceCode!, metaData: getTupleFromVal);
+
+                    ScriptCompiledCache tempCache = new ScriptCompiledCache
+                    {
+                        ScriptId = script.Id,
+                        ApiVersion = (int)apiV,
+                        AssemblyBytes = tempComp,
+                        CompilationDate = DateTime.UtcNow,
+                        CompilationSuccess = true,
+                        CompilationErrors = "",
+                        OldSourceCode = script.SourceCode
+                    };
+                    await InsertScriptCompiledCache(tempCache);
+                    await db.SaveChangesAsync();
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            throw new DbHelperException(nameof(CreateAndInsertCompiledCache) + " failed in " + nameof(DbHelper), e);
+        }
+
+    }
+    public async Task DeleteCustomerScript(Guid id)
+    {
+        try
+        {
+            Logger.LogTrace("Entered {MethodName} in {ClassName} with ID: {ScriptId}.", nameof(DeleteCustomerScript), nameof(DbHelper), id);
+
+            using (var db = new MyContext())
+            {
+                CustomerScript temp = await GetCustomerScript(id);
+                db.Remove(temp);
+                await db.SaveChangesAsync();
+            }
+        }
+        catch (Exception e)
+        {
+            throw new DbHelperException(nameof(DeleteCustomerScript) + " failed in " + nameof(DbHelper), e);
+        }
+    }
+    public async Task DeleteScriptCache(Guid id, int ApiVersion)
+    {
+        try
+        {
+            Logger.LogTrace("Entered {MethodName} in {ClassName} with ID: {ScriptId} and ApiVersion: {ApiVersion}.", nameof(DeleteScriptCache), nameof(DbHelper), id, ApiVersion);
+
+            using (var db = new MyContext())
+            {
+                try
+                {
+                    ScriptCompiledCache temp = await GetCompiledScripCache(id, ApiVersion);
+                    db.Remove(temp);
+                    await db.SaveChangesAsync();
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e.ToString());
+                    Console.WriteLine("Could not execute DeleteScriptCache");
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            throw new DbHelperException(nameof(DeleteScriptCache) + " failed in " + nameof(DbHelper), e);
+        }
+    }
+    public async Task UpdateScript(Guid scriptId, string newSourceCode, string? userName = null, int? apiVersion = null)
+    {
+        Logger.LogTrace("Entered {MethodName} in {ClassName} with scriptId: {ScriptId}.", nameof(UpdateScript), nameof(DbHelper), scriptId);
+        if (userName == null)
+        {
+            userName = "Default";
+        }
+        // if (apiVersion == null)
+        // {
+        //     apiVersion = GetRecentApiVersion();
+        // }
+
+        using (var db = new MyContext())
+        {
+            CustomerScript? existingScript = await db.CustomerScripts.FindAsync(scriptId);
+
+            if (existingScript != null)
+            {
+                existingScript.SourceCode = newSourceCode;
+                existingScript.ModifiedAt = DateTime.UtcNow;
+
+                if (userName != null)
+                {
+                    existingScript.CreatedBy = userName;
+                }
+            }
+            else
+            {
+                Logger.LogDebug("Somethign went wrong retrieving your script, we could not find it.");
+                throw new DbHelperException("Could not find the script what needs to be updated.");
+            }
+
+            await db.SaveChangesAsync();
+        }
+    }
+    public async Task InsertScriptCompiledCache(ScriptCompiledCache scriptCompiledCache)
+    {
+        try
+        {
+            Logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(InsertScriptCompiledCache), nameof(DbHelper));
+
+            using (var db = new MyContext())
+            {
+                scriptCompiledCache.CustomerScript = null!;
+
+                db.ScriptCompiledCaches.Add(scriptCompiledCache);
+                await db.SaveChangesAsync();
+            }
+        }
+        catch (Exception e)
+        {
+            throw new DbHelperException(nameof(InsertScriptCompiledCache) + " failed in " + nameof(DbHelper), e);
+        }
+    }
+
+    public async Task<ScriptCompiledCache> GetCompiledScripCache(Guid id, int ApiVersion)
+    {
+        try
+        {
+            Logger.LogTrace("Entered {MethodName} in {ClassName} with ID: {ScriptId}.", nameof(GetCompiledScripCache), nameof(DbHelper), id);
+
+            using (var db = new MyContext())
+            {
+                var cache = await db.ScriptCompiledCaches.SingleAsync(b => b.ScriptId == id && b.ApiVersion == ApiVersion);
+                return cache;
+            }
+        }
+        catch (Exception e)
+        {
+            throw new DbHelperException(nameof(GetCompiledScripCache) + " failed in " + nameof(DbHelper), e);
+        }
+    }
+    public async Task<CustomerScript> GetCustomerScript(Guid id, bool includeCaches = false)
+    {
+        // try
+        // {
+        Logger.LogTrace("Entered {MethodName} in {ClassName} with ID: {ScriptId}.", nameof(GetCustomerScript), nameof(DbHelper), id);
+
+        if (includeCaches == true)
+        {
+            using (var db = new MyContext())
+            {
+
+                var script = await db.CustomerScripts.Include(s => s.CompiledCaches).SingleAsync(b => b.Id == id);
+                return script;
+            }
+        }
+        else
+        {
+            using (var db = new MyContext())
+            {
+                var script = await db.CustomerScripts.SingleAsync(b => b.Id == id);
+                return script;
+            }
+        }
+        // }
+        // catch (Exception e)
+        // {
+        //     throw new DbHelperException(nameof(GetCustomerScript) + " failed in " + nameof(DbHelper), e);
+        // }
+    }
+
+
+    public async Task CompileAllStoredScripts(int currentApiVersion)
+    {
+        Logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(CompileAllStoredScripts), nameof(DbHelper));
+
+        try
+        {
+            using (var db = new MyContext())
+            {
+                List<CustomerScript> allScriptSC = await GetAllCustomerScripts();
+                for (int i = 0; i < allScriptSC.Count(); i++)
+                {
+                    await CreateAndInsertCompiledCache(allScriptSC[i]);
+                    await db.SaveChangesAsync();
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            Logger.LogError(e.ToString());
+            throw new DbHelperException(nameof(CompileAllStoredScripts) + " failed in " + nameof(DbHelper), e);
+        }
+    }
+
+    public async Task SaveScriptWithoutCompiling(Guid id, string sourceCode, string? userName = null)
+    {
+        using (var db = new MyContext())
+        {
+            CustomerScript? existingScript = await db.CustomerScripts.FindAsync(id);
+
+            if (existingScript != null)
+            {
+                existingScript.SourceCode = sourceCode;
+                existingScript.ModifiedAt = DateTime.UtcNow;
+
+                if (userName != null)
+                {
+                    existingScript.CreatedBy = userName;
+                }
+            }
+            else
+            {
+                CustomerScript testScript = new CustomerScript
+                {
+                    Id = id,
+                    ScriptName = null,
+                    ScriptType = null,
+                    SourceCode = sourceCode,
+                    MinApiVersion = GetRecentApiVersion(),
+                    CreatedAt = DateTime.UtcNow,
+                    ModifiedAt = DateTime.UtcNow,
+                    CreatedBy = null
+                };
+                db.CustomerScripts.Add(testScript);
+
+            }
+            await db.SaveChangesAsync();
+        }
+    }
+    public async Task DeleteAllCachedScripts()
+    {
+        Logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(DeleteAllCachedScripts), nameof(DbHelper));
+
+        try
+        {
+            using (var db = new MyContext())
+            {
+                await db.ScriptCompiledCaches.ExecuteDeleteAsync();
+            }
+        }
+        catch (Exception e)
+        {
+            Logger.LogError(e.ToString());
+            throw new DbHelperException(nameof(DeleteAllCachedScripts) + " failed in " + nameof(DbHelper), e);
+        }
+    }
+    public async Task<bool> IsDuplicateScript(CustomerScript script)    //todo make more efficient using ef core
+    {
+        try
+        {
+            Logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(IsDuplicateScript), nameof(DbHelper));
+            // CustomerScriptFilter filter = new CustomerScriptFilter(scriptName: script.ScriptName, sourceCode: script.SourceCode);
+            CustomerScriptFilter filter = new CustomerScriptFilter(scriptName: script.ScriptName);
+            List<CustomerScript> allScripts = await GetAllCustomerScripts(filters: filter);
+
+
+
+            if (allScripts.Count() == 0)
+            {
+                return false;
+            }
+            foreach (var item in allScripts)
+            {
+                if (Compiler.IsTheSameTree(item.SourceCode!, script.SourceCode!))
+                {
+                    return true;
+                }
+            }
+            return false;   //but name is duplicate! only source code is unique, also this could be an issue if the name of the script is not taken from the source code as it could lead to a script having a diffrent name but the same source code as another this would lead to this algorithm not finginh the duplicate script
+        }
+        catch (Exception e)
+        {
+            Logger.LogError(e.ToString());
+            throw new DbHelperException(nameof(IsDuplicateScript) + " failed in " + nameof(DbHelper), e);
+        }
+    }
+    public async Task<(List<Guid> scriptGUIDs, Dictionary<Guid, int> cacheGUIDs)> DetectDuplicates()
+    {
+        Logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(DetectDuplicates), nameof(DbHelper));
+
+        try
+        {
+            List<CustomerScript> allScripts = await GetAllCustomerScripts(includeCaches: true);
+            List<Guid> duplicateGuids = [];
+            for (int i = 0; i < allScripts.Count(); i++)
+            {
+                for (int j = 0; j < allScripts.Count(); j++)
+                {
+                    if (i != j && j > i)
+                    {
+                        if (allScripts[i].Id == allScripts[j].Id
+                        || allScripts[i].ScriptName == allScripts[j].ScriptName
+                        || allScripts[i].SourceCode == allScripts[j].SourceCode
+                        || Compiler.IsTheSameTree(allScripts[i].SourceCode!, allScripts[j].SourceCode!)
+                        )
+                        {
+                            if (duplicateGuids.Contains(allScripts[j].Id) == false)
+                            {
+                                duplicateGuids.Add(allScripts[j].Id);
+                            }
+                        }
+                    }
+                }
+            }
+            List<ScriptCompiledCache> allCaches = await GetAllCompiledScriptCaches();
+            Dictionary<Guid, int> cachesToDelete = [];
+            for (int i = 0; i < allCaches.Count(); i++)
+            {
+                Guid cacheID = allCaches[i].ScriptId;
+                bool found = false;
+                for (int j = 0; j < allScripts.Count(); j++)
+                {
+                    if (allScripts[j].Id == cacheID)
+                    {
+                        found = true;
+                    }
+                }
+                if (found == false)
+                {
+                    try
+                    {
+                        cachesToDelete.Add(cacheID, allCaches[i].ApiVersion);        //also add the version
+                        // await DeleteScriptCache(cacheID);   //deletes if there is a cache without a script attached to it
+                    }
+                    catch (Exception e)
+                    {
+                        Logger.LogError(e.ToString());
+                        throw new Exception();
+                    }
+
+                }
+            }
+            return (scriptGUIDs: duplicateGuids, cacheGUIDs: cachesToDelete);
+        }
+        catch (Exception e)
+        {
+            Logger.LogError(e.ToString());
+            throw new DbHelperException(nameof(DetectDuplicates) + " failed in " + nameof(DbHelper), e);
+        }
+    }
+    public async Task<List<int>> GetActiveApiVersions()
+    {
+        Logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(GetActiveApiVersions), nameof(DbHelper));
+
+        var caches = await GetAllCompiledScriptCaches();
+        List<int> ls = [];
+        foreach (var item in caches)
+        {
+            if (ls.Contains(item.ApiVersion) == false)
+            {
+                ls.Add(item.ApiVersion);
+            }
+        }
+        return ls;
+    }
+    public async Task<int> GetMostRecentApiVersionInDb()
+    {
+        List<int> versions = await GetActiveApiVersions();
+        return versions.Max();
+    }
+    public async Task RemoveDuplicates()
+    {
+        Logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(RemoveDuplicates), nameof(DbHelper));
+
+        try
+        {
+            List<Guid> duplicateGuids = (await DetectDuplicates()).scriptGUIDs;
+            Dictionary<Guid, int> cachesWithoutScript = (await DetectDuplicates()).cacheGUIDs;
+
+            for (int i = 0; i < duplicateGuids.Count(); i++)
+            {
+                if (duplicateGuids.Contains(duplicateGuids[i]))
+                {
+                    try
+                    {
+                        await DeleteCustomerScript(duplicateGuids[i]);
+                    }
+                    catch (Exception e)
+                    {
+                        Logger.LogError(e.ToString());
+                        Logger.LogError("Error when deleting index: " + i + " the GUID: " + duplicateGuids[i]);
+                    }
+                }
+            }
+            foreach (var item in cachesWithoutScript.Keys)
+            {
+                try { await DeleteScriptCache(item, cachesWithoutScript[item]); }
+                catch (Exception e)
+                {
+                    Logger.LogError(e.ToString());
+                    throw new Exception();
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            Logger.LogError(e.ToString());
+            throw new DbHelperException(nameof(GetActiveApiVersions) + " failed in " + nameof(DbHelper), e);
+        }
+    }
+    //Ai generated
+    public async Task HealthCheck() //todo verify
+    {
+        Logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(HealthCheck), nameof(DbHelper));
+
+        // ScriptCompiler compiler = new ScriptCompiler(References);
+
+        //checking if can connect to db
+        using (var context = new MyContext())
+        {
+            bool canConnect = await context.Database.CanConnectAsync();
+            if (!canConnect)
+            {
+                throw new InvalidOperationException("HealthCheck Failed: Unable to connect to the database.");
+            }
+            //verify if db tables exist
+            try
+            {
+                await context.EmberInstances.FirstOrDefaultAsync(); //if it fail it will throw
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException($"HealthCheck Failed: System state invalid. Unable to query critical tables (EmberInstances). Error: {ex.Message}", ex);
+            }
+        }
+
+        try
+        {
+            // Ensure the current runtime version is valid (positive integer)
+            int currentApiVersion = GetRecentApiVersion();
+            if (currentApiVersion <= 0)
+            {
+                throw new InvalidOperationException($"HealthCheck Failed: Invalid Current API Version configured ({currentApiVersion}).");
+            }
+
+            // Ensure we can retrieve active API versions from the database (Consistency check)
+            var activeVersions = await GetActiveApiVersions();
+            if (activeVersions == null)
+            {
+                throw new InvalidOperationException("HealthCheck Failed: Active API versions list is null.");
+            }
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException($"HealthCheck Failed: API Version consistency check encountered an error. {ex.Message}", ex);
+        }
+
+        // 4. Validate Compiler State
+        if (Compiler == null)
+        {
+            throw new InvalidOperationException("HealthCheck Failed: ScriptCompiler is not correctly initialized.");
+        }
+    }
+
+    public async Task<Dictionary<int, List<ScriptCompiledCache>>> GetCachesForEachApiVersion()
+    {
+        Logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(GetActiveApiVersions), nameof(DbHelper));
+
+        var caches = await GetAllCompiledScriptCaches();
+        Dictionary<int, List<ScriptCompiledCache>> returnedDict = [];
+
+        List<int> ls = [];
+        foreach (var cache in caches)
+        {
+            if (returnedDict.Keys.Contains(cache.ApiVersion) == false)
+            {
+                List<ScriptCompiledCache> newList = [];
+                returnedDict.Add(cache.ApiVersion, newList);
+                returnedDict[cache.ApiVersion].Add(cache);
+            }
+            else
+            {
+                // List<ScriptCompiledCache> retrievedList = returnedDict[item.ApiVersion];
+                // retrievedList.Add(item);
+                returnedDict[cache.ApiVersion].Add(cache);
+            }
+
+        }
+        return returnedDict;
+    }
+}
+</file>
+
+<file path="scripting/src/ScriptManager.cs/ScriptManager.cs">
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.Scripting;
+using Microsoft.EntityFrameworkCore.Infrastructure.Internal;
+using Microsoft.Extensions.Logging;
+
+namespace Ember.Scripting;
+
+internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISccriptManagerDeleteAfter
+{
+    /// <inheritdoc cref="IScriptManager.CreateScript(string, string?, string, int)">
+
+    private readonly DbHelper Db;
+    private readonly ScriptCompiler Compiler;
+    private readonly ScriptExecutor Executor;
+    private readonly List<MetadataReference> References;
+    private readonly ILogger<ScriptManagerFacade> Logger;
+    private readonly int RecentApiVersion;
+
+    internal ScriptManagerFacade(DbHelper db, ScriptCompiler compiler, ScriptExecutor executor, List<MetadataReference> references, ILogger<ScriptManagerFacade> logger, int recentApiVersion)
+    {
+        References = references;
+        Db = db;
+        Compiler = compiler;
+        Executor = executor;
+        Logger = logger;
+        RecentApiVersion = recentApiVersion;
+    }
+
+    #region Script Lifecycle
+
+    public async Task<Guid> CreateScript(string sourceCode, string userName = "Default", int? apiVersion = null, DateTime? createdAt = null, bool checkForDuplicates = false)    //maybe minApiVersion is better?
+    {
+        Logger.LogDebug("Entered {MethodName} in {ClassName} apiVersion: {apiVersion}.", nameof(CreateScript), nameof(ScriptManagerFacade), apiVersion);
+
+        int currentApiVersion = await GetRunningApiVersion();
+        Guid id = Guid.NewGuid();
+
+        if (apiVersion == null)
+        {
+            await Db.CreateAndInsertCustomerScript(sourceCode, id, userName, createdAt: createdAt, checkForDuplicates: checkForDuplicates);
+        }
+        else
+        {
+            await Db.CreateAndInsertCustomerScript(sourceCode, id, userName, (int)apiVersion, createdAt: createdAt, checkForDuplicates: checkForDuplicates);
+        }
+        return id;
+
+    }
+
+    // Updates existing script source code and recompiles for all compatible API versions
+    public async Task UpdateScript(Guid scriptId, string newSourceCode, string? userName = null, int? apiVersion = null)
+    {
+        Logger.LogTrace("Entered {MethodName} in {ClassName} with scriptId: {ScriptId}.", nameof(UpdateScript), nameof(ScriptManagerFacade), scriptId);
+
+        // if (apiVersion == -1)
+        // {
+        //     apiVersion = await GetRecentApiVersion();
+        // }
+        // var customerScript = await Db.GetCustomerScript(scriptId);
+        // var creationDate = customerScript.CreatedAt;
+        // try
+        // {
+        //     await Db.DeleteCustomerScript(scriptId);    //todo update is still inefficient
+        //     await Db.CreateAndInsertCustomerScript(newSourceCode, scriptId, userName, createdAt: (DateTime)creationDate!); //todo unsafe af 
+        // }
+        // catch
+        // {
+        //     await Db.SaveScriptWithoutCompiling(scriptId, newSourceCode, userName);
+        //     Logger.LogTrace("Could not save the actual Script so had to save without compiling");
+        //     throw;
+        // }
+        // // await RecompileScript(scriptId);    //todo inefficient also untested, ineff because compiles 2 for 1 api v
+        await Db.UpdateScript(scriptId, newSourceCode, userName, apiVersion);
+    }
+
+    // Removes script and all associated compiled caches
+    public async Task DeleteScript(Guid scriptId)
+    {
+        Logger.LogTrace("Entered {MethodName} in {ClassName} with scriptId: {ScriptId}.", nameof(DeleteScript), nameof(ScriptManagerFacade), scriptId);
+
+        await Db.DeleteCustomerScript(scriptId);    //todo check if this also deletes the caches
+    }
+
+    // Retrieves script metadata and source code
+    public async Task<CustomerScript> GetScript(Guid scriptId, bool includeCaches = false)
+    {
+        Logger.LogTrace("Entered {MethodName} in {ClassName} with scriptId: {ScriptId}.", nameof(GetScript), nameof(ScriptManagerFacade), scriptId);
+
+        CustomerScript script = await Db.GetCustomerScript(scriptId, includeCaches);
+        return script;
+    }
+
+    // Returns all scripts with optional filtering by type, API version, or creation date
+    public async Task<List<CustomerScript>> ListScripts(CustomerScriptFilter? filters = null, bool includeCaches = false)
+    {
+        Logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(ListScripts), nameof(ScriptManagerFacade));
+
+        List<CustomerScript> scripts;
+        scripts = await Db.GetAllCustomerScripts(includeCaches: includeCaches, filters: filters);
+        return scripts;
+    }
+
+    #endregion
+
+    #region Compilation Operations
+
+    // Compiles a specific script for a target API version, if target version not specified just takes the recent one
+    public async Task CompileScript(Guid scriptId, int? targetApiVersion = null)
+    {
+        Logger.LogTrace("Entered {MethodName} in {ClassName} with scriptId: {ScriptId} and targetApiVersion: {TargetApiVersion}.", nameof(CompileScript), nameof(ScriptManagerFacade), scriptId, targetApiVersion);
+
+        if (targetApiVersion == null)
+        {
+            targetApiVersion = await GetRunningApiVersion();
+        }
+        CustomerScript script = await Db.GetCustomerScript(scriptId);
+        await Db.CreateAndInsertCompiledCache(script, apiV: targetApiVersion);
+    }
+
+    // Compiles all compatible scripts for a new API version
+    public async Task CompileAllScripts()
+    {
+        Logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(CompileAllScripts), nameof(ScriptManagerFacade));
+
+        int currentApiVersion = await GetRunningApiVersion();
+        await Db.CompileAllStoredScripts(currentApiVersion);
+    }
+
+    public async Task SaveScriptWithoutCompiling(Guid id, string sourceCode)
+    {
+        Logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(SaveScriptWithoutCompiling), nameof(ScriptManagerFacade));
+        // Guid id = Guid.NewGuid();
+        await Db.SaveScriptWithoutCompiling(id, sourceCode);
+    }
+
+    // Recompiles script for all active API versions
+    public async Task RecompileScript(Guid scriptId)  //todo maybe get rid of the currentapi and create global var in dbhelper class
+    {
+        Logger.LogTrace("Entered {MethodName} in {ClassName} with scriptId: {ScriptId}.", nameof(RecompileScript), nameof(ScriptManagerFacade), scriptId);
+
+        await Db.RecompileScript(scriptId, deleteAlso: true);  //todo fix this i need old version dlls or something like that which will need to be passed maybe as fodler path or file path
+    }
+
+    /// Performs syntax and interface validation without saving
+    public string ValidateScript(string sourceCode)
+    {
+        Logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(ValidateScript), nameof(ScriptManagerFacade));
+        try
+        {
+            var validation = Compiler.BasicValidationBeforeCompiling(sourceCode);
+            string className = validation.className;    //figure out if i should do something with this
+            string baseTypeName = validation.baseTypeName;
+            int versionInt = validation.versionInt;
+
+            return "Success: ClassName: " + className + ", BaseTypeName: " + baseTypeName + ", VersionInt: " + versionInt;
+        }
+        catch (Exception e)
+        {
+            return "Error: " + e.ToString();
+            // throw new FacadeException(e.ToString(), e);
+        }
+
+    }
+
+    // Retrieves compilation error details
+    public async Task<string> GetCompilationErrors(Guid scriptId, int? apiVersion = null)
+    {
+        Logger.LogTrace("Entered {MethodName} in {ClassName} with scriptId: {ScriptId}.", nameof(GetCompilationErrors), nameof(ScriptManagerFacade), scriptId);
+        try
+        {
+            (string className, string baseTypeName, int versionInt)? metaData = null;
+            CustomerScript script;
+            string sourceCode;
+
+            if (apiVersion == null)
+            {
+                script = await GetScript(scriptId);
+                sourceCode = script.SourceCode!;
+            }
+            else
+            {
+                ScriptCompiledCache cache = await Db.GetCompiledScripCache(scriptId, (int)apiVersion);
+                sourceCode = cache.OldSourceCode!;
+            }
+            try
+            {
+                metaData = Compiler.BasicValidationBeforeCompiling(sourceCode);
+            }
+            catch (Exception e)
+            {
+                Logger.LogError("Validation in GetCompilationErrors failed but will still try to compile." + e.ToString());
+            }
+
+            Compiler.RunCompilation(sourceCode, metaData: metaData);
+
+            return "Successful Compilation!";
+        }
+        catch (Exception e)
+        {
+            return "Failed to compile script:" + scriptId + " " + e.ToString();
+            // throw new FacadeException(e.ToString(), e);
+        }
+    }
+
+    public (string className, string baseTypeName, int versionInt) BasicValidationBeforeCompiling(string script)
+    {
+        return Compiler.BasicValidationBeforeCompiling(script);
+    }
+
+    #endregion
+
+    #region Execution Operations
+
+    // Executes a Generator Action script with provided context, realisitcally not needed
+    public async Task<ActionResultBaseClass> ExecuteActionScript(Guid scriptId, GeneratorContext context, int? currentApiVersion = null)    //lowkey so many errors better to have one
+    {
+        Logger.LogTrace("Entered {MethodName} in {ClassName} with scriptId: {ScriptId}.", nameof(ExecuteActionScript), nameof(ScriptManagerFacade), scriptId);
+        try
+        {
+            if (currentApiVersion == null)
+            {
+                currentApiVersion = await GetRunningApiVersion();
+            }
+
+            byte[]? compiledScript = null;
+            try
+            {
+                var temp = await Db.GetCompiledScripCache(scriptId, (int)currentApiVersion);
+                compiledScript = temp.AssemblyBytes;
+            }
+            catch (Exception e)
+            {
+                Logger.LogError("Retrieval failed jit comp launched:" + e.ToString());
+                await CompileScript(scriptId, currentApiVersion);
+                //try again, if fails again we catch error outside
+                var temp = await Db.GetCompiledScripCache(scriptId, (int)currentApiVersion);
+                compiledScript = temp.AssemblyBytes;
+            }
+
+            //possibly add a null check for compiledScript
+            // ScriptExecutor executor = new ScriptExecutor();
+            ActionResultBaseClass result = (ActionResultBaseClass)Executor.RunScriptExecution<object>(compiledScript!, context);  //todo maybe better handling than casting although the error will be thrown in the class itself
+            return result;
+        }
+        catch (Exception e)
+        {
+            Logger.LogError(e.ToString());
+            throw new FacadeException(e.ToString(), e);
+        }
+
+    }
+
+    // Executes a Generator Condition script and returns boolean result, realisitcally not needed
+    public async Task<bool> ExecuteConditionScript(Guid scriptId, GeneratorContext context, int? ApiVersion = null)
+    {
+        Logger.LogTrace("Entered {MethodName} in {ClassName} with scriptId: {ScriptId}.", nameof(ExecuteConditionScript), nameof(ScriptManagerFacade), scriptId);
+        try
+        {
+            if (ApiVersion == null)
+            {
+                ApiVersion = await GetRunningApiVersion();
+            }
+
+            byte[]? compiledScript = null;
+            try
+            {
+                var temp = await Db.GetCompiledScripCache(scriptId, (int)ApiVersion);
+                compiledScript = temp.AssemblyBytes;
+            }
+            catch (Exception e)
+            {
+                Logger.LogError("Retrieval failed jit comp launched:" + e.ToString());
+                await CompileScript(scriptId, await GetRunningApiVersion());
+                //try again, if fails again we catch error outside
+                var temp = await Db.GetCompiledScripCache(scriptId, (int)ApiVersion);
+                compiledScript = temp.AssemblyBytes;
+            }
+
+            //possibly add a null check for compiledScript
+            // ScriptExecutor executor = new ScriptExecutor();
+            bool result = (bool)Executor.RunScriptExecution<object>(compiledScript!, context);  //todo maybe better handling than casting although the error will be thrown in the class itself
+            return result;
+        }
+        catch (Exception e)
+        {
+            Logger.LogError(e.ToString());
+            throw new FacadeException(e.ToString(), e);
+        }
+    }
+
+    // Generic execution that detects script type automatically
+    public async Task<object> ExecuteScriptById(Guid scriptId, GeneratorContext context, int? apiVersion = null)
+    {
+        Logger.LogTrace("Entered {MethodName} in {ClassName} with scriptId: {ScriptId}.", nameof(ExecuteScriptById), nameof(ScriptManagerFacade), scriptId);
+        try
+        {
+            if (apiVersion == null)
+            {
+                apiVersion = await GetRunningApiVersion();
+            }
+            byte[]? compiledScript = null;
+            try
+            {
+                var temp = await Db.GetCompiledScripCache(scriptId, (int)apiVersion);
+                compiledScript = temp.AssemblyBytes;
+            }
+            catch (Exception e)
+            {
+                Logger.LogError("Retrieval failed jit comp launched:" + e.ToString());
+                await CompileScript(scriptId, await GetRunningApiVersion());
+                //try again, if fails again we catch error outside
+                var temp = await Db.GetCompiledScripCache(scriptId, (int)apiVersion);
+                compiledScript = temp.AssemblyBytes;
+            }
+
+            //possibly add a null check for compiledScript
+            // ScriptExecutor executor = new ScriptExecutor();
+            object result = Executor.RunScriptExecution<object>(compiledScript!, context);  //returns either bool or action result todo maybe add checks if thats the case but normally should be
+            return result;
+        }
+        catch (Exception e)
+        {
+            Logger.LogError(e.ToString());
+            throw;
+        }
+    }
+
+    #endregion
+
+    #region Cache Management
+
+    // Retrieves compiled assembly bytes from cache
+    // public async Task<byte[]> GetCompiledCache(Guid scriptId, int? currentApiVersion = null)
+    public async Task<ScriptCompiledCache> GetCompiledCache(Guid scriptId, int? currentApiVersion = null)
+    {
+        Logger.LogTrace("Entered {MethodName} in {ClassName} with scriptId: {ScriptId}.", nameof(GetCompiledCache), nameof(ScriptManagerFacade), scriptId);
+        if (currentApiVersion == null)
+        {
+            currentApiVersion = await GetRunningApiVersion();
+        }
+        try
+        {
+            var temp = await Db.GetCompiledScripCache(scriptId, (int)currentApiVersion);
+            // byte[]? compiledScript = temp.AssemblyBytes;
+            return temp;
+            // return compiledScript!;
+        }
+        catch (Exception e)
+        {
+            Logger.LogError(e.ToString());
+            throw new FacadeException(e.ToString(), e);
+        }
+
+    }
+
+    // Removes all compiled versions of a script
+    public async Task ClearScriptCache(Guid scriptId)
+    {
+        Logger.LogTrace("Entered {MethodName} in {ClassName} with scriptId: {ScriptId}.", nameof(ClearScriptCache), nameof(ScriptManagerFacade), scriptId);
+        await Db.ClearScriptCache(scriptId);
+    }
+
+    public async Task DeleteScriptCache(Guid id, int ApiVersion)
+    {
+        Logger.LogTrace("Entered {MethodName} in {ClassName} with ApiVersion: {ScriptId}.", nameof(DeleteScriptCache), nameof(ScriptManagerFacade), ApiVersion);
+        await Db.DeleteScriptCache(id, ApiVersion);
+    }
+
+    public async Task<List<ScriptCompiledCache>> GetAllCompiledScriptCaches()
+    {
+        return await Db.GetAllCompiledScriptCaches();
+    }
+
+    // Removes all compiled caches (maintenance operation)
+    public async Task ClearAllCaches()
+    {
+        Logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(ClearAllCaches), nameof(ScriptManagerFacade));
+
+        await Db.DeleteAllCachedScripts();
+    }
+
+    // Background job to precompile all compatible scripts
+    public async Task PrecompileForApiVersion()
+    {
+        Logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(PrecompileForApiVersion), nameof(ScriptManagerFacade));
+
+        int currentApiVersion = await GetRunningApiVersion();
+        await Db.AutomaticCompilationOnVersionUpdate(currentApiVersion);
+    }
+
+    public async Task EnsureDeletedCreated()
+    {
+        await Db.EnsureDeletedCreated();
+    }
+    #endregion
+
+    #region Version Management
+
+    // Returns list of currently active API versions from Ember instances
+    public async Task<List<int>> GetActiveApiVersions() //todo implement
+    {
+        Logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(GetActiveApiVersions), nameof(ScriptManagerFacade));
+
+        return await Db.GetActiveApiVersions(); //shit implementation not really functional in rl
+    }
+
+    public async Task<int> GetRunningApiVersion() //todo implement
+    {
+        Logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(GetRunningApiVersion), nameof(ScriptManagerFacade));
+
+        return Db.GetRecentApiVersion();
+    }
+
+    // Returns which API versions a script is compatible with
+    public async Task<int> GetScriptCompatibility(Guid scriptId)
+    {
+        Logger.LogTrace("Entered {MethodName} in {ClassName} with scriptId: {ScriptId}.", nameof(GetScriptCompatibility), nameof(ScriptManagerFacade), scriptId);
+
+        CustomerScript script = await Db.GetCustomerScript(scriptId);
+        return script.MinApiVersion;
+    }
+
+    // Validates if script can run on target version
+    public async Task<bool> CheckVersionCompatibility(Guid scriptId, int targetApiVersion)
+    {
+        Logger.LogTrace("Entered {MethodName} in {ClassName} with scriptId: {ScriptId}.", nameof(CheckVersionCompatibility), nameof(ScriptManagerFacade), scriptId);
+
+        CustomerScript script = await Db.GetCustomerScript(scriptId);
+        // int minV = script.MinApiVersion;
+        int minV = targetApiVersion;
+        var ls = await GetActiveApiVersions();
+        if (ls.Contains(minV))
+        {
+            return true;
+        }
+        return false;
+    }
+
+    // Registers a new Ember instance in the system
+    public void RegisterEmberInstance(Guid instanceId, string emberVersion, int apiVersion)
+    {
+        Logger.LogTrace("Entered {MethodName} in {ClassName} with instanceId: {InstanceId}.", nameof(RegisterEmberInstance), nameof(ScriptManagerFacade), instanceId);
+
+        // TODO
+    }
+
+    #endregion
+
+    #region Duplicate Detection & Cleanup
+
+    // Identifies duplicate scripts based on source code equivalence
+    public async Task<(List<Guid> scriptGUIDs, Dictionary<Guid, int> cacheGUIDs)> DetectDuplicates()
+    {
+        Logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(DetectDuplicates), nameof(ScriptManagerFacade));
+
+        var dupes = await Db.DetectDuplicates();
+        return (scriptGUIDs: dupes.scriptGUIDs, cacheGUIDs: dupes.cacheGUIDs);
+    }
+
+    // Removes duplicate scripts and orphaned caches
+    public async Task RemoveDuplicates()
+    {
+        Logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(RemoveDuplicates), nameof(ScriptManagerFacade));
+
+        int currentApiVersion = await GetRunningApiVersion();
+        await Db.RemoveDuplicates();   //automatically get dupes from function in dbhelper dont have to pass therefore
+    }
+
+    // Removes caches without associated scripts
+    public async Task CleanupOrphanedCaches()
+    {
+        Logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(CleanupOrphanedCaches), nameof(ScriptManagerFacade));
+
+        int currentApiVersion = await GetRunningApiVersion();
+        await Db.AutomaticCompilationOnVersionUpdate(currentApiVersion);    //this also does this maybe implement real funcion later
+    }
+
+    #endregion
+
+    #region Monitoring & Diagnostics
+
+    // Returns execution logs and metrics
+    public void GetScriptExecutionHistory(Guid scriptId)
+    {
+        Logger.LogTrace("Entered {MethodName} in {ClassName} with scriptId: {ScriptId}.", nameof(GetScriptExecutionHistory), nameof(ScriptManagerFacade), scriptId);
+
+        // TODO
+    }
+
+    // Returns compilation success/failure rates and performance metrics
+    public void GetCompilationStatistics()
+    {
+        Logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(GetCompilationStatistics), nameof(ScriptManagerFacade));
+
+        // TODO
+    }
+
+    // Validates database connectivity, API version consistency, and system state
+    public async Task HealthCheck()
+    {
+        Logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(HealthCheck), nameof(ScriptManagerFacade));
+
+        // TODO
+        await Db.HealthCheck();
+    }
+
+    // Extracts className, baseTypeName, and version from script
+    public async Task<string> GetScriptMetadata(Guid scriptId)
+    {
+        Logger.LogTrace("Entered {MethodName} in {ClassName} with scriptId: {ScriptId}.", nameof(GetScriptMetadata), nameof(ScriptManagerFacade), scriptId);
+
+        CustomerScript script = await Db.GetCustomerScript(scriptId, includeCaches: true);
+        string str = "Metadata for script: " + script.ToString();
+        return str;
+    }
+
+    public async Task<Dictionary<int, List<ScriptCompiledCache>>> GetCachesForEachApiVersion()
+    {
+        return await Db.GetCachesForEachApiVersion();
+    }
+
+    public string GetUserName()
+    {
+        Logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(GetUserName), nameof(ScriptManagerFacade));
+
+        // return UsefulMethods.GetUserName();
+        return "Gilles";
+    }
+
+    #endregion
+
+
+}
+</file>
+
+</files>

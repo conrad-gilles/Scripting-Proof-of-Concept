@@ -1,0 +1,12 @@
+﻿{"@t":"2026-03-09T13:56:36.0096100Z","@mt":"Sandbox launched.","@l":"Debug"}
+{"@t":"2026-03-09T13:56:36.1446593Z","@mt":"Entered {MethodName} in {ClassName}.","@l":"Debug","MethodName":"GetEmberApiVersion","ClassName":"EmberMethods"}
+{"@t":"2026-03-09T13:56:36.2376989Z","@mt":"Entered {MethodName} in {ClassName}.","@l":"Verbose","MethodName":"GetRunningApiVersion","ClassName":"ScriptManagerFacade","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-03-09T13:56:36.2392277Z","@mt":"Entered {MethodName} in {ClassName}.","@l":"Verbose","MethodName":"GetRecentApiVersion","ClassName":"DbHelper","SourceContext":"Ember.Scripting.DbHelper"}
+{"@t":"2026-03-09T13:56:36.2403882Z","@mt":"Entered {MethodName} in {ClassName}.","@l":"Verbose","MethodName":"ListAllStoredSourceCodes","ClassName":"EmberMethods"}
+{"@t":"2026-03-09T13:56:36.2409045Z","@mt":"Entered {MethodName} in {ClassName}.","@l":"Verbose","MethodName":"ListScripts","ClassName":"ScriptManagerFacade","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-03-09T13:56:36.2432781Z","@mt":"Entered {MethodName} in {ClassName}.","@l":"Verbose","MethodName":"GetAllCustomerScripts","ClassName":"DbHelper","SourceContext":"Ember.Scripting.DbHelper"}
+{"@t":"2026-03-09T13:56:36.5452249Z","@mt":"Entered {MethodName} in {ClassName}.","@l":"Verbose","MethodName":"PrecompileForApiVersion","ClassName":"ScriptManagerFacade","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-03-09T13:56:36.5455970Z","@mt":"Entered {MethodName} in {ClassName}.","@l":"Verbose","MethodName":"GetRunningApiVersion","ClassName":"ScriptManagerFacade","SourceContext":"Ember.Scripting.ScriptManagerFacade"}
+{"@t":"2026-03-09T13:56:36.5456405Z","@mt":"Entered {MethodName} in {ClassName}.","@l":"Verbose","MethodName":"GetRecentApiVersion","ClassName":"DbHelper","SourceContext":"Ember.Scripting.DbHelper"}
+{"@t":"2026-03-09T13:56:36.5465628Z","@mt":"Entered {MethodName} in {ClassName} with currentApiVersion: {ApiVersion}.","@l":"Verbose","MethodName":"AutomaticCompilationOnVersionUpdate","ClassName":"DbHelper","ApiVersion":6,"SourceContext":"Ember.Scripting.DbHelper"}
+{"@t":"2026-03-09T13:56:36.5468234Z","@mt":"Entered {MethodName} in {ClassName}.","@l":"Verbose","MethodName":"GetAllCustomerScripts","ClassName":"DbHelper","SourceContext":"Ember.Scripting.DbHelper"}

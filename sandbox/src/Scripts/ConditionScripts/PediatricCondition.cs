@@ -3,15 +3,16 @@
 using Ember.Scripting;
 using System;   //todo this is possible to default in compiler
 using System.Threading.Tasks;
-using System.Collections.Generic;   //todo same for them
+using System.Collections.Generic;
+using GeneratorScriptsGenericSimple;   //todo same for them
 // [ScriptMetadata(MinApiVersion = 2)]
 // namespace MyCustomScripts //todo change get rid idk
 // {
 
-public class PediatricCondition : IGeneratorConditionScript<IGeneratorReadOnlyContext.IGeneratorContext>
+public class PediatricCondition : IGeneratorConditionScript<IGeneratorReadOnlyContextV1.IGeneratorContext>
 {
 
-    public async Task<bool> EvaluateAsync(IGeneratorReadOnlyContext.IGeneratorContext context)
+    public async Task<bool> EvaluateAsync(IGeneratorReadOnlyContextV1.IGeneratorContext context)
     {
         if (context.Patient.DateOfBirth.HasValue)
         {

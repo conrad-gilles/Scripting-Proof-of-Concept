@@ -2,6 +2,7 @@ using System;   //todo this is possible to default in compiler
 using System.Threading.Tasks;
 using System.Collections.Generic;   //todo same for them
 using Ember.Scripting;
+using GeneratorScriptsV3;
 
 // public class AddPediatricTestsV3 : IGeneratorActionScript<IGeneratorContext_V3, ActionResultV3NoInheritance>
 // {
@@ -29,10 +30,10 @@ using Ember.Scripting;
 //     }
 // }
 
-public class AddPediatricTestsV3 : IGeneratorActionScriptV3
+public class AddPediatricTestsV4 : IGeneratorActionScriptV3
 {
     // public async Task<ActionResult> ExecuteAsync(IGeneratorContext context)
-    public async Task<ActionResultV3NoInheritance> ExecuteAsync(IGeneratorContext_V3.IGeneratorContext context)
+    public async Task<ActionResultV3NoInheritance> ExecuteAsync(IGeneratorContext_V4.IGeneratorContext context)
     {
         context.Logger.Info("Adding pediatric standard tests");
 

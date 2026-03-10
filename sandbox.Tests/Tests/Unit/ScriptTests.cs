@@ -85,7 +85,7 @@ public class ScriptTests
         await facade!.EnsureDeletedCreated();
         Guid id = await facade!.CreateScript(sourceCodeActionV1!);
         CustomerScript retrievedScript = await facade.GetScript(id);
-        var context = em!.GetTestingContext<GeneratorContextNoInherVaccine.GeneratorContext>(justForTesting: retrievedScript);
+        var context = em!.GetTestingContext<GeneratorContextNoInherVaccineV5.GeneratorContext>(justForTesting: retrievedScript);
         object resultBeforeUpgrade = await facade.ExecuteScriptById(id, context);
         ActionResultV3NoInheritance result = EmberMethods.UpgradeActionResult(resultBeforeUpgrade);
         string shouldReturn = ActionResultVersionSpecific + "Pediatric tests added";
@@ -100,7 +100,7 @@ public class ScriptTests
     {
         Guid id = await facade!.CreateScript(sourceCodeActionV2!);
         CustomerScript retrievedScript = await facade.GetScript(id);
-        var context = em!.GetTestingContext<GeneratorContextNoInherVaccine.GeneratorContext>(justForTesting: retrievedScript);
+        var context = em!.GetTestingContext<GeneratorContextNoInherVaccineV5.GeneratorContext>(justForTesting: retrievedScript);
         object resultBeforeUpgrade = await facade.ExecuteScriptById(id, context);
         ActionResultV3NoInheritance result = EmberMethods.UpgradeActionResult(resultBeforeUpgrade);
         string shouldReturn = ActionResultVersionSpecific + "Pediatric tests added";
@@ -115,7 +115,7 @@ public class ScriptTests
     {
         Guid id = await facade!.CreateScript(sourceCodeActionV3!);
         CustomerScript retrievedScript = await facade.GetScript(id);
-        var context = em!.GetTestingContext<GeneratorContextNoInherVaccine.GeneratorContext>(justForTesting: retrievedScript);
+        var context = em!.GetTestingContext<GeneratorContextNoInherVaccineV5.GeneratorContext>(justForTesting: retrievedScript);
         object resultBeforeUpgrade = await facade.ExecuteScriptById(id, context);
         ActionResultV3NoInheritance result = EmberMethods.UpgradeActionResult(resultBeforeUpgrade);
         string shouldReturn = ActionResultVersionSpecific + "Pediatric tests added V3";
@@ -130,7 +130,7 @@ public class ScriptTests
     {
         Guid id = await facade!.CreateScript(sourceCodeVaccineAction!);
         CustomerScript retrievedScript = await facade.GetScript(id);
-        var context = em!.GetTestingContext<GeneratorContextNoInherVaccine.GeneratorContext>(justForTesting: retrievedScript);
+        var context = em!.GetTestingContext<GeneratorContextNoInherVaccineV5.GeneratorContext>(justForTesting: retrievedScript);
         object result = await facade.ExecuteScriptById(id, context);
         string shouldReturn = ActionResultVersionSpecific + "Polio Vaccine added";
         Assert.IsInstanceOfType(result, typeof(ActionResultBaseClass));
@@ -145,7 +145,7 @@ public class ScriptTests
     {
         Guid id = await facade!.CreateScript(sourceCodePedia!);
         CustomerScript retrievedScript = await facade.GetScript(id);
-        var context = em!.GetTestingContext<GeneratorContextNoInherVaccine.GeneratorContext>(justForTesting: retrievedScript);
+        var context = em!.GetTestingContext<GeneratorContextNoInherVaccineV5.GeneratorContext>(justForTesting: retrievedScript);
         object result = await facade.ExecuteScriptById(id, context);
         string shouldReturn = "True";
         Assert.IsInstanceOfType(result, typeof(bool));
@@ -184,7 +184,7 @@ public class ScriptTests
         DateTime? beforeUpdateCA = retrievedScript.CreatedAt;
         DateTime? beforeUpdateMA = retrievedScript.ModifiedAt;
 
-        var context = em!.GetTestingContext<GeneratorContextNoInherVaccine.GeneratorContext>(justForTesting: retrievedScript);
+        var context = em!.GetTestingContext<GeneratorContextNoInherVaccineV5.GeneratorContext>(justForTesting: retrievedScript);
         object result = await facade.ExecuteScriptById(id, context);
 
         await Task.Delay(2000);

@@ -118,36 +118,57 @@ internal class ScriptCompiler
             var baseTypeName = myClassSymbol!.BaseType!.Name;
             var className = myClassSymbol.ToString();
             var parentSymbol = myClassSymbol!.Interfaces.FirstOrDefault() ?? myClassSymbol.BaseType;
-            int versionInt;
+            int? versionInt = null;
+            string implementedIntrf = parentSymbol.Name;
 
-            string versionString = "";
-            string reversed = new string(parentSymbol.Name.Reverse().ToArray());
-            for (int i = 0; i < reversed.Length; i++)  //gets last int in version
+            string? contextParameterTypeName = null;
+
+            var executeMethod = myClass.DescendantNodes()
+                                       .OfType<MethodDeclarationSyntax>()
+                                       .FirstOrDefault(m => m.Identifier.Text == "ExecuteAsync" || m.Identifier.Text == "EvaluateAsync");
+
+            if (executeMethod != null)
             {
-                if (char.IsDigit(reversed[i]))
+                var firstParameter = executeMethod.ParameterList.Parameters.FirstOrDefault();
+                if (firstParameter != null && firstParameter.Type != null)
                 {
-                    versionString = versionString + reversed[i];
-
-                    int nextIndex = i + 1;
-                    while (char.IsDigit(reversed[nextIndex]) && nextIndex < reversed.Length)
-                    {
-                        versionString = versionString + reversed[nextIndex];
-                        nextIndex++;
-                    }
-                    break;
+                    contextParameterTypeName = firstParameter.Type.ToString();
                 }
-
-            }
-            versionString = new string(versionString.Reverse().ToArray());
-            try
-            {
-                versionInt = int.Parse(versionString.ToString());
-            }
-            catch (Exception)
-            {
-                versionInt = 1;
             }
 
+            Console.WriteLine("Extracted Context Parameter Type: " + contextParameterTypeName);
+            Logger.LogTrace("Extracted Context Parameter Type: " + contextParameterTypeName);
+
+            Dictionary<int, Type> activeContexts = ContextVersionScanner.GetInterfaceDictionary();
+            Console.WriteLine("Start of dict String:");
+            foreach (var pair in activeContexts)
+            {
+                Console.WriteLine("Key: " + pair.Key + ", Value: " + pair.Value);
+            }
+
+            foreach (var ctx in activeContexts)
+            {
+                string dictTypeFullName = ctx.Value.FullName ?? "";
+
+                if (ctx.Value.FullName == contextParameterTypeName)
+                {
+                    if (versionInt != null)
+                    {
+                        throw new Exception("Context name occured more than once for some reason that should not happen.");
+                    }
+                    versionInt = ctx.Key;
+                }
+            }
+
+            if (versionInt == null)
+            {
+                throw new Exception("Version int was null in BasicValidation");
+            }
+
+            if (versionInt == null)
+            {
+                throw new ValidationBeforeCompilationException("Version Int was not assigned probably because the foeach loop faliled maybe because the Context name of the script was not in the dictionary.");
+            }
             if (baseTypeName == null || className == null)
             {
                 Logger.LogError("BaseTypeName or classname null in BasicValidationBeforeCompiling.");
@@ -158,7 +179,7 @@ internal class ScriptCompiler
             Logger.LogTrace("Version Int = " + versionInt);
 
             ValidateNamespaceUsage(tree, model);
-            return (className, baseTypeName, versionInt);
+            return (className, baseTypeName, (int)versionInt!);
         }
         catch (Exception e)
         {

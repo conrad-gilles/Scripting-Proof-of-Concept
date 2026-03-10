@@ -1,0 +1,139 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using System.Runtime.CompilerServices;
+
+namespace Ember.Scripting;
+
+public static class ContextVersionScanner
+{
+    // Moved exactly as it was from ScriptFactory
+    public static Dictionary<int, Type> GetClassDictionary()
+    {
+        Type baseType = typeof(Ember.Scripting.GeneratorContext);
+        return GetBaseTypeDictionary(baseType);
+    }
+
+    public static Dictionary<int, Type> GetInterfaceDictionary()
+    {
+        Type baseType = typeof(Ember.Scripting.IGeneratorBaseInterface);
+        return GetBaseTypeDictionaryIntrfc(baseType);
+    }
+
+    private static Dictionary<int, Type> GetBaseTypeDictionary(Type baseType)
+    {
+        Dictionary<int, Type> contextVersionMap = new();
+        var subClasses = AppDomain.CurrentDomain.GetAssemblies()
+                   .SelectMany(assembly => assembly.GetTypes())
+                   .Where(t => t.IsClass && !t.IsAbstract && t.IsSubclassOf(baseType))
+                   .ToList();
+
+        for (int i = 0; i < subClasses.Count(); i++)
+        {
+            Type currentType = subClasses[i];
+            var uninitializedContext = (Ember.Scripting.GeneratorContext)RuntimeHelpers.GetUninitializedObject(currentType);
+
+            int version = uninitializedContext.Version;
+
+            if (contextVersionMap.Values.Contains(currentType))
+            {
+                throw new Exception("Type was more than once in the assembly probably with more than 1 Version property");
+            }
+            if (contextVersionMap.ContainsKey(version))
+            {
+                throw new Exception("Api version int more than once in the assembly should not happen.");
+            }
+            contextVersionMap.Add(version, currentType);
+        }
+        return contextVersionMap;
+    }
+
+    // private static Dictionary<int, Type> GetBaseTypeDictionaryIntrfc(Type baseType)
+    // {
+    //     Dictionary<int, Type> contextVersionMap = new();
+
+    //     var subClasses = AppDomain.CurrentDomain.GetAssemblies()
+    //                 .SelectMany(assembly => assembly.GetTypes())
+    //                 .Where(t => t.IsInterface && baseType.IsAssignableFrom(t) && t != baseType)
+    //                 .ToList();
+
+    //     for (int i = 0; i < subClasses.Count(); i++)
+    //     {
+    //         Type currentType = subClasses[i];
+
+    //         // Default version is 1 for ReadOnlyContext / Context_V1
+    //         int version = 1;
+
+    //         string namespaceName = currentType.Namespace ?? "";
+    //         string fullName = currentType.FullName ?? "";
+
+    //         // Safely parse the version integer from the Namespace string (e.g. "IGeneratorContext_V2")
+    //         if (namespaceName.Contains("_V"))
+    //         {
+    //             // Find the index of "_V"
+    //             int vIndex = namespaceName.IndexOf("_V") + 2;
+
+    //             // Extract the numbers after "_V"
+    //             string versionString = new string(namespaceName.Substring(vIndex).TakeWhile(char.IsDigit).ToArray());
+
+    //             if (!string.IsNullOrEmpty(versionString))
+    //             {
+    //                 version = int.Parse(versionString);
+    //             }
+    //         }
+    //         // For V3 or V4 if you used direct naming like 'GeneratorContextV3'
+    //         else if (fullName.Contains("V3")) version = 4; // Or whatever ID maps to V3
+    //         else if (fullName.Contains("V4")) version = 5;
+
+    //         // Prevent duplicate Keys/Values
+    //         if (!contextVersionMap.Values.Contains(currentType) && !contextVersionMap.ContainsKey(version))
+    //         {
+    //             contextVersionMap.Add(version, currentType);
+    //         }
+    //     }
+
+    //     return contextVersionMap;
+    // }
+    private static Dictionary<int, Type> GetBaseTypeDictionaryIntrfc(Type baseType)
+    {
+        Dictionary<int, Type> contextVersionMap = new();
+
+        var subClasses = AppDomain.CurrentDomain.GetAssemblies()
+            .SelectMany(assembly => assembly.GetTypes())
+            .Where(t => t.IsInterface && baseType.IsAssignableFrom(t) && t != baseType)
+            .ToList();
+
+        for (int i = 0; i < subClasses.Count(); i++)
+        {
+            Type currentType = subClasses[i];
+
+            // 1. Default version is 1 for ReadOnlyContext / Context_V1
+            int version = 1;
+
+            // 2. Look for a STATIC property named IVersion
+            PropertyInfo? versionProperty = currentType.GetProperty("IVersion", BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy);
+
+            // 3. If the property exists, extract its value
+            if (versionProperty != null)
+            {
+                if (versionProperty.GetValue(null) is int parsedVersion)
+                {
+                    version = parsedVersion;
+                }
+            }
+
+            // 4. Prevent duplicate Keys/Values
+            if (!contextVersionMap.Values.Contains(currentType) && !contextVersionMap.ContainsKey(version))
+            {
+                contextVersionMap.Add(version, currentType);
+            }
+        }
+
+        return contextVersionMap;
+    }
+
+
+
+
+}
