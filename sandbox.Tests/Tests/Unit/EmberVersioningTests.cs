@@ -82,7 +82,7 @@ public class EmberVersioningTests
         await ExecuteEachScript(facade, em);
         int apiVersionInsideFacade = await facade.GetRunningApiVersion();
         Assert.IsTrue(apiVersionInsideFacade == v);
-        Assert.IsTrue(apiVersionInsideFacade == 6);
+        Assert.IsTrue(apiVersionInsideFacade == 5);
 
         facade = EmberMethods.GetNewScriptManagerInstance(1);
         em = new EmberMethods(facade);
@@ -155,7 +155,7 @@ public class EmberVersioningTests
         }
 
         Assert.IsTrue(apiVersionInsideFacade == v);
-        Assert.IsTrue(apiVersionInsideFacade == 6);
+        Assert.IsTrue(apiVersionInsideFacade == 5);
 
         facade = EmberMethods.GetNewScriptManagerInstance(1);
         em = new EmberMethods(facade);
@@ -174,7 +174,7 @@ public class EmberVersioningTests
             }
         }
         Assert.IsTrue(versionDict2[1].Count() == 4);
-        Assert.IsTrue(versionDict2[6].Count() == 4);
+        Assert.IsTrue(versionDict2[5].Count() == 4);
 
     }
 

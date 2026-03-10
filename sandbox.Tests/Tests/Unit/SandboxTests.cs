@@ -85,10 +85,10 @@ public class SanboxTests
 
         Assert.IsTrue(ctx.GetType() == typeof(RWContextV2.GeneratorContext));
 
-        facade = EmberMethods.GetNewScriptManagerInstance();
+        facade = EmberMethods.GetNewScriptManagerInstance(6);
         sf = new ScriptFactory(facade);
 
-        Exception ex = await Assert.ThrowsExceptionAsync<Exception>(async () =>
+        Exception ex = await Assert.ThrowsExceptionAsync<Exception>(async () =>  //todo check this one
          {
              ctx = await sf.CreateContextForApiV();
          });
@@ -227,5 +227,37 @@ public class SanboxTests
             sf = new ScriptFactory(facade);
             await facade.ExecuteScriptById(id, await sf.CreateContextForApiV(valResult.versionInt));
         }
+    }
+
+    [TestMethod]
+    public async Task CreateContextByDowngradeTest()
+    {
+        Guid id;
+        ScriptFactory sf;
+        (string className, string baseTypeName, int versionInt) valResult;
+        object result;
+        ActionResultV3NoInheritance ar;
+        string src;
+
+        src = sourceCodeVaccineAction!;
+        facade = EmberMethods.GetNewScriptManagerInstance();
+        valResult = facade.BasicValidationBeforeCompiling(src!);
+        id = await facade.CreateScript(src!);
+
+        sf = new ScriptFactory(facade);
+        result = await facade.ExecuteScriptById(id, await sf.CreateContextByDowngrade(src!));
+        ar = EmberMethods.UpgradeActionResult(result);
+        Console.WriteLine(ar.ToString());
+
+        src = sourceCodeActionV3!;
+        valResult = facade.BasicValidationBeforeCompiling(src!);
+        id = await facade.CreateScript(src!);
+
+        sf = new ScriptFactory(facade);
+        result = await facade.ExecuteScriptById(id, await sf.CreateContextByDowngrade(src!));
+        ar = EmberMethods.UpgradeActionResult(result);
+        Console.WriteLine(ar.ToString());
+
+        // Assert.IsTrue(false);
     }
 }

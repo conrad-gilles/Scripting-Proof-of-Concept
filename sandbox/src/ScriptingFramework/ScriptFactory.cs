@@ -131,6 +131,51 @@ public class ScriptFactory
         //     throw new Exception(message: "UpgradeActionResult in ScriptExecutor failed.");
         // }
     }
+    public async Task<GeneratorContext> CreateContextByDowngrade(string sourceCode)
+    {
+        var vali = ScriptManager.BasicValidationBeforeCompiling(sourceCode);
+        int? apiV = null;
+        if (apiV == null)
+        {
+            apiV = await ScriptManager.GetRunningApiVersion();
+        }
+        Type recentType;
+        Dictionary<int, Type> contextVersionMap = ContextVersionScanner.GetClassDictionary();
+
+        if (contextVersionMap.Keys.Contains((int)apiV) == false)
+        {
+            throw new Exception("No Context class defined in " + nameof(contextVersionMap) + " for the passed API version.");
+            // might be better to instead return latest version?
+            // recentType = contextVersionMap.Last().Value;
+        }
+        recentType = contextVersionMap[(int)apiV];
+        Type desiredType = contextVersionMap[vali.versionInt];
+        var objs = ScriptObjects();
+        GeneratorContext context = await CreateContextForApiV();
+        int iterations = 0;
+        int maxIterations = ContextVersionScanner.GetClassDictionary().Keys.Count() + 3;
+        while (recentType != desiredType && iterations <= maxIterations)
+        {
+            if (recentType == typeof(GeneratorContextNoInherVaccineV5.GeneratorContext))
+            {
+                try
+                {
+                    context = context.Downgrade();
+                    recentType = context.GetType();
+                }
+                catch (Exception e)
+                {
+                    throw new Exception("CreateContextByDowngrade failed in while.", e);
+                }
+            }
+            if (iterations > maxIterations)
+            {
+                throw new Exception("Somethign went wrong trying to downgrade the context");
+            }
+            iterations++;
+        }
+        return (GeneratorContext)context;
+    }
 
     private (LabOrder labOrder, Patient patient, ConsoleLogger logger, DataAccess testDataAccess, Vaccine vaccine) ScriptObjects()
     {

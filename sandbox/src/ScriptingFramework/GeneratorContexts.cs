@@ -87,6 +87,12 @@ namespace ReadOnlyContextV1
         PatientInterface IGeneratorReadOnlyContextV1.IGeneratorContext.Patient => patient;
         ConsoleLoggerInterface IGeneratorReadOnlyContextV1.IGeneratorContext.Logger => logger;
         DataAccessInterface IGeneratorReadOnlyContextV1.IGeneratorContext.Data => data;
+
+        public override Ember.Scripting.GeneratorContext Downgrade()
+        {
+            // return null;
+            throw new Exception("Can not instaniate the abstract base class.");
+        }
     }
 }
 
@@ -122,6 +128,11 @@ namespace RWContextV2
         public DataAccessInterface Data => data;
 
         ILabOrderInterface IGeneratorReadOnlyContextV1.IGeneratorContext.LabOrder => LabOrder;
+
+        public override Ember.Scripting.GeneratorContext Downgrade()
+        {
+            return null;
+        }
     }
 }
 
@@ -149,7 +160,10 @@ namespace GeneratorContextV3
 
         }
         ILabOrderInterfaceV2 IGeneratorContext_V3.IGeneratorContext.LabOrder => labOrderV2;
-
+        public override Ember.Scripting.GeneratorContext Downgrade()
+        {
+            return null;
+        }
     }
 }
 
@@ -178,6 +192,10 @@ namespace GeneratorContextV4
         }
         ILabOrderInterfaceV3 IGeneratorContext_V4.IGeneratorContext.LabOrder => labOrderV3;
 
+        public override Ember.Scripting.GeneratorContext Downgrade()
+        {
+            return null;
+        }
     }
 }
 
@@ -199,6 +217,22 @@ namespace GeneratorContextNoInherVaccineV5
         ILabOrderInterfaceV4NoInheritence IGeneratorContextNoInheritance_V5.IGeneratorContext.LabOrder => LabOrder;
 
         IVaccineInterface IGeneratorContextNoInheritance_V5.IGeneratorContext.Vaccine => Vaccine;
+
+        public override Ember.Scripting.GeneratorContext Downgrade()
+        {
+            try
+            {
+                ILabOrderInterfaceV3 labOrderV3 = (ILabOrderInterfaceV3)LabOrder;
+                Patient patient = new Patient("1", "Default", "Default", new DateTime(2010, 6, 1, 7, 47, 0), "M");
+                ConsoleLogger logger = new ConsoleLogger();
+                DataAccess data = new DataAccess();
+                return new GeneratorContextV4.GeneratorContext(labOrderV3!, patient!, logger!, data!);
+            }
+            catch (Exception e)
+            {
+                throw new Exception("Could not downgrade your Context to the previous version.", e);
+            }
+        }
     }
 }
 

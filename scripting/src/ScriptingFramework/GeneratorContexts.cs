@@ -12,4 +12,6 @@ public interface IGeneratorBaseInterface
 public abstract class GeneratorContext
 {
     public abstract int Version { get; }
+
+    public abstract GeneratorContext Downgrade();
 }

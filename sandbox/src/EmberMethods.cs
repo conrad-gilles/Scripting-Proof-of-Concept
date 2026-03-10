@@ -23,7 +23,7 @@ public class EmberMethods
             return (int)testingDiffrentVersion;
         }
 
-        return 6;
+        return 5;
     }
 
     public static ISccriptManagerDeleteAfter GetNewScriptManagerInstance(int? apiVersion = null)
