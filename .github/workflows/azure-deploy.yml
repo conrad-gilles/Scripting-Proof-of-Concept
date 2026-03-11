@@ -3,7 +3,7 @@ name: Build and deploy ASP.Net Core app to Azure Web App
 on:
   push:
     branches:
-      - main # Change this if your main branch is named 'master'
+      - main
   workflow_dispatch:
 
 jobs:
@@ -16,17 +16,18 @@ jobs:
       - name: Set up .NET Core
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '9.x' # Match your project's .NET version
+          dotnet-version: '9.x' 
 
       - name: Build and Publish
         run: |
           dotnet restore ember-scripting.sln
           dotnet build ember-scripting.sln --configuration Release
-          dotnet publish BlazorUI/BlazorUI.csproj -c Release -o ${{env.DOTNET_ROOT}}/myapp
+          dotnet publish BlazorUI/BlazorUI.csproj -c Release -o ./publish_output
 
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
         with:
-          app-name: 'Scripting-POC-Conrad-Gilles' # MUST match the name you chose in Step 1
+          app-name: 'Scripting-POC-Conrad-Gilles'
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-          package: ${{env.DOTNET_ROOT}}/myapp
+          package: ./publish_output
+          startup-command: 'dotnet BlazorUI.dll'
