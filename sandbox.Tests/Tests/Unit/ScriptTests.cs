@@ -23,21 +23,7 @@ public class ScriptTests
     public
      void Setup()
     {
-        var logger = new LoggerForScripting();
-        Log.Debug("Sandbox launched.");
-
-        var services = new ServiceCollection();
-        services.AddLogging(builder =>
-        {
-            // Assuming you use Serilog, this forwards standard MS Logging to Serilog
-            builder.AddSerilog(dispose: true);
-        });
-
-        ScriptingServiceCollectionExtensions.AddEmberScripting(services, EmberMethods.GetReferences(), EmberMethods.GetEmberApiVersion());
-
-        using var provider = services.BuildServiceProvider();
-
-        facade = provider.GetRequiredService<ISccriptManagerDeleteAfter>();
+        facade = EmberMethods.GetNewScriptManagerInstance();
         em = new EmberMethods(facade);
 
         ActionResultVersionSpecific = "[Message contains either failure or succes: ] ";

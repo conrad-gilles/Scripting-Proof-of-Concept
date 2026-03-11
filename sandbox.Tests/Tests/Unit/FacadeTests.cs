@@ -18,21 +18,7 @@ public class ScriptManagerFacadeTests
     [TestInitialize]
     public async Task Setup()
     {
-
-        var logger = new LoggerForScripting();
-        Log.Debug("Sandbox launched.");
-
-        var services = new ServiceCollection();
-        services.AddLogging(builder =>
-        {
-            builder.AddSerilog(dispose: true);
-        });
-
-        ScriptingServiceCollectionExtensions.AddEmberScripting(services, EmberMethods.GetReferences(), EmberMethods.GetEmberApiVersion());
-
-        using var provider = services.BuildServiceProvider();
-
-        facade = provider.GetRequiredService<ISccriptManagerDeleteAfter>();
+        facade = EmberMethods.GetNewScriptManagerInstance();
         em = new EmberMethods(facade);
 
         await facade.ClearAllCaches();

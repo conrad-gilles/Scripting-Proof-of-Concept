@@ -8,8 +8,6 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 [TestClass]
 public class SanboxTests
 {
-
-
     ISccriptManagerDeleteAfter? facade;
     // EmberMethods? em;
     string? ActionResultVersionSpecific;
