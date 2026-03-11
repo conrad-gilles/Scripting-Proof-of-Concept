@@ -38,7 +38,7 @@ public class ScriptTests
         CustomerScript retrievedScript = await facade.GetScript(id);
         var context = await em!.GetTestingContext<GeneratorContextNoInherVaccineV5.GeneratorContext>(justForTesting: retrievedScript);
         object resultBeforeUpgrade = await facade.ExecuteScriptById(id, context);
-        ActionResultV3NoInheritance result = EmberMethods.UpgradeActionResult(resultBeforeUpgrade);
+        ActionResultV3NoInheritance result = (ActionResultV3NoInheritance)EmberMethods.UpgradeActionResult(resultBeforeUpgrade);
         string shouldReturn = ActionResultVersionSpecific + "Pediatric tests added";
         Assert.IsInstanceOfType(result, typeof(ActionResultBaseClass));
         Assert.IsInstanceOfType(result, typeof(ActionResultV3NoInheritance));
@@ -53,7 +53,7 @@ public class ScriptTests
         CustomerScript retrievedScript = await facade.GetScript(id);
         var context = await em!.GetTestingContext<GeneratorContextNoInherVaccineV5.GeneratorContext>(justForTesting: retrievedScript);
         object resultBeforeUpgrade = await facade.ExecuteScriptById(id, context);
-        ActionResultV3NoInheritance result = EmberMethods.UpgradeActionResult(resultBeforeUpgrade);
+        ActionResultV3NoInheritance result = (ActionResultV3NoInheritance)EmberMethods.UpgradeActionResult(resultBeforeUpgrade);
         string shouldReturn = ActionResultVersionSpecific + "Pediatric tests added";
         Assert.IsInstanceOfType(result, typeof(ActionResultBaseClass));
         Assert.IsInstanceOfType(result, typeof(ActionResultV3NoInheritance));
@@ -68,7 +68,7 @@ public class ScriptTests
         CustomerScript retrievedScript = await facade.GetScript(id);
         var context = await em!.GetTestingContext<GeneratorContextNoInherVaccineV5.GeneratorContext>(justForTesting: retrievedScript);
         object resultBeforeUpgrade = await facade.ExecuteScriptById(id, context);
-        ActionResultV3NoInheritance result = EmberMethods.UpgradeActionResult(resultBeforeUpgrade);
+        ActionResultV3NoInheritance result = (ActionResultV3NoInheritance)EmberMethods.UpgradeActionResult(resultBeforeUpgrade);
         string shouldReturn = ActionResultVersionSpecific + "Pediatric tests added V3";
         Assert.IsInstanceOfType(result, typeof(ActionResultBaseClass));
         Assert.IsInstanceOfType(result, typeof(ActionResultV3NoInheritance));

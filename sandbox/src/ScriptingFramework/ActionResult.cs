@@ -1,5 +1,6 @@
 using Ember.Scripting;
 
+[MetaDataActionResult(version: 1)]
 public class ActionResult : ActionResultBaseClass
 {
     public bool IsSuccess { get; private set; }
@@ -29,7 +30,14 @@ public class ActionResult : ActionResultBaseClass
     {
         return IsSuccess ? $"[Success] {Message}" : $"[Error: {ErrorCode}] {Message}";
     }
+
+    public override ActionResultBaseClass Upgrade(ActionResultBaseClass actionResult)
+    {
+        throw new NotImplementedException(message: "This can not be implemented because and also should never be called since the verson below this one is abstract.");
+    }
 }
+
+[MetaDataActionResult(version: 2)]
 public class ActionResultV2 : ActionResult
 {
     public List<string> LoggedActions { get; private set; }
@@ -65,8 +73,21 @@ public class ActionResultV2 : ActionResult
         return new ActionResultV2(actionResult.IsSuccess, actionResult.Message, actionResult.ErrorCode, loggedActions);
         // return new ActionResultV2(isSuccess, message, errorCode, loggedActions);
     }
+
+    public override ActionResultBaseClass Upgrade(ActionResultBaseClass actionResult)
+    {
+        List<string> loggedActions = [];
+
+        if (actionResult is ActionResult)
+        {
+            return UpgradeV1((ActionResult)actionResult, loggedActions);
+        }
+        throw new ArgumentException("Provided action result is not an ActionResult (V1).");
+    }
 }
 
+
+[MetaDataActionResult(version: 3)]
 public class ActionResultV3NoInheritance : ActionResultBaseClass
 {
     public bool FailedOrNot { get; private set; }
@@ -107,6 +128,15 @@ public class ActionResultV3NoInheritance : ActionResultBaseClass
             tempMessage = tempMessage + actionResult.ErrorCode;
         }
         return new ActionResultV3NoInheritance(actionResult.IsSuccess, tempMessage);
+    }
+
+    public override ActionResultBaseClass Upgrade(ActionResultBaseClass actionResult)
+    {
+        if (actionResult is ActionResultV2)
+        {
+            return UpgradeV2((ActionResultV2)actionResult);
+        }
+        throw new ArgumentException("Provided action result is not an ActionResultV2.");
     }
 }
 

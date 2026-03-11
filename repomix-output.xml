@@ -32,7 +32,7 @@ The content is organized as follows:
 <notes>
 - Some files may have been excluded based on .gitignore rules and Repomix's configuration
 - Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
-- Only files matching these patterns are included: sandbox, scripting, sandbox.Tests
+- Only files matching these patterns are included: sandbox, sandbox.Tests, scripting
 - Files matching patterns in .gitignore are excluded
 - Files matching default ignore patterns are excluded
 - Files are sorted by Git change count (files with more changes are at the bottom)
@@ -43,13 +43,13 @@ The content is organized as follows:
 <directory_structure>
 sandbox.Tests/MSTestSettings.cs
 sandbox.Tests/sandbox.Tests.csproj
+sandbox.Tests/Tests/src/TestHelper.cs
 sandbox.Tests/Tests/TestAssemblyInit.cs
 sandbox.Tests/Tests/Unit/DbHelperTests.cs
 sandbox.Tests/Tests/Unit/EmberVersioningTests.cs
 sandbox.Tests/Tests/Unit/FacadeTests.cs
 sandbox.Tests/Tests/Unit/SandboxTests.cs
 sandbox.Tests/Tests/Unit/ScriptTests.cs
-sandbox.Tests/Tests/Unit/UpdateScriptTests.cs
 sandbox/docker-compose.yml
 sandbox/init.sql
 sandbox/logs/seq-offline-buffer-20260303.clef
@@ -74,15 +74,17 @@ sandbox/src/Scripts/ActionScripts/AddPediatricTestsV3.cs
 sandbox/src/Scripts/ActionScripts/VaccineScript.cs
 sandbox/src/Scripts/ConditionScripts/PediatricCondition.cs
 scripting/scripting.csproj
-scripting/src/CompilationAndExecution/ContextVersionScanner.cs
 scripting/src/CompilationAndExecution/ScriptCompiler.cs
 scripting/src/CompilationAndExecution/ScriptExecutor.cs
+scripting/src/CompilationAndExecution/VersionScanners/ActionResultVersionScanner.cs
+scripting/src/CompilationAndExecution/VersionScanners/ContextVersionScanner.cs
 scripting/src/DbFiles/CustomerScript.cs
 scripting/src/DbFiles/DbHelper.cs
 scripting/src/DbFiles/EmberInstances.cs
 scripting/src/DbFiles/MyContext.cs
 scripting/src/DbFiles/ScriptCompiledCache.cs
-scripting/src/Exceptions/Exceptions.cs
+scripting/src/ExceptionsAttributes/Attributes.cs
+scripting/src/ExceptionsAttributes/Exceptions.cs
 scripting/src/ScriptingFramework/ActionResult.cs
 scripting/src/ScriptingFramework/GeneratorContexts.cs
 scripting/src/ScriptingFramework/GeneratorScripts.cs
@@ -96,8 +98,263 @@ scripting/src/ScriptManager.cs/ScriptManager.cs
 <files>
 This section contains the contents of the repository's files.
 
+<file path="scripting/src/CompilationAndExecution/VersionScanners/ActionResultVersionScanner.cs">
+using System.Net.Http.Headers;
+using System.Reflection;
+
+namespace Ember.Scripting;
+
+public static class ActionResultVersionScanner
+{
+    public static Dictionary<int, Type> GetClassDictionary()
+    {
+        Type baseType = typeof(Ember.Scripting.ActionResultBaseClass);
+        return GetBaseTypeDictionary(baseType);
+    }
+
+    private static Dictionary<int, Type> GetBaseTypeDictionary(Type baseType)
+    {
+        Dictionary<int, Type> contextVersionMap = new();
+        var subClasses = AppDomain.CurrentDomain.GetAssemblies()
+                   .SelectMany(assembly => assembly.GetTypes())
+                   .Where(t => t.IsClass && !t.IsAbstract && t.IsSubclassOf(baseType))
+                   .ToList();
+
+        for (int i = 0; i < subClasses.Count(); i++)
+        {
+            Type currentType = subClasses[i];
+            var uninitializedContext = (Ember.Scripting.ActionResultBaseClass)System.Runtime.CompilerServices.RuntimeHelpers.GetUninitializedObject(currentType);
+            TypeInfo typeInfo = uninitializedContext.GetType().GetTypeInfo();
+
+            var metaDataAttribute = typeInfo.GetCustomAttribute<MetaDataActionResult>();
+            if (metaDataAttribute == null)
+            {
+                throw new Exception(message: "MetdaDataAttribute was mull, which means version would have been null.");
+            }
+            int version = metaDataAttribute.Version;
+
+            if (contextVersionMap.Values.Contains(currentType))
+            {
+                throw new Exception("Type was more than once in the assembly probably with more than 1 Version property");
+            }
+            if (contextVersionMap.ContainsKey(version))
+            {
+                throw new Exception("Api version int more than once in the assembly should not happen.");
+            }
+            contextVersionMap.Add(version, currentType);
+        }
+        return contextVersionMap;
+    }
+}
+</file>
+
+<file path="scripting/src/CompilationAndExecution/VersionScanners/ContextVersionScanner.cs">
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using System.Runtime.CompilerServices;
+
+namespace Ember.Scripting;
+
+public static class ContextVersionScanner
+{
+    // Moved exactly as it was from ScriptFactory
+    public static Dictionary<int, Type> GetClassDictionary()
+    {
+        Type baseType = typeof(Ember.Scripting.GeneratorContext);
+        return GetBaseTypeDictionary(baseType);
+    }
+
+    public static Dictionary<int, Type> GetInterfaceDictionary()
+    {
+        Type baseType = typeof(Ember.Scripting.IGeneratorBaseInterface);
+        return GetBaseTypeDictionaryIntrfc(baseType);
+    }
+
+    private static Dictionary<int, Type> GetBaseTypeDictionary(Type baseType)
+    {
+        Dictionary<int, Type> contextVersionMap = new();
+        var subClasses = AppDomain.CurrentDomain.GetAssemblies()
+                   .SelectMany(assembly => assembly.GetTypes())
+                   .Where(t => t.IsClass && !t.IsAbstract && t.IsSubclassOf(baseType))
+                   .ToList();
+
+        for (int i = 0; i < subClasses.Count(); i++)
+        {
+            Type currentType = subClasses[i];
+            var uninitializedContext = (Ember.Scripting.GeneratorContext)RuntimeHelpers.GetUninitializedObject(currentType);
+
+            int version = uninitializedContext.Version;
+
+            if (contextVersionMap.Values.Contains(currentType))
+            {
+                throw new Exception("Type was more than once in the assembly probably with more than 1 Version property");
+            }
+            if (contextVersionMap.ContainsKey(version))
+            {
+                throw new Exception("Api version int more than once in the assembly should not happen.");
+            }
+            contextVersionMap.Add(version, currentType);
+        }
+        return contextVersionMap;
+    }
+    /// <summary>
+    /// This method was mostly Generated by Ai i just adapted it and fixed some issues with to integrate it into the class lib
+    /// </summary>
+    /// <param name="baseType"></param>
+    /// <returns></returns>
+    private static Dictionary<int, Type> GetBaseTypeDictionaryIntrfc(Type baseType)
+    {
+        Dictionary<int, Type> contextVersionMap = new();
+
+        var subClasses = AppDomain.CurrentDomain.GetAssemblies()
+            .SelectMany(assembly => assembly.GetTypes())
+            .Where(t => t.IsInterface && baseType.IsAssignableFrom(t) && t != baseType)
+            .ToList();
+
+        for (int i = 0; i < subClasses.Count(); i++)
+        {
+            Type currentType = subClasses[i];
+
+            // 1. Default version is 1 for ReadOnlyContext / Context_V1
+            int version = 1;
+
+            // 2. Look for a STATIC property named IVersion
+            PropertyInfo? versionProperty = currentType.GetProperty("IVersion", BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy);
+
+            // 3. If the property exists, extract its value
+            if (versionProperty != null)
+            {
+                if (versionProperty.GetValue(null) is int parsedVersion)
+                {
+                    version = parsedVersion;
+                }
+            }
+
+            // 4. Prevent duplicate Keys/Values
+            if (!contextVersionMap.Values.Contains(currentType) && !contextVersionMap.ContainsKey(version))
+            {
+                contextVersionMap.Add(version, currentType);
+            }
+        }
+
+        return contextVersionMap;
+    }
+    // private static Dictionary<int, Type> GetBaseTypeDictionaryIntrfc(Type baseType)
+    // {
+    //     Dictionary<int, Type> contextVersionMap = new();
+
+    //     var subClasses = AppDomain.CurrentDomain.GetAssemblies()
+    //                 .SelectMany(assembly => assembly.GetTypes())
+    //                 .Where(t => t.IsInterface && baseType.IsAssignableFrom(t) && t != baseType)
+    //                 .ToList();
+
+    //     for (int i = 0; i < subClasses.Count(); i++)
+    //     {
+    //         Type currentType = subClasses[i];
+
+    //         // Default version is 1 for ReadOnlyContext / Context_V1
+    //         int version = 1;
+
+    //         string namespaceName = currentType.Namespace ?? "";
+    //         string fullName = currentType.FullName ?? "";
+
+    //         // Safely parse the version integer from the Namespace string (e.g. "IGeneratorContext_V2")
+    //         if (namespaceName.Contains("_V"))
+    //         {
+    //             // Find the index of "_V"
+    //             int vIndex = namespaceName.IndexOf("_V") + 2;
+
+    //             // Extract the numbers after "_V"
+    //             string versionString = new string(namespaceName.Substring(vIndex).TakeWhile(char.IsDigit).ToArray());
+
+    //             if (!string.IsNullOrEmpty(versionString))
+    //             {
+    //                 version = int.Parse(versionString);
+    //             }
+    //         }
+    //         // For V3 or V4 if you used direct naming like 'GeneratorContextV3'
+    //         else if (fullName.Contains("V3")) version = 4; // Or whatever ID maps to V3
+    //         else if (fullName.Contains("V4")) version = 5;
+
+    //         // Prevent duplicate Keys/Values
+    //         if (!contextVersionMap.Values.Contains(currentType) && !contextVersionMap.ContainsKey(version))
+    //         {
+    //             contextVersionMap.Add(version, currentType);
+    //         }
+    //     }
+
+    //     return contextVersionMap;
+    // }
+}
+</file>
+
 <file path="sandbox.Tests/MSTestSettings.cs">
 // [assembly: Parallelize(Scope = ExecutionScope.MethodLevel)]
+</file>
+
+<file path="sandbox.Tests/Tests/src/TestHelper.cs">
+public class TestHelper
+{
+    static string? sourceCodeActionV1;
+    static string? sourceCodeActionV2;
+    static string? sourceCodeActionV3;
+    static string? sourceCodeVaccineAction;
+    static string? sourceCodePedia;
+    static List<string>? sourceCodes;
+
+    public static (string sourceCodePedia, string sourceCodeActionV1, string sourceCodeActionV2, string sourceCodeActionV3, string sourceCodeVaccineAction, List<string> sourceCodes)
+    GetSC(bool includeCondInList = true)
+    {
+        sourceCodeActionV1 = EmberMethods.CreateStringFromCsFile(
+                   Path.GetFullPath(Path.Combine(
+                       AppDomain.CurrentDomain.BaseDirectory,
+                       "..", "..", "..", "..",
+                       "sandbox", "src", "Scripts", "ActionScripts", "AddPediatricTestsV1.cs"
+                   ))
+               );
+        sourceCodeActionV2 = EmberMethods.CreateStringFromCsFile(
+        Path.GetFullPath(Path.Combine(
+            AppDomain.CurrentDomain.BaseDirectory,
+            "..", "..", "..", "..",
+            "sandbox", "src", "Scripts", "ActionScripts", "AddPediatricTestsV2.cs"
+        ))
+    );
+        sourceCodeActionV3 = EmberMethods.CreateStringFromCsFile(
+       Path.GetFullPath(Path.Combine(
+           AppDomain.CurrentDomain.BaseDirectory,
+           "..", "..", "..", "..",
+           "sandbox", "src", "Scripts", "ActionScripts", "AddPediatricTestsV3.cs"
+       ))
+   );
+        sourceCodeVaccineAction = EmberMethods.CreateStringFromCsFile(
+          Path.GetFullPath(Path.Combine(
+          AppDomain.CurrentDomain.BaseDirectory,
+          "..", "..", "..", "..",
+          "sandbox", "src", "Scripts", "ActionScripts", "VaccineScript.cs"
+      ))
+      );
+        sourceCodePedia = EmberMethods.CreateStringFromCsFile(
+       Path.GetFullPath(Path.Combine(
+           AppDomain.CurrentDomain.BaseDirectory,
+                   "..", "..", "..", "..",
+                   "sandbox", "src", "Scripts", "ConditionScripts", "PediatricCondition.cs"
+               ))
+           );
+        sourceCodes = [];
+        sourceCodes!.Add(sourceCodeActionV1);
+        sourceCodes!.Add(sourceCodeActionV2);
+        sourceCodes!.Add(sourceCodeActionV3);
+        sourceCodes!.Add(sourceCodeVaccineAction);
+        if (includeCondInList)
+        {
+            sourceCodes!.Add(sourceCodePedia);
+        }
+
+        return (sourceCodePedia, sourceCodeActionV1, sourceCodeActionV2, sourceCodeActionV3, sourceCodeVaccineAction, sourceCodes);
+    }
+}
 </file>
 
 <file path="sandbox.Tests/Tests/TestAssemblyInit.cs">
@@ -142,12 +399,254 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 {"@t":"2026-03-09T13:56:36.5468234Z","@mt":"Entered {MethodName} in {ClassName}.","@l":"Verbose","MethodName":"GetAllCustomerScripts","ClassName":"DbHelper","SourceContext":"Ember.Scripting.DbHelper"}
 </file>
 
+<file path="scripting/src/ExceptionsAttributes/Attributes.cs">
+namespace Ember.Scripting;
+
+[AttributeUsage(AttributeTargets.Interface)]
+public class MetaDataIGeneratorScript : Attribute
+{
+    public int Version { get; }
+    public IGeneratorScriptType Type { get; }
+    public IGeneratorScriptReturnType ReturnType { get; }
+    public MetaDataIGeneratorScript(int version, IGeneratorScriptReturnType returnType, IGeneratorScriptType type)
+    {
+        Version = version;
+        ReturnType = returnType;
+        Type = IGeneratorScriptType.DefaultVersioned;
+    }
+
+    public MetaDataIGeneratorScript(int version)
+    {
+        Version = version;
+        ReturnType = IGeneratorScriptReturnType.Action;
+        Type = IGeneratorScriptType.DefaultVersioned;
+    }
+}
+
+public enum IGeneratorScriptType
+{
+    AbstractBaseInSF,
+    GenericSimple,
+    Generic,
+    DefaultVersioned
+}
+public enum IGeneratorScriptReturnType
+{
+    Condition, Action
+}
+
+[AttributeUsage(AttributeTargets.Class)]
+public class MetaDataActionResult : Attribute
+{
+    public int Version { get; }
+    public ActionResultType Type { get; }
+
+    public MetaDataActionResult(int version)
+    {
+        Version = version;
+        Type = ActionResultType.DefaultVersioned;
+    }
+
+    public MetaDataActionResult(int version, ActionResultType type)
+    {
+        Version = version;
+        Type = type;
+    }
+
+}
+
+public enum ActionResultType
+{
+    AbstractBaseInSF,
+    DefaultVersioned
+}
+</file>
+
+<file path="scripting/src/ExceptionsAttributes/Exceptions.cs">
+using System;
+using System.Collections.Generic;
+
+namespace Ember.Scripting;
+
+public class NoFileWithThisClassNameFoundException : Exception
+{
+    public NoFileWithThisClassNameFoundException() : base() { }
+    public NoFileWithThisClassNameFoundException(string message) : base(message) { }
+    public NoFileWithThisClassNameFoundException(string message, Exception innerException) : base(message, innerException) { }
+}
+
+public class CompilationFailedException : Exception
+{
+    string? CompilerErrors { get; }
+
+    public CompilationFailedException() : base() { }
+    public CompilationFailedException(string message) : base(message) { }
+    public CompilationFailedException(string message, Exception innerException) : base(message, innerException) { }
+
+    public CompilationFailedException(string message, string compilerErrors) : base(message)
+    {
+        CompilerErrors = compilerErrors;
+    }
+}
+
+public class ScriptExecutionException : Exception
+{
+    public ScriptExecutionException() : base() { }
+    public ScriptExecutionException(string message) : base(message) { }
+    public ScriptExecutionException(string message, Exception innerException) : base(message, innerException) { }
+}
+
+public class ActionScriptExecutionException : ScriptExecutionException
+{
+    public ActionScriptExecutionException() : base() { }
+    public ActionScriptExecutionException(string message) : base(message) { }
+    public ActionScriptExecutionException(string message, Exception innerException) : base(message, innerException) { }
+}
+
+public class ConditionScriptExecutionException : ScriptExecutionException
+{
+    public ConditionScriptExecutionException() : base() { }
+    public ConditionScriptExecutionException(string message) : base(message) { }
+    public ConditionScriptExecutionException(string message, Exception innerException) : base(message, innerException) { }
+}
+
+public class GetScriptPathFromFolderException : Exception
+{
+    public GetScriptPathFromFolderException() : base() { }
+    public GetScriptPathFromFolderException(string message) : base(message) { }
+    public GetScriptPathFromFolderException(string message, Exception innerException) : base(message, innerException) { }
+}
+
+public class CreateStringFromCsFileException : Exception
+{
+    public CreateStringFromCsFileException() : base() { }
+    public CreateStringFromCsFileException(string message) : base(message) { }
+    public CreateStringFromCsFileException(string message, Exception innerException) : base(message, innerException) { }
+}
+
+public class NoClassFoundInScriptFileException : Exception
+{
+    public NoClassFoundInScriptFileException() : base() { }
+    public NoClassFoundInScriptFileException(string message) : base(message) { }
+    public NoClassFoundInScriptFileException(string message, Exception innerException) : base(message, innerException) { }
+}
+
+public class MoreThanOneClassFoundInScriptException : Exception
+{
+    public MoreThanOneClassFoundInScriptException() : base() { }
+    public MoreThanOneClassFoundInScriptException(string message) : base(message) { }
+    public MoreThanOneClassFoundInScriptException(string message, Exception innerException) : base(message, innerException) { }
+}
+
+public class ValidationBeforeCompilationException : Exception
+{
+    public ValidationBeforeCompilationException() : base() { }
+    public ValidationBeforeCompilationException(string message) : base(message) { }
+    public ValidationBeforeCompilationException(string message, Exception innerException) : base(message, innerException) { }
+}
+
+public class ClassNameOrBaseNameNullException : Exception
+{
+    public ClassNameOrBaseNameNullException() : base() { }
+    public ClassNameOrBaseNameNullException(string message) : base(message) { }
+    public ClassNameOrBaseNameNullException(string message, Exception innerException) : base(message, innerException) { }
+}
+
+public class ForbiddenNamespaceException : Exception
+{
+    public string? AttemptedNamespace { get; }
+
+    public ForbiddenNamespaceException() : base() { }
+    public ForbiddenNamespaceException(string message) : base(message) { }
+    public ForbiddenNamespaceException(string message, Exception innerException) : base(message, innerException) { }
+
+    public ForbiddenNamespaceException(string message, string attemptedNamespace) : base(message)
+    {
+        AttemptedNamespace = attemptedNamespace;
+    }
+}
+
+public class ScriptTimeoutException : Exception
+{
+    public ScriptTimeoutException() : base() { }
+    public ScriptTimeoutException(string message) : base(message) { }
+    public ScriptTimeoutException(string message, Exception innerException) : base(message, innerException) { }
+}
+
+public class DbHelperException : Exception
+{
+    public DbHelperException() : base() { }
+    public DbHelperException(string message) : base(message) { }
+    public DbHelperException(string message, Exception innerException) : base(message, innerException) { }
+}
+public class FacadeException : Exception
+{
+    public FacadeException() : base() { }
+    public FacadeException(string message) : base(message) { }
+    public FacadeException(string message, Exception innerException) : base(message, innerException) { }
+}
+
+public class ExceptionHelper    //for future to traverse exception chain
+{
+    public static Exception GetExceptionFromChain(Exception ex, int i)
+    {
+        Exception baseException = ex.GetBaseException();
+        int indexInChain = 0;
+
+        Exception innerEx = ex;
+        while (innerEx.Equals(baseException) == false && indexInChain != i)
+        {
+            innerEx = innerEx.InnerException!;
+            indexInChain++;
+        }
+        if (indexInChain < i)
+        {
+            throw new Exception(message: "Index is out of bounds of the Exception chain!");
+        }
+        return innerEx;
+    }
+    public static Exception GetExceptionFromChainReversed(Exception ex, int i)  //todo fix use index base lookup get rid of for loop
+    {
+        List<Exception> exceptions = GetExceptionList(ex);
+        exceptions.Reverse();
+
+        for (int j = 0; j < exceptions.Count(); j++)
+        {
+            if (j == i)
+            {
+                return exceptions[i];
+            }
+        }
+        throw new Exception(message: "Could not find your exception in the List!");
+    }
+    public static int GetBaseExceptionIndex(Exception ex)
+    {
+        List<Exception> exceptions = GetExceptionList(ex);
+        return exceptions.Count() - 1;
+    }
+    private static List<Exception> GetExceptionList(Exception ex)
+    {
+        List<Exception> exceptions = [];
+        Exception baseException = ex.GetBaseException();
+
+        while (ex.Equals(baseException) == false)
+        {
+            exceptions.Add(ex);
+            ex = ex.InnerException!;
+        }
+        exceptions.Add(baseException);
+        return exceptions;
+    }
+}
+</file>
+
 <file path="scripting/src/ScriptingFramework/ActionResult.cs">
 namespace Ember.Scripting;
 
+[MetaDataActionResult(version: 0, type: ActionResultType.AbstractBaseInSF)]
 public abstract class ActionResultBaseClass
 {
-
+    public abstract ActionResultBaseClass Upgrade(ActionResultBaseClass actionResult);
 }
 </file>
 
@@ -176,97 +675,6 @@ public abstract class ActionResultBaseClass
   </ItemGroup>
 
 </Project>
-</file>
-
-<file path="sandbox.Tests/Tests/Unit/UpdateScriptTests.cs">
-using System.Threading.Tasks;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Ember.Scripting;
-using Serilog;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
-
-[TestClass]
-public class UpdateScriptTests
-{
-
-
-    ISccriptManagerDeleteAfter? facade;
-    EmberMethods? rm;
-    string? ActionResultVersionSpecific;
-    string? sourceCodeActionV1;
-    string? sourceCodeActionV2;
-    string? sourceCodeActionV3;
-    string? sourceCodeVaccineAction;
-    string? sourceCodePedia;
-    LoggerForScripting? logger;
-    ServiceCollection? services;
-    List<string>? sourceCodes;
-
-    [TestInitialize]
-    public
-     void Setup()
-    {
-        logger = new LoggerForScripting();
-        Log.Debug("Sandbox launched.");
-
-        services = new ServiceCollection();
-        services.AddLogging(builder =>
-        {
-            // Assuming you use Serilog, this forwards standard MS Logging to Serilog
-            builder.AddSerilog(dispose: true);
-        });
-
-        ActionResultVersionSpecific = "[Message contains either failure or succes: ] ";  //change this if action result version changes it will thraow cause of message contains
-        sourceCodeActionV1 = EmberMethods.CreateStringFromCsFile(
-           Path.GetFullPath(Path.Combine(
-               AppDomain.CurrentDomain.BaseDirectory,
-               "..", "..", "..", "..",
-               "sandbox", "src", "Scripts", "ActionScripts", "AddPediatricTestsV1.cs"
-           ))
-       );
-        sourceCodeActionV2 = EmberMethods.CreateStringFromCsFile(
-        Path.GetFullPath(Path.Combine(
-            AppDomain.CurrentDomain.BaseDirectory,
-            "..", "..", "..", "..",
-            "sandbox", "src", "Scripts", "ActionScripts", "AddPediatricTestsV2.cs"
-        ))
-    );
-        sourceCodeActionV3 = EmberMethods.CreateStringFromCsFile(
-       Path.GetFullPath(Path.Combine(
-           AppDomain.CurrentDomain.BaseDirectory,
-           "..", "..", "..", "..",
-           "sandbox", "src", "Scripts", "ActionScripts", "AddPediatricTestsV3.cs"
-       ))
-   );
-        sourceCodeVaccineAction = EmberMethods.CreateStringFromCsFile(
-          Path.GetFullPath(Path.Combine(
-          AppDomain.CurrentDomain.BaseDirectory,
-          "..", "..", "..", "..",
-          "sandbox", "src", "Scripts", "ActionScripts", "VaccineScript.cs"
-      ))
-      );
-        sourceCodePedia = EmberMethods.CreateStringFromCsFile(
-       Path.GetFullPath(Path.Combine(
-           AppDomain.CurrentDomain.BaseDirectory,
-                   "..", "..", "..", "..",
-                   "sandbox", "src", "Scripts", "ConditionScripts", "PediatricCondition.cs"
-               ))
-           );
-        sourceCodes = [];
-        sourceCodes!.Add(sourceCodeActionV1);
-        sourceCodes!.Add(sourceCodeActionV2);
-        sourceCodes!.Add(sourceCodeActionV3);
-        sourceCodes!.Add(sourceCodeVaccineAction);
-        // sourceCodes!.Add(sourceCodePedia);
-    }
-
-    [TestMethod]
-    public void TestCreatedAt()
-    {
-
-    }
-}
 </file>
 
 <file path="sandbox/init.sql">
@@ -321,6 +729,9 @@ using Serilog;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using TypeInfo = System.Reflection.TypeInfo;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 public class EmberMethods
 {
@@ -483,45 +894,55 @@ public class EmberMethods
         }
 
     }
-    public static ActionResultV3NoInheritance UpgradeActionResult(object resultValue)
+    public static ActionResultV3NoInheritance UpgradeActionResult(object resultValue)   //todo change to base class return and cast in tests and so on
     {
         Serilog.Log.Verbose("Entered {MethodName} in {ClassName}.", nameof(UpgradeActionResult), nameof(EmberMethods));
 
         // var facade = new ScriptManagerFacade(UsefulMethods.GetReferences());
         // var newestVersion = await facade.GetRecentApiVersion();
-        object finalActionResult = resultValue;
+        ActionResultBaseClass currentActionResult = (ActionResultBaseClass)resultValue;
+        // var finalActionResult = resultValue;
+        TypeInfo typeInfo = currentActionResult.GetType().GetTypeInfo();
+        var attrs = typeInfo.GetCustomAttributes();
+        var metaDataAttribute = typeInfo.GetCustomAttribute<MetaDataActionResult>();
+
+
+        // Type currentType
+        // throw new Exception("Intentional debug exception delete after todo");
+
         int iterations = 0;              // will probably fail in real application todo fix mabe with reflection i heard?
-        int maxIterations = ContextVersionScanner.GetClassDictionary().Keys.Count() + 3;  //just making sure my logic is fine to prevent infinite loop  todo chacnge this t onot genrerator clas version but maybe action result version
-        while (finalActionResult is not ActionResultV3NoInheritance && iterations <= maxIterations)    //could fail if loaded from diffrent assembly should probably replace the is statements with something like get type.name
+        var dict = ActionResultVersionScanner.GetClassDictionary();
+        int maxIterations = dict.Keys.Count() + 3;  //just making sure my logic is fine to prevent infinite loop  todo chacnge this t onot genrerator clas version but maybe action result version
+        Type maxVersionType = dict[dict.Keys.Max()];
+
+        foreach (var att in attrs)
+        {
+            Console.WriteLine(att.GetType().Name);
+        }
+        foreach (var item in dict)
+        {
+            Console.WriteLine("Key: " + item.Key + " , Value: " + item.Value);
+        }
+
+        Console.WriteLine(currentActionResult.GetType().Name);
+        Console.WriteLine(maxVersionType.Name);
+        Console.WriteLine(metaDataAttribute!.Version);
+
+        while (currentActionResult.GetType() != maxVersionType && iterations <= maxIterations)
         {
 
-            // if (finalActionResult is ActionResultV2 v2Script)
-            if (finalActionResult.GetType().Name == "ActionResultV2")
+            var nextVersionType = dict[metaDataAttribute!.Version + 1];
+            var uninitializedNextVersion = (ActionResultBaseClass)System.Runtime.CompilerServices.RuntimeHelpers.GetUninitializedObject(currentActionResult.GetType());
+
+            try
             {
-                try
-                {
-                    ActionResultV2 v2Script2 = (ActionResultV2)finalActionResult;
-                    finalActionResult = ActionResultV3NoInheritance.UpgradeV2(v2Script2);
-                }
-                catch (Exception e)
-                {
-                    Serilog.Log.Error(e.ToString());
-                }
+                currentActionResult = uninitializedNextVersion.Upgrade(currentActionResult);
             }
-            // else if (finalActionResult is ActionResult v1Script)
-            else if (finalActionResult.GetType().Name == "ActionResult")
+            catch (TargetInvocationException ex)
             {
-                try
-                {
-                    ActionResult v1Script2 = (ActionResult)finalActionResult;
-                    List<string> loggedActions = [];
-                    finalActionResult = ActionResultV2.UpgradeV1(v1Script2, loggedActions);
-                }
-                catch (Exception e)
-                {
-                    Serilog.Log.Error(e.ToString());
-                }
+                throw new Exception($"Failed to upgrade {maxVersionType.Name} to {nextVersionType.Name}.", ex.InnerException);
             }
+
             if (iterations > maxIterations)
             {
                 throw new Exception("Somethign went wrong trying to upgrade the ActionResult");
@@ -530,15 +951,15 @@ public class EmberMethods
         }
 
         // if (finalActionResult is ActionResultV3NoInheritance v3Script)
-        if (finalActionResult.GetType().Name == "ActionResultV3NoInheritance")
-        {
-            ActionResultV3NoInheritance v3Script2 = (ActionResultV3NoInheritance)finalActionResult;
-            return (ActionResultV3NoInheritance)v3Script2;
-        }
-        else
-        {
-            throw new Exception(message: "UpgradeActionResult in ScriptExecutor failed.");
-        }
+        // if (currentActionResult.GetType().Name == "ActionResultV3NoInheritance")
+        // {
+        ActionResultV3NoInheritance v3Script2 = (ActionResultV3NoInheritance)currentActionResult;
+        return (ActionResultV3NoInheritance)v3Script2;
+        // }
+        // else
+        // {
+        //     throw new Exception(message: "UpgradeActionResult in ScriptExecutor failed.");
+        // }
     }
     public async Task<Guid> GetIdInConsoleAsync(bool fromSrc = false)
     {
@@ -730,72 +1151,6 @@ public class EmberMethods
 }
 </file>
 
-<file path="sandbox/src/LoggerForScripting.cs">
-using System;
-using Serilog;
-using Ember.Scripting;
-using Serilog.Extensions.Logging;
-using Microsoft.Extensions.Logging;
-// using BlazorUi.
-
-public class LoggerForScripting
-{
-    private Serilog.Core.Logger? serilogLogger = null;
-    private ILoggerFactory? factory = null;
-
-//  public BlazorSink MemorySink { get; } = new BlazorSink();
-
-    public LoggerForScripting()
-    {
-
-    }
-    public Serilog.Core.Logger SetUpAndGetSeriLogger()
-    {
-        Serilog.Core.Logger? serilogLoggerSet = new LoggerConfiguration()
-            .MinimumLevel.Verbose()
-    .Enrich.FromLogContext()
-    .WriteTo.File(
-        "logs/app-.log",
-        rollingInterval: RollingInterval.Day,
-        retainedFileCountLimit: 5).WriteTo.Console(restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Warning)
-        .WriteTo.Seq("http://localhost:5341", bufferBaseFilename: "logs/seq-offline-buffer")
-        // .WriteTo.Sink(MemorySink)   //for seeing it in blazor webapp
-        .CreateLogger();
-
-        return serilogLoggerSet;
-    }
-
-    // public Microsoft.Extensions.Logging.Logger<ScriptManagerFacade> GetMicrosoftLogger()
-    public Microsoft.Extensions.Logging.Logger<T> GetMicrosoftLogger<T>()
-    {
-        if (serilogLogger == null)
-        {
-            serilogLogger = SetUpAndGetSeriLogger();
-            Log.Logger = serilogLogger;
-        }
-
-        if (factory == null)
-        {
-            factory = new SerilogLoggerFactory(serilogLogger);
-        }
-
-        // using var factory = new SerilogLoggerFactory(serilogLogger);
-
-        Microsoft.Extensions.Logging.Logger<T>? microsoftLogger =
-              new Microsoft.Extensions.Logging.Logger<T>(factory);
-        return microsoftLogger;
-    }
-    public void Dispose()
-    {
-        factory?.Dispose();
-        serilogLogger?.Dispose();
-    }
-    // Source - https://stackoverflow.com/a/68559937
-    // Posted by mihails.kuzmins, modified by community. See post 'Timeline' for change history
-    // Retrieved 2026-02-26, License - CC BY-SA 4.0
-}
-</file>
-
 <file path="scripting/scripting.csproj">
 <Project Sdk="Microsoft.NET.Sdk">
 
@@ -812,148 +1167,6 @@ public class LoggerForScripting
 </ItemGroup>
 
 </Project>
-</file>
-
-<file path="scripting/src/CompilationAndExecution/ContextVersionScanner.cs">
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Runtime.CompilerServices;
-
-namespace Ember.Scripting;
-
-public static class ContextVersionScanner
-{
-    // Moved exactly as it was from ScriptFactory
-    public static Dictionary<int, Type> GetClassDictionary()
-    {
-        Type baseType = typeof(Ember.Scripting.GeneratorContext);
-        return GetBaseTypeDictionary(baseType);
-    }
-
-    public static Dictionary<int, Type> GetInterfaceDictionary()
-    {
-        Type baseType = typeof(Ember.Scripting.IGeneratorBaseInterface);
-        return GetBaseTypeDictionaryIntrfc(baseType);
-    }
-
-    private static Dictionary<int, Type> GetBaseTypeDictionary(Type baseType)
-    {
-        Dictionary<int, Type> contextVersionMap = new();
-        var subClasses = AppDomain.CurrentDomain.GetAssemblies()
-                   .SelectMany(assembly => assembly.GetTypes())
-                   .Where(t => t.IsClass && !t.IsAbstract && t.IsSubclassOf(baseType))
-                   .ToList();
-
-        for (int i = 0; i < subClasses.Count(); i++)
-        {
-            Type currentType = subClasses[i];
-            var uninitializedContext = (Ember.Scripting.GeneratorContext)RuntimeHelpers.GetUninitializedObject(currentType);
-
-            int version = uninitializedContext.Version;
-
-            if (contextVersionMap.Values.Contains(currentType))
-            {
-                throw new Exception("Type was more than once in the assembly probably with more than 1 Version property");
-            }
-            if (contextVersionMap.ContainsKey(version))
-            {
-                throw new Exception("Api version int more than once in the assembly should not happen.");
-            }
-            contextVersionMap.Add(version, currentType);
-        }
-        return contextVersionMap;
-    }
-    /// <summary>
-    /// This method was mostly Generated by Ai i just adapted it and fixed some issues with to integrate it into the class lib
-    /// </summary>
-    /// <param name="baseType"></param>
-    /// <returns></returns>
-    private static Dictionary<int, Type> GetBaseTypeDictionaryIntrfc(Type baseType)
-    {
-        Dictionary<int, Type> contextVersionMap = new();
-
-        var subClasses = AppDomain.CurrentDomain.GetAssemblies()
-            .SelectMany(assembly => assembly.GetTypes())
-            .Where(t => t.IsInterface && baseType.IsAssignableFrom(t) && t != baseType)
-            .ToList();
-
-        for (int i = 0; i < subClasses.Count(); i++)
-        {
-            Type currentType = subClasses[i];
-
-            // 1. Default version is 1 for ReadOnlyContext / Context_V1
-            int version = 1;
-
-            // 2. Look for a STATIC property named IVersion
-            PropertyInfo? versionProperty = currentType.GetProperty("IVersion", BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy);
-
-            // 3. If the property exists, extract its value
-            if (versionProperty != null)
-            {
-                if (versionProperty.GetValue(null) is int parsedVersion)
-                {
-                    version = parsedVersion;
-                }
-            }
-
-            // 4. Prevent duplicate Keys/Values
-            if (!contextVersionMap.Values.Contains(currentType) && !contextVersionMap.ContainsKey(version))
-            {
-                contextVersionMap.Add(version, currentType);
-            }
-        }
-
-        return contextVersionMap;
-    }
-    // private static Dictionary<int, Type> GetBaseTypeDictionaryIntrfc(Type baseType)
-    // {
-    //     Dictionary<int, Type> contextVersionMap = new();
-
-    //     var subClasses = AppDomain.CurrentDomain.GetAssemblies()
-    //                 .SelectMany(assembly => assembly.GetTypes())
-    //                 .Where(t => t.IsInterface && baseType.IsAssignableFrom(t) && t != baseType)
-    //                 .ToList();
-
-    //     for (int i = 0; i < subClasses.Count(); i++)
-    //     {
-    //         Type currentType = subClasses[i];
-
-    //         // Default version is 1 for ReadOnlyContext / Context_V1
-    //         int version = 1;
-
-    //         string namespaceName = currentType.Namespace ?? "";
-    //         string fullName = currentType.FullName ?? "";
-
-    //         // Safely parse the version integer from the Namespace string (e.g. "IGeneratorContext_V2")
-    //         if (namespaceName.Contains("_V"))
-    //         {
-    //             // Find the index of "_V"
-    //             int vIndex = namespaceName.IndexOf("_V") + 2;
-
-    //             // Extract the numbers after "_V"
-    //             string versionString = new string(namespaceName.Substring(vIndex).TakeWhile(char.IsDigit).ToArray());
-
-    //             if (!string.IsNullOrEmpty(versionString))
-    //             {
-    //                 version = int.Parse(versionString);
-    //             }
-    //         }
-    //         // For V3 or V4 if you used direct naming like 'GeneratorContextV3'
-    //         else if (fullName.Contains("V3")) version = 4; // Or whatever ID maps to V3
-    //         else if (fullName.Contains("V4")) version = 5;
-
-    //         // Prevent duplicate Keys/Values
-    //         if (!contextVersionMap.Values.Contains(currentType) && !contextVersionMap.ContainsKey(version))
-    //         {
-    //             contextVersionMap.Add(version, currentType);
-    //         }
-    //     }
-
-    //     return contextVersionMap;
-    // }
-}
 </file>
 
 <file path="scripting/src/DbFiles/MyContext.cs">
@@ -992,23 +1205,6 @@ public class MyContext : DbContext
         }
 
     }
-}
-</file>
-
-<file path="scripting/src/ScriptingFramework/GeneratorScripts.cs">
-namespace Ember.Scripting;
-
-public interface IGeneratorConditionScript
-{
-    // int VersionScript { get; }
-    // Task<bool> EvaluateAsync(IGeneratorReadOnlyContext context);
-    Task<bool> EvaluateAsync(IGeneratorBaseInterface context);
-}
-public interface IGeneratorActionScript
-{
-    // int VersionSript { get; }
-    // Task<ActionResultBaseClass> ExecuteAsync(IGeneratorContext context);
-    Task<ActionResultBaseClass> ExecuteAsync(IGeneratorBaseInterface context);
 }
 </file>
 
@@ -2829,6 +3025,75 @@ IReadOnlyVaccince, IVaccineInterface
 }
 </file>
 
+<file path="sandbox/src/LoggerForScripting.cs">
+using System;
+using Serilog;
+using Ember.Scripting;
+using Serilog.Extensions.Logging;
+using Microsoft.Extensions.Logging;
+using Serilog.Sinks.Grafana.Loki;
+// using BlazorUi.
+
+public class LoggerForScripting
+{
+    private Serilog.Core.Logger? serilogLogger = null;
+    private ILoggerFactory? factory = null;
+
+    //  public BlazorSink MemorySink { get; } = new BlazorSink();
+
+    public LoggerForScripting()
+    {
+
+    }
+    public Serilog.Core.Logger SetUpAndGetSeriLogger()
+    {
+        Serilog.Core.Logger? serilogLoggerSet = new LoggerConfiguration()
+            .MinimumLevel.Verbose()
+    .Enrich.FromLogContext()
+    .WriteTo.File(
+        "logs/app-.log",
+        rollingInterval: RollingInterval.Day,
+        retainedFileCountLimit: 5).WriteTo.Console(restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Warning)
+        // .WriteTo.Seq("http://localhost:5341", bufferBaseFilename: "logs/seq-offline-buffer")
+        // .WriteTo.Sink(MemorySink)   //for seeing it in blazor webapp
+        .WriteTo.GrafanaLoki(
+        "http://localhost:3100",
+        labels: new[] { new LokiLabel { Key = "app", Value = "ember-scripting-sandbox" } })
+        .CreateLogger();
+        return serilogLoggerSet;
+    }
+
+    // public Microsoft.Extensions.Logging.Logger<ScriptManagerFacade> GetMicrosoftLogger()
+    public Microsoft.Extensions.Logging.Logger<T> GetMicrosoftLogger<T>()
+    {
+        if (serilogLogger == null)
+        {
+            serilogLogger = SetUpAndGetSeriLogger();
+            Log.Logger = serilogLogger;
+        }
+
+        if (factory == null)
+        {
+            factory = new SerilogLoggerFactory(serilogLogger);
+        }
+
+        // using var factory = new SerilogLoggerFactory(serilogLogger);
+
+        Microsoft.Extensions.Logging.Logger<T>? microsoftLogger =
+              new Microsoft.Extensions.Logging.Logger<T>(factory);
+        return microsoftLogger;
+    }
+    public void Dispose()
+    {
+        factory?.Dispose();
+        serilogLogger?.Dispose();
+    }
+    // Source - https://stackoverflow.com/a/68559937
+    // Posted by mihails.kuzmins, modified by community. See post 'Timeline' for change history
+    // Retrieved 2026-02-26, License - CC BY-SA 4.0
+}
+</file>
+
 <file path="scripting/src/DbFiles/EmberInstances.cs">
 using System;
 using System.ComponentModel.DataAnnotations;
@@ -2922,230 +3187,22 @@ public class ScriptCompiledCache
 }
 </file>
 
-<file path="sandbox/docker-compose.yml">
-services:
-  db:
-    image: postgres:16-alpine
-    container_name: script_db_container
-    restart: always
-    environment:
-      - POSTGRES_USER=admin
-      - POSTGRES_PASSWORD=your_secure_password
-      - POSTGRES_DB=script_registry
-    ports:
-      - "5432:5432"
-    volumes:
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
-      - pgdata:/var/lib/postgresql/data
+<file path="scripting/src/ScriptingFramework/GeneratorScripts.cs">
+namespace Ember.Scripting;
 
-  seq:
-    image: datalust/seq:latest
-    container_name: seq
-    environment:
-      - ACCEPT_EULA=Y
-      - SEQ_FIRSTRUN_NOAUTHENTICATION=true
-    ports:
-      - "8081:80"    # Web UI now at http://localhost:8081
-      - "5341:5341"  # Log Ingestion now at http://localhost:5341
-      # - "5341:80" # Web UI at http://localhost:5341
-    volumes:
-      - seqdata:/data
-
-volumes:
-  pgdata:
-  seqdata:
-</file>
-
-<file path="sandbox/src/ScriptingFramework/ScriptFactory.cs">
-using System.Reflection;
-using System.Runtime.CompilerServices;
-using System.Runtime.Serialization;
-using System.Threading.Tasks;
-using Ember.Scripting;
-
-public class ScriptFactory
+[MetaDataIGeneratorScript(version: 1, returnType: IGeneratorScriptReturnType.Condition, type: IGeneratorScriptType.AbstractBaseInSF)]
+public interface IGeneratorConditionScript
 {
-    private readonly ISccriptManagerDeleteAfter ScriptManager;
-    public ScriptFactory(ISccriptManagerDeleteAfter scriptManager)
-    {
-        ScriptManager = scriptManager;
-    }
-    /// <summary>
-    /// Gets the context version for the running Ember System
-    /// </summary>
-    /// <returns></returns>
-    /// <exception cref="Exception"></exception>
-    /// <exception cref="ArgumentException"></exception>
-    public async Task<GeneratorContext> CreateContext()
-    {
-        // int apiV = EmberMethods.GetEmberApiVersion(ScriptManager.GetRecentApiVersion());
-        int apiV = await ScriptManager.GetRunningApiVersion();
-
-        Type recentType;
-        Dictionary<int, Type> contextVersionMap = ContextVersionScanner.GetClassDictionary();
-
-        if (contextVersionMap.Keys.Contains(apiV) == false)
-        {
-            throw new Exception("No Context class defined in " + nameof(contextVersionMap) + " for the passed API version.");
-            // might be better to instead return latest version?
-            // recentType = contextVersionMap.Last().Value;
-        }
-        recentType = contextVersionMap[apiV];
-        var objs = ScriptObjects();
-
-        GeneratorContext ctx = recentType switch
-        {
-            var t when t == typeof(ReadOnlyContextV1.GeneratorContext) => new ReadOnlyContextV1.GeneratorContext(objs.labOrder, objs.patient, objs.logger, objs.testDataAccess),
-            var t when t == typeof(RWContextV2.GeneratorContext) => new RWContextV2.GeneratorContext(objs.labOrder, objs.patient, objs.logger, objs.testDataAccess),
-            var t when t == typeof(GeneratorContextV3.GeneratorContext) => new GeneratorContextV3.GeneratorContext(objs.labOrder, objs.patient, objs.logger, objs.testDataAccess),
-            var t when t == typeof(GeneratorContextV4.GeneratorContext) => new GeneratorContextV4.GeneratorContext(objs.labOrder, objs.patient, objs.logger, objs.testDataAccess),
-            var t when t == typeof(GeneratorContextNoInherVaccineV5.GeneratorContext) => new GeneratorContextNoInherVaccineV5.GeneratorContext(objs.labOrder, objs.vaccine),
-            _ => throw new ArgumentException($"Unsupported context type: {recentType.Name}")
-        };
-
-        return ctx;
-    }
-
-
-    public async Task<GeneratorContext> CreateContextForApiV(int? apiV = null)
-    {
-        if (apiV == null)
-        {
-            apiV = await ScriptManager.GetRunningApiVersion();
-        }
-        Type recentType;
-        Dictionary<int, Type> contextVersionMap = ContextVersionScanner.GetClassDictionary();
-
-        if (contextVersionMap.Keys.Contains((int)apiV) == false)
-        {
-            throw new Exception("No Context class defined in " + nameof(contextVersionMap) + " for the passed API version.");
-            // might be better to instead return latest version?
-            // recentType = contextVersionMap.Last().Value;
-        }
-        recentType = contextVersionMap[(int)apiV];
-        var objs = ScriptObjects();
-
-        GeneratorContext ctx = recentType switch
-        {
-            var t when t == typeof(ReadOnlyContextV1.GeneratorContext) => new ReadOnlyContextV1.GeneratorContext(objs.labOrder, objs.patient, objs.logger, objs.testDataAccess),
-            var t when t == typeof(RWContextV2.GeneratorContext) => new RWContextV2.GeneratorContext(objs.labOrder, objs.patient, objs.logger, objs.testDataAccess),
-            var t when t == typeof(GeneratorContextV3.GeneratorContext) => new GeneratorContextV3.GeneratorContext(objs.labOrder, objs.patient, objs.logger, objs.testDataAccess),
-            var t when t == typeof(GeneratorContextV4.GeneratorContext) => new GeneratorContextV4.GeneratorContext(objs.labOrder, objs.patient, objs.logger, objs.testDataAccess),
-            var t when t == typeof(GeneratorContextNoInherVaccineV5.GeneratorContext) => new GeneratorContextNoInherVaccineV5.GeneratorContext(objs.labOrder, objs.vaccine),
-            _ => throw new ArgumentException($"Unsupported context type: {recentType.Name}")
-        };
-
-        return ctx;
-
-        // var facade = new ScriptManagerFacade(UsefulMethods.GetReferences());
-        // // var newestVersion = await facade.GetRecentApiVersion();
-        // object finalActionResult = resultValue;
-        // int iterations = 0;              // will probably fail in real application todo fix mabe with reflection i heard?
-        // int maxIterations = ContextVersionScanner.GetClassDictionary().Keys.Count() + 3;  //just making sure my logic is fine to prevent infinite loop  todo chacnge this t onot genrerator clas version but maybe action result version
-        // while (finalActionResult is not ActionResultV3NoInheritance && iterations <= maxIterations)    //could fail if loaded from diffrent assembly should probably replace the is statements with something like get type.name
-        // {
-
-        //     // if (finalActionResult is ActionResultV2 v2Script)
-        //     if (finalActionResult.GetType().Name == "ActionResultV2")
-        //     {
-        //         try
-        //         {
-        //             ActionResultV2 v2Script2 = (ActionResultV2)finalActionResult;
-        //             finalActionResult = ActionResultV3NoInheritance.UpgradeV2(v2Script2);
-        //         }
-        //         catch (Exception e)
-        //         {
-        //             Serilog.Log.Error(e.ToString());
-        //         }
-        //     }
-        //     // else if (finalActionResult is ActionResult v1Script)
-        //     else if (finalActionResult.GetType().Name == "ActionResult")
-        //     {
-        //         try
-        //         {
-        //             ActionResult v1Script2 = (ActionResult)finalActionResult;
-        //             List<string> loggedActions = [];
-        //             finalActionResult = ActionResultV2.UpgradeV1(v1Script2, loggedActions);
-        //         }
-        //         catch (Exception e)
-        //         {
-        //             Serilog.Log.Error(e.ToString());
-        //         }
-        //     }
-        //     if (iterations > maxIterations)
-        //     {
-        //         throw new Exception("Somethign went wrong trying to upgrade the ActionResult");
-        //     }
-        //     iterations++;
-        // }
-
-        // // if (finalActionResult is ActionResultV3NoInheritance v3Script)
-        // if (finalActionResult.GetType().Name == "ActionResultV3NoInheritance")
-        // {
-        //     ActionResultV3NoInheritance v3Script2 = (ActionResultV3NoInheritance)finalActionResult;
-        //     return (ActionResultV3NoInheritance)v3Script2;
-        // }
-        // else
-        // {
-        //     throw new Exception(message: "UpgradeActionResult in ScriptExecutor failed.");
-        // }
-    }
-    public async Task<GeneratorContext> CreateContextByDowngrade(string sourceCode)
-    {
-        var vali = ScriptManager.BasicValidationBeforeCompiling(sourceCode);
-        int? apiV = null;
-        if (apiV == null)
-        {
-            apiV = await ScriptManager.GetRunningApiVersion();
-        }
-        Type recentType;
-        Dictionary<int, Type> contextVersionMap = ContextVersionScanner.GetClassDictionary();
-
-        if (contextVersionMap.Keys.Contains((int)apiV) == false)
-        {
-            throw new Exception("No Context class defined in " + nameof(contextVersionMap) + " for the passed API version.");
-            // might be better to instead return latest version?
-            // recentType = contextVersionMap.Last().Value;
-        }
-        recentType = contextVersionMap[(int)apiV];
-        Type desiredType = contextVersionMap[vali.versionInt];
-        var objs = ScriptObjects();
-        GeneratorContext context = await CreateContextForApiV();
-        int iterations = 0;
-        int maxIterations = ContextVersionScanner.GetClassDictionary().Keys.Count() + 3;
-        while (recentType != desiredType && iterations <= maxIterations)
-        {
-            if (recentType == typeof(GeneratorContextNoInherVaccineV5.GeneratorContext))
-            {
-                try
-                {
-                    context = context.Downgrade();
-                    recentType = context.GetType();
-                }
-                catch (Exception e)
-                {
-                    throw new Exception("CreateContextByDowngrade failed in while.", e);
-                }
-            }
-            if (iterations > maxIterations)
-            {
-                throw new Exception("Somethign went wrong trying to downgrade the context");
-            }
-            iterations++;
-        }
-        return (GeneratorContext)context;
-    }
-
-    private (LabOrder labOrder, Patient patient, ConsoleLogger logger, DataAccess testDataAccess, Vaccine vaccine) ScriptObjects()
-    {
-        LabOrder labOrder = new LabOrder("1", "Pediatrics");
-        Patient patient = new Patient("1", "TestFirst", "TestLast", new DateTime(2010, 6, 1, 7, 47, 0), "M");   //mfu
-        ConsoleLogger logger = new ConsoleLogger();
-        DataAccess testDataAccess = new DataAccess();
-        Vaccine vaccine = new Vaccine("Polio", 1, DateTime.UtcNow);
-
-        return (labOrder, patient, logger, testDataAccess, vaccine);
-    }
+    // int VersionScript { get; }
+    // Task<bool> EvaluateAsync(IGeneratorReadOnlyContext context);
+    Task<bool> EvaluateAsync(IGeneratorBaseInterface context);
+}
+[MetaDataIGeneratorScript(version: 1, returnType: IGeneratorScriptReturnType.Action, type: IGeneratorScriptType.AbstractBaseInSF)]
+public interface IGeneratorActionScript
+{
+    // int VersionSript { get; }
+    // Task<ActionResultBaseClass> ExecuteAsync(IGeneratorContext context);
+    Task<ActionResultBaseClass> ExecuteAsync(IGeneratorBaseInterface context);
 }
 </file>
 
@@ -3246,6 +3303,51 @@ public class CustomerScript
         return false;
     }
 }
+</file>
+
+<file path="sandbox/docker-compose.yml">
+version: "3"
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: script_db_container
+    restart: always
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=your_secure_password
+      - POSTGRES_DB=script_registry
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+      - pgdata:/var/lib/postgresql/data
+
+  loki:
+    image: grafana/loki:latest
+    container_name: loki
+    ports:
+      - "3100:3100" # Log Ingestion at http://localhost:3100
+    command: -config.file=/etc/loki/local-config.yaml
+    volumes:
+      - lokidata:/loki
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000" # Web UI at http://localhost:3000
+    environment:
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+      - GF_AUTH_DISABLE_LOGIN_FORM=true
+    volumes:
+      - grafanadata:/var/lib/grafana
+
+volumes:
+  pgdata:
+  lokidata:
+  grafanadata:
 </file>
 
 <file path="sandbox/src/InternalClassesForTesting/LabOrder.cs">
@@ -3470,6 +3572,199 @@ internal class LabOrder : ILabOrderRWInterface, ILabOrderInterface, ILabOrderInt
 // }
 </file>
 
+<file path="sandbox/src/ScriptingFramework/ScriptFactory.cs">
+using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Runtime.Serialization;
+using System.Threading.Tasks;
+using Ember.Scripting;
+
+public class ScriptFactory
+{
+    private readonly ISccriptManagerDeleteAfter ScriptManager;
+    public ScriptFactory(ISccriptManagerDeleteAfter scriptManager)
+    {
+        ScriptManager = scriptManager;
+    }
+    /// <summary>
+    /// Gets the context version for the running Ember System
+    /// </summary>
+    /// <returns></returns>
+    /// <exception cref="Exception"></exception>
+    /// <exception cref="ArgumentException"></exception>
+    public async Task<GeneratorContext> CreateContext()
+    {
+        // int apiV = EmberMethods.GetEmberApiVersion(ScriptManager.GetRecentApiVersion());
+        int apiV = ScriptManager.GetRunningApiVersion();
+
+        Type recentType;
+        Dictionary<int, Type> contextVersionMap = ContextVersionScanner.GetClassDictionary();
+
+        if (contextVersionMap.Keys.Contains(apiV) == false)
+        {
+            throw new Exception("No Context class defined in " + nameof(contextVersionMap) + " for the passed API version.");
+            // might be better to instead return latest version?
+            // recentType = contextVersionMap.Last().Value;
+        }
+        recentType = contextVersionMap[apiV];
+        var objs = ScriptObjects();
+
+        GeneratorContext ctx = recentType switch
+        {
+            var t when t == typeof(ReadOnlyContextV1.GeneratorContext) => new ReadOnlyContextV1.GeneratorContext(objs.labOrder, objs.patient, objs.logger, objs.testDataAccess),
+            var t when t == typeof(RWContextV2.GeneratorContext) => new RWContextV2.GeneratorContext(objs.labOrder, objs.patient, objs.logger, objs.testDataAccess),
+            var t when t == typeof(GeneratorContextV3.GeneratorContext) => new GeneratorContextV3.GeneratorContext(objs.labOrder, objs.patient, objs.logger, objs.testDataAccess),
+            var t when t == typeof(GeneratorContextV4.GeneratorContext) => new GeneratorContextV4.GeneratorContext(objs.labOrder, objs.patient, objs.logger, objs.testDataAccess),
+            var t when t == typeof(GeneratorContextNoInherVaccineV5.GeneratorContext) => new GeneratorContextNoInherVaccineV5.GeneratorContext(objs.labOrder, objs.vaccine),
+            _ => throw new ArgumentException($"Unsupported context type: {recentType.Name}")
+        };
+
+        return ctx;
+    }
+
+
+    public async Task<GeneratorContext> CreateContextForApiV(int? apiV = null)
+    {
+        if (apiV == null)
+        {
+            apiV = ScriptManager.GetRunningApiVersion();
+        }
+        Type recentType;
+        Dictionary<int, Type> contextVersionMap = ContextVersionScanner.GetClassDictionary();
+
+        if (contextVersionMap.Keys.Contains((int)apiV) == false)
+        {
+            throw new Exception("No Context class defined in " + nameof(contextVersionMap) + " for the passed API version.");
+            // might be better to instead return latest version?
+            // recentType = contextVersionMap.Last().Value;
+        }
+        recentType = contextVersionMap[(int)apiV];
+        var objs = ScriptObjects();
+
+        GeneratorContext ctx = recentType switch
+        {
+            var t when t == typeof(ReadOnlyContextV1.GeneratorContext) => new ReadOnlyContextV1.GeneratorContext(objs.labOrder, objs.patient, objs.logger, objs.testDataAccess),
+            var t when t == typeof(RWContextV2.GeneratorContext) => new RWContextV2.GeneratorContext(objs.labOrder, objs.patient, objs.logger, objs.testDataAccess),
+            var t when t == typeof(GeneratorContextV3.GeneratorContext) => new GeneratorContextV3.GeneratorContext(objs.labOrder, objs.patient, objs.logger, objs.testDataAccess),
+            var t when t == typeof(GeneratorContextV4.GeneratorContext) => new GeneratorContextV4.GeneratorContext(objs.labOrder, objs.patient, objs.logger, objs.testDataAccess),
+            var t when t == typeof(GeneratorContextNoInherVaccineV5.GeneratorContext) => new GeneratorContextNoInherVaccineV5.GeneratorContext(objs.labOrder, objs.vaccine),
+            _ => throw new ArgumentException($"Unsupported context type: {recentType.Name}")
+        };
+
+        return ctx;
+
+        // var facade = new ScriptManagerFacade(UsefulMethods.GetReferences());
+        // // var newestVersion = await facade.GetRecentApiVersion();
+        // object finalActionResult = resultValue;
+        // int iterations = 0;              // will probably fail in real application todo fix mabe with reflection i heard?
+        // int maxIterations = ContextVersionScanner.GetClassDictionary().Keys.Count() + 3;  //just making sure my logic is fine to prevent infinite loop  todo chacnge this t onot genrerator clas version but maybe action result version
+        // while (finalActionResult is not ActionResultV3NoInheritance && iterations <= maxIterations)    //could fail if loaded from diffrent assembly should probably replace the is statements with something like get type.name
+        // {
+
+        //     // if (finalActionResult is ActionResultV2 v2Script)
+        //     if (finalActionResult.GetType().Name == "ActionResultV2")
+        //     {
+        //         try
+        //         {
+        //             ActionResultV2 v2Script2 = (ActionResultV2)finalActionResult;
+        //             finalActionResult = ActionResultV3NoInheritance.UpgradeV2(v2Script2);
+        //         }
+        //         catch (Exception e)
+        //         {
+        //             Serilog.Log.Error(e.ToString());
+        //         }
+        //     }
+        //     // else if (finalActionResult is ActionResult v1Script)
+        //     else if (finalActionResult.GetType().Name == "ActionResult")
+        //     {
+        //         try
+        //         {
+        //             ActionResult v1Script2 = (ActionResult)finalActionResult;
+        //             List<string> loggedActions = [];
+        //             finalActionResult = ActionResultV2.UpgradeV1(v1Script2, loggedActions);
+        //         }
+        //         catch (Exception e)
+        //         {
+        //             Serilog.Log.Error(e.ToString());
+        //         }
+        //     }
+        //     if (iterations > maxIterations)
+        //     {
+        //         throw new Exception("Somethign went wrong trying to upgrade the ActionResult");
+        //     }
+        //     iterations++;
+        // }
+
+        // // if (finalActionResult is ActionResultV3NoInheritance v3Script)
+        // if (finalActionResult.GetType().Name == "ActionResultV3NoInheritance")
+        // {
+        //     ActionResultV3NoInheritance v3Script2 = (ActionResultV3NoInheritance)finalActionResult;
+        //     return (ActionResultV3NoInheritance)v3Script2;
+        // }
+        // else
+        // {
+        //     throw new Exception(message: "UpgradeActionResult in ScriptExecutor failed.");
+        // }
+    }
+    public async Task<GeneratorContext> CreateContextByDowngrade(string sourceCode)
+    {
+        var vali = ScriptManager.BasicValidationBeforeCompiling(sourceCode);
+        int? apiV = null;
+        if (apiV == null)
+        {
+            apiV = ScriptManager.GetRunningApiVersion();
+        }
+        Type recentType;
+        Dictionary<int, Type> contextVersionMap = ContextVersionScanner.GetClassDictionary();
+
+        if (contextVersionMap.Keys.Contains((int)apiV) == false)
+        {
+            throw new Exception("No Context class defined in " + nameof(contextVersionMap) + " for the passed API version.");
+            // might be better to instead return latest version?
+            // recentType = contextVersionMap.Last().Value;
+        }
+        recentType = contextVersionMap[(int)apiV];
+        Type desiredType = contextVersionMap[vali.versionInt];
+        var objs = ScriptObjects();
+        GeneratorContext context = await CreateContextForApiV();
+        int iterations = 0;
+        int maxIterations = ContextVersionScanner.GetClassDictionary().Keys.Count() + 3;
+        while (recentType != desiredType && iterations <= maxIterations)
+        {
+            if (recentType == typeof(GeneratorContextNoInherVaccineV5.GeneratorContext))
+            {
+                try
+                {
+                    context = context.Downgrade();
+                    recentType = context.GetType();
+                }
+                catch (Exception e)
+                {
+                    throw new Exception("CreateContextByDowngrade failed in while.", e);
+                }
+            }
+            if (iterations > maxIterations)
+            {
+                throw new Exception("Somethign went wrong trying to downgrade the context");
+            }
+            iterations++;
+        }
+        return (GeneratorContext)context;
+    }
+
+    private (LabOrder labOrder, Patient patient, ConsoleLogger logger, DataAccess testDataAccess, Vaccine vaccine) ScriptObjects()
+    {
+        LabOrder labOrder = new LabOrder("1", "Pediatrics");
+        Patient patient = new Patient("1", "TestFirst", "TestLast", new DateTime(2010, 6, 1, 7, 47, 0), "M");   //mfu
+        ConsoleLogger logger = new ConsoleLogger();
+        DataAccess testDataAccess = new DataAccess();
+        Vaccine vaccine = new Vaccine("Polio", 1, DateTime.UtcNow);
+
+        return (labOrder, patient, logger, testDataAccess, vaccine);
+    }
+}
+</file>
+
 <file path="scripting/src/ScriptingFramework/GeneratorContexts.cs">
 using Microsoft.Extensions.Logging;
 using Ember.Scripting;
@@ -3490,584 +3785,10 @@ public abstract class GeneratorContext
 }
 </file>
 
-<file path="sandbox.Tests/Tests/Unit/DbHelperTests.cs">
-using System.Threading.Tasks;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Ember.Scripting;
-using Serilog;
-using Microsoft.Extensions.DependencyInjection;
-
-namespace FirstTests;
-
-[TestClass]
-public class DbHelperTests
-{
-    private ISccriptManagerDeleteAfter? facade;
-    string? sourceCodePedia;
-    private string? sourceCodeActionV1;
-    private string? sourceCodeActionV3;
-    private EmberMethods? em;
-
-    [TestInitialize]
-    public async Task Setup()
-    {
-
-        var logger = new LoggerForScripting();
-        Log.Debug("Sandbox launched.");
-
-        var services = new ServiceCollection();
-        services.AddLogging(builder =>
-        {
-            // Assuming you use Serilog, this forwards standard MS Logging to Serilog
-            builder.AddSerilog(dispose: true);
-        });
-
-        ScriptingServiceCollectionExtensions.AddEmberScripting(services, EmberMethods.GetReferences(), EmberMethods.GetEmberApiVersion());
-
-        using var provider = services.BuildServiceProvider();
-
-        facade = provider.GetRequiredService<ISccriptManagerDeleteAfter>();
-        em = new EmberMethods(facade);
-
-        // var logger = new LoggerForScripting();
-        // // var microsoftLogger = logger.GetMicrosoftLogger<ScriptManagerFacade>();
-        // ScriptCompiler compiler3 = new ScriptCompiler(RandomMethods.GetReferences(), logger.GetMicrosoftLogger<ScriptCompiler>());
-        // ScriptExecutor exec3 = new ScriptExecutor(logger.GetMicrosoftLogger<ScriptExecutor>());
-        // db = new DbHelper(compiler3, RandomMethods.GetReferences(), logger.GetMicrosoftLogger<DbHelper>());
-        // rm = new RandomMethods(db);
-
-        // facade = new ScriptManagerFacade(db, compiler3, exec3, RandomMethods.GetReferences(), logger.GetMicrosoftLogger<ScriptManagerFacade>());
-
-        // Clear all data between tests without drop/recreate
-        await facade.ClearAllCaches();
-        var existing = await facade.ListScripts(includeCaches: false);
-        foreach (var s in existing)
-            await facade.DeleteScript(s.Id);
-
-        // Load source files
-        sourceCodePedia = EmberMethods.CreateStringFromCsFile(
-            Path.GetFullPath(Path.Combine(
-                AppDomain.CurrentDomain.BaseDirectory,
-                "..", "..", "..", "..",
-                "sandbox", "src", "Scripts", "ConditionScripts", "PediatricCondition.cs"
-            ))
-        );
-
-        sourceCodeActionV1 = EmberMethods.CreateStringFromCsFile(
-            Path.GetFullPath(Path.Combine(
-                AppDomain.CurrentDomain.BaseDirectory,
-                "..", "..", "..", "..",
-                "sandbox", "src", "Scripts", "ActionScripts", "AddPediatricTestsV1.cs"
-            ))
-        );
-
-        sourceCodeActionV3 = EmberMethods.CreateStringFromCsFile(
-            Path.GetFullPath(Path.Combine(
-                AppDomain.CurrentDomain.BaseDirectory,
-                "..", "..", "..", "..",
-                "sandbox", "src", "Scripts", "ActionScripts", "AddPediatricTestsV3.cs"
-            ))
-        );
-    }
-
-    [TestMethod]
-    public async Task CreateAndInsertCompiledCacheTest()
-    {
-        Guid id = await facade!.CreateScript(sourceCodePedia!);
-
-        await facade.ClearScriptCache(id);
-        var before = await facade.GetScript(id, includeCaches: true);
-        Assert.AreEqual(0, before.CompiledCaches.Count);
-
-
-        await facade.CompileScript(id);
-
-        var after = await facade.GetScript(id, includeCaches: true);
-        var getCache = await facade.GetCompiledCache(id, EmberMethods.GetEmberApiVersion());
-        Assert.IsTrue(after.CompiledCaches.Count == 1);
-        Assert.IsTrue(getCache != null && (getCache.ApiVersion == EmberMethods.GetEmberApiVersion()));
-        Assert.IsTrue(after.CompiledCaches.Any(c => c.AssemblyBytes != null && c.AssemblyBytes.Length >= 1));
-
-        var e = await Assert.ThrowsExceptionAsync<Ember.Scripting.DbHelperException>(async () =>
-         {
-             await facade.CompileScript(id, EmberMethods.GetEmberApiVersion());
-             var after3 = await facade.GetScript(id, includeCaches: true);
-             Assert.IsTrue(after3.CompiledCaches.Count == 1);
-             Assert.IsTrue(after3.CompiledCaches.Any(c => c.AssemblyBytes != null && c.AssemblyBytes.Length >= 1));
-         });
-        Console.WriteLine(e.ToString());
-
-        // Assert.IsFalse(true);
-        int oldV = 3;
-        await facade.CompileScript(id, oldV);
-
-        var after2 = await facade.GetScript(id, includeCaches: true);
-        ScriptCompiledCache cache = await facade.GetCompiledCache(id, oldV);
-        Assert.IsTrue(after2.CompiledCaches.Count == 2);
-        Console.WriteLine("Api Version = " + cache.ApiVersion);
-        Assert.IsTrue(cache != null && (cache.ApiVersion == oldV));
-        Assert.IsTrue(after2.CompiledCaches.Any(c => c.AssemblyBytes != null && c.AssemblyBytes.Length >= 1));
-    }
-
-    [TestMethod]
-    public async Task IsDuplicateTestAndListScriptsFilterTest()
-    {
-        Guid id1 = await facade!.CreateScript(sourceCodePedia!);
-        CustomerScript script1 = await facade.GetScript(id1);
-
-        Guid id2 = await facade!.CreateScript(sourceCodePedia!);
-        CustomerScript script2 = await facade.GetScript(id2);
-
-        Assert.IsTrue(script1.Equals(script2));
-        var e = await Assert.ThrowsExceptionAsync<Ember.Scripting.DbHelperException>(async () =>
-        {
-            Guid id3 = await facade!.CreateScript(sourceCodePedia!, checkForDuplicates: true);
-        });
-
-        var allScripts = await facade.ListScripts();
-        Console.WriteLine("Count of allScrips= " + allScripts.Count());
-        Assert.IsTrue(allScripts.Count() == 2);
-
-        CustomerScriptFilter filter = new CustomerScriptFilter(scriptName: script1.ScriptName, sourceCode: script1.SourceCode);
-        var allScripts2 = await facade.ListScripts(filter);
-        Console.WriteLine("Count of allScrips= " + allScripts2.Count());
-        Assert.IsTrue(allScripts2.Count() == 2);
-
-        await facade!.CreateScript(sourceCodeActionV1!);
-        await facade!.CreateScript(sourceCodeActionV3!);
-        await facade!.CreateScript(sourceCodeActionV3!);
-
-        await facade!.CreateScript(sourceCodePedia!);
-        await facade!.CreateScript(sourceCodePedia!);
-        await facade!.CreateScript(sourceCodePedia!);
-        await facade!.CreateScript(sourceCodePedia!);
-        var allScripts3 = await facade.ListScripts(filter);
-        Console.WriteLine("Count of allScrips= " + allScripts3.Count());
-        Assert.IsTrue(allScripts3.Count() == 6);
-    }
-
-    [TestMethod]
-    public async Task ExceptionHelperTestsAsync()
-    {
-        try
-        {
-            try
-            {
-                try
-                {
-
-                    try
-                    {
-                        try
-                        {
-                            throw new NoFileWithThisClassNameFoundException("random message0");
-                        }
-                        catch (Exception e)
-                        {
-
-                            throw new CompilationFailedException("random message1", e);
-                        }
-                    }
-                    catch (Exception e)
-                    {
-
-                        throw new ScriptExecutionException("random message2", e);
-                    }
-                }
-                catch (Exception e)
-                {
-
-                    throw new GetScriptPathFromFolderException("random message3", e);
-                }
-            }
-            catch (Exception e)
-            {
-
-                throw new CreateStringFromCsFileException("random message4", e);
-            }
-        }
-        catch (Exception e)
-        {
-
-            int baseExceptionIndex = ExceptionHelper.GetBaseExceptionIndex(e);
-            Assert.IsTrue(baseExceptionIndex == 4);
-
-            Exception baseException = e.GetBaseException();
-            Assert.IsInstanceOfType(baseException, typeof(NoFileWithThisClassNameFoundException));
-            // Assert.IsTrue(e.)
-
-            Exception exAtIndex0 = ExceptionHelper.GetExceptionFromChain(e, 0);
-            Console.WriteLine(exAtIndex0.GetType().Name);
-            Assert.IsInstanceOfType(exAtIndex0, typeof(CreateStringFromCsFileException));
-            Assert.IsTrue(exAtIndex0.Message == "random message4");
-
-            Exception exAtIndex1 = ExceptionHelper.GetExceptionFromChain(e, 1);
-            Console.WriteLine(exAtIndex1.GetType().Name);
-            Assert.IsInstanceOfType(exAtIndex1, typeof(GetScriptPathFromFolderException));
-
-            Exception exAtIndex2 = ExceptionHelper.GetExceptionFromChain(e, 2);
-            Console.WriteLine(exAtIndex2.GetType().Name);
-            Assert.IsInstanceOfType(exAtIndex2, typeof(ScriptExecutionException));
-
-            Exception exAtIndex3 = ExceptionHelper.GetExceptionFromChain(e, 3);
-            Console.WriteLine(exAtIndex3.GetType().Name);
-            Assert.IsInstanceOfType(exAtIndex3, typeof(CompilationFailedException));
-            Assert.IsTrue(exAtIndex3.Message == "random message1");
-
-            Exception exAtIndex4 = ExceptionHelper.GetExceptionFromChain(e, 4);
-            Console.WriteLine(exAtIndex4.GetType().Name);
-            Assert.IsInstanceOfType(exAtIndex4, typeof(NoFileWithThisClassNameFoundException));
-
-
-            await Assert.ThrowsExceptionAsync<Exception>(async () =>
-      {
-          Exception exAtIndex5 = ExceptionHelper.GetExceptionFromChain(e, 5);
-          Console.WriteLine(exAtIndex5.GetType().Name);
-          // Assert.IsInstanceOfType(exAtIndex5, typeof(CreateStringFromCsFileException));
-      });
-
-            await Assert.ThrowsExceptionAsync<Exception>(async () =>
-    {
-        Exception exAtIndex6 = ExceptionHelper.GetExceptionFromChain(e, 6);
-        Console.WriteLine(exAtIndex6.GetType().Name);
-        //    Assert.IsInstanceOfType(exAtIndex6, typeof(CreateStringFromCsFileException));
-    });
-
-            Console.WriteLine("First tests ran.");
-
-            Exception exAtNegIndex0 = ExceptionHelper.GetExceptionFromChainReversed(e, 0);
-            Console.WriteLine(exAtNegIndex0.GetType().Name);
-            Assert.IsInstanceOfType(exAtNegIndex0, typeof(NoFileWithThisClassNameFoundException));
-
-            Exception exAtNegIndex1 = ExceptionHelper.GetExceptionFromChainReversed(e, 1);
-            Console.WriteLine(exAtNegIndex1.GetType().Name);
-            Assert.IsInstanceOfType(exAtNegIndex1, typeof(CompilationFailedException));
-
-            Exception exAtNegIndex2 = ExceptionHelper.GetExceptionFromChainReversed(e, 2);
-            Console.WriteLine(exAtNegIndex2.GetType().Name);
-            Assert.IsInstanceOfType(exAtNegIndex2, typeof(ScriptExecutionException));
-
-            Exception exAtNegIndex3 = ExceptionHelper.GetExceptionFromChainReversed(e, 3);
-            Console.WriteLine(exAtNegIndex3.GetType().Name);
-            Assert.IsInstanceOfType(exAtNegIndex3, typeof(GetScriptPathFromFolderException));
-
-            Exception exAtNegIndex4 = ExceptionHelper.GetExceptionFromChainReversed(e, 4);
-            Console.WriteLine(exAtNegIndex4.GetType().Name);
-            Assert.IsInstanceOfType(exAtNegIndex4, typeof(CreateStringFromCsFileException));
-
-
-            await Assert.ThrowsExceptionAsync<Exception>(async () =>
-              {
-                  Exception exAtNegIndex5 = ExceptionHelper.GetExceptionFromChainReversed(e, 5);
-                  Console.WriteLine(exAtNegIndex5.GetType().Name);
-                  Assert.IsInstanceOfType(exAtNegIndex5, typeof(CreateStringFromCsFileException));
-              });
-            await Assert.ThrowsExceptionAsync<Exception>(async () =>
-               {
-                   Exception exAtNegIndex6 = ExceptionHelper.GetExceptionFromChainReversed(e, 6);
-                   Console.WriteLine(exAtNegIndex6.GetType().Name);
-                   Assert.IsInstanceOfType(exAtNegIndex6, typeof(CreateStringFromCsFileException));
-               });
-
-            // Assert.IsTrue(false);
-        }
-    }
-
-}
-</file>
-
-<file path="sandbox.Tests/Tests/Unit/SandboxTests.cs">
-using System.Threading.Tasks;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Ember.Scripting;
-using Serilog;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
-
-[TestClass]
-public class SanboxTests
-{
-
-
-    ISccriptManagerDeleteAfter? facade;
-    EmberMethods? em;
-    string? ActionResultVersionSpecific;
-    string? sourceCodeActionV1;
-    string? sourceCodeActionV2;
-    string? sourceCodeActionV3;
-    string? sourceCodeVaccineAction;
-    string? sourceCodePedia;
-    List<string>? sourceCodes;
-
-    [TestInitialize]
-    public
-     void Setup()
-    {
-        ActionResultVersionSpecific = "[Message contains either failure or succes: ] ";  //change this if action result version changes it will thraow cause of message contains
-        sourceCodeActionV1 = EmberMethods.CreateStringFromCsFile(
-           Path.GetFullPath(Path.Combine(
-               AppDomain.CurrentDomain.BaseDirectory,
-               "..", "..", "..", "..",
-               "sandbox", "src", "Scripts", "ActionScripts", "AddPediatricTestsV1.cs"
-           ))
-       );
-        sourceCodeActionV2 = EmberMethods.CreateStringFromCsFile(
-        Path.GetFullPath(Path.Combine(
-            AppDomain.CurrentDomain.BaseDirectory,
-            "..", "..", "..", "..",
-            "sandbox", "src", "Scripts", "ActionScripts", "AddPediatricTestsV2.cs"
-        ))
-    );
-        sourceCodeActionV3 = EmberMethods.CreateStringFromCsFile(
-       Path.GetFullPath(Path.Combine(
-           AppDomain.CurrentDomain.BaseDirectory,
-           "..", "..", "..", "..",
-           "sandbox", "src", "Scripts", "ActionScripts", "AddPediatricTestsV3.cs"
-       ))
-   );
-        sourceCodeVaccineAction = EmberMethods.CreateStringFromCsFile(
-          Path.GetFullPath(Path.Combine(
-          AppDomain.CurrentDomain.BaseDirectory,
-          "..", "..", "..", "..",
-          "sandbox", "src", "Scripts", "ActionScripts", "VaccineScript.cs"
-      ))
-      );
-        sourceCodePedia = EmberMethods.CreateStringFromCsFile(
-       Path.GetFullPath(Path.Combine(
-           AppDomain.CurrentDomain.BaseDirectory,
-                   "..", "..", "..", "..",
-                   "sandbox", "src", "Scripts", "ConditionScripts", "PediatricCondition.cs"
-               ))
-           );
-        sourceCodes = [];
-        sourceCodes!.Add(sourceCodeActionV1);
-        sourceCodes!.Add(sourceCodeActionV2);
-        sourceCodes!.Add(sourceCodeActionV3);
-        sourceCodes!.Add(sourceCodeVaccineAction);
-        // sourceCodes!.Add(sourceCodePedia);
-    }
-    [TestMethod]
-    public async Task CreateContextText()
-    {
-        ScriptFactory sf;
-        GeneratorContext ctx;
-
-        facade = EmberMethods.GetNewScriptManagerInstance(1);
-        sf = new ScriptFactory(facade);
-        ctx = await sf.CreateContextForApiV();
-
-        Assert.IsTrue(ctx.GetType() == typeof(ReadOnlyContextV1.GeneratorContext));
-
-        facade = EmberMethods.GetNewScriptManagerInstance(2);
-        sf = new ScriptFactory(facade);
-        ctx = await sf.CreateContextForApiV();
-
-        Assert.IsTrue(ctx.GetType() == typeof(RWContextV2.GeneratorContext));
-
-        facade = EmberMethods.GetNewScriptManagerInstance(6);
-        sf = new ScriptFactory(facade);
-
-        Exception ex = await Assert.ThrowsExceptionAsync<Exception>(async () =>  //todo check this one
-         {
-             ctx = await sf.CreateContextForApiV();
-         });
-        Assert.IsTrue(ex.Message.Contains("No Context class defined in") && ex.Message.Contains("for the passed API version."));
-    }
-
-    [TestMethod]
-    public async Task GetDictionaryTest()
-    {
-        Dictionary<int, Type> contextVersionMap = new()
-        {
-            // {0, typeof(GeneratorContext)},
-            {1, typeof(ReadOnlyContextV1.GeneratorContext)},
-            {2, typeof(RWContextV2.GeneratorContext)},
-            {3, typeof(GeneratorContextV3.GeneratorContext)},
-            {4, typeof(GeneratorContextV4.GeneratorContext)},
-            {5, typeof(GeneratorContextNoInherVaccineV5.GeneratorContext)},
-        };
-
-        ScriptFactory sf;
-        facade = EmberMethods.GetNewScriptManagerInstance(1);
-        sf = new ScriptFactory(facade);
-        Dictionary<int, Type> retrievedDict = ContextVersionScanner.GetClassDictionary();
-        retrievedDict.Reverse();
-        PrintDictToConsole(contextVersionMap);
-        PrintDictToConsole(retrievedDict);
-        CollectionAssert.AreEquivalent(contextVersionMap, retrievedDict);
-    }
-
-    public void PrintDictToConsole(Dictionary<int, Type> dict)
-    {
-        Console.WriteLine("Start of dict String:");
-        foreach (var pair in dict)
-        {
-            Console.WriteLine("Key: " + pair.Key + ", Value: " + pair.Value);
-        }
-    }
-
-    [TestMethod]
-    public async Task BasicValidationTestUsingGetDictionary()
-    {
-        facade = EmberMethods.GetNewScriptManagerInstance();
-        (string className, string baseTypeName, int versionInt) valResult = facade.BasicValidationBeforeCompiling(sourceCodeActionV2!);
-
-        Console.WriteLine(nameof(valResult.baseTypeName) + " : " + valResult.baseTypeName);
-        Console.WriteLine(nameof(valResult.className) + " : " + valResult.className);
-        Console.WriteLine(nameof(valResult.versionInt) + " : " + valResult.versionInt);
-
-        Assert.IsTrue(valResult.baseTypeName == "IGeneratorActionScriptV2");
-        Assert.IsTrue(valResult.className == "AddPediatricTestsV3");
-        Assert.IsTrue(valResult.versionInt == 3);
-
-        valResult = facade.BasicValidationBeforeCompiling(sourceCodeActionV1!);
-
-        Console.WriteLine(nameof(valResult.baseTypeName) + " : " + valResult.baseTypeName);
-        Console.WriteLine(nameof(valResult.className) + " : " + valResult.className);
-        Console.WriteLine(nameof(valResult.versionInt) + " : " + valResult.versionInt);
-
-        Assert.IsTrue(valResult.baseTypeName == "IGeneratorActionScript");
-        Assert.IsTrue(valResult.className == "AddPediatricTestsV2");
-        Assert.IsTrue(valResult.versionInt == 2);
-
-        valResult = facade.BasicValidationBeforeCompiling(sourceCodeActionV3!);
-
-        Console.WriteLine(nameof(valResult.baseTypeName) + " : " + valResult.baseTypeName);
-        Console.WriteLine(nameof(valResult.className) + " : " + valResult.className);
-        Console.WriteLine(nameof(valResult.versionInt) + " : " + valResult.versionInt);
-
-        Assert.IsTrue(valResult.baseTypeName == "IGeneratorActionScriptV3");
-        Assert.IsTrue(valResult.className == "AddPediatricTestsV4");
-        Assert.IsTrue(valResult.versionInt == 4);
-
-        valResult = facade.BasicValidationBeforeCompiling(sourceCodeVaccineAction!);
-
-        Console.WriteLine(nameof(valResult.baseTypeName) + " : " + valResult.baseTypeName);
-        Console.WriteLine(nameof(valResult.className) + " : " + valResult.className);
-        Console.WriteLine(nameof(valResult.versionInt) + " : " + valResult.versionInt);
-
-        Assert.IsTrue(valResult.baseTypeName == "IGeneratorActionScriptV4Vaccine");
-        Assert.IsTrue(valResult.className == "VaccineScript");
-        Assert.IsTrue(valResult.versionInt == 5);
-
-        valResult = facade.BasicValidationBeforeCompiling(sourceCodePedia!);
-
-        Console.WriteLine(nameof(valResult.baseTypeName) + " : " + valResult.baseTypeName);
-        Console.WriteLine(nameof(valResult.className) + " : " + valResult.className);
-        Console.WriteLine(nameof(valResult.versionInt) + " : " + valResult.versionInt);
-
-        Assert.IsTrue(valResult.baseTypeName == "IGeneratorConditionScript");
-        Assert.IsTrue(valResult.className == "PediatricCondition");
-        Assert.IsTrue(valResult.versionInt == 1);
-
-        // Assert.IsTrue(false);
-
-    }
-
-    [TestMethod]
-    public async Task CreateContextForApiTest()
-    {
-        Guid id;
-        ScriptFactory sf;
-        (string className, string baseTypeName, int versionInt) valResult;
-
-        facade = EmberMethods.GetNewScriptManagerInstance();
-        valResult = facade.BasicValidationBeforeCompiling(sourceCodeActionV2!);
-        id = await facade.CreateScript(sourceCodeActionV2!);
-
-        sf = new ScriptFactory(facade);
-        await facade.ExecuteScriptById(id, await sf.CreateContextForApiV(valResult.versionInt));
-
-        for (int i = 0; i < 6; i++)
-        {
-            facade = EmberMethods.GetNewScriptManagerInstance(i);
-            valResult = facade.BasicValidationBeforeCompiling(sourceCodeActionV2!);
-            id = await facade.CreateScript(sourceCodeActionV2!);
-
-            sf = new ScriptFactory(facade);
-            await facade.ExecuteScriptById(id, await sf.CreateContextForApiV(valResult.versionInt));
-        }
-
-        for (int i = 0; i < 6; i++)
-        {
-            facade = EmberMethods.GetNewScriptManagerInstance(i);
-            valResult = facade.BasicValidationBeforeCompiling(sourceCodeVaccineAction!);
-            id = await facade.CreateScript(sourceCodeVaccineAction!);
-
-            sf = new ScriptFactory(facade);
-            await facade.ExecuteScriptById(id, await sf.CreateContextForApiV(valResult.versionInt));
-        }
-        for (int i = 0; i < 6; i++)
-        {
-            facade = EmberMethods.GetNewScriptManagerInstance(i);
-            valResult = facade.BasicValidationBeforeCompiling(sourceCodePedia!);
-            id = await facade.CreateScript(sourceCodePedia!);
-
-            sf = new ScriptFactory(facade);
-            await facade.ExecuteScriptById(id, await sf.CreateContextForApiV(valResult.versionInt));
-        }
-    }
-
-    [TestMethod]
-    public async Task CreateContextByDowngradeTest()
-    {
-        Guid id;
-        ScriptFactory sf;
-        (string className, string baseTypeName, int versionInt) valResult;
-        object result;
-        ActionResultV3NoInheritance ar;
-        string src;
-
-        src = sourceCodeVaccineAction!;
-        facade = EmberMethods.GetNewScriptManagerInstance();
-        valResult = facade.BasicValidationBeforeCompiling(src!);
-        id = await facade.CreateScript(src!);
-
-        sf = new ScriptFactory(facade);
-        result = await facade.ExecuteScriptById(id, await sf.CreateContextByDowngrade(src!));
-        ar = EmberMethods.UpgradeActionResult(result);
-        Console.WriteLine(ar.ToString());
-        Assert.IsInstanceOfType(ar, typeof(ActionResultV3NoInheritance));
-
-        src = sourceCodeActionV3!;
-        valResult = facade.BasicValidationBeforeCompiling(src!);
-        id = await facade.CreateScript(src!);
-
-        sf = new ScriptFactory(facade);
-        result = await facade.ExecuteScriptById(id, await sf.CreateContextByDowngrade(src!));
-        ar = EmberMethods.UpgradeActionResult(result);
-        Console.WriteLine(ar.ToString());
-        Assert.IsInstanceOfType(ar, typeof(ActionResultV3NoInheritance));
-
-        src = sourceCodeActionV1!;
-        valResult = facade.BasicValidationBeforeCompiling(src!);
-        id = await facade.CreateScript(src!);
-
-        sf = new ScriptFactory(facade);
-        result = await facade.ExecuteScriptById(id, await sf.CreateContextByDowngrade(src!));
-        ar = EmberMethods.UpgradeActionResult(result);
-        Console.WriteLine(ar.ToString());
-        Assert.IsInstanceOfType(ar, typeof(ActionResultV3NoInheritance));
-
-        src = sourceCodePedia!;
-        valResult = facade.BasicValidationBeforeCompiling(src!);
-        id = await facade.CreateScript(src!);
-
-        sf = new ScriptFactory(facade);
-        result = await facade.ExecuteScriptById(id, await sf.CreateContextByDowngrade(src!));
-        // ar = EmberMethods.UpgradeActionResult(result);
-        Console.WriteLine(result.ToString());
-
-        Assert.IsInstanceOfType(result, typeof(bool));
-
-        // Assert.IsTrue(false);
-    }
-}
-</file>
-
 <file path="sandbox/src/ScriptingFramework/ActionResult.cs">
 using Ember.Scripting;
 
+[MetaDataActionResult(version: 1)]
 public class ActionResult : ActionResultBaseClass
 {
     public bool IsSuccess { get; private set; }
@@ -4097,7 +3818,14 @@ public class ActionResult : ActionResultBaseClass
     {
         return IsSuccess ? $"[Success] {Message}" : $"[Error: {ErrorCode}] {Message}";
     }
+
+    public override ActionResultBaseClass Upgrade(ActionResultBaseClass actionResult)
+    {
+        throw new NotImplementedException(message: "This can not be implemented because and also should never be called since the verson below this one is abstract.");
+    }
 }
+
+[MetaDataActionResult(version: 2)]
 public class ActionResultV2 : ActionResult
 {
     public List<string> LoggedActions { get; private set; }
@@ -4133,8 +3861,21 @@ public class ActionResultV2 : ActionResult
         return new ActionResultV2(actionResult.IsSuccess, actionResult.Message, actionResult.ErrorCode, loggedActions);
         // return new ActionResultV2(isSuccess, message, errorCode, loggedActions);
     }
+
+    public override ActionResultBaseClass Upgrade(ActionResultBaseClass actionResult)
+    {
+        List<string> loggedActions = [];
+
+        if (actionResult is ActionResult)
+        {
+            return UpgradeV1((ActionResult)actionResult, loggedActions);
+        }
+        throw new ArgumentException("Provided action result is not an ActionResult (V1).");
+    }
 }
 
+
+[MetaDataActionResult(version: 3)]
 public class ActionResultV3NoInheritance : ActionResultBaseClass
 {
     public bool FailedOrNot { get; private set; }
@@ -4176,105 +3917,14 @@ public class ActionResultV3NoInheritance : ActionResultBaseClass
         }
         return new ActionResultV3NoInheritance(actionResult.IsSuccess, tempMessage);
     }
-}
-</file>
 
-<file path="sandbox/src/Scripts/ActionScripts/AddPediatricTestsV2.cs">
-using System;   //todo this is possible to default in compiler
-using System.Threading.Tasks;
-using System.Collections.Generic;   //todo same for them
-using Ember.Scripting;
-using IGeneratorContext_V3;
-using GeneratorScriptsV2;
-// public class AddPediatricTestsV2 : IGeneratorActionScript<IGeneratorContext_V2, ActionResultV2>
-// {
-//     // public async Task<ActionResult> ExecuteAsync(IGeneratorContext context)
-//     public async Task<ActionResultV2> ExecuteAsync(IGeneratorContext_V2 context)
-//     {
-//         context.Logger.Info("Adding pediatric standard tests");
-
-//         // Check if test already exists (might be auto-added by business rule)
-//         if (!context.LabOrder.HasTest("PED-BASIC"))
-//         {
-//             context.LabOrder.AddTest("PED-BASIC");
-//         }
-
-//         context.LabOrder.SetCustomField("ProcessedByGenerator", true);
-
-//         double versionExample = context.LabOrder.RandomNewDouble;    //example of newer version
-//         Console.WriteLine(versionExample);
-
-//         // string exampleV3 = context.LabOrder.randomNewFunctionInV3("Gilles");
-//         // Console.WriteLine("Return also works if here:" + exampleV3);
-
-//         return ActionResultV2.Success("Pediatric tests added");
-//         // return null; //just for compiler
-//     }
-// }
-
-public class AddPediatricTestsV3 : GeneratorScriptsV2.IGeneratorActionScriptV2
-{
-    // public async Task<ActionResult> ExecuteAsync(IGeneratorContext context)
-    public async Task<ActionResultV2> ExecuteAsync(IGeneratorContext_V3.IGeneratorContext context)
+    public override ActionResultBaseClass Upgrade(ActionResultBaseClass actionResult)
     {
-        context.Logger.Info("Adding pediatric standard tests");
-
-        // Check if test already exists (might be auto-added by business rule)
-        if (!context.LabOrder.HasTest("PED-BASIC"))
+        if (actionResult is ActionResultV2)
         {
-            context.LabOrder.AddTest("PED-BASIC");
+            return UpgradeV2((ActionResultV2)actionResult);
         }
-
-        context.LabOrder.SetCustomField("ProcessedByGenerator", true);
-
-        double versionExample = context.LabOrder.RandomNewDouble;    //example of newer version
-        Console.WriteLine(versionExample);
-
-        // string exampleV3 = context.LabOrder.randomNewFunctionInV3("Gilles");
-        // Console.WriteLine("Return also works if here:" + exampleV3);
-
-        return ActionResultV2.Success("Pediatric tests added");
-        // return null; //just for compiler
-    }
-}
-</file>
-
-<file path="sandbox/src/Scripts/ActionScripts/VaccineScript.cs">
-using System.Threading.Tasks;
-using System;
-using Ember.Scripting;
-using GeneratorScriptsV4;
-
-// public class VaccineScript : IGeneratorActionScript<IGeneratorContextNoInheritance_V4.IGeneratorContext, ActionResultV3NoInheritance>
-// {
-
-//     public async Task<ActionResultV3NoInheritance> ExecuteAsync(IGeneratorContextNoInheritance_V4.IGeneratorContext context)
-//     {
-//         string number = context.LabOrder.OrderNumber;
-//         if (number == "1")
-//         {
-//             Console.WriteLine("do somehing");
-//         }
-//         // context.LabOrder.OrderNumber = "2";  //doesnt work because red only
-//         string name = context.Vaccine.GetName();
-
-//         return ActionResultV3NoInheritance.Success(name + " Vaccine added");
-//     }
-// }
-
-public class VaccineScript : IGeneratorActionScriptV4Vaccine
-{
-    public async Task<ActionResultV3NoInheritance> ExecuteAsync(IGeneratorContextNoInheritance_V5.IGeneratorContext context)
-    {
-        string number = context.LabOrder.OrderNumber;
-        if (number == "1")
-        {
-            Console.WriteLine("do somehing");
-        }
-        // context.LabOrder.OrderNumber = "2";  //doesnt work because red only
-        string name = context.Vaccine.GetName();
-
-        return ActionResultV3NoInheritance.Success(name + " Vaccine added");
+        throw new ArgumentException("Provided action result is not an ActionResultV2.");
     }
 }
 </file>
@@ -4654,252 +4304,17 @@ public class CustomerScriptFilter
 }
 </file>
 
-<file path="sandbox.Tests/Tests/Unit/EmberVersioningTests.cs">
-using System.Threading.Tasks;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Ember.Scripting;
-using Serilog;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
-
-[TestClass]
-public class EmberVersioningTests
-{
-
-
-    ISccriptManagerDeleteAfter? facade;
-    EmberMethods? em;
-    string? ActionResultVersionSpecific;
-    string? sourceCodeActionV1;
-    string? sourceCodeActionV2;
-    string? sourceCodeActionV3;
-    string? sourceCodeVaccineAction;
-    string? sourceCodePedia;
-    LoggerForScripting? logger;
-    ServiceCollection? services;
-    List<string>? sourceCodes;
-
-    [TestInitialize]
-    public
-     void Setup()
-    {
-        ActionResultVersionSpecific = "[Message contains either failure or succes: ] ";  //change this if action result version changes it will thraow cause of message contains
-        sourceCodeActionV1 = EmberMethods.CreateStringFromCsFile(
-           Path.GetFullPath(Path.Combine(
-               AppDomain.CurrentDomain.BaseDirectory,
-               "..", "..", "..", "..",
-               "sandbox", "src", "Scripts", "ActionScripts", "AddPediatricTestsV1.cs"
-           ))
-       );
-        sourceCodeActionV2 = EmberMethods.CreateStringFromCsFile(
-        Path.GetFullPath(Path.Combine(
-            AppDomain.CurrentDomain.BaseDirectory,
-            "..", "..", "..", "..",
-            "sandbox", "src", "Scripts", "ActionScripts", "AddPediatricTestsV2.cs"
-        ))
-    );
-        sourceCodeActionV3 = EmberMethods.CreateStringFromCsFile(
-       Path.GetFullPath(Path.Combine(
-           AppDomain.CurrentDomain.BaseDirectory,
-           "..", "..", "..", "..",
-           "sandbox", "src", "Scripts", "ActionScripts", "AddPediatricTestsV3.cs"
-       ))
-   );
-        sourceCodeVaccineAction = EmberMethods.CreateStringFromCsFile(
-          Path.GetFullPath(Path.Combine(
-          AppDomain.CurrentDomain.BaseDirectory,
-          "..", "..", "..", "..",
-          "sandbox", "src", "Scripts", "ActionScripts", "VaccineScript.cs"
-      ))
-      );
-        sourceCodePedia = EmberMethods.CreateStringFromCsFile(
-       Path.GetFullPath(Path.Combine(
-           AppDomain.CurrentDomain.BaseDirectory,
-                   "..", "..", "..", "..",
-                   "sandbox", "src", "Scripts", "ConditionScripts", "PediatricCondition.cs"
-               ))
-           );
-        sourceCodes = [];
-        sourceCodes!.Add(sourceCodeActionV1);
-        sourceCodes!.Add(sourceCodeActionV2);
-        sourceCodes!.Add(sourceCodeActionV3);
-        sourceCodes!.Add(sourceCodeVaccineAction);
-        // sourceCodes!.Add(sourceCodePedia);
-    }
-
-
-    [TestMethod]
-    public async Task RecentEmberVersionTestAsync()
-    {
-        int v = EmberMethods.GetEmberApiVersion();
-
-        facade = EmberMethods.GetNewScriptManagerInstance(v);
-        em = new EmberMethods(facade);
-        await facade!.EnsureDeletedCreated();
-        await ExecuteEachScript(facade, em);
-        int apiVersionInsideFacade = await facade.GetRunningApiVersion();
-        Assert.IsTrue(apiVersionInsideFacade == v);
-        Assert.IsTrue(apiVersionInsideFacade == 5);
-
-        facade = EmberMethods.GetNewScriptManagerInstance(1);
-        em = new EmberMethods(facade);
-        await facade!.EnsureDeletedCreated();
-        await ExecuteEachScript(facade, em);
-        apiVersionInsideFacade = await facade.GetRunningApiVersion();
-        Assert.IsTrue(apiVersionInsideFacade == EmberMethods.GetEmberApiVersion(testingDiffrentVersion: 1));
-        Assert.IsTrue(apiVersionInsideFacade == 1);
-    }
-
-    public void OldEmberVersionTest()
-    {
-
-    }
-    public async Task<List<Guid>> SaturateDBAsync(ISccriptManagerDeleteAfter facade, EmberMethods rm)
-    {
-        List<Guid> ids = [];
-        foreach (var item in sourceCodes!)
-        {
-            Guid id = await facade!.CreateScript(sourceCodeActionV1!);
-            ids.Add(id);
-        }
-        return ids;
-    }
-    public async Task ExecuteEachScript(ISccriptManagerDeleteAfter facade, EmberMethods em)
-    {
-        foreach (var id in await SaturateDBAsync(facade, em))
-        {
-            CustomerScript retrievedScript = await facade!.GetScript(id);
-            var context = await em!.GetTestingContext<GeneratorContextNoInherVaccineV5.GeneratorContext>(justForTesting: retrievedScript);
-            object resultBeforeUpgrade = await facade.ExecuteScriptById(id, context);   //here somehow figure out how to get the version that is being executed todo
-
-            if (resultBeforeUpgrade is ActionResultBaseClass)
-            {
-                ActionResultV3NoInheritance result = EmberMethods.UpgradeActionResult(resultBeforeUpgrade);
-                string shouldReturn = ActionResultVersionSpecific + "Pediatric tests added";
-                Assert.IsInstanceOfType(result, typeof(ActionResultBaseClass));
-                Assert.IsInstanceOfType(result, typeof(ActionResultV3NoInheritance));
-                Assert.IsTrue(result.ToString().Contains(shouldReturn));
-            }
-            else
-            {
-                object result = await facade.ExecuteScriptById(id, context);
-                string shouldReturn = "True";
-                Assert.IsInstanceOfType(result, typeof(bool));
-                Assert.IsTrue(result.ToString()!.Contains(shouldReturn));
-            }
-        }
-    }
-
-    [TestMethod]
-    public async Task GetCachesForEachApiVersionTestsAsync()
-    {
-        int v = EmberMethods.GetEmberApiVersion();
-
-        facade = EmberMethods.GetNewScriptManagerInstance(v);
-        em = new EmberMethods(facade);
-        await facade!.EnsureDeletedCreated();
-        await ExecuteEachScript(facade, em);
-        int apiVersionInsideFacade = await facade.GetRunningApiVersion();
-
-        var versionDict = await facade!.GetCachesForEachApiVersion();
-        foreach (var item in versionDict)
-        {
-            Console.WriteLine("Key: " + item.Key);
-            foreach (var cache in item.Value)
-            {
-                Console.WriteLine(cache.CustomerScript!.ScriptName);
-            }
-        }
-
-        Assert.IsTrue(apiVersionInsideFacade == v);
-        Assert.IsTrue(apiVersionInsideFacade == 5);
-
-        facade = EmberMethods.GetNewScriptManagerInstance(1);
-        em = new EmberMethods(facade);
-        await ExecuteEachScript(facade, em);
-        apiVersionInsideFacade = await facade.GetRunningApiVersion();
-        Assert.IsTrue(apiVersionInsideFacade == EmberMethods.GetEmberApiVersion(testingDiffrentVersion: 1));
-        Assert.IsTrue(apiVersionInsideFacade == 1);
-
-        var versionDict2 = await facade!.GetCachesForEachApiVersion();
-        foreach (var item in versionDict2)
-        {
-            Console.WriteLine("Key: " + item.Key);
-            foreach (var cache in item.Value)
-            {
-                Console.WriteLine(cache.CustomerScript!.ScriptName);
-            }
-        }
-        Assert.IsTrue(versionDict2[1].Count() == 4);
-        Assert.IsTrue(versionDict2[5].Count() == 4);
-
-    }
-
-    [TestMethod]
-    public async Task OldSourceCodeVersionsTest()
-    {
-        facade = EmberMethods.GetNewScriptManagerInstance(1);
-        Guid id = await facade!.CreateScript(sourceCodeActionV1!);
-
-        facade = EmberMethods.GetNewScriptManagerInstance(2);
-        await facade.UpdateScript(id, sourceCodeActionV2!);
-        await facade.CompileScript(id);
-
-        string sourceCodeAV = (await facade.GetCompiledCache(id)).OldSourceCode!;
-        string sourceCodeV1 = (await facade.GetCompiledCache(id, 1)).OldSourceCode!;
-        string sourceCodeV2 = (await facade.GetCompiledCache(id, 2)).OldSourceCode!;
-
-        Assert.IsTrue(sourceCodeAV == sourceCodeActionV2);
-        Assert.IsTrue(sourceCodeV1 == sourceCodeActionV1);
-        Assert.IsTrue(sourceCodeAV == sourceCodeActionV2);
-        Assert.IsTrue(sourceCodeAV == sourceCodeV2);
-        Assert.IsFalse(sourceCodeAV == sourceCodeV1);
-        // Console.WriteLine(sourceCodeAV);
-        // Console.WriteLine(sourceCodeV1);
-        // Assert.IsTrue(false);
-    }
-}
-</file>
-
-<file path="sandbox/src/Scripts/ActionScripts/AddPediatricTestsV1.cs">
+<file path="sandbox/src/Scripts/ActionScripts/AddPediatricTestsV2.cs">
 using System;   //todo this is possible to default in compiler
 using System.Threading.Tasks;
 using System.Collections.Generic;   //todo same for them
 using Ember.Scripting;
-using GeneratorScriptsGeneric;
-// using static System.Threading.Mutex; //if uncomment it wont run which is good
-public class AddPediatricTestsV2 : IGeneratorActionScript<IGeneratorContext_V2.IGeneratorContext, ActionResult>
-{
-    public async Task<ActionResult> ExecuteAsync(IGeneratorContext_V2.IGeneratorContext context)    //error is here in Basyns
-    {
-        context.Logger.Info("Adding pediatric standard tests");
-
-        // Check if test already exists (might be auto-added by business rule)
-        if (!context.LabOrder.HasTest("PED-BASIC"))
-        {
-            context.LabOrder.AddTest("PED-BASIC");
-        }
-        // System.IO.BufferedStream? stream = null;
-        // double versionExample = context.LabOrder.RandomNewDouble;    //example of newer version
-        // Console.WriteLine(versionExample);
-        context.LabOrder.SetCustomField("ProcessedByGenerator", true);
-        return ActionResult.Success("Pediatric tests added");   //todo check what happens if you return this object without calling the function on it
-        // return null; //just for compiler
-    }
-}
-</file>
-
-<file path="sandbox/src/Scripts/ActionScripts/AddPediatricTestsV3.cs">
-using System;   //todo this is possible to default in compiler
-using System.Threading.Tasks;
-using System.Collections.Generic;   //todo same for them
-using Ember.Scripting;
-using GeneratorScriptsV3;
-
-// public class AddPediatricTestsV3 : IGeneratorActionScript<IGeneratorContext_V3, ActionResultV3NoInheritance>
+using IGeneratorContext_V3;
+using GeneratorScriptsV2;
+// public class AddPediatricTestsV2 : IGeneratorActionScript<IGeneratorContext_V2, ActionResultV2>
 // {
 //     // public async Task<ActionResult> ExecuteAsync(IGeneratorContext context)
-//     public async Task<ActionResultV3NoInheritance> ExecuteAsync(IGeneratorContext_V3 context)
+//     public async Task<ActionResultV2> ExecuteAsync(IGeneratorContext_V2 context)
 //     {
 //         context.Logger.Info("Adding pediatric standard tests");
 
@@ -4914,18 +4329,18 @@ using GeneratorScriptsV3;
 //         double versionExample = context.LabOrder.RandomNewDouble;    //example of newer version
 //         Console.WriteLine(versionExample);
 
-//         string exampleV3 = context.LabOrder.randomNewFunctionInV3("Gilles");
-//         Console.WriteLine("Return also works if here:" + exampleV3);
+//         // string exampleV3 = context.LabOrder.randomNewFunctionInV3("Gilles");
+//         // Console.WriteLine("Return also works if here:" + exampleV3);
 
-//         return ActionResultV3NoInheritance.Success("Pediatric tests added V3");
+//         return ActionResultV2.Success("Pediatric tests added");
 //         // return null; //just for compiler
 //     }
 // }
 
-public class AddPediatricTestsV4 : GeneratorScriptsV3.IGeneratorActionScriptV3
+public class AddPediatricTestsV3 : GeneratorScriptsV2.IGeneratorActionScript
 {
     // public async Task<ActionResult> ExecuteAsync(IGeneratorContext context)
-    public async Task<ActionResultV3NoInheritance> ExecuteAsync(IGeneratorContext_V4.IGeneratorContext context)
+    public async Task<ActionResultV2> ExecuteAsync(IGeneratorContext_V3.IGeneratorContext context)
     {
         context.Logger.Info("Adding pediatric standard tests");
 
@@ -4940,11 +4355,51 @@ public class AddPediatricTestsV4 : GeneratorScriptsV3.IGeneratorActionScriptV3
         double versionExample = context.LabOrder.RandomNewDouble;    //example of newer version
         Console.WriteLine(versionExample);
 
-        string exampleV3 = context.LabOrder.randomNewFunctionInV3("Gilles");
-        Console.WriteLine("Return also works if here:" + exampleV3);
+        // string exampleV3 = context.LabOrder.randomNewFunctionInV3("Gilles");
+        // Console.WriteLine("Return also works if here:" + exampleV3);
 
-        return ActionResultV3NoInheritance.Success("Pediatric tests added V3");
+        return ActionResultV2.Success("Pediatric tests added");
         // return null; //just for compiler
+    }
+}
+</file>
+
+<file path="sandbox/src/Scripts/ActionScripts/VaccineScript.cs">
+using System.Threading.Tasks;
+using System;
+using Ember.Scripting;
+using GeneratorScriptsV4;
+
+// public class VaccineScript : IGeneratorActionScript<IGeneratorContextNoInheritance_V4.IGeneratorContext, ActionResultV3NoInheritance>
+// {
+
+//     public async Task<ActionResultV3NoInheritance> ExecuteAsync(IGeneratorContextNoInheritance_V4.IGeneratorContext context)
+//     {
+//         string number = context.LabOrder.OrderNumber;
+//         if (number == "1")
+//         {
+//             Console.WriteLine("do somehing");
+//         }
+//         // context.LabOrder.OrderNumber = "2";  //doesnt work because red only
+//         string name = context.Vaccine.GetName();
+
+//         return ActionResultV3NoInheritance.Success(name + " Vaccine added");
+//     }
+// }
+
+public class VaccineScript : GeneratorScriptsV4.IGeneratorActionScript
+{
+    public async Task<ActionResultV3NoInheritance> ExecuteAsync(IGeneratorContextNoInheritance_V5.IGeneratorContext context)
+    {
+        string number = context.LabOrder.OrderNumber;
+        if (number == "1")
+        {
+            Console.WriteLine("do somehing");
+        }
+        // context.LabOrder.OrderNumber = "2";  //doesnt work because red only
+        string name = context.Vaccine.GetName();
+
+        return ActionResultV3NoInheritance.Success(name + " Vaccine added");
     }
 }
 </file>
@@ -5093,6 +4548,701 @@ internal class ScriptExecutor
 }
 </file>
 
+<file path="sandbox.Tests/Tests/Unit/DbHelperTests.cs">
+using System.Threading.Tasks;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Ember.Scripting;
+using Serilog;
+using Microsoft.Extensions.DependencyInjection;
+
+namespace FirstTests;
+
+[TestClass]
+public class DbHelperTests
+{
+    private ISccriptManagerDeleteAfter? facade;
+    string? sourceCodePedia = TestHelper.GetSC().sourceCodePedia;
+    private string? sourceCodeActionV1 = TestHelper.GetSC().sourceCodeActionV1;
+    private string? sourceCodeActionV3 = TestHelper.GetSC().sourceCodeActionV3;
+    private EmberMethods? em;
+
+    [TestInitialize]
+    public async Task Setup()
+    {
+        facade = EmberMethods.GetNewScriptManagerInstance();
+        em = new EmberMethods(facade);
+
+        await facade.ClearAllCaches();
+        var existing = await facade.ListScripts(includeCaches: false);
+        foreach (var s in existing)
+        {
+            await facade.DeleteScript(s.Id);
+        }
+    }
+
+    [TestMethod]
+    public async Task CreateAndInsertCompiledCacheTest()
+    {
+        Guid id = await facade!.CreateScript(sourceCodePedia!);
+
+        await facade.ClearScriptCache(id);
+        var before = await facade.GetScript(id, includeCaches: true);
+        Assert.AreEqual(0, before.CompiledCaches.Count);
+
+
+        await facade.CompileScript(id);
+
+        var after = await facade.GetScript(id, includeCaches: true);
+        var getCache = await facade.GetCompiledCache(id, EmberMethods.GetEmberApiVersion());
+        Assert.IsTrue(after.CompiledCaches.Count == 1);
+        Assert.IsTrue(getCache != null && (getCache.ApiVersion == EmberMethods.GetEmberApiVersion()));
+        Assert.IsTrue(after.CompiledCaches.Any(c => c.AssemblyBytes != null && c.AssemblyBytes.Length >= 1));
+
+        var e = await Assert.ThrowsExceptionAsync<Ember.Scripting.DbHelperException>(async () =>
+         {
+             await facade.CompileScript(id, EmberMethods.GetEmberApiVersion());
+             var after3 = await facade.GetScript(id, includeCaches: true);
+             Assert.IsTrue(after3.CompiledCaches.Count == 1);
+             Assert.IsTrue(after3.CompiledCaches.Any(c => c.AssemblyBytes != null && c.AssemblyBytes.Length >= 1));
+         });
+        Console.WriteLine(e.ToString());
+
+        // Assert.IsFalse(true);
+        int oldV = 3;
+        await facade.CompileScript(id, oldV);
+
+        var after2 = await facade.GetScript(id, includeCaches: true);
+        ScriptCompiledCache cache = await facade.GetCompiledCache(id, oldV);
+        Assert.IsTrue(after2.CompiledCaches.Count == 2);
+        Console.WriteLine("Api Version = " + cache.ApiVersion);
+        Assert.IsTrue(cache != null && (cache.ApiVersion == oldV));
+        Assert.IsTrue(after2.CompiledCaches.Any(c => c.AssemblyBytes != null && c.AssemblyBytes.Length >= 1));
+    }
+
+    [TestMethod]
+    public async Task IsDuplicateTestAndListScriptsFilterTest()
+    {
+        Guid id1 = await facade!.CreateScript(sourceCodePedia!);
+        CustomerScript script1 = await facade.GetScript(id1);
+
+        Guid id2 = await facade!.CreateScript(sourceCodePedia!);
+        CustomerScript script2 = await facade.GetScript(id2);
+
+        Assert.IsTrue(script1.Equals(script2));
+        var e = await Assert.ThrowsExceptionAsync<Ember.Scripting.DbHelperException>(async () =>
+        {
+            Guid id3 = await facade!.CreateScript(sourceCodePedia!, checkForDuplicates: true);
+        });
+
+        var allScripts = await facade.ListScripts();
+        Console.WriteLine("Count of allScrips= " + allScripts.Count());
+        Assert.IsTrue(allScripts.Count() == 2);
+
+        CustomerScriptFilter filter = new CustomerScriptFilter(scriptName: script1.ScriptName, sourceCode: script1.SourceCode);
+        var allScripts2 = await facade.ListScripts(filter);
+        Console.WriteLine("Count of allScrips= " + allScripts2.Count());
+        Assert.IsTrue(allScripts2.Count() == 2);
+
+        await facade!.CreateScript(sourceCodeActionV1!);
+        await facade!.CreateScript(sourceCodeActionV3!);
+        await facade!.CreateScript(sourceCodeActionV3!);
+
+        await facade!.CreateScript(sourceCodePedia!);
+        await facade!.CreateScript(sourceCodePedia!);
+        await facade!.CreateScript(sourceCodePedia!);
+        await facade!.CreateScript(sourceCodePedia!);
+        var allScripts3 = await facade.ListScripts(filter);
+        Console.WriteLine("Count of allScrips= " + allScripts3.Count());
+        Assert.IsTrue(allScripts3.Count() == 6);
+    }
+
+    [TestMethod]
+    public void ExceptionHelperTestsAsync()
+    {
+        try
+        {
+            try
+            {
+                try
+                {
+
+                    try
+                    {
+                        try
+                        {
+                            throw new NoFileWithThisClassNameFoundException("random message0");
+                        }
+                        catch (Exception e)
+                        {
+
+                            throw new CompilationFailedException("random message1", e);
+                        }
+                    }
+                    catch (Exception e)
+                    {
+
+                        throw new ScriptExecutionException("random message2", e);
+                    }
+                }
+                catch (Exception e)
+                {
+
+                    throw new GetScriptPathFromFolderException("random message3", e);
+                }
+            }
+            catch (Exception e)
+            {
+
+                throw new CreateStringFromCsFileException("random message4", e);
+            }
+        }
+        catch (Exception e)
+        {
+
+            int baseExceptionIndex = ExceptionHelper.GetBaseExceptionIndex(e);
+            Assert.IsTrue(baseExceptionIndex == 4);
+
+            Exception baseException = e.GetBaseException();
+            Assert.IsInstanceOfType(baseException, typeof(NoFileWithThisClassNameFoundException));
+            // Assert.IsTrue(e.)
+
+            Exception exAtIndex0 = ExceptionHelper.GetExceptionFromChain(e, 0);
+            Console.WriteLine(exAtIndex0.GetType().Name);
+            Assert.IsInstanceOfType(exAtIndex0, typeof(CreateStringFromCsFileException));
+            Assert.IsTrue(exAtIndex0.Message == "random message4");
+
+            Exception exAtIndex1 = ExceptionHelper.GetExceptionFromChain(e, 1);
+            Console.WriteLine(exAtIndex1.GetType().Name);
+            Assert.IsInstanceOfType(exAtIndex1, typeof(GetScriptPathFromFolderException));
+
+            Exception exAtIndex2 = ExceptionHelper.GetExceptionFromChain(e, 2);
+            Console.WriteLine(exAtIndex2.GetType().Name);
+            Assert.IsInstanceOfType(exAtIndex2, typeof(ScriptExecutionException));
+
+            Exception exAtIndex3 = ExceptionHelper.GetExceptionFromChain(e, 3);
+            Console.WriteLine(exAtIndex3.GetType().Name);
+            Assert.IsInstanceOfType(exAtIndex3, typeof(CompilationFailedException));
+            Assert.IsTrue(exAtIndex3.Message == "random message1");
+
+            Exception exAtIndex4 = ExceptionHelper.GetExceptionFromChain(e, 4);
+            Console.WriteLine(exAtIndex4.GetType().Name);
+            Assert.IsInstanceOfType(exAtIndex4, typeof(NoFileWithThisClassNameFoundException));
+
+
+            Assert.ThrowsException<Exception>(() =>
+      {
+          Exception exAtIndex5 = ExceptionHelper.GetExceptionFromChain(e, 5);
+          Console.WriteLine(exAtIndex5.GetType().Name);
+          // Assert.IsInstanceOfType(exAtIndex5, typeof(CreateStringFromCsFileException));
+      });
+
+            Assert.ThrowsException<Exception>(() =>
+   {
+       Exception exAtIndex6 = ExceptionHelper.GetExceptionFromChain(e, 6);
+       Console.WriteLine(exAtIndex6.GetType().Name);
+       //    Assert.IsInstanceOfType(exAtIndex6, typeof(CreateStringFromCsFileException));
+   });
+
+            Console.WriteLine("First tests ran.");
+
+            Exception exAtNegIndex0 = ExceptionHelper.GetExceptionFromChainReversed(e, 0);
+            Console.WriteLine(exAtNegIndex0.GetType().Name);
+            Assert.IsInstanceOfType(exAtNegIndex0, typeof(NoFileWithThisClassNameFoundException));
+
+            Exception exAtNegIndex1 = ExceptionHelper.GetExceptionFromChainReversed(e, 1);
+            Console.WriteLine(exAtNegIndex1.GetType().Name);
+            Assert.IsInstanceOfType(exAtNegIndex1, typeof(CompilationFailedException));
+
+            Exception exAtNegIndex2 = ExceptionHelper.GetExceptionFromChainReversed(e, 2);
+            Console.WriteLine(exAtNegIndex2.GetType().Name);
+            Assert.IsInstanceOfType(exAtNegIndex2, typeof(ScriptExecutionException));
+
+            Exception exAtNegIndex3 = ExceptionHelper.GetExceptionFromChainReversed(e, 3);
+            Console.WriteLine(exAtNegIndex3.GetType().Name);
+            Assert.IsInstanceOfType(exAtNegIndex3, typeof(GetScriptPathFromFolderException));
+
+            Exception exAtNegIndex4 = ExceptionHelper.GetExceptionFromChainReversed(e, 4);
+            Console.WriteLine(exAtNegIndex4.GetType().Name);
+            Assert.IsInstanceOfType(exAtNegIndex4, typeof(CreateStringFromCsFileException));
+
+
+            Assert.ThrowsException<Exception>(() =>
+              {
+                  Exception exAtNegIndex5 = ExceptionHelper.GetExceptionFromChainReversed(e, 5);
+                  Console.WriteLine(exAtNegIndex5.GetType().Name);
+                  Assert.IsInstanceOfType(exAtNegIndex5, typeof(CreateStringFromCsFileException));
+              });
+            Assert.ThrowsException<Exception>(() =>
+              {
+                  Exception exAtNegIndex6 = ExceptionHelper.GetExceptionFromChainReversed(e, 6);
+                  Console.WriteLine(exAtNegIndex6.GetType().Name);
+                  Assert.IsInstanceOfType(exAtNegIndex6, typeof(CreateStringFromCsFileException));
+              });
+
+            // Assert.IsTrue(false);
+        }
+    }
+
+
+}
+</file>
+
+<file path="sandbox.Tests/Tests/Unit/EmberVersioningTests.cs">
+using System.Threading.Tasks;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Ember.Scripting;
+using Serilog;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+
+[TestClass]
+public class EmberVersioningTests
+{
+
+
+    ISccriptManagerDeleteAfter? facade;
+    EmberMethods? em;
+    string? ActionResultVersionSpecific;
+    string? sourceCodeActionV1 = TestHelper.GetSC().sourceCodeActionV1;
+    string? sourceCodeActionV2 = TestHelper.GetSC().sourceCodeActionV2;
+    string? sourceCodeActionV3 = TestHelper.GetSC().sourceCodeActionV3;
+    string? sourceCodeVaccineAction = TestHelper.GetSC().sourceCodeVaccineAction;
+    string? sourceCodePedia = TestHelper.GetSC().sourceCodePedia;
+    // LoggerForScripting? logger;
+    List<string>? sourceCodes = TestHelper.GetSC(includeCondInList: false).sourceCodes;
+
+    [TestInitialize]
+    public
+     void Setup()
+    {
+        ActionResultVersionSpecific = "[Message contains either failure or succes: ] ";  //change this if action result version changes it will thraow cause of message contains
+    }
+
+
+    [TestMethod]
+    public async Task RecentEmberVersionTestAsync()
+    {
+        int v = EmberMethods.GetEmberApiVersion();
+
+        facade = EmberMethods.GetNewScriptManagerInstance(v);
+        em = new EmberMethods(facade);
+        await facade!.EnsureDeletedCreated();
+        await ExecuteEachScript(facade, em);
+        int apiVersionInsideFacade = facade.GetRunningApiVersion();
+        Assert.IsTrue(apiVersionInsideFacade == v);
+        Assert.IsTrue(apiVersionInsideFacade == 5);
+
+        facade = EmberMethods.GetNewScriptManagerInstance(1);
+        em = new EmberMethods(facade);
+        await facade!.EnsureDeletedCreated();
+        await ExecuteEachScript(facade, em);
+        apiVersionInsideFacade = facade.GetRunningApiVersion();
+        Assert.IsTrue(apiVersionInsideFacade == EmberMethods.GetEmberApiVersion(testingDiffrentVersion: 1));
+        Assert.IsTrue(apiVersionInsideFacade == 1);
+    }
+
+    public void OldEmberVersionTest()
+    {
+
+    }
+    public async Task<List<Guid>> SaturateDBAsync(ISccriptManagerDeleteAfter facade, EmberMethods rm)
+    {
+        List<Guid> ids = [];
+        foreach (var item in sourceCodes!)
+        {
+            Guid id = await facade!.CreateScript(sourceCodeActionV1!);
+            ids.Add(id);
+        }
+        return ids;
+    }
+    public async Task ExecuteEachScript(ISccriptManagerDeleteAfter facade, EmberMethods em)
+    {
+        foreach (var id in await SaturateDBAsync(facade, em))
+        {
+            CustomerScript retrievedScript = await facade!.GetScript(id);
+            var context = await em!.GetTestingContext<GeneratorContextNoInherVaccineV5.GeneratorContext>(justForTesting: retrievedScript);
+            object resultBeforeUpgrade = await facade.ExecuteScriptById(id, context);   //here somehow figure out how to get the version that is being executed todo
+
+            if (resultBeforeUpgrade is ActionResultBaseClass)
+            {
+                ActionResultV3NoInheritance result = EmberMethods.UpgradeActionResult(resultBeforeUpgrade);
+                string shouldReturn = ActionResultVersionSpecific + "Pediatric tests added";
+                Assert.IsInstanceOfType(result, typeof(ActionResultBaseClass));
+                Assert.IsInstanceOfType(result, typeof(ActionResultV3NoInheritance));
+                Assert.IsTrue(result.ToString().Contains(shouldReturn));
+            }
+            else
+            {
+                object result = await facade.ExecuteScriptById(id, context);
+                string shouldReturn = "True";
+                Assert.IsInstanceOfType(result, typeof(bool));
+                Assert.IsTrue(result.ToString()!.Contains(shouldReturn));
+            }
+        }
+    }
+
+    [TestMethod]
+    public async Task GetCachesForEachApiVersionTestsAsync()
+    {
+        int v = EmberMethods.GetEmberApiVersion();
+
+        facade = EmberMethods.GetNewScriptManagerInstance(v);
+        em = new EmberMethods(facade);
+        await facade!.EnsureDeletedCreated();
+        await ExecuteEachScript(facade, em);
+        int apiVersionInsideFacade = facade.GetRunningApiVersion();
+
+        var versionDict = await facade!.GetCachesForEachApiVersion();
+        foreach (var item in versionDict)
+        {
+            Console.WriteLine("Key: " + item.Key);
+            foreach (var cache in item.Value)
+            {
+                Console.WriteLine(cache.CustomerScript!.ScriptName);
+            }
+        }
+
+        Assert.IsTrue(apiVersionInsideFacade == v);
+        Assert.IsTrue(apiVersionInsideFacade == 5);
+
+        facade = EmberMethods.GetNewScriptManagerInstance(1);
+        em = new EmberMethods(facade);
+        await ExecuteEachScript(facade, em);
+        apiVersionInsideFacade = facade.GetRunningApiVersion();
+        Assert.IsTrue(apiVersionInsideFacade == EmberMethods.GetEmberApiVersion(testingDiffrentVersion: 1));
+        Assert.IsTrue(apiVersionInsideFacade == 1);
+
+        var versionDict2 = await facade!.GetCachesForEachApiVersion();
+        foreach (var item in versionDict2)
+        {
+            Console.WriteLine("Key: " + item.Key);
+            foreach (var cache in item.Value)
+            {
+                Console.WriteLine(cache.CustomerScript!.ScriptName);
+            }
+        }
+        Assert.IsTrue(versionDict2[1].Count() == 4);
+        Assert.IsTrue(versionDict2[5].Count() == 4);
+
+    }
+
+    [TestMethod]
+    public async Task OldSourceCodeVersionsTest()
+    {
+        facade = EmberMethods.GetNewScriptManagerInstance(1);
+        Guid id = await facade!.CreateScript(sourceCodeActionV1!);
+
+        facade = EmberMethods.GetNewScriptManagerInstance(2);
+        await facade.UpdateScript(id, sourceCodeActionV2!);
+        await facade.CompileScript(id);
+
+        string sourceCodeAV = (await facade.GetCompiledCache(id)).OldSourceCode!;
+        string sourceCodeV1 = (await facade.GetCompiledCache(id, 1)).OldSourceCode!;
+        string sourceCodeV2 = (await facade.GetCompiledCache(id, 2)).OldSourceCode!;
+
+        Assert.IsTrue(sourceCodeAV == sourceCodeActionV2);
+        Assert.IsTrue(sourceCodeV1 == sourceCodeActionV1);
+        Assert.IsTrue(sourceCodeAV == sourceCodeActionV2);
+        Assert.IsTrue(sourceCodeAV == sourceCodeV2);
+        Assert.IsFalse(sourceCodeAV == sourceCodeV1);
+        // Console.WriteLine(sourceCodeAV);
+        // Console.WriteLine(sourceCodeV1);
+        // Assert.IsTrue(false);
+    }
+}
+</file>
+
+<file path="sandbox/src/Scripts/ActionScripts/AddPediatricTestsV1.cs">
+using System;   //todo this is possible to default in compiler
+using System.Threading.Tasks;
+using System.Collections.Generic;   //todo same for them
+using Ember.Scripting;
+using GeneratorScriptsGeneric;
+using IGeneratorContext_V2;
+
+// using static System.Threading.Mutex; //if uncomment it wont run which is good
+public class AddPediatricTestsV2 : GeneratorScriptsGeneric.IGeneratorActionScript<IGeneratorContext_V2.IGeneratorContext, ActionResult>
+{
+    public async Task<ActionResult> ExecuteAsync(IGeneratorContext_V2.IGeneratorContext context)    //error is here in Basyns
+    {
+        context.Logger.Info("Adding pediatric standard tests");
+
+        // Check if test already exists (might be auto-added by business rule)
+        if (!context.LabOrder.HasTest("PED-BASIC"))
+        {
+            context.LabOrder.AddTest("PED-BASIC");
+        }
+        // System.IO.BufferedStream? stream = null;
+        // double versionExample = context.LabOrder.RandomNewDouble;    //example of newer version
+        // Console.WriteLine(versionExample);
+        context.LabOrder.SetCustomField("ProcessedByGenerator", true);
+        return ActionResult.Success("Pediatric tests added");   //todo check what happens if you return this object without calling the function on it
+        // return null; //just for compiler
+    }
+}
+</file>
+
+<file path="sandbox.Tests/Tests/Unit/SandboxTests.cs">
+using System.Threading.Tasks;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Ember.Scripting;
+using Serilog;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+
+[TestClass]
+public class SanboxTests
+{
+    ISccriptManagerDeleteAfter? facade;
+    // EmberMethods? em;
+    string? ActionResultVersionSpecific;
+    string? sourceCodeActionV1 = TestHelper.GetSC().sourceCodeActionV1;
+    string? sourceCodeActionV2 = TestHelper.GetSC().sourceCodeActionV2;
+    string? sourceCodeActionV3 = TestHelper.GetSC().sourceCodeActionV3;
+    string? sourceCodeVaccineAction = TestHelper.GetSC().sourceCodeVaccineAction;
+    string? sourceCodePedia = TestHelper.GetSC().sourceCodePedia;
+    List<string>? sourceCodes = TestHelper.GetSC(includeCondInList: false).sourceCodes;
+
+    [TestInitialize]
+    public
+     void Setup()
+    {
+        ActionResultVersionSpecific = "[Message contains either failure or succes: ] ";
+    }
+    [TestMethod]
+    public async Task CreateContextText()
+    {
+        ScriptFactory sf;
+        GeneratorContext ctx;
+
+        facade = EmberMethods.GetNewScriptManagerInstance(1);
+        sf = new ScriptFactory(facade);
+        ctx = await sf.CreateContextForApiV();
+
+        Assert.IsTrue(ctx.GetType() == typeof(ReadOnlyContextV1.GeneratorContext));
+
+        facade = EmberMethods.GetNewScriptManagerInstance(2);
+        sf = new ScriptFactory(facade);
+        ctx = await sf.CreateContextForApiV();
+
+        Assert.IsTrue(ctx.GetType() == typeof(RWContextV2.GeneratorContext));
+
+        facade = EmberMethods.GetNewScriptManagerInstance(6);
+        sf = new ScriptFactory(facade);
+
+        Exception ex = await Assert.ThrowsExceptionAsync<Exception>(async () =>  //todo check this one
+         {
+             ctx = await sf.CreateContextForApiV();
+         });
+        Assert.IsTrue(ex.Message.Contains("No Context class defined in") && ex.Message.Contains("for the passed API version."));
+    }
+
+    [TestMethod]
+    public void GetDictionaryTest()
+    {
+        Dictionary<int, Type> contextVersionMap = new()
+        {
+            {1, typeof(ReadOnlyContextV1.GeneratorContext)},
+            {2, typeof(RWContextV2.GeneratorContext)},
+            {3, typeof(GeneratorContextV3.GeneratorContext)},
+            {4, typeof(GeneratorContextV4.GeneratorContext)},
+            {5, typeof(GeneratorContextNoInherVaccineV5.GeneratorContext)},
+        };
+
+        ScriptFactory sf;
+        facade = EmberMethods.GetNewScriptManagerInstance(1);
+        sf = new ScriptFactory(facade);
+        Dictionary<int, Type> retrievedDict = ContextVersionScanner.GetClassDictionary();
+        retrievedDict.Reverse();
+        PrintDictToConsole(contextVersionMap);
+        PrintDictToConsole(retrievedDict);
+        CollectionAssert.AreEquivalent(contextVersionMap, retrievedDict);
+    }
+
+    public void PrintDictToConsole(Dictionary<int, Type> dict)
+    {
+        Console.WriteLine("Start of dict String:");
+        foreach (var pair in dict)
+        {
+            Console.WriteLine("Key: " + pair.Key + ", Value: " + pair.Value);
+        }
+    }
+
+    [TestMethod]
+    public void ActionResultVersionScannerTest()
+    {
+        Dictionary<int, Type> contextVersionMap = new()
+        {
+            {1, typeof(ActionResult)},
+            {2, typeof(ActionResultV2)},
+            {3, typeof(ActionResultV3NoInheritance)},
+        };
+
+        Dictionary<int, Type> retrievedDict = ActionResultVersionScanner.GetClassDictionary();
+        PrintDictToConsole(retrievedDict);
+
+        CollectionAssert.AreEquivalent(contextVersionMap, retrievedDict);
+        // Assert.IsFalse(true);
+    }
+    [TestMethod]
+    public void BasicValidationTestUsingGetDictionary()
+    {
+        facade = EmberMethods.GetNewScriptManagerInstance();
+        (string className, string baseTypeName, int versionInt) valResult = facade.BasicValidationBeforeCompiling(sourceCodeActionV2!);
+
+        Console.WriteLine(nameof(valResult.baseTypeName) + " : " + valResult.baseTypeName);
+        Console.WriteLine(nameof(valResult.className) + " : " + valResult.className);
+        Console.WriteLine(nameof(valResult.versionInt) + " : " + valResult.versionInt);
+
+        Assert.IsTrue(valResult.baseTypeName == "IGeneratorActionScript");
+        Assert.IsTrue(valResult.className == "AddPediatricTestsV3");
+        Assert.IsTrue(valResult.versionInt == 3);
+
+        valResult = facade.BasicValidationBeforeCompiling(sourceCodeActionV1!);
+
+        Console.WriteLine(nameof(valResult.baseTypeName) + " : " + valResult.baseTypeName);
+        Console.WriteLine(nameof(valResult.className) + " : " + valResult.className);
+        Console.WriteLine(nameof(valResult.versionInt) + " : " + valResult.versionInt);
+
+        Assert.IsTrue(valResult.baseTypeName == "IGeneratorActionScript");
+        Assert.IsTrue(valResult.className == "AddPediatricTestsV2");
+        Assert.IsTrue(valResult.versionInt == 2);
+
+        valResult = facade.BasicValidationBeforeCompiling(sourceCodeActionV3!);
+
+        Console.WriteLine(nameof(valResult.baseTypeName) + " : " + valResult.baseTypeName);
+        Console.WriteLine(nameof(valResult.className) + " : " + valResult.className);
+        Console.WriteLine(nameof(valResult.versionInt) + " : " + valResult.versionInt);
+
+        Assert.IsTrue(valResult.baseTypeName == "IGeneratorActionScript");
+        Assert.IsTrue(valResult.className == "AddPediatricTestsV4");
+        Assert.IsTrue(valResult.versionInt == 4);
+
+        valResult = facade.BasicValidationBeforeCompiling(sourceCodeVaccineAction!);
+
+        Console.WriteLine(nameof(valResult.baseTypeName) + " : " + valResult.baseTypeName);
+        Console.WriteLine(nameof(valResult.className) + " : " + valResult.className);
+        Console.WriteLine(nameof(valResult.versionInt) + " : " + valResult.versionInt);
+
+        Assert.IsTrue(valResult.baseTypeName == "IGeneratorActionScript");
+        Assert.IsTrue(valResult.className == "VaccineScript");
+        Assert.IsTrue(valResult.versionInt == 5);
+
+        valResult = facade.BasicValidationBeforeCompiling(sourceCodePedia!);
+
+        Console.WriteLine(nameof(valResult.baseTypeName) + " : " + valResult.baseTypeName);
+        Console.WriteLine(nameof(valResult.className) + " : " + valResult.className);
+        Console.WriteLine(nameof(valResult.versionInt) + " : " + valResult.versionInt);
+
+        Assert.IsTrue(valResult.baseTypeName == "IGeneratorConditionScript");
+        Assert.IsTrue(valResult.className == "PediatricCondition");
+        Assert.IsTrue(valResult.versionInt == 1);
+
+        // Assert.IsTrue(false);
+
+    }
+
+    [TestMethod]
+    public async Task CreateContextForApiTest()
+    {
+        Guid id;
+        ScriptFactory sf;
+        (string className, string baseTypeName, int versionInt) valResult;
+
+        facade = EmberMethods.GetNewScriptManagerInstance();
+        valResult = facade.BasicValidationBeforeCompiling(sourceCodeActionV2!);
+        id = await facade.CreateScript(sourceCodeActionV2!);
+
+        sf = new ScriptFactory(facade);
+        await facade.ExecuteScriptById(id, await sf.CreateContextForApiV(valResult.versionInt));
+
+        for (int i = 0; i < 6; i++)
+        {
+            facade = EmberMethods.GetNewScriptManagerInstance(i);
+            valResult = facade.BasicValidationBeforeCompiling(sourceCodeActionV2!);
+            id = await facade.CreateScript(sourceCodeActionV2!);
+
+            sf = new ScriptFactory(facade);
+            await facade.ExecuteScriptById(id, await sf.CreateContextForApiV(valResult.versionInt));
+        }
+
+        for (int i = 0; i < 6; i++)
+        {
+            facade = EmberMethods.GetNewScriptManagerInstance(i);
+            valResult = facade.BasicValidationBeforeCompiling(sourceCodeVaccineAction!);
+            id = await facade.CreateScript(sourceCodeVaccineAction!);
+
+            sf = new ScriptFactory(facade);
+            await facade.ExecuteScriptById(id, await sf.CreateContextForApiV(valResult.versionInt));
+        }
+        for (int i = 0; i < 6; i++)
+        {
+            facade = EmberMethods.GetNewScriptManagerInstance(i);
+            valResult = facade.BasicValidationBeforeCompiling(sourceCodePedia!);
+            id = await facade.CreateScript(sourceCodePedia!);
+
+            sf = new ScriptFactory(facade);
+            await facade.ExecuteScriptById(id, await sf.CreateContextForApiV(valResult.versionInt));
+        }
+    }
+
+    [TestMethod]
+    public async Task CreateContextByDowngradeTest()
+    {
+        Guid id;
+        ScriptFactory sf;
+        (string className, string baseTypeName, int versionInt) valResult;
+        object result;
+        ActionResultV3NoInheritance ar;
+        string src;
+
+        src = sourceCodeVaccineAction!;
+        facade = EmberMethods.GetNewScriptManagerInstance();
+        valResult = facade.BasicValidationBeforeCompiling(src!);
+        id = await facade.CreateScript(src!);
+
+        sf = new ScriptFactory(facade);
+        result = await facade.ExecuteScriptById(id, await sf.CreateContextByDowngrade(src!));
+        ar = EmberMethods.UpgradeActionResult(result);
+        Console.WriteLine(ar.ToString());
+        Assert.IsInstanceOfType(ar, typeof(ActionResultV3NoInheritance));
+
+        src = sourceCodeActionV3!;
+        valResult = facade.BasicValidationBeforeCompiling(src!);
+        id = await facade.CreateScript(src!);
+
+        sf = new ScriptFactory(facade);
+        result = await facade.ExecuteScriptById(id, await sf.CreateContextByDowngrade(src!));
+        ar = EmberMethods.UpgradeActionResult(result);
+        Console.WriteLine(ar.ToString());
+        Assert.IsInstanceOfType(ar, typeof(ActionResultV3NoInheritance));
+
+        src = sourceCodeActionV1!;
+        valResult = facade.BasicValidationBeforeCompiling(src!);
+        id = await facade.CreateScript(src!);
+
+        sf = new ScriptFactory(facade);
+        result = await facade.ExecuteScriptById(id, await sf.CreateContextByDowngrade(src!));
+        ar = EmberMethods.UpgradeActionResult(result);
+        Console.WriteLine(ar.ToString());
+        Assert.IsInstanceOfType(ar, typeof(ActionResultV3NoInheritance));
+
+        src = sourceCodePedia!;
+        valResult = facade.BasicValidationBeforeCompiling(src!);
+        id = await facade.CreateScript(src!);
+
+        sf = new ScriptFactory(facade);
+        result = await facade.ExecuteScriptById(id, await sf.CreateContextByDowngrade(src!));
+        // ar = EmberMethods.UpgradeActionResult(result);
+        Console.WriteLine(result.ToString());
+
+        Assert.IsInstanceOfType(result, typeof(bool));
+
+        // Assert.IsTrue(false);
+    }
+}
+</file>
+
 <file path="sandbox/sandbox.csproj">
 <Project Sdk="Microsoft.NET.Sdk">
 
@@ -5107,6 +5257,7 @@ internal class ScriptExecutor
     <ItemGroup>
         <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.3" />
         <PackageReference Include="Serilog.Extensions.Logging" Version="10.0.0" />
+        <PackageReference Include="Serilog.Sinks.Grafana.Loki" Version="8.3.2" />
         <ProjectReference Include="..\scripting\scripting.csproj" />
         <!-- Existing: Roslyn scripting support -->
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="5.0.0" />
@@ -5140,7 +5291,6 @@ internal class ScriptExecutor
         <PackageReference Include="Serilog" Version="4.3.1" />
         <PackageReference Include="Serilog.Sinks.Console" Version="6.1.1" />
         <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
-        <PackageReference Include="Serilog.Sinks.Seq" Version="9.0.0" />
 
         <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="10.0.2" />
         <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.2" />
@@ -5154,6 +5304,74 @@ internal class ScriptExecutor
     </ItemGroup>
 
 </Project>
+</file>
+
+<file path="sandbox/src/Scripts/ActionScripts/AddPediatricTestsV3.cs">
+using System;   //todo this is possible to default in compiler
+using System.Threading.Tasks;
+using System.Collections.Generic;   //todo same for them
+using Ember.Scripting;
+using GeneratorScriptsV3;
+using IGeneratorContext_V4;
+
+// public class AddPediatricTestsV3 : IGeneratorActionScript<IGeneratorContext_V3, ActionResultV3NoInheritance>
+// {
+//     // public async Task<ActionResult> ExecuteAsync(IGeneratorContext context)
+//     public async Task<ActionResultV3NoInheritance> ExecuteAsync(IGeneratorContext_V3 context)
+//     {
+//         context.Logger.Info("Adding pediatric standard tests");
+
+//         // Check if test already exists (might be auto-added by business rule)
+//         if (!context.LabOrder.HasTest("PED-BASIC"))
+//         {
+//             context.LabOrder.AddTest("PED-BASIC");
+//         }
+
+//         context.LabOrder.SetCustomField("ProcessedByGenerator", true);
+
+//         double versionExample = context.LabOrder.RandomNewDouble;    //example of newer version
+//         Console.WriteLine(versionExample);
+
+//         string exampleV3 = context.LabOrder.randomNewFunctionInV3("Gilles");
+//         Console.WriteLine("Return also works if here:" + exampleV3);
+
+//         return ActionResultV3NoInheritance.Success("Pediatric tests added V3");
+//         // return null; //just for compiler
+//     }
+// }
+
+public class AddPediatricTestsV4 : GeneratorScriptsV3.IGeneratorActionScript
+{
+    // public async Task<ActionResult> ExecuteAsync(IGeneratorContext context)
+    public async Task<ActionResultV3NoInheritance> ExecuteAsync(IGeneratorContext_V4.IGeneratorContext context)
+    {
+        context.Logger.Info("Adding pediatric standard tests");
+
+        // Check if test already exists (might be auto-added by business rule)
+        if (!context.LabOrder.HasTest("PED-BASIC"))
+        {
+            context.LabOrder.AddTest("PED-BASIC");
+        }
+
+        context.LabOrder.SetCustomField("ProcessedByGenerator", true);
+
+        double versionExample = context.LabOrder.RandomNewDouble;    //example of newer version
+        Console.WriteLine(versionExample);
+
+        string exampleV3 = context.LabOrder.randomNewFunctionInV3("Gilles");
+        Console.WriteLine("Return also works if here:" + exampleV3);
+
+        return ActionResultV3NoInheritance.Success("Pediatric tests added V3");
+        // return null; //just for compiler
+    }
+}
+</file>
+
+<file path="sandbox/logs/seq-offline-buffer.bookmark">
+0:::C:\Users\Gilles\Desktop\UNI\Semester 6\Code\Codebase\Scripting-Proof-of-Concept\sandbox\logs\seq-offline-buffer-20260309.clef
+lef
+
+20260303.clef
 </file>
 
 <file path="scripting/src/ScriptManager.cs/IScriptManagerDeleteAfter.cs">
@@ -5307,7 +5525,7 @@ public interface ISccriptManagerDeleteAfter : IScriptManagerExtended
   /// <returns></returns>
   Task<List<int>> GetActiveApiVersions();
 
-  Task<int> GetRunningApiVersion();
+  int GetRunningApiVersion();
 
   /// <summary>
   /// Returns which API versions a script is compatible with
@@ -5397,13 +5615,6 @@ public interface ISccriptManagerDeleteAfter : IScriptManagerExtended
 }
 </file>
 
-<file path="sandbox/logs/seq-offline-buffer.bookmark">
-0:::C:\Users\Gilles\Desktop\UNI\Semester 6\Code\Codebase\Scripting-Proof-of-Concept\sandbox\logs\seq-offline-buffer-20260309.clef
-lef
-
-20260303.clef
-</file>
-
 <file path="sandbox/src/ScriptingFramework/GeneratorScripts.cs">
 using Ember.Scripting;
 
@@ -5415,6 +5626,7 @@ namespace GeneratorScriptsGenericSimple
     /// <summary>
     /// Implementation using 1 generic for Context
     /// </summary>
+    [MetaDataIGeneratorScript(version: 1, returnType: IGeneratorScriptReturnType.Condition, type: IGeneratorScriptType.GenericSimple)]
     public interface IGeneratorConditionScript<TContext> : IGeneratorConditionScript    //todo this needs to get tested still
     where TContext : IGeneratorReadOnlyContextV1.IGeneratorContext
     {
@@ -5425,9 +5637,11 @@ namespace GeneratorScriptsGenericSimple
             return EvaluateAsync((TContext)context);
         }
     }
+    [MetaDataIGeneratorScript(version: 1, returnType: IGeneratorScriptReturnType.Action, type: IGeneratorScriptType.GenericSimple)]
     public interface IGeneratorActionScript<TContext> : IGeneratorActionScript
     where TContext : IGeneratorContext_V2.IGeneratorContext
     {
+
         Task<ActionResultBaseClass> ExecuteAsync(TContext context);
 
         //explicit default implementation for the base interface
@@ -5444,10 +5658,10 @@ namespace GeneratorScriptsGeneric
     /// <summary>
     /// Implementation using 2 generics, one for context and one additional for ActionResult
     /// </summary>
-
+    [MetaDataIGeneratorScript(version: 1, returnType: IGeneratorScriptReturnType.Action, type: IGeneratorScriptType.Generic)]
     public interface IGeneratorActionScript<TContext, TActionResult> : IGeneratorActionScript
-    where TContext : IGeneratorBaseInterface    //changed from IGeneratorContext
-    where TActionResult : ActionResultBaseClass
+        where TContext : IGeneratorBaseInterface    //changed from IGeneratorContext
+        where TActionResult : ActionResultBaseClass
     {
         Task<TActionResult> ExecuteAsync(TContext context);
 
@@ -5466,7 +5680,8 @@ namespace GeneratorScriptsGeneric
 
 namespace GeneratorScriptsV2
 {
-    public interface IGeneratorActionScriptV2 : Ember.Scripting.IGeneratorActionScript
+    [MetaDataIGeneratorScript(version: 2)]
+    public interface IGeneratorActionScript : Ember.Scripting.IGeneratorActionScript
     {
         Task<ActionResultV2> ExecuteAsync(IGeneratorContext_V3.IGeneratorContext context);
 
@@ -5478,7 +5693,8 @@ namespace GeneratorScriptsV2
 }
 namespace GeneratorScriptsV3
 {
-    public interface IGeneratorActionScriptV3 : Ember.Scripting.IGeneratorActionScript
+    [MetaDataIGeneratorScript(version: 3)]
+    public interface IGeneratorActionScript : Ember.Scripting.IGeneratorActionScript
     {
         Task<ActionResultV3NoInheritance> ExecuteAsync(IGeneratorContext_V4.IGeneratorContext context);
 
@@ -5490,7 +5706,8 @@ namespace GeneratorScriptsV3
 }
 namespace GeneratorScriptsV4
 {
-    public interface IGeneratorActionScriptV4Vaccine : Ember.Scripting.IGeneratorActionScript
+    [MetaDataIGeneratorScript(version: 4)]
+    public interface IGeneratorActionScript : Ember.Scripting.IGeneratorActionScript
     {
         Task<ActionResultV3NoInheritance> ExecuteAsync(IGeneratorContextNoInheritance_V5.IGeneratorContext context);
 
@@ -5498,184 +5715,6 @@ namespace GeneratorScriptsV4
         {
             return ExecuteAsync(context);
         }
-    }
-}
-</file>
-
-<file path="scripting/src/Exceptions/Exceptions.cs">
-using System;
-using System.Collections.Generic;
-
-namespace Ember.Scripting;
-
-public class NoFileWithThisClassNameFoundException : Exception
-{
-    public NoFileWithThisClassNameFoundException() : base() { }
-    public NoFileWithThisClassNameFoundException(string message) : base(message) { }
-    public NoFileWithThisClassNameFoundException(string message, Exception innerException) : base(message, innerException) { }
-}
-
-public class CompilationFailedException : Exception
-{
-    string? CompilerErrors { get; }
-
-    public CompilationFailedException() : base() { }
-    public CompilationFailedException(string message) : base(message) { }
-    public CompilationFailedException(string message, Exception innerException) : base(message, innerException) { }
-
-    public CompilationFailedException(string message, string compilerErrors) : base(message)
-    {
-        CompilerErrors = compilerErrors;
-    }
-}
-
-public class ScriptExecutionException : Exception
-{
-    public ScriptExecutionException() : base() { }
-    public ScriptExecutionException(string message) : base(message) { }
-    public ScriptExecutionException(string message, Exception innerException) : base(message, innerException) { }
-}
-
-public class ActionScriptExecutionException : ScriptExecutionException
-{
-    public ActionScriptExecutionException() : base() { }
-    public ActionScriptExecutionException(string message) : base(message) { }
-    public ActionScriptExecutionException(string message, Exception innerException) : base(message, innerException) { }
-}
-
-public class ConditionScriptExecutionException : ScriptExecutionException
-{
-    public ConditionScriptExecutionException() : base() { }
-    public ConditionScriptExecutionException(string message) : base(message) { }
-    public ConditionScriptExecutionException(string message, Exception innerException) : base(message, innerException) { }
-}
-
-public class GetScriptPathFromFolderException : Exception
-{
-    public GetScriptPathFromFolderException() : base() { }
-    public GetScriptPathFromFolderException(string message) : base(message) { }
-    public GetScriptPathFromFolderException(string message, Exception innerException) : base(message, innerException) { }
-}
-
-public class CreateStringFromCsFileException : Exception
-{
-    public CreateStringFromCsFileException() : base() { }
-    public CreateStringFromCsFileException(string message) : base(message) { }
-    public CreateStringFromCsFileException(string message, Exception innerException) : base(message, innerException) { }
-}
-
-public class NoClassFoundInScriptFileException : Exception
-{
-    public NoClassFoundInScriptFileException() : base() { }
-    public NoClassFoundInScriptFileException(string message) : base(message) { }
-    public NoClassFoundInScriptFileException(string message, Exception innerException) : base(message, innerException) { }
-}
-
-public class MoreThanOneClassFoundInScriptException : Exception
-{
-    public MoreThanOneClassFoundInScriptException() : base() { }
-    public MoreThanOneClassFoundInScriptException(string message) : base(message) { }
-    public MoreThanOneClassFoundInScriptException(string message, Exception innerException) : base(message, innerException) { }
-}
-
-public class ValidationBeforeCompilationException : Exception
-{
-    public ValidationBeforeCompilationException() : base() { }
-    public ValidationBeforeCompilationException(string message) : base(message) { }
-    public ValidationBeforeCompilationException(string message, Exception innerException) : base(message, innerException) { }
-}
-
-public class ClassNameOrBaseNameNullException : Exception
-{
-    public ClassNameOrBaseNameNullException() : base() { }
-    public ClassNameOrBaseNameNullException(string message) : base(message) { }
-    public ClassNameOrBaseNameNullException(string message, Exception innerException) : base(message, innerException) { }
-}
-
-public class ForbiddenNamespaceException : Exception
-{
-    public string? AttemptedNamespace { get; }
-
-    public ForbiddenNamespaceException() : base() { }
-    public ForbiddenNamespaceException(string message) : base(message) { }
-    public ForbiddenNamespaceException(string message, Exception innerException) : base(message, innerException) { }
-
-    public ForbiddenNamespaceException(string message, string attemptedNamespace) : base(message)
-    {
-        AttemptedNamespace = attemptedNamespace;
-    }
-}
-
-public class ScriptTimeoutException : Exception
-{
-    public ScriptTimeoutException() : base() { }
-    public ScriptTimeoutException(string message) : base(message) { }
-    public ScriptTimeoutException(string message, Exception innerException) : base(message, innerException) { }
-}
-
-public class DbHelperException : Exception
-{
-    public DbHelperException() : base() { }
-    public DbHelperException(string message) : base(message) { }
-    public DbHelperException(string message, Exception innerException) : base(message, innerException) { }
-}
-public class FacadeException : Exception
-{
-    public FacadeException() : base() { }
-    public FacadeException(string message) : base(message) { }
-    public FacadeException(string message, Exception innerException) : base(message, innerException) { }
-}
-
-public class ExceptionHelper    //for future to traverse exception chain
-{
-    public static Exception GetExceptionFromChain(Exception ex, int i)
-    {
-        Exception baseException = ex.GetBaseException();
-        int indexInChain = 0;
-
-        Exception innerEx = ex;
-        while (innerEx.Equals(baseException) == false && indexInChain != i)
-        {
-            innerEx = innerEx.InnerException!;
-            indexInChain++;
-        }
-        if (indexInChain < i)
-        {
-            throw new Exception(message: "Index is out of bounds of the Exception chain!");
-        }
-        return innerEx;
-    }
-    public static Exception GetExceptionFromChainReversed(Exception ex, int i)  //todo fix use index base lookup get rid of for loop
-    {
-        List<Exception> exceptions = GetExceptionList(ex);
-        exceptions.Reverse();
-
-        for (int j = 0; j < exceptions.Count(); j++)
-        {
-            if (j == i)
-            {
-                return exceptions[i];
-            }
-        }
-        throw new Exception(message: "Could not find your exception in the List!");
-    }
-    public static int GetBaseExceptionIndex(Exception ex)
-    {
-        List<Exception> exceptions = GetExceptionList(ex);
-        return exceptions.Count() - 1;
-    }
-    private static List<Exception> GetExceptionList(Exception ex)
-    {
-        List<Exception> exceptions = [];
-        Exception baseException = ex.GetBaseException();
-
-        while (ex.Equals(baseException) == false)
-        {
-            exceptions.Add(ex);
-            ex = ex.InnerException!;
-        }
-        exceptions.Add(baseException);
-        return exceptions;
     }
 }
 </file>
@@ -5861,11 +5900,6 @@ internal class ScriptCompiler
                     }
                     versionInt = ctx.Key;
                 }
-            }
-
-            if (versionInt == null)
-            {
-                throw new Exception("Version int was null in BasicValidation");
             }
 
             if (versionInt == null)
@@ -7176,70 +7210,21 @@ public class ScriptTests
     ISccriptManagerDeleteAfter? facade;
     EmberMethods? em;
     string? ActionResultVersionSpecific;
-    string? sourceCodeActionV1;
-    string? sourceCodeActionV2;
-    string? sourceCodeActionV3;
-    string? sourceCodeVaccineAction;
-    string? sourceCodePedia;
+    string? sourceCodeActionV1 = TestHelper.GetSC().sourceCodeActionV1;
+    string? sourceCodeActionV2 = TestHelper.GetSC().sourceCodeActionV2;
+    string? sourceCodeActionV3 = TestHelper.GetSC().sourceCodeActionV3;
+    string? sourceCodeVaccineAction = TestHelper.GetSC().sourceCodeVaccineAction;
+    string? sourceCodePedia = TestHelper.GetSC().sourceCodePedia;
 
 
     [TestInitialize]
     public
      void Setup()
     {
-        var logger = new LoggerForScripting();
-        Log.Debug("Sandbox launched.");
-
-        var services = new ServiceCollection();
-        services.AddLogging(builder =>
-        {
-            // Assuming you use Serilog, this forwards standard MS Logging to Serilog
-            builder.AddSerilog(dispose: true);
-        });
-
-        ScriptingServiceCollectionExtensions.AddEmberScripting(services, EmberMethods.GetReferences(), EmberMethods.GetEmberApiVersion());
-
-        using var provider = services.BuildServiceProvider();
-
-        facade = provider.GetRequiredService<ISccriptManagerDeleteAfter>();
+        facade = EmberMethods.GetNewScriptManagerInstance();
         em = new EmberMethods(facade);
 
-        ActionResultVersionSpecific = "[Message contains either failure or succes: ] ";  //change this if action result version changes it will thraow cause of message contains
-        sourceCodeActionV1 = EmberMethods.CreateStringFromCsFile(
-           Path.GetFullPath(Path.Combine(
-               AppDomain.CurrentDomain.BaseDirectory,
-               "..", "..", "..", "..",
-               "sandbox", "src", "Scripts", "ActionScripts", "AddPediatricTestsV1.cs"
-           ))
-       );
-        sourceCodeActionV2 = EmberMethods.CreateStringFromCsFile(
-        Path.GetFullPath(Path.Combine(
-            AppDomain.CurrentDomain.BaseDirectory,
-            "..", "..", "..", "..",
-            "sandbox", "src", "Scripts", "ActionScripts", "AddPediatricTestsV2.cs"
-        ))
-    );
-        sourceCodeActionV3 = EmberMethods.CreateStringFromCsFile(
-       Path.GetFullPath(Path.Combine(
-           AppDomain.CurrentDomain.BaseDirectory,
-           "..", "..", "..", "..",
-           "sandbox", "src", "Scripts", "ActionScripts", "AddPediatricTestsV3.cs"
-       ))
-   );
-        sourceCodeVaccineAction = EmberMethods.CreateStringFromCsFile(
-          Path.GetFullPath(Path.Combine(
-          AppDomain.CurrentDomain.BaseDirectory,
-          "..", "..", "..", "..",
-          "sandbox", "src", "Scripts", "ActionScripts", "VaccineScript.cs"
-      ))
-      );
-        sourceCodePedia = EmberMethods.CreateStringFromCsFile(
-       Path.GetFullPath(Path.Combine(
-           AppDomain.CurrentDomain.BaseDirectory,
-                   "..", "..", "..", "..",
-                   "sandbox", "src", "Scripts", "ConditionScripts", "PediatricCondition.cs"
-               ))
-           );
+        ActionResultVersionSpecific = "[Message contains either failure or succes: ] ";
     }
 
 
@@ -7422,7 +7407,7 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
     {
         Logger.LogDebug("Entered {MethodName} in {ClassName} apiVersion: {apiVersion}.", nameof(CreateScript), nameof(ScriptManagerFacade), apiVersion);
 
-        int currentApiVersion = await GetRunningApiVersion();
+        int currentApiVersion = GetRunningApiVersion();
         Guid id = Guid.NewGuid();
 
         if (apiVersion == null)
@@ -7501,7 +7486,7 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
 
         if (targetApiVersion == null)
         {
-            targetApiVersion = await GetRunningApiVersion();
+            targetApiVersion = GetRunningApiVersion();
         }
         CustomerScript script = await Db.GetCustomerScript(scriptId);
         await Db.CreateAndInsertCompiledCache(script, apiV: targetApiVersion);
@@ -7512,7 +7497,7 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
     {
         Logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(CompileAllScripts), nameof(ScriptManagerFacade));
 
-        int currentApiVersion = await GetRunningApiVersion();
+        int currentApiVersion = GetRunningApiVersion();
         await Db.CompileAllStoredScripts(currentApiVersion);
     }
 
@@ -7614,7 +7599,7 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
         {
             if (currentApiVersion == null)
             {
-                currentApiVersion = await GetRunningApiVersion();
+                currentApiVersion = GetRunningApiVersion();
             }
 
             byte[]? compiledScript = null;
@@ -7653,7 +7638,7 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
         {
             if (ApiVersion == null)
             {
-                ApiVersion = await GetRunningApiVersion();
+                ApiVersion = GetRunningApiVersion();
             }
 
             byte[]? compiledScript = null;
@@ -7665,7 +7650,7 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
             catch (Exception e)
             {
                 Logger.LogError("Retrieval failed jit comp launched:" + e.ToString());
-                await CompileScript(scriptId, await GetRunningApiVersion());
+                await CompileScript(scriptId, GetRunningApiVersion());
                 //try again, if fails again we catch error outside
                 var temp = await Db.GetCompiledScripCache(scriptId, (int)ApiVersion);
                 compiledScript = temp.AssemblyBytes;
@@ -7691,7 +7676,7 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
         {
             if (apiVersion == null)
             {
-                apiVersion = await GetRunningApiVersion();
+                apiVersion = GetRunningApiVersion();
             }
             byte[]? compiledScript = null;
             try
@@ -7702,7 +7687,7 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
             catch (Exception e)
             {
                 Logger.LogError("Retrieval failed jit comp launched:" + e.ToString());
-                await CompileScript(scriptId, await GetRunningApiVersion());
+                await CompileScript(scriptId, GetRunningApiVersion());
                 //try again, if fails again we catch error outside
                 var temp = await Db.GetCompiledScripCache(scriptId, (int)apiVersion);
                 compiledScript = temp.AssemblyBytes;
@@ -7731,7 +7716,7 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
         Logger.LogTrace("Entered {MethodName} in {ClassName} with scriptId: {ScriptId}.", nameof(GetCompiledCache), nameof(ScriptManagerFacade), scriptId);
         if (currentApiVersion == null)
         {
-            currentApiVersion = await GetRunningApiVersion();
+            currentApiVersion = GetRunningApiVersion();
         }
         try
         {
@@ -7779,7 +7764,7 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
     {
         Logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(PrecompileForApiVersion), nameof(ScriptManagerFacade));
 
-        int currentApiVersion = await GetRunningApiVersion();
+        int currentApiVersion = GetRunningApiVersion();
         await Db.AutomaticCompilationOnVersionUpdate(currentApiVersion);
     }
 
@@ -7799,7 +7784,7 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
         return await Db.GetActiveApiVersions(); //shit implementation not really functional in rl
     }
 
-    public async Task<int> GetRunningApiVersion() //todo implement
+    public int GetRunningApiVersion() //todo implement
     {
         Logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(GetRunningApiVersion), nameof(ScriptManagerFacade));
 
@@ -7857,7 +7842,7 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
     {
         Logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(RemoveDuplicates), nameof(ScriptManagerFacade));
 
-        int currentApiVersion = await GetRunningApiVersion();
+        int currentApiVersion = GetRunningApiVersion();
         await Db.RemoveDuplicates();   //automatically get dupes from function in dbhelper dont have to pass therefore
     }
 
@@ -7866,7 +7851,7 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
     {
         Logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(CleanupOrphanedCaches), nameof(ScriptManagerFacade));
 
-        int currentApiVersion = await GetRunningApiVersion();
+        int currentApiVersion = GetRunningApiVersion();
         await Db.AutomaticCompilationOnVersionUpdate(currentApiVersion);    //this also does this maybe implement real funcion later
     }
 
@@ -7941,71 +7926,23 @@ namespace FirstTests;
 public class ScriptManagerFacadeTests
 {
     private ISccriptManagerDeleteAfter? facade;
-    string? sourceCodePedia;
-    private string? sourceCodeActionV1;
-    private string? sourceCodeActionV3;
+    string? sourceCodePedia = TestHelper.GetSC().sourceCodePedia;
+    private string? sourceCodeActionV1 = TestHelper.GetSC().sourceCodeActionV1;
+    private string? sourceCodeActionV3 = TestHelper.GetSC().sourceCodeActionV3;
     private EmberMethods? em;
 
     [TestInitialize]
     public async Task Setup()
     {
-
-        var logger = new LoggerForScripting();
-        Log.Debug("Sandbox launched.");
-
-        var services = new ServiceCollection();
-        services.AddLogging(builder =>
-        {
-            // Assuming you use Serilog, this forwards standard MS Logging to Serilog
-            builder.AddSerilog(dispose: true);
-        });
-
-        ScriptingServiceCollectionExtensions.AddEmberScripting(services, EmberMethods.GetReferences(), EmberMethods.GetEmberApiVersion());
-
-        using var provider = services.BuildServiceProvider();
-
-        facade = provider.GetRequiredService<ISccriptManagerDeleteAfter>();
+        facade = EmberMethods.GetNewScriptManagerInstance();
         em = new EmberMethods(facade);
 
-        // var logger = new LoggerForScripting();
-        // // var microsoftLogger = logger.GetMicrosoftLogger<ScriptManagerFacade>();
-        // ScriptCompiler compiler3 = new ScriptCompiler(RandomMethods.GetReferences(), logger.GetMicrosoftLogger<ScriptCompiler>());
-        // ScriptExecutor exec3 = new ScriptExecutor(logger.GetMicrosoftLogger<ScriptExecutor>());
-        // db = new DbHelper(compiler3, RandomMethods.GetReferences(), logger.GetMicrosoftLogger<DbHelper>());
-        // rm = new RandomMethods(db);
-
-        // facade = new ScriptManagerFacade(db, compiler3, exec3, RandomMethods.GetReferences(), logger.GetMicrosoftLogger<ScriptManagerFacade>());
-
-        // Clear all data between tests without drop/recreate
         await facade.ClearAllCaches();
         var existing = await facade.ListScripts(includeCaches: false);
         foreach (var s in existing)
+        {
             await facade.DeleteScript(s.Id);
-
-        // Load source files
-        sourceCodePedia = EmberMethods.CreateStringFromCsFile(
-            Path.GetFullPath(Path.Combine(
-                AppDomain.CurrentDomain.BaseDirectory,
-                "..", "..", "..", "..",
-                "sandbox", "src", "Scripts", "ConditionScripts", "PediatricCondition.cs"
-            ))
-        );
-
-        sourceCodeActionV1 = EmberMethods.CreateStringFromCsFile(
-            Path.GetFullPath(Path.Combine(
-                AppDomain.CurrentDomain.BaseDirectory,
-                "..", "..", "..", "..",
-                "sandbox", "src", "Scripts", "ActionScripts", "AddPediatricTestsV1.cs"
-            ))
-        );
-
-        sourceCodeActionV3 = EmberMethods.CreateStringFromCsFile(
-            Path.GetFullPath(Path.Combine(
-                AppDomain.CurrentDomain.BaseDirectory,
-                "..", "..", "..", "..",
-                "sandbox", "src", "Scripts", "ActionScripts", "AddPediatricTestsV3.cs"
-            ))
-        );
+        }
     }
 
     #region Script Lifecycle
@@ -8158,7 +8095,7 @@ public class ScriptManagerFacadeTests
     }
 
     [TestMethod]
-    public async Task ValidateScriptTest()
+    public void ValidateScriptTest()
     {
         string result = facade!.ValidateScript(sourceCodePedia!);
 
@@ -8370,7 +8307,7 @@ public class ScriptManagerFacadeTests
     public async Task GetActiveApiVersionsTest()
     {
         Guid id = await facade!.CreateScript(sourceCodePedia!);
-        int currentVersion = await facade.GetRunningApiVersion();
+        int currentVersion = facade.GetRunningApiVersion();
 
         List<int> versions = await facade.GetActiveApiVersions();
 
@@ -8380,9 +8317,9 @@ public class ScriptManagerFacadeTests
     }
 
     [TestMethod]
-    public async Task GetRecentApiVersionTest()
+    public void GetRecentApiVersionTest()
     {
-        int v = await facade!.GetRunningApiVersion();
+        int v = facade!.GetRunningApiVersion();
         Assert.IsInstanceOfType(v, typeof(System.Int32));   //todo implement maybe real
     }
 
@@ -8400,7 +8337,7 @@ public class ScriptManagerFacadeTests
     public async Task CheckVersionCompatibilityTest()
     {
         Guid id = await facade!.CreateScript(sourceCodePedia!);
-        int currentVersion = await facade.GetRunningApiVersion();
+        int currentVersion = facade.GetRunningApiVersion();
 
         bool hasRecent = await facade.CheckVersionCompatibility(id, currentVersion);
 
@@ -8578,7 +8515,7 @@ async Task MainProgramSwitch(IServiceProvider provider)
         // ScriptManagerFacade facade = provider.GetRequiredService<ScriptManagerFacade>();
         ISccriptManagerDeleteAfter facade = provider.GetRequiredService<ISccriptManagerDeleteAfter>();
         IScriptManager facade1 = provider.GetRequiredService<IScriptManager>();
-        currentApiVersion = await facade.GetRunningApiVersion();
+        currentApiVersion = facade.GetRunningApiVersion();
 
         EmberMethods em = new EmberMethods(facade);
 

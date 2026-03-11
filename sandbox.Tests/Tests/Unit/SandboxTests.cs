@@ -57,7 +57,6 @@ public class SanboxTests
     {
         Dictionary<int, Type> contextVersionMap = new()
         {
-            // {0, typeof(GeneratorContext)},
             {1, typeof(ReadOnlyContextV1.GeneratorContext)},
             {2, typeof(RWContextV2.GeneratorContext)},
             {3, typeof(GeneratorContextV3.GeneratorContext)},
@@ -84,6 +83,22 @@ public class SanboxTests
         }
     }
 
+    [TestMethod]
+    public void ActionResultVersionScannerTest()
+    {
+        Dictionary<int, Type> contextVersionMap = new()
+        {
+            {1, typeof(ActionResult)},
+            {2, typeof(ActionResultV2)},
+            {3, typeof(ActionResultV3NoInheritance)},
+        };
+
+        Dictionary<int, Type> retrievedDict = ActionResultVersionScanner.GetClassDictionary();
+        PrintDictToConsole(retrievedDict);
+
+        CollectionAssert.AreEquivalent(contextVersionMap, retrievedDict);
+        // Assert.IsFalse(true);
+    }
     [TestMethod]
     public void BasicValidationTestUsingGetDictionary()
     {
@@ -203,7 +218,7 @@ public class SanboxTests
 
         sf = new ScriptFactory(facade);
         result = await facade.ExecuteScriptById(id, await sf.CreateContextByDowngrade(src!));
-        ar = EmberMethods.UpgradeActionResult(result);
+        ar = (ActionResultV3NoInheritance)EmberMethods.UpgradeActionResult(result);
         Console.WriteLine(ar.ToString());
         Assert.IsInstanceOfType(ar, typeof(ActionResultV3NoInheritance));
 
@@ -213,7 +228,7 @@ public class SanboxTests
 
         sf = new ScriptFactory(facade);
         result = await facade.ExecuteScriptById(id, await sf.CreateContextByDowngrade(src!));
-        ar = EmberMethods.UpgradeActionResult(result);
+        ar = (ActionResultV3NoInheritance)EmberMethods.UpgradeActionResult(result);
         Console.WriteLine(ar.ToString());
         Assert.IsInstanceOfType(ar, typeof(ActionResultV3NoInheritance));
 
@@ -223,7 +238,7 @@ public class SanboxTests
 
         sf = new ScriptFactory(facade);
         result = await facade.ExecuteScriptById(id, await sf.CreateContextByDowngrade(src!));
-        ar = EmberMethods.UpgradeActionResult(result);
+        ar = (ActionResultV3NoInheritance)EmberMethods.UpgradeActionResult(result);
         Console.WriteLine(ar.ToString());
         Assert.IsInstanceOfType(ar, typeof(ActionResultV3NoInheritance));
 

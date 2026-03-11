@@ -6,6 +6,9 @@ using Serilog;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using TypeInfo = System.Reflection.TypeInfo;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 public class EmberMethods
 {
@@ -168,45 +171,48 @@ public class EmberMethods
         }
 
     }
-    public static ActionResultV3NoInheritance UpgradeActionResult(object resultValue)
+    public static ActionResultBaseClass UpgradeActionResult(object resultValue)   //todo change to base class return and cast in tests and so on
     {
         Serilog.Log.Verbose("Entered {MethodName} in {ClassName}.", nameof(UpgradeActionResult), nameof(EmberMethods));
 
-        // var facade = new ScriptManagerFacade(UsefulMethods.GetReferences());
-        // var newestVersion = await facade.GetRecentApiVersion();
-        object finalActionResult = resultValue;
-        int iterations = 0;              // will probably fail in real application todo fix mabe with reflection i heard?
-        int maxIterations = ContextVersionScanner.GetClassDictionary().Keys.Count() + 3;  //just making sure my logic is fine to prevent infinite loop  todo chacnge this t onot genrerator clas version but maybe action result version
-        while (finalActionResult is not ActionResultV3NoInheritance && iterations <= maxIterations)    //could fail if loaded from diffrent assembly should probably replace the is statements with something like get type.name
-        {
+        ActionResultBaseClass currentActionResult = (ActionResultBaseClass)resultValue;
 
-            // if (finalActionResult is ActionResultV2 v2Script)
-            if (finalActionResult.GetType().Name == "ActionResultV2")
+        TypeInfo typeInfo = currentActionResult.GetType().GetTypeInfo();
+        var attrs = typeInfo.GetCustomAttributes();
+        var metaDataAttribute = typeInfo.GetCustomAttribute<MetaDataActionResult>();
+
+        if (metaDataAttribute == null)
+        {
+            throw new Exception(message: "MetadataAttribute was null why i cant tell you.");
+        }
+
+        int metaDatatVersionAtt = metaDataAttribute.Version;
+
+        int iterations = 0;
+        var dict = ActionResultVersionScanner.GetClassDictionary();
+        int maxIterations = dict.Keys.Count() + 1;
+
+        Console.WriteLine("max iterations: " + maxIterations);
+
+        Type maxVersionType = dict[dict.Keys.Max()];
+
+        while (currentActionResult.GetType() != maxVersionType && iterations <= maxIterations)
+        {
+            metaDatatVersionAtt++;
+            var nextVersionType = dict[metaDatatVersionAtt];
+
+            var uninitializedNextVersion =
+            (ActionResultBaseClass)System.Runtime.CompilerServices.RuntimeHelpers.GetUninitializedObject(nextVersionType);
+
+            try
             {
-                try
-                {
-                    ActionResultV2 v2Script2 = (ActionResultV2)finalActionResult;
-                    finalActionResult = ActionResultV3NoInheritance.UpgradeV2(v2Script2);
-                }
-                catch (Exception e)
-                {
-                    Serilog.Log.Error(e.ToString());
-                }
+                currentActionResult = uninitializedNextVersion.Upgrade(currentActionResult);
             }
-            // else if (finalActionResult is ActionResult v1Script)
-            else if (finalActionResult.GetType().Name == "ActionResult")
+            catch (TargetInvocationException ex)
             {
-                try
-                {
-                    ActionResult v1Script2 = (ActionResult)finalActionResult;
-                    List<string> loggedActions = [];
-                    finalActionResult = ActionResultV2.UpgradeV1(v1Script2, loggedActions);
-                }
-                catch (Exception e)
-                {
-                    Serilog.Log.Error(e.ToString());
-                }
+                throw new Exception($"Failed to upgrade {maxVersionType.Name} to {nextVersionType.Name}.", ex.InnerException);
             }
+
             if (iterations > maxIterations)
             {
                 throw new Exception("Somethign went wrong trying to upgrade the ActionResult");
@@ -214,16 +220,10 @@ public class EmberMethods
             iterations++;
         }
 
-        // if (finalActionResult is ActionResultV3NoInheritance v3Script)
-        if (finalActionResult.GetType().Name == "ActionResultV3NoInheritance")
-        {
-            ActionResultV3NoInheritance v3Script2 = (ActionResultV3NoInheritance)finalActionResult;
-            return (ActionResultV3NoInheritance)v3Script2;
-        }
-        else
-        {
-            throw new Exception(message: "UpgradeActionResult in ScriptExecutor failed.");
-        }
+
+        // ActionResultV3NoInheritance v3Script2 = (ActionResultV3NoInheritance)currentActionResult;
+        // return (ActionResultV3NoInheritance)v3Script2;
+        return currentActionResult;
     }
     public async Task<Guid> GetIdInConsoleAsync(bool fromSrc = false)
     {

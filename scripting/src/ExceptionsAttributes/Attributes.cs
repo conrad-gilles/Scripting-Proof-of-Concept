@@ -1,3 +1,5 @@
+namespace Ember.Scripting;
+
 [AttributeUsage(AttributeTargets.Interface)]
 public class MetaDataIGeneratorScript : Attribute
 {
@@ -29,4 +31,30 @@ public enum IGeneratorScriptType
 public enum IGeneratorScriptReturnType
 {
     Condition, Action
+}
+
+[AttributeUsage(AttributeTargets.Class)]
+public class MetaDataActionResult : Attribute
+{
+    public int Version { get; }
+    public ActionResultType Type { get; }
+
+    public MetaDataActionResult(int version)
+    {
+        Version = version;
+        Type = ActionResultType.DefaultVersioned;
+    }
+
+    public MetaDataActionResult(int version, ActionResultType type)
+    {
+        Version = version;
+        Type = type;
+    }
+
+}
+
+public enum ActionResultType
+{
+    AbstractBaseInSF,
+    DefaultVersioned
 }

@@ -1,7 +1,6 @@
 # Todo
 
-- fix warnings
-- get rid of the code duplication of the file path strings
+- put action results also in diffrent namespaces instead of labeling in class name
 - pass data in context so when you execute script(id,context) it gives data to the script
 - this data needs to be standardized maybe using something like fluentvalidation idk
 - upgrade action result -> interface plus downgrade async

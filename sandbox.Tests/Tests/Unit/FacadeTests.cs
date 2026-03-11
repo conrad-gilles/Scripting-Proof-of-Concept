@@ -275,7 +275,7 @@ public class ScriptManagerFacadeTests
         Assert.IsNotNull(result);
         // Assert.IsTrue(result.IsSuccess);
         // Assert.IsTrue(result.Message.Contains("Pediatric"));
-        result = EmberMethods.UpgradeActionResult(result);
+        result = (ActionResultV3NoInheritance)EmberMethods.UpgradeActionResult(result);
         Assert.IsInstanceOfType(result, typeof(ActionResultV3NoInheritance));
 
         Guid id2 = await facade.CreateScript(sourceCodePedia!);
