@@ -248,7 +248,7 @@ public class SanboxTests
         result = await facade.ExecuteScriptById(id, await sf.CreateContextByDowngrade(src!));
         ar = EmberMethods.UpgradeActionResult(result);
         Console.WriteLine(ar.ToString());
-        Assert.IsInstanceOfType(result, typeof(ActionResultV3NoInheritance));
+        Assert.IsInstanceOfType(ar, typeof(ActionResultV3NoInheritance));
 
         src = sourceCodeActionV3!;
         valResult = facade.BasicValidationBeforeCompiling(src!);
@@ -258,7 +258,7 @@ public class SanboxTests
         result = await facade.ExecuteScriptById(id, await sf.CreateContextByDowngrade(src!));
         ar = EmberMethods.UpgradeActionResult(result);
         Console.WriteLine(ar.ToString());
-        Assert.IsInstanceOfType(result, typeof(ActionResultV3NoInheritance));
+        Assert.IsInstanceOfType(ar, typeof(ActionResultV3NoInheritance));
 
         src = sourceCodeActionV1!;
         valResult = facade.BasicValidationBeforeCompiling(src!);
@@ -268,7 +268,7 @@ public class SanboxTests
         result = await facade.ExecuteScriptById(id, await sf.CreateContextByDowngrade(src!));
         ar = EmberMethods.UpgradeActionResult(result);
         Console.WriteLine(ar.ToString());
-        Assert.IsInstanceOfType(result, typeof(ActionResultV3NoInheritance));
+        Assert.IsInstanceOfType(ar, typeof(ActionResultV3NoInheritance));
 
         src = sourceCodePedia!;
         valResult = facade.BasicValidationBeforeCompiling(src!);

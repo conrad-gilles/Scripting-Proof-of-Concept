@@ -15,6 +15,8 @@
 - other option is injecting scriptfactory somehow and then determining it inside the class lib without having to ive access to the entire sandbox!
 - change verion abstract int to annotation 
 - also add verson int or annotation to the ActionResult classes
+- add a abstract method to actionresultbaseclass so i can improve the upgrade method
+- change seq to grafana and loki
 
 # Developers in Ember simply do this:
  
