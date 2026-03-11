@@ -9,6 +9,7 @@
 - in ui when compile all scripts with 1 corrupt one more than 1 dont cpompile because it aborts the process
 - version generator scripts in scripting done but yet no logic behind it
 - create script factory in scriptmanager facade
+- make sure azure works
 
 # Developers in Ember simply do this:
  
