@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using System.Collections.Generic;   //todo same for them
 using Ember.Scripting;
 
-public class AddPediatricTestsV3 : IGeneratorActionScriptV3
+public class AddPediatricTestsV3 : GeneratorScriptsV3.IGeneratorActionScript
 {
     // public async Task<ActionResult> ExecuteAsync(IGeneratorContext context)
     public async Task<ActionResultV3NoInheritance> ExecuteAsync(IGeneratorContext_V4.IGeneratorContext context)
