@@ -309,3 +309,5 @@ __pycache__/
 # Ignore meta resource files, generated on build
 **/LX.Localisation.Shared/Resources/*.resx
 **/LX.Localisation.Shared/Resources/*.cs
+repomix-output.xml
+repomix-output.xml
