@@ -222,7 +222,7 @@ block in Home.razor -->
     private async Task LoadDashBoardData()
     {
         EmberMethods em = new EmberMethods(ScriptManager);
-        currentEmberVersionApi = await ScriptManager.GetRunningApiVersion();
+        currentEmberVersionApi = ScriptManager.GetRunningApiVersion();
         CustomerScripts = await ScriptManager.ListScripts(includeCaches: true);
         totalScripts = CustomerScripts.Count();
         compiledScripts = 0;
@@ -234,7 +234,7 @@ block in Home.razor -->
             {
                 versions.Add(cache.ApiVersion);
             }
-            if (versions.Contains(await ScriptManager.GetRunningApiVersion()) == false)
+            if (versions.Contains(ScriptManager.GetRunningApiVersion()) == false)
             {
                 pendingScripts++;
             }
