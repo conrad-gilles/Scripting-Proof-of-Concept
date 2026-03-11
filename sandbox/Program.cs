@@ -59,7 +59,7 @@ async Task MainProgramSwitch(IServiceProvider provider)
         // ScriptManagerFacade facade = provider.GetRequiredService<ScriptManagerFacade>();
         ISccriptManagerDeleteAfter facade = provider.GetRequiredService<ISccriptManagerDeleteAfter>();
         IScriptManager facade1 = provider.GetRequiredService<IScriptManager>();
-        currentApiVersion = await facade.GetRunningApiVersion();
+        currentApiVersion = facade.GetRunningApiVersion();
 
         EmberMethods em = new EmberMethods(facade);
 

@@ -13,61 +13,19 @@ public class EmberVersioningTests
     ISccriptManagerDeleteAfter? facade;
     EmberMethods? em;
     string? ActionResultVersionSpecific;
-    string? sourceCodeActionV1;
-    string? sourceCodeActionV2;
-    string? sourceCodeActionV3;
-    string? sourceCodeVaccineAction;
-    string? sourceCodePedia;
-    LoggerForScripting? logger;
-    ServiceCollection? services;
-    List<string>? sourceCodes;
+    string? sourceCodeActionV1 = TestHelper.GetSC().sourceCodeActionV1;
+    string? sourceCodeActionV2 = TestHelper.GetSC().sourceCodeActionV2;
+    string? sourceCodeActionV3 = TestHelper.GetSC().sourceCodeActionV3;
+    string? sourceCodeVaccineAction = TestHelper.GetSC().sourceCodeVaccineAction;
+    string? sourceCodePedia = TestHelper.GetSC().sourceCodePedia;
+    // LoggerForScripting? logger;
+    List<string>? sourceCodes = TestHelper.GetSC(includeCondInList: false).sourceCodes;
 
     [TestInitialize]
     public
      void Setup()
     {
         ActionResultVersionSpecific = "[Message contains either failure or succes: ] ";  //change this if action result version changes it will thraow cause of message contains
-        sourceCodeActionV1 = EmberMethods.CreateStringFromCsFile(
-           Path.GetFullPath(Path.Combine(
-               AppDomain.CurrentDomain.BaseDirectory,
-               "..", "..", "..", "..",
-               "sandbox", "src", "Scripts", "ActionScripts", "AddPediatricTestsV1.cs"
-           ))
-       );
-        sourceCodeActionV2 = EmberMethods.CreateStringFromCsFile(
-        Path.GetFullPath(Path.Combine(
-            AppDomain.CurrentDomain.BaseDirectory,
-            "..", "..", "..", "..",
-            "sandbox", "src", "Scripts", "ActionScripts", "AddPediatricTestsV2.cs"
-        ))
-    );
-        sourceCodeActionV3 = EmberMethods.CreateStringFromCsFile(
-       Path.GetFullPath(Path.Combine(
-           AppDomain.CurrentDomain.BaseDirectory,
-           "..", "..", "..", "..",
-           "sandbox", "src", "Scripts", "ActionScripts", "AddPediatricTestsV3.cs"
-       ))
-   );
-        sourceCodeVaccineAction = EmberMethods.CreateStringFromCsFile(
-          Path.GetFullPath(Path.Combine(
-          AppDomain.CurrentDomain.BaseDirectory,
-          "..", "..", "..", "..",
-          "sandbox", "src", "Scripts", "ActionScripts", "VaccineScript.cs"
-      ))
-      );
-        sourceCodePedia = EmberMethods.CreateStringFromCsFile(
-       Path.GetFullPath(Path.Combine(
-           AppDomain.CurrentDomain.BaseDirectory,
-                   "..", "..", "..", "..",
-                   "sandbox", "src", "Scripts", "ConditionScripts", "PediatricCondition.cs"
-               ))
-           );
-        sourceCodes = [];
-        sourceCodes!.Add(sourceCodeActionV1);
-        sourceCodes!.Add(sourceCodeActionV2);
-        sourceCodes!.Add(sourceCodeActionV3);
-        sourceCodes!.Add(sourceCodeVaccineAction);
-        // sourceCodes!.Add(sourceCodePedia);
     }
 
 
@@ -80,7 +38,7 @@ public class EmberVersioningTests
         em = new EmberMethods(facade);
         await facade!.EnsureDeletedCreated();
         await ExecuteEachScript(facade, em);
-        int apiVersionInsideFacade = await facade.GetRunningApiVersion();
+        int apiVersionInsideFacade = facade.GetRunningApiVersion();
         Assert.IsTrue(apiVersionInsideFacade == v);
         Assert.IsTrue(apiVersionInsideFacade == 5);
 
@@ -88,7 +46,7 @@ public class EmberVersioningTests
         em = new EmberMethods(facade);
         await facade!.EnsureDeletedCreated();
         await ExecuteEachScript(facade, em);
-        apiVersionInsideFacade = await facade.GetRunningApiVersion();
+        apiVersionInsideFacade = facade.GetRunningApiVersion();
         Assert.IsTrue(apiVersionInsideFacade == EmberMethods.GetEmberApiVersion(testingDiffrentVersion: 1));
         Assert.IsTrue(apiVersionInsideFacade == 1);
     }
@@ -142,7 +100,7 @@ public class EmberVersioningTests
         em = new EmberMethods(facade);
         await facade!.EnsureDeletedCreated();
         await ExecuteEachScript(facade, em);
-        int apiVersionInsideFacade = await facade.GetRunningApiVersion();
+        int apiVersionInsideFacade = facade.GetRunningApiVersion();
 
         var versionDict = await facade!.GetCachesForEachApiVersion();
         foreach (var item in versionDict)
@@ -160,7 +118,7 @@ public class EmberVersioningTests
         facade = EmberMethods.GetNewScriptManagerInstance(1);
         em = new EmberMethods(facade);
         await ExecuteEachScript(facade, em);
-        apiVersionInsideFacade = await facade.GetRunningApiVersion();
+        apiVersionInsideFacade = facade.GetRunningApiVersion();
         Assert.IsTrue(apiVersionInsideFacade == EmberMethods.GetEmberApiVersion(testingDiffrentVersion: 1));
         Assert.IsTrue(apiVersionInsideFacade == 1);
 

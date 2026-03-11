@@ -11,61 +11,20 @@ public class SanboxTests
 
 
     ISccriptManagerDeleteAfter? facade;
-    EmberMethods? em;
+    // EmberMethods? em;
     string? ActionResultVersionSpecific;
-    string? sourceCodeActionV1;
-    string? sourceCodeActionV2;
-    string? sourceCodeActionV3;
-    string? sourceCodeVaccineAction;
-    string? sourceCodePedia;
-    List<string>? sourceCodes;
+    string? sourceCodeActionV1 = TestHelper.GetSC().sourceCodeActionV1;
+    string? sourceCodeActionV2 = TestHelper.GetSC().sourceCodeActionV2;
+    string? sourceCodeActionV3 = TestHelper.GetSC().sourceCodeActionV3;
+    string? sourceCodeVaccineAction = TestHelper.GetSC().sourceCodeVaccineAction;
+    string? sourceCodePedia = TestHelper.GetSC().sourceCodePedia;
+    List<string>? sourceCodes = TestHelper.GetSC(includeCondInList: false).sourceCodes;
 
     [TestInitialize]
     public
      void Setup()
     {
-        ActionResultVersionSpecific = "[Message contains either failure or succes: ] ";  //change this if action result version changes it will thraow cause of message contains
-        sourceCodeActionV1 = EmberMethods.CreateStringFromCsFile(
-           Path.GetFullPath(Path.Combine(
-               AppDomain.CurrentDomain.BaseDirectory,
-               "..", "..", "..", "..",
-               "sandbox", "src", "Scripts", "ActionScripts", "AddPediatricTestsV1.cs"
-           ))
-       );
-        sourceCodeActionV2 = EmberMethods.CreateStringFromCsFile(
-        Path.GetFullPath(Path.Combine(
-            AppDomain.CurrentDomain.BaseDirectory,
-            "..", "..", "..", "..",
-            "sandbox", "src", "Scripts", "ActionScripts", "AddPediatricTestsV2.cs"
-        ))
-    );
-        sourceCodeActionV3 = EmberMethods.CreateStringFromCsFile(
-       Path.GetFullPath(Path.Combine(
-           AppDomain.CurrentDomain.BaseDirectory,
-           "..", "..", "..", "..",
-           "sandbox", "src", "Scripts", "ActionScripts", "AddPediatricTestsV3.cs"
-       ))
-   );
-        sourceCodeVaccineAction = EmberMethods.CreateStringFromCsFile(
-          Path.GetFullPath(Path.Combine(
-          AppDomain.CurrentDomain.BaseDirectory,
-          "..", "..", "..", "..",
-          "sandbox", "src", "Scripts", "ActionScripts", "VaccineScript.cs"
-      ))
-      );
-        sourceCodePedia = EmberMethods.CreateStringFromCsFile(
-       Path.GetFullPath(Path.Combine(
-           AppDomain.CurrentDomain.BaseDirectory,
-                   "..", "..", "..", "..",
-                   "sandbox", "src", "Scripts", "ConditionScripts", "PediatricCondition.cs"
-               ))
-           );
-        sourceCodes = [];
-        sourceCodes!.Add(sourceCodeActionV1);
-        sourceCodes!.Add(sourceCodeActionV2);
-        sourceCodes!.Add(sourceCodeActionV3);
-        sourceCodes!.Add(sourceCodeVaccineAction);
-        // sourceCodes!.Add(sourceCodePedia);
+        ActionResultVersionSpecific = "[Message contains either failure or succes: ] ";
     }
     [TestMethod]
     public async Task CreateContextText()
@@ -96,7 +55,7 @@ public class SanboxTests
     }
 
     [TestMethod]
-    public async Task GetDictionaryTest()
+    public void GetDictionaryTest()
     {
         Dictionary<int, Type> contextVersionMap = new()
         {
@@ -128,7 +87,7 @@ public class SanboxTests
     }
 
     [TestMethod]
-    public async Task BasicValidationTestUsingGetDictionary()
+    public void BasicValidationTestUsingGetDictionary()
     {
         facade = EmberMethods.GetNewScriptManagerInstance();
         (string className, string baseTypeName, int versionInt) valResult = facade.BasicValidationBeforeCompiling(sourceCodeActionV2!);
@@ -137,7 +96,7 @@ public class SanboxTests
         Console.WriteLine(nameof(valResult.className) + " : " + valResult.className);
         Console.WriteLine(nameof(valResult.versionInt) + " : " + valResult.versionInt);
 
-        Assert.IsTrue(valResult.baseTypeName == "IGeneratorActionScriptV2");
+        Assert.IsTrue(valResult.baseTypeName == "IGeneratorActionScript");
         Assert.IsTrue(valResult.className == "AddPediatricTestsV3");
         Assert.IsTrue(valResult.versionInt == 3);
 
@@ -157,7 +116,7 @@ public class SanboxTests
         Console.WriteLine(nameof(valResult.className) + " : " + valResult.className);
         Console.WriteLine(nameof(valResult.versionInt) + " : " + valResult.versionInt);
 
-        Assert.IsTrue(valResult.baseTypeName == "IGeneratorActionScriptV3");
+        Assert.IsTrue(valResult.baseTypeName == "IGeneratorActionScript");
         Assert.IsTrue(valResult.className == "AddPediatricTestsV4");
         Assert.IsTrue(valResult.versionInt == 4);
 
@@ -167,7 +126,7 @@ public class SanboxTests
         Console.WriteLine(nameof(valResult.className) + " : " + valResult.className);
         Console.WriteLine(nameof(valResult.versionInt) + " : " + valResult.versionInt);
 
-        Assert.IsTrue(valResult.baseTypeName == "IGeneratorActionScriptV4Vaccine");
+        Assert.IsTrue(valResult.baseTypeName == "IGeneratorActionScript");
         Assert.IsTrue(valResult.className == "VaccineScript");
         Assert.IsTrue(valResult.versionInt == 5);
 

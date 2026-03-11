@@ -20,7 +20,7 @@ public class ScriptFactory
     public async Task<GeneratorContext> CreateContext()
     {
         // int apiV = EmberMethods.GetEmberApiVersion(ScriptManager.GetRecentApiVersion());
-        int apiV = await ScriptManager.GetRunningApiVersion();
+        int apiV = ScriptManager.GetRunningApiVersion();
 
         Type recentType;
         Dictionary<int, Type> contextVersionMap = ContextVersionScanner.GetClassDictionary();
@@ -52,7 +52,7 @@ public class ScriptFactory
     {
         if (apiV == null)
         {
-            apiV = await ScriptManager.GetRunningApiVersion();
+            apiV = ScriptManager.GetRunningApiVersion();
         }
         Type recentType;
         Dictionary<int, Type> contextVersionMap = ContextVersionScanner.GetClassDictionary();
@@ -137,7 +137,7 @@ public class ScriptFactory
         int? apiV = null;
         if (apiV == null)
         {
-            apiV = await ScriptManager.GetRunningApiVersion();
+            apiV = ScriptManager.GetRunningApiVersion();
         }
         Type recentType;
         Dictionary<int, Type> contextVersionMap = ContextVersionScanner.GetClassDictionary();

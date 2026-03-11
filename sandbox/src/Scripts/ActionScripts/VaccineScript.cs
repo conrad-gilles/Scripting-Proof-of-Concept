@@ -20,7 +20,7 @@ using GeneratorScriptsV4;
 //     }
 // }
 
-public class VaccineScript : IGeneratorActionScriptV4Vaccine
+public class VaccineScript : GeneratorScriptsV4.IGeneratorActionScript
 {
     public async Task<ActionResultV3NoInheritance> ExecuteAsync(IGeneratorContextNoInheritance_V5.IGeneratorContext context)
     {

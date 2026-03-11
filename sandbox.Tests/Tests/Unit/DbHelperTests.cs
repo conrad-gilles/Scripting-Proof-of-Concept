@@ -10,22 +10,20 @@ namespace FirstTests;
 public class DbHelperTests
 {
     private ISccriptManagerDeleteAfter? facade;
-    string? sourceCodePedia;
-    private string? sourceCodeActionV1;
-    private string? sourceCodeActionV3;
+    string? sourceCodePedia = TestHelper.GetSC().sourceCodePedia;
+    private string? sourceCodeActionV1 = TestHelper.GetSC().sourceCodeActionV1;
+    private string? sourceCodeActionV3 = TestHelper.GetSC().sourceCodeActionV3;
     private EmberMethods? em;
 
     [TestInitialize]
     public async Task Setup()
     {
-
         var logger = new LoggerForScripting();
         Log.Debug("Sandbox launched.");
 
         var services = new ServiceCollection();
         services.AddLogging(builder =>
         {
-            // Assuming you use Serilog, this forwards standard MS Logging to Serilog
             builder.AddSerilog(dispose: true);
         });
 
@@ -36,45 +34,10 @@ public class DbHelperTests
         facade = provider.GetRequiredService<ISccriptManagerDeleteAfter>();
         em = new EmberMethods(facade);
 
-        // var logger = new LoggerForScripting();
-        // // var microsoftLogger = logger.GetMicrosoftLogger<ScriptManagerFacade>();
-        // ScriptCompiler compiler3 = new ScriptCompiler(RandomMethods.GetReferences(), logger.GetMicrosoftLogger<ScriptCompiler>());
-        // ScriptExecutor exec3 = new ScriptExecutor(logger.GetMicrosoftLogger<ScriptExecutor>());
-        // db = new DbHelper(compiler3, RandomMethods.GetReferences(), logger.GetMicrosoftLogger<DbHelper>());
-        // rm = new RandomMethods(db);
-
-        // facade = new ScriptManagerFacade(db, compiler3, exec3, RandomMethods.GetReferences(), logger.GetMicrosoftLogger<ScriptManagerFacade>());
-
-        // Clear all data between tests without drop/recreate
         await facade.ClearAllCaches();
         var existing = await facade.ListScripts(includeCaches: false);
         foreach (var s in existing)
             await facade.DeleteScript(s.Id);
-
-        // Load source files
-        sourceCodePedia = EmberMethods.CreateStringFromCsFile(
-            Path.GetFullPath(Path.Combine(
-                AppDomain.CurrentDomain.BaseDirectory,
-                "..", "..", "..", "..",
-                "sandbox", "src", "Scripts", "ConditionScripts", "PediatricCondition.cs"
-            ))
-        );
-
-        sourceCodeActionV1 = EmberMethods.CreateStringFromCsFile(
-            Path.GetFullPath(Path.Combine(
-                AppDomain.CurrentDomain.BaseDirectory,
-                "..", "..", "..", "..",
-                "sandbox", "src", "Scripts", "ActionScripts", "AddPediatricTestsV1.cs"
-            ))
-        );
-
-        sourceCodeActionV3 = EmberMethods.CreateStringFromCsFile(
-            Path.GetFullPath(Path.Combine(
-                AppDomain.CurrentDomain.BaseDirectory,
-                "..", "..", "..", "..",
-                "sandbox", "src", "Scripts", "ActionScripts", "AddPediatricTestsV3.cs"
-            ))
-        );
     }
 
     [TestMethod]
@@ -154,7 +117,7 @@ public class DbHelperTests
     }
 
     [TestMethod]
-    public async Task ExceptionHelperTestsAsync()
+    public void ExceptionHelperTestsAsync()
     {
         try
         {
@@ -226,19 +189,19 @@ public class DbHelperTests
             Assert.IsInstanceOfType(exAtIndex4, typeof(NoFileWithThisClassNameFoundException));
 
 
-            await Assert.ThrowsExceptionAsync<Exception>(async () =>
+            Assert.ThrowsException<Exception>(() =>
       {
           Exception exAtIndex5 = ExceptionHelper.GetExceptionFromChain(e, 5);
           Console.WriteLine(exAtIndex5.GetType().Name);
           // Assert.IsInstanceOfType(exAtIndex5, typeof(CreateStringFromCsFileException));
       });
 
-            await Assert.ThrowsExceptionAsync<Exception>(async () =>
-    {
-        Exception exAtIndex6 = ExceptionHelper.GetExceptionFromChain(e, 6);
-        Console.WriteLine(exAtIndex6.GetType().Name);
-        //    Assert.IsInstanceOfType(exAtIndex6, typeof(CreateStringFromCsFileException));
-    });
+            Assert.ThrowsException<Exception>(() =>
+   {
+       Exception exAtIndex6 = ExceptionHelper.GetExceptionFromChain(e, 6);
+       Console.WriteLine(exAtIndex6.GetType().Name);
+       //    Assert.IsInstanceOfType(exAtIndex6, typeof(CreateStringFromCsFileException));
+   });
 
             Console.WriteLine("First tests ran.");
 
@@ -263,18 +226,18 @@ public class DbHelperTests
             Assert.IsInstanceOfType(exAtNegIndex4, typeof(CreateStringFromCsFileException));
 
 
-            await Assert.ThrowsExceptionAsync<Exception>(async () =>
+            Assert.ThrowsException<Exception>(() =>
               {
                   Exception exAtNegIndex5 = ExceptionHelper.GetExceptionFromChainReversed(e, 5);
                   Console.WriteLine(exAtNegIndex5.GetType().Name);
                   Assert.IsInstanceOfType(exAtNegIndex5, typeof(CreateStringFromCsFileException));
               });
-            await Assert.ThrowsExceptionAsync<Exception>(async () =>
-               {
-                   Exception exAtNegIndex6 = ExceptionHelper.GetExceptionFromChainReversed(e, 6);
-                   Console.WriteLine(exAtNegIndex6.GetType().Name);
-                   Assert.IsInstanceOfType(exAtNegIndex6, typeof(CreateStringFromCsFileException));
-               });
+            Assert.ThrowsException<Exception>(() =>
+              {
+                  Exception exAtNegIndex6 = ExceptionHelper.GetExceptionFromChainReversed(e, 6);
+                  Console.WriteLine(exAtNegIndex6.GetType().Name);
+                  Assert.IsInstanceOfType(exAtNegIndex6, typeof(CreateStringFromCsFileException));
+              });
 
             // Assert.IsTrue(false);
         }

@@ -10,9 +10,9 @@ namespace FirstTests;
 public class ScriptManagerFacadeTests
 {
     private ISccriptManagerDeleteAfter? facade;
-    string? sourceCodePedia;
-    private string? sourceCodeActionV1;
-    private string? sourceCodeActionV3;
+    string? sourceCodePedia = TestHelper.GetSC().sourceCodePedia;
+    private string? sourceCodeActionV1 = TestHelper.GetSC().sourceCodeActionV1;
+    private string? sourceCodeActionV3 = TestHelper.GetSC().sourceCodeActionV3;
     private EmberMethods? em;
 
     [TestInitialize]
@@ -25,7 +25,6 @@ public class ScriptManagerFacadeTests
         var services = new ServiceCollection();
         services.AddLogging(builder =>
         {
-            // Assuming you use Serilog, this forwards standard MS Logging to Serilog
             builder.AddSerilog(dispose: true);
         });
 
@@ -36,45 +35,12 @@ public class ScriptManagerFacadeTests
         facade = provider.GetRequiredService<ISccriptManagerDeleteAfter>();
         em = new EmberMethods(facade);
 
-        // var logger = new LoggerForScripting();
-        // // var microsoftLogger = logger.GetMicrosoftLogger<ScriptManagerFacade>();
-        // ScriptCompiler compiler3 = new ScriptCompiler(RandomMethods.GetReferences(), logger.GetMicrosoftLogger<ScriptCompiler>());
-        // ScriptExecutor exec3 = new ScriptExecutor(logger.GetMicrosoftLogger<ScriptExecutor>());
-        // db = new DbHelper(compiler3, RandomMethods.GetReferences(), logger.GetMicrosoftLogger<DbHelper>());
-        // rm = new RandomMethods(db);
-
-        // facade = new ScriptManagerFacade(db, compiler3, exec3, RandomMethods.GetReferences(), logger.GetMicrosoftLogger<ScriptManagerFacade>());
-
-        // Clear all data between tests without drop/recreate
         await facade.ClearAllCaches();
         var existing = await facade.ListScripts(includeCaches: false);
         foreach (var s in existing)
+        {
             await facade.DeleteScript(s.Id);
-
-        // Load source files
-        sourceCodePedia = EmberMethods.CreateStringFromCsFile(
-            Path.GetFullPath(Path.Combine(
-                AppDomain.CurrentDomain.BaseDirectory,
-                "..", "..", "..", "..",
-                "sandbox", "src", "Scripts", "ConditionScripts", "PediatricCondition.cs"
-            ))
-        );
-
-        sourceCodeActionV1 = EmberMethods.CreateStringFromCsFile(
-            Path.GetFullPath(Path.Combine(
-                AppDomain.CurrentDomain.BaseDirectory,
-                "..", "..", "..", "..",
-                "sandbox", "src", "Scripts", "ActionScripts", "AddPediatricTestsV1.cs"
-            ))
-        );
-
-        sourceCodeActionV3 = EmberMethods.CreateStringFromCsFile(
-            Path.GetFullPath(Path.Combine(
-                AppDomain.CurrentDomain.BaseDirectory,
-                "..", "..", "..", "..",
-                "sandbox", "src", "Scripts", "ActionScripts", "AddPediatricTestsV3.cs"
-            ))
-        );
+        }
     }
 
     #region Script Lifecycle
@@ -227,7 +193,7 @@ public class ScriptManagerFacadeTests
     }
 
     [TestMethod]
-    public async Task ValidateScriptTest()
+    public void ValidateScriptTest()
     {
         string result = facade!.ValidateScript(sourceCodePedia!);
 
@@ -439,7 +405,7 @@ public class ScriptManagerFacadeTests
     public async Task GetActiveApiVersionsTest()
     {
         Guid id = await facade!.CreateScript(sourceCodePedia!);
-        int currentVersion = await facade.GetRunningApiVersion();
+        int currentVersion = facade.GetRunningApiVersion();
 
         List<int> versions = await facade.GetActiveApiVersions();
 
@@ -449,9 +415,9 @@ public class ScriptManagerFacadeTests
     }
 
     [TestMethod]
-    public async Task GetRecentApiVersionTest()
+    public void GetRecentApiVersionTest()
     {
-        int v = await facade!.GetRunningApiVersion();
+        int v = facade!.GetRunningApiVersion();
         Assert.IsInstanceOfType(v, typeof(System.Int32));   //todo implement maybe real
     }
 
@@ -469,7 +435,7 @@ public class ScriptManagerFacadeTests
     public async Task CheckVersionCompatibilityTest()
     {
         Guid id = await facade!.CreateScript(sourceCodePedia!);
-        int currentVersion = await facade.GetRunningApiVersion();
+        int currentVersion = facade.GetRunningApiVersion();
 
         bool hasRecent = await facade.CheckVersionCompatibility(id, currentVersion);
 

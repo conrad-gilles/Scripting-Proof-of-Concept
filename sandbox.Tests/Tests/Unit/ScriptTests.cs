@@ -12,11 +12,11 @@ public class ScriptTests
     ISccriptManagerDeleteAfter? facade;
     EmberMethods? em;
     string? ActionResultVersionSpecific;
-    string? sourceCodeActionV1;
-    string? sourceCodeActionV2;
-    string? sourceCodeActionV3;
-    string? sourceCodeVaccineAction;
-    string? sourceCodePedia;
+    string? sourceCodeActionV1 = TestHelper.GetSC().sourceCodeActionV1;
+    string? sourceCodeActionV2 = TestHelper.GetSC().sourceCodeActionV2;
+    string? sourceCodeActionV3 = TestHelper.GetSC().sourceCodeActionV3;
+    string? sourceCodeVaccineAction = TestHelper.GetSC().sourceCodeVaccineAction;
+    string? sourceCodePedia = TestHelper.GetSC().sourceCodePedia;
 
 
     [TestInitialize]
@@ -40,42 +40,7 @@ public class ScriptTests
         facade = provider.GetRequiredService<ISccriptManagerDeleteAfter>();
         em = new EmberMethods(facade);
 
-        ActionResultVersionSpecific = "[Message contains either failure or succes: ] ";  //change this if action result version changes it will thraow cause of message contains
-        sourceCodeActionV1 = EmberMethods.CreateStringFromCsFile(
-           Path.GetFullPath(Path.Combine(
-               AppDomain.CurrentDomain.BaseDirectory,
-               "..", "..", "..", "..",
-               "sandbox", "src", "Scripts", "ActionScripts", "AddPediatricTestsV1.cs"
-           ))
-       );
-        sourceCodeActionV2 = EmberMethods.CreateStringFromCsFile(
-        Path.GetFullPath(Path.Combine(
-            AppDomain.CurrentDomain.BaseDirectory,
-            "..", "..", "..", "..",
-            "sandbox", "src", "Scripts", "ActionScripts", "AddPediatricTestsV2.cs"
-        ))
-    );
-        sourceCodeActionV3 = EmberMethods.CreateStringFromCsFile(
-       Path.GetFullPath(Path.Combine(
-           AppDomain.CurrentDomain.BaseDirectory,
-           "..", "..", "..", "..",
-           "sandbox", "src", "Scripts", "ActionScripts", "AddPediatricTestsV3.cs"
-       ))
-   );
-        sourceCodeVaccineAction = EmberMethods.CreateStringFromCsFile(
-          Path.GetFullPath(Path.Combine(
-          AppDomain.CurrentDomain.BaseDirectory,
-          "..", "..", "..", "..",
-          "sandbox", "src", "Scripts", "ActionScripts", "VaccineScript.cs"
-      ))
-      );
-        sourceCodePedia = EmberMethods.CreateStringFromCsFile(
-       Path.GetFullPath(Path.Combine(
-           AppDomain.CurrentDomain.BaseDirectory,
-                   "..", "..", "..", "..",
-                   "sandbox", "src", "Scripts", "ConditionScripts", "PediatricCondition.cs"
-               ))
-           );
+        ActionResultVersionSpecific = "[Message contains either failure or succes: ] ";
     }
 
 

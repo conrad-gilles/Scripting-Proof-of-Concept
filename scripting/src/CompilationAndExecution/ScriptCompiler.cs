@@ -182,11 +182,6 @@ internal class ScriptCompiler
 
             if (versionInt == null)
             {
-                throw new Exception("Version int was null in BasicValidation");
-            }
-
-            if (versionInt == null)
-            {
                 throw new ValidationBeforeCompilationException("Version Int was not assigned probably because the foeach loop faliled maybe because the Context name of the script was not in the dictionary.");
             }
             if (baseTypeName == null || className == null)

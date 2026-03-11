@@ -30,7 +30,7 @@ using GeneratorScriptsV2;
 //     }
 // }
 
-public class AddPediatricTestsV3 : GeneratorScriptsV2.IGeneratorActionScriptV2
+public class AddPediatricTestsV3 : GeneratorScriptsV2.IGeneratorActionScript
 {
     // public async Task<ActionResult> ExecuteAsync(IGeneratorContext context)
     public async Task<ActionResultV2> ExecuteAsync(IGeneratorContext_V3.IGeneratorContext context)
