@@ -30,4 +30,3 @@ jobs:
           app-name: 'Scripting-POC-Conrad-Gilles'
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
           package: ./publish_output
-          startup-command: 'dotnet BlazorUI.dll'
