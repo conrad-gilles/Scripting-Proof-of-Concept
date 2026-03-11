@@ -3,8 +3,10 @@ using System.Threading.Tasks;
 using System.Collections.Generic;   //todo same for them
 using Ember.Scripting;
 using GeneratorScriptsGeneric;
+using IGeneratorContext_V2;
+
 // using static System.Threading.Mutex; //if uncomment it wont run which is good
-public class AddPediatricTestsV2 : IGeneratorActionScript<IGeneratorContext_V2.IGeneratorContext, ActionResult>
+public class AddPediatricTestsV2 : GeneratorScriptsGeneric.IGeneratorActionScript<IGeneratorContext_V2.IGeneratorContext, ActionResult>
 {
     public async Task<ActionResult> ExecuteAsync(IGeneratorContext_V2.IGeneratorContext context)    //error is here in Basyns
     {

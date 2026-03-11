@@ -1,11 +1,13 @@
 namespace Ember.Scripting;
 
+[MetaDataIGeneratorScript(version: 1, returnType: IGeneratorScriptReturnType.Condition, type: IGeneratorScriptType.AbstractBaseInSF)]
 public interface IGeneratorConditionScript
 {
     // int VersionScript { get; }
     // Task<bool> EvaluateAsync(IGeneratorReadOnlyContext context);
     Task<bool> EvaluateAsync(IGeneratorBaseInterface context);
 }
+[MetaDataIGeneratorScript(version: 1, returnType: IGeneratorScriptReturnType.Action, type: IGeneratorScriptType.AbstractBaseInSF)]
 public interface IGeneratorActionScript
 {
     // int VersionSript { get; }

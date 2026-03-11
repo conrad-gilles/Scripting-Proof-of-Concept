@@ -3,6 +3,7 @@ using Serilog;
 using Ember.Scripting;
 using Serilog.Extensions.Logging;
 using Microsoft.Extensions.Logging;
+using Serilog.Sinks.Grafana.Loki;
 // using BlazorUi.
 
 public class LoggerForScripting
@@ -10,7 +11,7 @@ public class LoggerForScripting
     private Serilog.Core.Logger? serilogLogger = null;
     private ILoggerFactory? factory = null;
 
-//  public BlazorSink MemorySink { get; } = new BlazorSink();
+    //  public BlazorSink MemorySink { get; } = new BlazorSink();
 
     public LoggerForScripting()
     {
@@ -25,10 +26,12 @@ public class LoggerForScripting
         "logs/app-.log",
         rollingInterval: RollingInterval.Day,
         retainedFileCountLimit: 5).WriteTo.Console(restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Warning)
-        .WriteTo.Seq("http://localhost:5341", bufferBaseFilename: "logs/seq-offline-buffer")
+        // .WriteTo.Seq("http://localhost:5341", bufferBaseFilename: "logs/seq-offline-buffer")
         // .WriteTo.Sink(MemorySink)   //for seeing it in blazor webapp
+        .WriteTo.GrafanaLoki(
+        "http://localhost:3100",
+        labels: new[] { new LokiLabel { Key = "app", Value = "ember-scripting-sandbox" } })
         .CreateLogger();
-
         return serilogLoggerSet;
     }
 
