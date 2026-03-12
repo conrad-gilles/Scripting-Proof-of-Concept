@@ -247,7 +247,7 @@ public class EmberVersioningTests
         {
             ctx = ContextFactory.CreateContext(desiredContextVersion, data);
         });
-        ScriptFactory sf = new ScriptFactory(facade);
+        ContextFactory sf = new ContextFactory(facade);
         var obj = sf.ScriptObjects();
 
         data = new MockData(labOrder: obj.labOrder, patient: obj.patient, consoleLogger: obj.logger,

@@ -253,7 +253,7 @@ public class EmberMethods
         Serilog.Log.Verbose("Entered {MethodName} in {ClassName}.", nameof(GetTestingContext), nameof(EmberMethods));
         try
         {
-            ScriptFactory sf = new ScriptFactory(Facade);
+            ContextFactory sf = new ContextFactory(Facade);
             GeneratorContext ctx;
             var objs = sf.ScriptObjects();
             if (autoDetectFromScript == null)

@@ -1,13 +1,11 @@
 # Todo
 
-- in GetTestingContext first if make sure to not have to hardcode the diffrent contexts get rid of switch
 - remove hardcoded paths using ctrl alt f c/gilles bla bla
-- pass data in context so when you execute script(id,context) it gives data to the script
+- pass data in context so when you execute script(id,context) it gives data to the script //maybe add it to facade instead but idk
 - this data needs to be standardized maybe using something like fluentvalidation idk
 - CreateContext() in ScriptFactory takes in a few arguments 
 - fix basic val still doesnt check if implements correct class  probably with is null? is typeof ?
 - in ui when compile all scripts with 1 corrupt one more than 1 dont cpompile because it aborts the process
-- create script factory in scriptmanager facade
 - make sure azure works
 
 # Developers in Ember simply do this:

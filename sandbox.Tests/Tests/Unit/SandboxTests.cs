@@ -27,23 +27,23 @@ public class SanboxTests
     [TestMethod]
     public async Task CreateContextTest()
     {
-        ScriptFactory sf;
+        ContextFactory sf;
         GeneratorContext ctx;
 
         facade = EmberMethods.GetNewScriptManagerInstance(1);
-        sf = new ScriptFactory(facade);
+        sf = new ContextFactory(facade);
         ctx = sf.CreateContextForApiV();
 
         Assert.IsTrue(ctx.GetType() == typeof(ReadOnlyContextV1.GeneratorContext));
 
         facade = EmberMethods.GetNewScriptManagerInstance(2);
-        sf = new ScriptFactory(facade);
+        sf = new ContextFactory(facade);
         ctx = sf.CreateContextForApiV();
 
         Assert.IsTrue(ctx.GetType() == typeof(RWContextV2.GeneratorContext));
 
         facade = EmberMethods.GetNewScriptManagerInstance(6);
-        sf = new ScriptFactory(facade);
+        sf = new ContextFactory(facade);
 
         Exception ex = await Assert.ThrowsExceptionAsync<Exception>(async () =>  //todo check this one
          {
@@ -71,9 +71,9 @@ public class SanboxTests
             {5, typeof(GeneratorContextNoInherVaccineV5.GeneratorContext)},
         };
 
-        ScriptFactory sf;
+        ContextFactory sf;
         facade = EmberMethods.GetNewScriptManagerInstance(1);
-        sf = new ScriptFactory(facade);
+        sf = new ContextFactory(facade);
         Dictionary<int, Type> retrievedDict = ContextVersionScanner.GetClassDictionary();
         retrievedDict.Reverse();
         PrintDictToConsole(contextVersionMap);
@@ -168,14 +168,14 @@ public class SanboxTests
     public async Task CreateContextForApiTest()
     {
         Guid id;
-        ScriptFactory sf;
+        ContextFactory sf;
         (string className, string baseTypeName, int versionInt) valResult;
 
         facade = EmberMethods.GetNewScriptManagerInstance();
         valResult = facade.BasicValidationBeforeCompiling(sourceCodeActionV2!);
         id = await facade.CreateScript(sourceCodeActionV2!);
 
-        sf = new ScriptFactory(facade);
+        sf = new ContextFactory(facade);
         await facade.ExecuteScriptById(id, sf.CreateContextForApiV(valResult.versionInt));
 
         for (int i = 0; i < 6; i++)
@@ -184,7 +184,7 @@ public class SanboxTests
             valResult = facade.BasicValidationBeforeCompiling(sourceCodeActionV2!);
             id = await facade.CreateScript(sourceCodeActionV2!);
 
-            sf = new ScriptFactory(facade);
+            sf = new ContextFactory(facade);
             await facade.ExecuteScriptById(id, sf.CreateContextForApiV(valResult.versionInt));
         }
 
@@ -194,7 +194,7 @@ public class SanboxTests
             valResult = facade.BasicValidationBeforeCompiling(sourceCodeVaccineAction!);
             id = await facade.CreateScript(sourceCodeVaccineAction!);
 
-            sf = new ScriptFactory(facade);
+            sf = new ContextFactory(facade);
             await facade.ExecuteScriptById(id, sf.CreateContextForApiV(valResult.versionInt));
         }
         for (int i = 0; i < 6; i++)
@@ -203,7 +203,7 @@ public class SanboxTests
             valResult = facade.BasicValidationBeforeCompiling(sourceCodePedia!);
             id = await facade.CreateScript(sourceCodePedia!);
 
-            sf = new ScriptFactory(facade);
+            sf = new ContextFactory(facade);
             await facade.ExecuteScriptById(id, sf.CreateContextForApiV(valResult.versionInt));
         }
     }
@@ -212,7 +212,7 @@ public class SanboxTests
     public async Task CreateContextByDowngradeTest()
     {
         Guid id;
-        ScriptFactory sf;
+        ContextFactory sf;
         (string className, string baseTypeName, int versionInt) valResult;
         object result;
         ActionResultV3.ActionResult ar;
@@ -223,7 +223,7 @@ public class SanboxTests
         valResult = facade.BasicValidationBeforeCompiling(src!);
         id = await facade.CreateScript(src!);
 
-        sf = new ScriptFactory(facade);
+        sf = new ContextFactory(facade);
         result = await facade.ExecuteScriptById(id, await sf.CreateContextByDowngrade(src!));
         ar = (ActionResultV3.ActionResult)EmberMethods.UpgradeActionResult(result);
         Console.WriteLine(ar.ToString());
@@ -233,7 +233,7 @@ public class SanboxTests
         valResult = facade.BasicValidationBeforeCompiling(src!);
         id = await facade.CreateScript(src!);
 
-        sf = new ScriptFactory(facade);
+        sf = new ContextFactory(facade);
         result = await facade.ExecuteScriptById(id, await sf.CreateContextByDowngrade(src!));
         ar = (ActionResultV3.ActionResult)EmberMethods.UpgradeActionResult(result);
         Console.WriteLine(ar.ToString());
@@ -243,7 +243,7 @@ public class SanboxTests
         valResult = facade.BasicValidationBeforeCompiling(src!);
         id = await facade.CreateScript(src!);
 
-        sf = new ScriptFactory(facade);
+        sf = new ContextFactory(facade);
         result = await facade.ExecuteScriptById(id, await sf.CreateContextByDowngrade(src!));
         ar = (ActionResultV3.ActionResult)EmberMethods.UpgradeActionResult(result);
         Console.WriteLine(ar.ToString());
@@ -253,7 +253,7 @@ public class SanboxTests
         valResult = facade.BasicValidationBeforeCompiling(src!);
         id = await facade.CreateScript(src!);
 
-        sf = new ScriptFactory(facade);
+        sf = new ContextFactory(facade);
         result = await facade.ExecuteScriptById(id, await sf.CreateContextByDowngrade(src!));
         // ar = EmberMethods.UpgradeActionResult(result);
         Console.WriteLine(result.ToString());

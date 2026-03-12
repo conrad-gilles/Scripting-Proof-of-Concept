@@ -4,10 +4,10 @@ using System.Runtime.Serialization;
 using System.Threading.Tasks;
 using Ember.Scripting;
 
-public class ScriptFactory
+public class ContextFactory
 {
     private readonly ISccriptManagerDeleteAfter ScriptManager;
-    public ScriptFactory(ISccriptManagerDeleteAfter scriptManager)
+    public ContextFactory(ISccriptManagerDeleteAfter scriptManager)
     {
         ScriptManager = scriptManager;
     }
@@ -23,7 +23,7 @@ public class ScriptFactory
 
         MockData data = new MockData(labOrder: obj.labOrder, patient: obj.patient, consoleLogger: obj.logger,
         dataAccess: obj.testDataAccess, vaccine: obj.vaccine);
-        GeneratorContext ctx = ContextFactory.CreateContext((int)apiV, data);
+        GeneratorContext ctx = CreateContext((int)apiV, data);
 
         return ctx;
     }
@@ -71,6 +71,20 @@ public class ScriptFactory
             iterations++;
         }
         return (GeneratorContext)context;
+    }
+    public static GeneratorContext CreateContext(int version, DataBaseClass data)
+    {
+        MockData mockData = (MockData)data;
+
+        Dictionary<int, Type> retrievedDict = ContextVersionScanner.GetClassDictionary();
+        if (retrievedDict.Keys.Contains(version) == false)
+        {
+            throw new Exception(message: "The version was not found in the Dictionary");
+        }
+        Type neededType = retrievedDict[version];
+        GeneratorContext uninitializedContext = (Ember.Scripting.GeneratorContext)RuntimeHelpers.GetUninitializedObject(neededType);
+        var ctx = uninitializedContext.CreateUsingData(data);
+        return ctx;
     }
 
     internal (LabOrder labOrder, Patient patient, ConsoleLogger logger, DataAccess testDataAccess, Vaccine vaccine) ScriptObjects()
