@@ -6,6 +6,7 @@ using IGeneratorReadOnlyContextV1;
 
 namespace IGeneratorReadOnlyContextV1
 {
+    [MetaDataIGeneratorIntrfc(version: 1)]
     public interface IGeneratorContext : IGeneratorBaseInterface
     {
         new static sealed int IVersion => 1;
@@ -18,6 +19,7 @@ namespace IGeneratorReadOnlyContextV1
 
 namespace IGeneratorContext_V2
 {
+    [MetaDataIGeneratorIntrfc(version: 2)]
     public interface IGeneratorContext : IGeneratorReadOnlyContextV1.IGeneratorContext
     {
         new static sealed int IVersion => 2;
@@ -30,6 +32,7 @@ namespace IGeneratorContext_V2
 
 namespace IGeneratorContext_V3
 {
+    [MetaDataIGeneratorIntrfc(version: 3)]
     public interface IGeneratorContext : IGeneratorContext_V2.IGeneratorContext
     {
         new static sealed int IVersion => 3;
@@ -40,6 +43,7 @@ namespace IGeneratorContext_V3
 
 namespace IGeneratorContext_V4
 {
+    [MetaDataIGeneratorIntrfc(version: 4)]
     public interface IGeneratorContext : IGeneratorContext_V3.IGeneratorContext
     {
         new static sealed int IVersion => 4;
@@ -48,6 +52,7 @@ namespace IGeneratorContext_V4
 }
 namespace IGeneratorContextNoInheritance_V5
 {
+    [MetaDataIGeneratorIntrfc(version: 5)]
     public interface IGeneratorContext : IGeneratorBaseInterface
     {
         new static sealed int IVersion => 5;
@@ -63,6 +68,7 @@ namespace IGeneratorContextNoInheritance_V5
 /// </summary>
 namespace ReadOnlyContextV1
 {
+    [MetaDataGeneratorClass(version: 1)]
     public class GeneratorContext : Ember.Scripting.GeneratorContext, IGeneratorReadOnlyContextV1.IGeneratorContext
     {
         public override int Version => 1;
@@ -98,6 +104,7 @@ namespace ReadOnlyContextV1
 
 namespace RWContextV2
 {
+    [MetaDataGeneratorClass(version: 2)]
     public class GeneratorContext : Ember.Scripting.GeneratorContext, IGeneratorContext_V2.IGeneratorContext
     {
         public override int Version => 2;
@@ -149,6 +156,7 @@ namespace RWContextV2
 
 namespace GeneratorContextV3
 {
+    [MetaDataGeneratorClass(version: 3)]
     public class GeneratorContext : RWContextV2.GeneratorContext, IGeneratorContext_V3.IGeneratorContext
     {
         public override int Version => 3;
@@ -191,6 +199,7 @@ namespace GeneratorContextV3
 
 namespace GeneratorContextV4
 {
+    [MetaDataGeneratorClass(version: 4)]
     public class GeneratorContext : GeneratorContextV3.GeneratorContext, IGeneratorContext_V4.IGeneratorContext  //todo implement Adapter pattern
     {
         public override int Version => 4;
@@ -234,6 +243,7 @@ namespace GeneratorContextV4
 
 namespace GeneratorContextNoInherVaccineV5
 {
+    [MetaDataGeneratorClass(version: 5)]
     public class GeneratorContext : Ember.Scripting.GeneratorContext, IGeneratorContextNoInheritance_V5.IGeneratorContext   //into diffrent namespaces blocks later folders
     {
         public override int Version => 5;

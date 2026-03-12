@@ -1,6 +1,5 @@
 # Todo
 
-- put action results also in diffrent namespaces instead of labeling in class name
 - pass data in context so when you execute script(id,context) it gives data to the script
 - this data needs to be standardized maybe using something like fluentvalidation idk
 - CreateContext() in ScriptFactory takes in a few arguments 

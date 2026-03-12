@@ -3,12 +3,13 @@ using Ember.Scripting;
 using System.Runtime.InteropServices;
 namespace Ember.Scripting;
 
+[MetaDataIGeneratorIntrfc(version: 0, type: TypeInfo.AbstractBaseInSF)]
 public interface IGeneratorBaseInterface
 {
     int IVersion { get; }
 }
 
-// [TypeLibVersion (4)]
+[MetaDataGeneratorClass(version: 0, type: TypeInfo.AbstractBaseInSF)]
 public abstract class GeneratorContext
 {
     public abstract int Version { get; }

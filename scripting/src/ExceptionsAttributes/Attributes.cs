@@ -37,15 +37,15 @@ public enum IGeneratorScriptReturnType
 public class MetaDataActionResult : Attribute
 {
     public int Version { get; }
-    public ActionResultType Type { get; }
+    public TypeInfo Type { get; }
 
     public MetaDataActionResult(int version)
     {
         Version = version;
-        Type = ActionResultType.DefaultVersioned;
+        Type = TypeInfo.DefaultVersioned;
     }
 
-    public MetaDataActionResult(int version, ActionResultType type)
+    public MetaDataActionResult(int version, TypeInfo type)
     {
         Version = version;
         Type = type;
@@ -53,8 +53,47 @@ public class MetaDataActionResult : Attribute
 
 }
 
-public enum ActionResultType
+public enum TypeInfo
 {
     AbstractBaseInSF,
     DefaultVersioned
+}
+
+
+[AttributeUsage(AttributeTargets.Class)]
+public class MetaDataGeneratorClass : Attribute
+{
+    public int Version { get; }
+    public TypeInfo Type { get; }
+
+    public MetaDataGeneratorClass(int version)
+    {
+        Version = version;
+        Type = TypeInfo.DefaultVersioned;
+    }
+
+    public MetaDataGeneratorClass(int version, TypeInfo type)
+    {
+        Version = version;
+        Type = type;
+    }
+}
+
+[AttributeUsage(AttributeTargets.Interface)]
+public class MetaDataIGeneratorIntrfc : Attribute
+{
+    public int Version { get; }
+    public TypeInfo Type { get; }
+
+    public MetaDataIGeneratorIntrfc(int version)
+    {
+        Version = version;
+        Type = TypeInfo.DefaultVersioned;
+    }
+
+    public MetaDataIGeneratorIntrfc(int version, TypeInfo type)
+    {
+        Version = version;
+        Type = type;
+    }
 }
