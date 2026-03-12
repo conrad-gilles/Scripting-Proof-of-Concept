@@ -5,6 +5,7 @@ using Serilog;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.VisualStudio.SolutionPersistence.Serializer.SlnV12;
+using System.Runtime.CompilerServices;
 
 [TestClass]
 public class EmberVersioningTests
@@ -263,5 +264,29 @@ public class EmberVersioningTests
         Assert.IsTrue(result.ToString()!.Contains(shouldReturn));
 
         // Assert.IsTrue(false);
+    }
+
+    public async Task GetTestingContextTest()
+    {
+        GeneratorContext ctx;
+        Guid id;
+        id = await facade!.CreateScript(sourceCodeActionV2!);
+        var vali = facade.BasicValidationBeforeCompiling(sourceCodeActionV2!);
+        int desiredContextVersion = vali.versionInt;
+
+        await Assert.ThrowsExceptionAsync<Exception>(async () =>
+        {
+            ctx = await em!.GetTestingContext<GeneratorContextV3.GeneratorContext>();
+            var result1 = await facade.ExecuteScriptById(id, ctx);
+        });
+
+        ctx = await em!.GetTestingContext<RWContextV2.GeneratorContext>();
+        var result1 = await facade.ExecuteScriptById(id, ctx);
+        var result = EmberMethods.UpgradeActionResult(result1);
+
+        string shouldReturn = ActionResultVersionSpecific + "Pediatric tests added";
+        Assert.IsInstanceOfType(result, typeof(ActionResultBaseClass));
+        Assert.IsInstanceOfType(result, typeof(ActionResultV3.ActionResult));
+        Assert.IsTrue(result.ToString()!.Contains(shouldReturn));
     }
 }

@@ -11,42 +11,6 @@ public class ScriptFactory
     {
         ScriptManager = scriptManager;
     }
-    /// <summary>
-    /// Gets the context version for the running Ember System
-    /// </summary>
-    /// <returns></returns>
-    /// <exception cref="Exception"></exception>
-    /// <exception cref="ArgumentException"></exception>
-    public GeneratorContext CreateContext()
-    {
-        // int apiV = EmberMethods.GetEmberApiVersion(ScriptManager.GetRecentApiVersion());
-        int apiV = ScriptManager.GetRunningApiVersion();
-
-        Type recentType;
-        Dictionary<int, Type> contextVersionMap = ContextVersionScanner.GetClassDictionary();
-
-        if (contextVersionMap.Keys.Contains(apiV) == false)
-        {
-            throw new Exception("No Context class defined in " + nameof(contextVersionMap) + " for the passed API version.");
-            // might be better to instead return latest version?
-            // recentType = contextVersionMap.Last().Value;
-        }
-        recentType = contextVersionMap[apiV];
-        var objs = ScriptObjects();
-
-        GeneratorContext ctx = recentType switch
-        {
-            var t when t == typeof(ReadOnlyContextV1.GeneratorContext) => new ReadOnlyContextV1.GeneratorContext(objs.labOrder, objs.patient, objs.logger, objs.testDataAccess),
-            var t when t == typeof(RWContextV2.GeneratorContext) => new RWContextV2.GeneratorContext(objs.labOrder, objs.patient, objs.logger, objs.testDataAccess),
-            var t when t == typeof(GeneratorContextV3.GeneratorContext) => new GeneratorContextV3.GeneratorContext(objs.labOrder, objs.patient, objs.logger, objs.testDataAccess),
-            var t when t == typeof(GeneratorContextV4.GeneratorContext) => new GeneratorContextV4.GeneratorContext(objs.labOrder, objs.patient, objs.logger, objs.testDataAccess),
-            var t when t == typeof(GeneratorContextNoInherVaccineV5.GeneratorContext) => new GeneratorContextNoInherVaccineV5.GeneratorContext(objs.labOrder, objs.vaccine),
-            _ => throw new ArgumentException($"Unsupported context type: {recentType.Name}")
-        };
-
-        return ctx;
-    }
-
 
     public GeneratorContext CreateContextForApiV(int? apiV = null)
     {
@@ -54,32 +18,12 @@ public class ScriptFactory
         {
             apiV = ScriptManager.GetRunningApiVersion();
         }
-        // Type recentType;
-        // Dictionary<int, Type> contextVersionMap = ContextVersionScanner.GetClassDictionary();
 
-        // if (contextVersionMap.Keys.Contains((int)apiV) == false)
-        // {
-        //     throw new Exception("No Context class defined in " + nameof(contextVersionMap) + " for the passed API version.");
-        //     // might be better to instead return latest version?
-        //     // recentType = contextVersionMap.Last().Value;
-        // }
-        // recentType = contextVersionMap[(int)apiV];
         var obj = ScriptObjects();
-
-        // GeneratorContext ctx = recentType switch
-        // {
-        //     var t when t == typeof(ReadOnlyContextV1.GeneratorContext) => new ReadOnlyContextV1.GeneratorContext(obj.labOrder, obj.patient, obj.logger, obj.testDataAccess),
-        //     var t when t == typeof(RWContextV2.GeneratorContext) => new RWContextV2.GeneratorContext(obj.labOrder, obj.patient, obj.logger, obj.testDataAccess),
-        //     var t when t == typeof(GeneratorContextV3.GeneratorContext) => new GeneratorContextV3.GeneratorContext(obj.labOrder, obj.patient, obj.logger, obj.testDataAccess),
-        //     var t when t == typeof(GeneratorContextV4.GeneratorContext) => new GeneratorContextV4.GeneratorContext(obj.labOrder, obj.patient, obj.logger, obj.testDataAccess),
-        //     var t when t == typeof(GeneratorContextNoInherVaccineV5.GeneratorContext) => new GeneratorContextNoInherVaccineV5.GeneratorContext(obj.labOrder, obj.vaccine),
-        //     _ => throw new ArgumentException($"Unsupported context type: {recentType.Name}")
-        // };
 
         MockData data = new MockData(labOrder: obj.labOrder, patient: obj.patient, consoleLogger: obj.logger,
         dataAccess: obj.testDataAccess, vaccine: obj.vaccine);
         GeneratorContext ctx = ContextFactory.CreateContext((int)apiV, data);
-
 
         return ctx;
     }

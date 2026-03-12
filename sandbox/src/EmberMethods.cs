@@ -9,6 +9,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using TypeInfo = System.Reflection.TypeInfo;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 public class EmberMethods
 {
@@ -77,8 +78,6 @@ public class EmberMethods
         Dictionary<int, Guid> sourceDict = new Dictionary<int, Guid>();
         for (int i = 0; i < sourceCodes.Count; i++)
         {
-            // Console.WriteLine(i + 1 + ". " + sourceCodes[i].ToString());
-            // Console.WriteLine(i + 1 + ". " + sourceCodes[i].ToStringShorter());
             string str = (i + 1).ToString() + ". Name: " + sourceCodes[i].ScriptName + ", Created by: " + sourceCodes[i].CreatedBy
             + ", Created at: " + sourceCodes[i].CreatedAt + ", MinApiVersion: " + sourceCodes[i].MinApiVersion + ", Modified at: " + sourceCodes[i].ModifiedAt
             + ", Compiled count [" + sourceCodes[i].CompiledCaches.Count() + "]";
@@ -151,10 +150,8 @@ public class EmberMethods
         Serilog.Log.Verbose("Entered {MethodName} in {ClassName}.", nameof(GetSourceCodeInSwitch), nameof(EmberMethods));
         Console.WriteLine("Enter the the script you want to read: ");
         string userInput = Console.ReadLine()!;
-        // var db = new DbHelper(UsefulMethods.GetReferences());
         if (userInput == null || userInput == "")
         {
-            // string userInput = Console.ReadLine();
 
             List<CustomerScript> customerScripts = await Facade.ListScripts();
             for (int i = 0; i < customerScripts.Count; i++)
@@ -219,10 +216,6 @@ public class EmberMethods
             }
             iterations++;
         }
-
-
-        // ActionResultV3NoInheritance v3Script2 = (ActionResultV3NoInheritance)currentActionResult;
-        // return (ActionResultV3NoInheritance)v3Script2;
         return currentActionResult;
     }
     public async Task<Guid> GetIdInConsoleAsync(bool fromSrc = false)
@@ -240,18 +233,10 @@ public class EmberMethods
         Guid id = cacheDict[Int32.Parse(userInputForEdit)];
         return id;
     }
-    private static List<MetadataReference> references = [                        MetadataReference.CreateFromFile(typeof(object).Assembly.Location), // System.Private.CoreLib
-                        // MetadataReference.CreateFromFile(typeof(Console).Assembly.Location), // System.Console
-                        // MetadataReference.CreateFromFile(Assembly.Load("System.Runtime").Location), // System.Runtime
-                        // MetadataReference.CreateFromFile(typeof(Task<>).Assembly.Location), // System.Threading.Tasks
-                        // MetadataReference.CreateFromFile(typeof(DateTime).Assembly.Location), // System.DateTime
-                        // References t custom interfaces
+    private static List<MetadataReference> references = [
+        MetadataReference.CreateFromFile(typeof(object).Assembly.Location), // System.Private.CoreLib
                         MetadataReference.CreateFromFile(typeof(IGeneratorConditionScript).Assembly.Location),
-                        // MetadataReference.CreateFromFile(typeof(IGeneratorActionScript).Assembly.Location),
-                        // MetadataReference.CreateFromFile(typeof(IGeneratorBaseInterface).Assembly.Location),
-                        // MetadataReference.CreateFromFile(typeof(Ember.Scripting.GeneratorContext).Assembly.Location),
-                        MetadataReference.CreateFromFile(typeof(IGeneratorReadOnlyContextV1.IGeneratorContext).Assembly.Location),//try removing if works good i guess but still need to pass from sandbox];
-                        //   MetadataReference.CreateFromFile(typeof(Ember.Scripting.ScriptManagerFacade).Assembly.Location)
+                MetadataReference.CreateFromFile(typeof(IGeneratorReadOnlyContextV1.IGeneratorContext).Assembly.Location),//try removing if works good i guess but still need to pass from sandbox];
                           ];
     public static List<MetadataReference> GetReferences()
     {
@@ -273,15 +258,25 @@ public class EmberMethods
             var objs = sf.ScriptObjects();
             if (autoDetectFromScript == null)
             {
-                ctx = typeof(T) switch
+                var dict = ContextVersionScanner.GetClassDictionary();
+                int? v = null;
+
+                foreach (KeyValuePair<int, Type> kvp in dict)
                 {
-                    var t when t == typeof(ReadOnlyContextV1.GeneratorContext) => new ReadOnlyContextV1.GeneratorContext(objs.labOrder, objs.patient, objs.logger, objs.testDataAccess),
-                    var t when t == typeof(RWContextV2.GeneratorContext) => new RWContextV2.GeneratorContext(objs.labOrder, objs.patient, objs.logger, objs.testDataAccess),
-                    var t when t == typeof(GeneratorContextV3.GeneratorContext) => new GeneratorContextV3.GeneratorContext(objs.labOrder, objs.patient, objs.logger, objs.testDataAccess),
-                    var t when t == typeof(GeneratorContextV4.GeneratorContext) => new GeneratorContextV4.GeneratorContext(objs.labOrder, objs.patient, objs.logger, objs.testDataAccess),
-                    var t when t == typeof(GeneratorContextNoInherVaccineV5.GeneratorContext) => new GeneratorContextNoInherVaccineV5.GeneratorContext(objs.labOrder, objs.vaccine),
-                    _ => throw new ArgumentException($"Unsupported context type: {typeof(T).Name}")
-                };
+                    if (kvp.Value == typeof(T))
+                    {
+                        if (v != null)
+                        {
+                            throw new Exception(message: "version int should be null here else it was assigned twice which is weird.");
+                        }
+                        v = kvp.Key;
+                    }
+                }
+                if (v == null)
+                {
+                    throw new Exception(message: "Version int was null, this should not happen.");
+                }
+                ctx = sf.CreateContextForApiV(v);
             }
             else
             {
@@ -355,25 +350,5 @@ public class EmberMethods
         }
 
     }
-
-    // public GeneratorContext GetTestingContextUsingData(CustomerScript? script = null)
-    // {
-    //     MockData data = new MockData();
-    // }
-
-    // public static async Task<Guid> GetIdInConsoleAsync(bool fromSrc = false)
-    // {
-    //     Dictionary<int, Guid> cacheDict = [];
-    //     if (fromSrc == false)
-    //     { cacheDict = await RandomMethods.ListAllCompiledFromDB(); }
-
-    //     else { cacheDict = await RandomMethods.ListAllStoredSourceCodes(); }
-
-    //     Dictionary<int, Guid> sourceDict = [];
-    //     Console.WriteLine("Enter the number of the script ");
-    //     string userInputForEdit = Console.ReadLine();
-    //     Guid id = cacheDict[Int32.Parse(userInputForEdit)];
-    //     return id;
-    // }
 
 }
