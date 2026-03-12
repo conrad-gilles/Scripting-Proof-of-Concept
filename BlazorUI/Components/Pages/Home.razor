@@ -262,7 +262,13 @@ block in Home.razor -->
             isWorking = true; //might have to call StateChange
             StateHasChanged();
             EmberMethods rm = new EmberMethods(ScriptManager);
-            string path = @"C:\Users\Gilles\Desktop\UNI\Semester 6\Code\Codebase\Scripting-Proof-of-Concept\sandbox\src\Scripts";
+            @* string path = @"C:\Users\Gilles\Desktop\UNI\Semester 6\Code\Codebase\Scripting-Proof-of-Concept\sandbox\src\Scripts"; *@
+
+            string path = Path.GetFullPath(Path.Combine(
+                AppDomain.CurrentDomain.BaseDirectory,
+                "..", "..", "..", "..",
+                "sandbox", "src", "Scripts"
+            ));
             await rm.CompileAllScriptsInFolderAndSaveToDB(path, "Gilles", EmberMethods.GetEmberApiVersion());
 
             isWorking = false;

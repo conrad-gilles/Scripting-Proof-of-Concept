@@ -127,7 +127,6 @@ public class ScriptTests
     public async Task TestCreatedAt()
     {
         await facade!.EnsureDeletedCreated();
-        // string path = @"C:\Users\Gilles\Desktop\UNI\Semester 6\Code\Codebase\Scripting-Proof-of-Concept\scripting\src";
         // await rm!.CompileAllScriptsInFolderAndSaveToDB(path, "Default", await facade.GetRecentApiVersion());
 
         Guid id = await facade!.CreateScript(sourceCodePedia!);

@@ -292,7 +292,13 @@ EmberMethods.GetEmberApiVersion(testingDiffrentVersion: selectedApiVersion));
 
     public static string GetTemplate()
     {
-        string path = @"C:\Users\Gilles\Desktop\UNI\Semester 6\Code\Codebase\Scripting-Proof-of-Concept\BlazorUI\src\ScriptTemplate.cs";
+        @* string path = @"C:\Users\Gilles\Desktop\UNI\Semester 6\Code\Codebase\Scripting-Proof-of-Concept\BlazorUI\src\ScriptTemplate.cs"; *@
+
+        string path = Path.GetFullPath(Path.Combine(
+            AppDomain.CurrentDomain.BaseDirectory,
+            "..", "..", "..",
+            "src", "ScriptTemplate.cs"
+        ));
         return EmberMethods.CreateStringFromCsFile(path);
     }
 

@@ -1,6 +1,6 @@
 # Todo
 
-- remove hardcoded paths using ctrl alt f c/gilles bla bla
+- remove hardcoded paths using ctrl alt f C:\Users\Gilles\Desktop\UNI\Semester 6\Code\Codebase\Scripting-Proof-of-Concept\sandbox\src\Scripts
 - pass data in context so when you execute script(id,context) it gives data to the script //maybe add it to facade instead but idk
 - this data needs to be standardized maybe using something like fluentvalidation idk
 - CreateContext() in ScriptFactory takes in a few arguments 
