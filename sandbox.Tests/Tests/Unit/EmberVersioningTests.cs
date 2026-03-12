@@ -229,4 +229,39 @@ public class EmberVersioningTests
             Console.WriteLine("Key: " + pair.Key + ", Value: " + pair.Value);
         }
     }
+
+    [TestMethod]
+    public async Task CreateUsingDataTestAsync()
+    {
+        MockData data = new MockData();
+        GeneratorContext ctx;
+        Guid id;
+        id = await facade!.CreateScript(sourceCodeActionV2!);
+        var vali = facade.BasicValidationBeforeCompiling(sourceCodeActionV2!);
+        int desiredContextVersion = vali.versionInt;
+
+        Console.WriteLine(nameof(desiredContextVersion) + ": " + desiredContextVersion);
+
+        await Assert.ThrowsExceptionAsync<Exception>(async () =>
+        {
+            ctx = ContextFactory.CreateContext(desiredContextVersion, data);
+        });
+        ScriptFactory sf = new ScriptFactory(facade);
+        var obj = sf.ScriptObjects();
+
+        data = new MockData(labOrder: obj.labOrder, patient: obj.patient, consoleLogger: obj.logger,
+        dataAccess: obj.testDataAccess, vaccine: obj.vaccine);
+
+        ctx = ContextFactory.CreateContext(desiredContextVersion, data);
+        var result1 = await facade.ExecuteScriptById(id, ctx);
+
+        var result = EmberMethods.UpgradeActionResult(result1);
+
+        string shouldReturn = ActionResultVersionSpecific + "Pediatric tests added";
+        Assert.IsInstanceOfType(result, typeof(ActionResultBaseClass));
+        Assert.IsInstanceOfType(result, typeof(ActionResultV3.ActionResult));
+        Assert.IsTrue(result.ToString()!.Contains(shouldReturn));
+
+        // Assert.IsTrue(false);
+    }
 }

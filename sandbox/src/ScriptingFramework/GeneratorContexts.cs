@@ -72,7 +72,6 @@ namespace ReadOnlyContextV1
         public ConsoleLoggerInterface logger;
         public DataAccessInterface data;
 
-
         public GeneratorContext(ILabOrderInterface pLabOrder, PatientInterface pPatient, ConsoleLoggerInterface plogger, DataAccessInterface pdata)
         {
             labOrder = pLabOrder;
@@ -81,10 +80,28 @@ namespace ReadOnlyContextV1
             data = pdata;
 
         }
+
         ILabOrderInterface IGeneratorReadOnlyContextV1.IGeneratorContext.LabOrder => labOrder;
         PatientInterface IGeneratorReadOnlyContextV1.IGeneratorContext.Patient => patient;
         ConsoleLoggerInterface IGeneratorReadOnlyContextV1.IGeneratorContext.Logger => logger;
         DataAccessInterface IGeneratorReadOnlyContextV1.IGeneratorContext.Data => data;
+
+        public override Ember.Scripting.GeneratorContext CreateUsingData(DataBaseClass data)
+        {
+            try
+            {
+                MockData mockData = (MockData)data;
+                if (mockData.LabOrder == null || mockData.Patient == null || mockData.ConsoleLogger == null || mockData.DataAccess == null)
+                {
+                    throw new Exception(message: "One of the inserted Parameters in Data was null");
+                }
+                return new GeneratorContext(mockData.LabOrder, mockData.Patient, mockData.ConsoleLogger, mockData.DataAccess);
+            }
+            catch (Exception e)
+            {
+                throw new Exception(message: "Something went wrong trying to CreateUsing Data", e);
+            }
+        }
 
         public override Ember.Scripting.GeneratorContext Downgrade()
         {
@@ -124,7 +141,22 @@ namespace RWContextV2
         public DataAccessInterface Data => data;
 
         ILabOrderInterface IGeneratorReadOnlyContextV1.IGeneratorContext.LabOrder => LabOrder;
-
+        public override Ember.Scripting.GeneratorContext CreateUsingData(DataBaseClass data)
+        {
+            try
+            {
+                MockData mockData = (MockData)data;
+                if (mockData.LabOrder == null || mockData.Patient == null || mockData.ConsoleLogger == null || mockData.DataAccess == null)
+                {
+                    throw new Exception(message: "One of the inserted Parameters in Data was null");
+                }
+                return new GeneratorContext(mockData.LabOrder, mockData.Patient, mockData.ConsoleLogger, mockData.DataAccess);
+            }
+            catch (Exception e)
+            {
+                throw new Exception(message: "Something went wrong trying to CreateUsing Data", e);
+            }
+        }
         public override Ember.Scripting.GeneratorContext Downgrade()
         {
             try
@@ -165,6 +197,24 @@ namespace GeneratorContextV3
 
         }
         ILabOrderInterfaceV2 IGeneratorContext_V3.IGeneratorContext.LabOrder => labOrderV2;
+
+        public override Ember.Scripting.GeneratorContext CreateUsingData(DataBaseClass data)
+        {
+            try
+            {
+                MockData mockData = (MockData)data;
+                if (mockData.LabOrder == null || mockData.Patient == null || mockData.ConsoleLogger == null || mockData.DataAccess == null)
+                {
+                    throw new Exception(message: "One of the inserted Parameters in Data was null");
+                }
+                return new GeneratorContext(mockData.LabOrder, mockData.Patient, mockData.ConsoleLogger, mockData.DataAccess);
+            }
+            catch (Exception e)
+            {
+                throw new Exception(message: "Something went wrong trying to CreateUsing Data", e);
+            }
+        }
+
         public override Ember.Scripting.GeneratorContext Downgrade()
         {
             try
@@ -206,6 +256,23 @@ namespace GeneratorContextV4
         }
         ILabOrderInterfaceV3 IGeneratorContext_V4.IGeneratorContext.LabOrder => labOrderV3;
 
+        public override Ember.Scripting.GeneratorContext CreateUsingData(DataBaseClass data)
+        {
+            try
+            {
+                MockData mockData = (MockData)data;
+                if (mockData.LabOrder == null || mockData.Patient == null || mockData.ConsoleLogger == null || mockData.DataAccess == null)
+                {
+                    throw new Exception(message: "One of the inserted Parameters in Data was null");
+                }
+                return new GeneratorContext(mockData.LabOrder, mockData.Patient, mockData.ConsoleLogger, mockData.DataAccess);
+            }
+            catch (Exception e)
+            {
+                throw new Exception(message: "Something went wrong trying to CreateUsing Data", e);
+            }
+        }
+
         public override Ember.Scripting.GeneratorContext Downgrade()
         {
             try
@@ -240,6 +307,23 @@ namespace GeneratorContextNoInherVaccineV5
         ILabOrderInterfaceV4NoInheritence IGeneratorContextNoInheritance_V5.IGeneratorContext.LabOrder => LabOrder;
 
         IVaccineInterface IGeneratorContextNoInheritance_V5.IGeneratorContext.Vaccine => Vaccine;
+
+        public override Ember.Scripting.GeneratorContext CreateUsingData(DataBaseClass data)
+        {
+            try
+            {
+                MockData mockData = (MockData)data;
+                if (mockData.LabOrder == null || mockData.Vaccine == null)
+                {
+                    throw new Exception(message: "One of the inserted Parameters in Data was null");
+                }
+                return new GeneratorContext(mockData.LabOrder, mockData.Vaccine);
+            }
+            catch (Exception e)
+            {
+                throw new Exception(message: "Something went wrong trying to CreateUsing Data", e);
+            }
+        }
 
         public override Ember.Scripting.GeneratorContext Downgrade()
         {

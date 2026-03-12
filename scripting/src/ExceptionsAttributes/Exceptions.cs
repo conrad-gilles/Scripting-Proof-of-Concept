@@ -159,7 +159,7 @@ public class ExceptionHelper    //for future to traverse exception chain
         List<Exception> exceptions = GetExceptionList(ex);
         return exceptions.Count() - 1;
     }
-    private static List<Exception> GetExceptionList(Exception ex)
+    public static List<Exception> GetExceptionList(Exception ex)
     {
         List<Exception> exceptions = [];
         Exception baseException = ex.GetBaseException();
@@ -171,5 +171,14 @@ public class ExceptionHelper    //for future to traverse exception chain
         }
         exceptions.Add(baseException);
         return exceptions;
+    }
+
+    public static void PrintExceptionListToConsole(Exception ex)
+    {
+        List<Exception> ls = GetExceptionList(ex);
+        for (int i = 0; i < ls.Count(); i++)
+        {
+            Console.WriteLine("Exception " + i + " :" + ls[i].Message);
+        }
     }
 }

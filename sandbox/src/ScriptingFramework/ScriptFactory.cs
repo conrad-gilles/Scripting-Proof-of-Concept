@@ -17,7 +17,7 @@ public class ScriptFactory
     /// <returns></returns>
     /// <exception cref="Exception"></exception>
     /// <exception cref="ArgumentException"></exception>
-    public async Task<GeneratorContext> CreateContext()
+    public GeneratorContext CreateContext()
     {
         // int apiV = EmberMethods.GetEmberApiVersion(ScriptManager.GetRecentApiVersion());
         int apiV = ScriptManager.GetRunningApiVersion();
@@ -48,88 +48,40 @@ public class ScriptFactory
     }
 
 
-    public async Task<GeneratorContext> CreateContextForApiV(int? apiV = null)
+    public GeneratorContext CreateContextForApiV(int? apiV = null)
     {
         if (apiV == null)
         {
             apiV = ScriptManager.GetRunningApiVersion();
         }
-        Type recentType;
-        Dictionary<int, Type> contextVersionMap = ContextVersionScanner.GetClassDictionary();
+        // Type recentType;
+        // Dictionary<int, Type> contextVersionMap = ContextVersionScanner.GetClassDictionary();
 
-        if (contextVersionMap.Keys.Contains((int)apiV) == false)
-        {
-            throw new Exception("No Context class defined in " + nameof(contextVersionMap) + " for the passed API version.");
-            // might be better to instead return latest version?
-            // recentType = contextVersionMap.Last().Value;
-        }
-        recentType = contextVersionMap[(int)apiV];
-        var objs = ScriptObjects();
+        // if (contextVersionMap.Keys.Contains((int)apiV) == false)
+        // {
+        //     throw new Exception("No Context class defined in " + nameof(contextVersionMap) + " for the passed API version.");
+        //     // might be better to instead return latest version?
+        //     // recentType = contextVersionMap.Last().Value;
+        // }
+        // recentType = contextVersionMap[(int)apiV];
+        var obj = ScriptObjects();
 
-        GeneratorContext ctx = recentType switch
-        {
-            var t when t == typeof(ReadOnlyContextV1.GeneratorContext) => new ReadOnlyContextV1.GeneratorContext(objs.labOrder, objs.patient, objs.logger, objs.testDataAccess),
-            var t when t == typeof(RWContextV2.GeneratorContext) => new RWContextV2.GeneratorContext(objs.labOrder, objs.patient, objs.logger, objs.testDataAccess),
-            var t when t == typeof(GeneratorContextV3.GeneratorContext) => new GeneratorContextV3.GeneratorContext(objs.labOrder, objs.patient, objs.logger, objs.testDataAccess),
-            var t when t == typeof(GeneratorContextV4.GeneratorContext) => new GeneratorContextV4.GeneratorContext(objs.labOrder, objs.patient, objs.logger, objs.testDataAccess),
-            var t when t == typeof(GeneratorContextNoInherVaccineV5.GeneratorContext) => new GeneratorContextNoInherVaccineV5.GeneratorContext(objs.labOrder, objs.vaccine),
-            _ => throw new ArgumentException($"Unsupported context type: {recentType.Name}")
-        };
+        // GeneratorContext ctx = recentType switch
+        // {
+        //     var t when t == typeof(ReadOnlyContextV1.GeneratorContext) => new ReadOnlyContextV1.GeneratorContext(obj.labOrder, obj.patient, obj.logger, obj.testDataAccess),
+        //     var t when t == typeof(RWContextV2.GeneratorContext) => new RWContextV2.GeneratorContext(obj.labOrder, obj.patient, obj.logger, obj.testDataAccess),
+        //     var t when t == typeof(GeneratorContextV3.GeneratorContext) => new GeneratorContextV3.GeneratorContext(obj.labOrder, obj.patient, obj.logger, obj.testDataAccess),
+        //     var t when t == typeof(GeneratorContextV4.GeneratorContext) => new GeneratorContextV4.GeneratorContext(obj.labOrder, obj.patient, obj.logger, obj.testDataAccess),
+        //     var t when t == typeof(GeneratorContextNoInherVaccineV5.GeneratorContext) => new GeneratorContextNoInherVaccineV5.GeneratorContext(obj.labOrder, obj.vaccine),
+        //     _ => throw new ArgumentException($"Unsupported context type: {recentType.Name}")
+        // };
+
+        MockData data = new MockData(labOrder: obj.labOrder, patient: obj.patient, consoleLogger: obj.logger,
+        dataAccess: obj.testDataAccess, vaccine: obj.vaccine);
+        GeneratorContext ctx = ContextFactory.CreateContext((int)apiV, data);
+
 
         return ctx;
-
-        // var facade = new ScriptManagerFacade(UsefulMethods.GetReferences());
-        // // var newestVersion = await facade.GetRecentApiVersion();
-        // object finalActionResult = resultValue;
-        // int iterations = 0;              // will probably fail in real application todo fix mabe with reflection i heard?
-        // int maxIterations = ContextVersionScanner.GetClassDictionary().Keys.Count() + 3;  //just making sure my logic is fine to prevent infinite loop  todo chacnge this t onot genrerator clas version but maybe action result version
-        // while (finalActionResult is not ActionResultV3NoInheritance && iterations <= maxIterations)    //could fail if loaded from diffrent assembly should probably replace the is statements with something like get type.name
-        // {
-
-        //     // if (finalActionResult is ActionResultV2 v2Script)
-        //     if (finalActionResult.GetType().Name == "ActionResultV2")
-        //     {
-        //         try
-        //         {
-        //             ActionResultV2 v2Script2 = (ActionResultV2)finalActionResult;
-        //             finalActionResult = ActionResultV3NoInheritance.UpgradeV2(v2Script2);
-        //         }
-        //         catch (Exception e)
-        //         {
-        //             Serilog.Log.Error(e.ToString());
-        //         }
-        //     }
-        //     // else if (finalActionResult is ActionResult v1Script)
-        //     else if (finalActionResult.GetType().Name == "ActionResult")
-        //     {
-        //         try
-        //         {
-        //             ActionResult v1Script2 = (ActionResult)finalActionResult;
-        //             List<string> loggedActions = [];
-        //             finalActionResult = ActionResultV2.UpgradeV1(v1Script2, loggedActions);
-        //         }
-        //         catch (Exception e)
-        //         {
-        //             Serilog.Log.Error(e.ToString());
-        //         }
-        //     }
-        //     if (iterations > maxIterations)
-        //     {
-        //         throw new Exception("Somethign went wrong trying to upgrade the ActionResult");
-        //     }
-        //     iterations++;
-        // }
-
-        // // if (finalActionResult is ActionResultV3NoInheritance v3Script)
-        // if (finalActionResult.GetType().Name == "ActionResultV3NoInheritance")
-        // {
-        //     ActionResultV3NoInheritance v3Script2 = (ActionResultV3NoInheritance)finalActionResult;
-        //     return (ActionResultV3NoInheritance)v3Script2;
-        // }
-        // else
-        // {
-        //     throw new Exception(message: "UpgradeActionResult in ScriptExecutor failed.");
-        // }
     }
     public async Task<GeneratorContext> CreateContextByDowngrade(string sourceCode)
     {
@@ -151,7 +103,7 @@ public class ScriptFactory
         recentType = contextVersionMap[(int)apiV];
         Type desiredType = contextVersionMap[vali.versionInt];
         var objs = ScriptObjects();
-        GeneratorContext context = await CreateContextForApiV();
+        GeneratorContext context = CreateContextForApiV();
         int iterations = 0;
         int maxIterations = ContextVersionScanner.GetClassDictionary().Keys.Count() + 3;
         while (recentType != desiredType && iterations <= maxIterations)
@@ -177,7 +129,7 @@ public class ScriptFactory
         return (GeneratorContext)context;
     }
 
-    private (LabOrder labOrder, Patient patient, ConsoleLogger logger, DataAccess testDataAccess, Vaccine vaccine) ScriptObjects()
+    internal (LabOrder labOrder, Patient patient, ConsoleLogger logger, DataAccess testDataAccess, Vaccine vaccine) ScriptObjects()
     {
         LabOrder labOrder = new LabOrder("1", "Pediatrics");
         Patient patient = new Patient("1", "TestFirst", "TestLast", new DateTime(2010, 6, 1, 7, 47, 0), "M");   //mfu

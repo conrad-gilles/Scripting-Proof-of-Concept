@@ -56,5 +56,9 @@
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
     </ItemGroup>
+    
+    <ItemGroup>
+        <InternalsVisibleTo Include="sandbox.Tests" />
+    </ItemGroup>
 
 </Project>

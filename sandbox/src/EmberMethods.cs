@@ -285,51 +285,9 @@ public class EmberMethods
             };
             if (justForTesting != null) //this is ofc just for testing purposes in the real application you would never automatically distribute the context because it is unsafe you want to be able to control who gets which context precisely
             {
-                // // var microsoftLogger = new LoggerForScripting().GetMicrosoftLogger<ScriptManagerFacade>();
-                // var refs = GetReferences();
-                // // ScriptCompiler compiler = new ScriptCompiler(refs, new LoggerForScripting().GetMicrosoftLogger<ScriptCompiler>());
-                // string implementedInterface = Facade.BasicValidationBeforeCompiling(justForTesting.SourceCode!).baseTypeName;
-                // switch (implementedInterface)
-                // {
-                //     case "IGeneratorActionScript":
-                //         int v = Facade.BasicValidationBeforeCompiling(justForTesting.SourceCode!).versionInt;
-                //         ctx = v switch
-                //         {
-                //             1 => new RWContextV2.GeneratorContext(labOrder, patient, logger, testDataAccess),
-                //             2 => new GeneratorContextV3.GeneratorContext(labOrder, patient, logger, testDataAccess),
-                //             3 => new GeneratorContextV4.GeneratorContext(labOrder, patient, logger, testDataAccess),
-                //             4 => new GeneratorContextNoInherVaccineV5.GeneratorContext(labOrder, vaccine),
-                //             _ => throw new NotImplementedException(),
-                //         };
-                //         break;
-                //     case "IGeneratorActionScriptV2":
-                //         ctx = new GeneratorContextV3.GeneratorContext(labOrder, patient, logger, testDataAccess);
-                //         break;
-                //     case "IGeneratorActionScriptV3":
-                //         ctx = new GeneratorContextV4.GeneratorContext(labOrder, patient, logger, testDataAccess);
-                //         break;
-                //     case "IGeneratorActionScriptV4Vaccine":
-                //         ctx = new GeneratorContextNoInherVaccineV5.GeneratorContext(labOrder, vaccine);
-                //         break;
-                //     case "IGeneratorConditionScript":
-                //         ctx = new ReadOnlyContextV1.GeneratorContext(labOrder, patient, logger, testDataAccess);
-                //         break;
-                //     default:
-                //         Console.WriteLine("Error in testing switch");
-                //         throw new Exception();
-                // }
-
-                // var dict = ContextVersionScanner.GetInterfaceDictionary();
-                // foreach (Type item in dict.Values)
-                // {
-                //     if (item.Name == Facade.GetBaseType(justForTesting.SourceCode!).Name)
-                //     {
-
-                //     }
-                // }
                 ScriptFactory sf = new ScriptFactory(Facade);
                 int v = Facade.BasicValidationBeforeCompiling(justForTesting.SourceCode!).versionInt;
-                ctx = await sf.CreateContextForApiV(v);
+                ctx = sf.CreateContextForApiV(v);
 
             }
             return ctx;
@@ -397,6 +355,12 @@ public class EmberMethods
         }
 
     }
+
+    // public GeneratorContext GetTestingContextUsingData(CustomerScript? script = null)
+    // {
+    //     MockData data = new MockData();
+    // }
+
     // public static async Task<Guid> GetIdInConsoleAsync(bool fromSrc = false)
     // {
     //     Dictionary<int, Guid> cacheDict = [];

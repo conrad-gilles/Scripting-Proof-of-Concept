@@ -25,20 +25,20 @@ public class SanboxTests
         ActionResultVersionSpecific = "[Message contains either failure or succes: ] ";
     }
     [TestMethod]
-    public async Task CreateContextText()
+    public async Task CreateContextTest()
     {
         ScriptFactory sf;
         GeneratorContext ctx;
 
         facade = EmberMethods.GetNewScriptManagerInstance(1);
         sf = new ScriptFactory(facade);
-        ctx = await sf.CreateContextForApiV();
+        ctx = sf.CreateContextForApiV();
 
         Assert.IsTrue(ctx.GetType() == typeof(ReadOnlyContextV1.GeneratorContext));
 
         facade = EmberMethods.GetNewScriptManagerInstance(2);
         sf = new ScriptFactory(facade);
-        ctx = await sf.CreateContextForApiV();
+        ctx = sf.CreateContextForApiV();
 
         Assert.IsTrue(ctx.GetType() == typeof(RWContextV2.GeneratorContext));
 
@@ -47,9 +47,16 @@ public class SanboxTests
 
         Exception ex = await Assert.ThrowsExceptionAsync<Exception>(async () =>  //todo check this one
          {
-             ctx = await sf.CreateContextForApiV();
+             ctx = sf.CreateContextForApiV();
          });
-        Assert.IsTrue(ex.Message.Contains("No Context class defined in") && ex.Message.Contains("for the passed API version."));
+        // Assert.IsTrue(ex.Message.Contains("No Context class defined in") && ex.Message.Contains("for the passed API version."));
+        Assert.IsTrue(ex.Message.Contains("The version was not found in the Dictionary"));
+
+        Console.WriteLine(ex.Message);
+        var ls = ExceptionHelper.GetExceptionList(ex);
+        ExceptionHelper.PrintExceptionListToConsole(ex);
+
+        // Assert.IsTrue(false);
     }
 
     [TestMethod]
@@ -169,7 +176,7 @@ public class SanboxTests
         id = await facade.CreateScript(sourceCodeActionV2!);
 
         sf = new ScriptFactory(facade);
-        await facade.ExecuteScriptById(id, await sf.CreateContextForApiV(valResult.versionInt));
+        await facade.ExecuteScriptById(id, sf.CreateContextForApiV(valResult.versionInt));
 
         for (int i = 0; i < 6; i++)
         {
@@ -178,7 +185,7 @@ public class SanboxTests
             id = await facade.CreateScript(sourceCodeActionV2!);
 
             sf = new ScriptFactory(facade);
-            await facade.ExecuteScriptById(id, await sf.CreateContextForApiV(valResult.versionInt));
+            await facade.ExecuteScriptById(id, sf.CreateContextForApiV(valResult.versionInt));
         }
 
         for (int i = 0; i < 6; i++)
@@ -188,7 +195,7 @@ public class SanboxTests
             id = await facade.CreateScript(sourceCodeVaccineAction!);
 
             sf = new ScriptFactory(facade);
-            await facade.ExecuteScriptById(id, await sf.CreateContextForApiV(valResult.versionInt));
+            await facade.ExecuteScriptById(id, sf.CreateContextForApiV(valResult.versionInt));
         }
         for (int i = 0; i < 6; i++)
         {
@@ -197,7 +204,7 @@ public class SanboxTests
             id = await facade.CreateScript(sourceCodePedia!);
 
             sf = new ScriptFactory(facade);
-            await facade.ExecuteScriptById(id, await sf.CreateContextForApiV(valResult.versionInt));
+            await facade.ExecuteScriptById(id, sf.CreateContextForApiV(valResult.versionInt));
         }
     }
 

@@ -12,4 +12,10 @@ public interface IGeneratorBaseInterface
 public abstract class GeneratorContext
 {
     public abstract GeneratorContext Downgrade();
+    public abstract GeneratorContext CreateUsingData(DataBaseClass data);
+}
+
+public abstract class DataBaseClass
+{
+
 }
