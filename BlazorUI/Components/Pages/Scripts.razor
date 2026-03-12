@@ -220,7 +220,7 @@ EmberMethods.GetEmberApiVersion(testingDiffrentVersion: selectedApiVersion));
             Console.Log("Test if it prints");
             EmberMethods em = new EmberMethods(ScriptManager);
             CustomerScript script = await ScriptManager.GetScript(id);
-            var ctx = await em.GetTestingContext<GeneratorContextV4.GeneratorContext>(justForTesting: script);
+            var ctx = await em.GetTestingContext<GeneratorContextV4.GeneratorContext>(autoDetectFromScript: script);
             object resultObj = await ScriptManager.ExecuteScriptById(id, ctx);
 
             if (typeof(bool).IsAssignableFrom(resultObj.GetType()))

@@ -263,30 +263,30 @@ public class EmberMethods
         // GeneratorContext ctx = GetTestingContext();
         return "Gilles";
     }
-    public async Task<GeneratorContext> GetTestingContext<T>(CustomerScript? justForTesting = null) where T : GeneratorContext
+    public async Task<GeneratorContext> GetTestingContext<T>(CustomerScript? autoDetectFromScript = null) where T : GeneratorContext
     {
         Serilog.Log.Verbose("Entered {MethodName} in {ClassName}.", nameof(GetTestingContext), nameof(EmberMethods));
         try
         {
-            LabOrder labOrder = new LabOrder("1", "Pediatrics");
-            Patient patient = new Patient("1", "TestFirst", "TestLast", new DateTime(2010, 6, 1, 7, 47, 0), "M");   //mfu
-            ConsoleLogger logger = new ConsoleLogger();
-            DataAccess testDataAccess = new DataAccess();
-            Vaccine vaccine = new Vaccine("Polio", 1, DateTime.UtcNow);
+            ScriptFactory sf = new ScriptFactory(Facade);
+            GeneratorContext ctx;
+            var objs = sf.ScriptObjects();
+            if (autoDetectFromScript == null)
+            {
+                ctx = typeof(T) switch
+                {
+                    var t when t == typeof(ReadOnlyContextV1.GeneratorContext) => new ReadOnlyContextV1.GeneratorContext(objs.labOrder, objs.patient, objs.logger, objs.testDataAccess),
+                    var t when t == typeof(RWContextV2.GeneratorContext) => new RWContextV2.GeneratorContext(objs.labOrder, objs.patient, objs.logger, objs.testDataAccess),
+                    var t when t == typeof(GeneratorContextV3.GeneratorContext) => new GeneratorContextV3.GeneratorContext(objs.labOrder, objs.patient, objs.logger, objs.testDataAccess),
+                    var t when t == typeof(GeneratorContextV4.GeneratorContext) => new GeneratorContextV4.GeneratorContext(objs.labOrder, objs.patient, objs.logger, objs.testDataAccess),
+                    var t when t == typeof(GeneratorContextNoInherVaccineV5.GeneratorContext) => new GeneratorContextNoInherVaccineV5.GeneratorContext(objs.labOrder, objs.vaccine),
+                    _ => throw new ArgumentException($"Unsupported context type: {typeof(T).Name}")
+                };
+            }
+            else
+            {
 
-            GeneratorContext ctx = typeof(T) switch
-            {
-                var t when t == typeof(ReadOnlyContextV1.GeneratorContext) => new ReadOnlyContextV1.GeneratorContext(labOrder, patient, logger, testDataAccess),
-                var t when t == typeof(RWContextV2.GeneratorContext) => new RWContextV2.GeneratorContext(labOrder, patient, logger, testDataAccess),
-                var t when t == typeof(GeneratorContextV3.GeneratorContext) => new GeneratorContextV3.GeneratorContext(labOrder, patient, logger, testDataAccess),
-                var t when t == typeof(GeneratorContextV4.GeneratorContext) => new GeneratorContextV4.GeneratorContext(labOrder, patient, logger, testDataAccess),
-                var t when t == typeof(GeneratorContextNoInherVaccineV5.GeneratorContext) => new GeneratorContextNoInherVaccineV5.GeneratorContext(labOrder, vaccine),
-                _ => throw new ArgumentException($"Unsupported context type: {typeof(T).Name}")
-            };
-            if (justForTesting != null) //this is ofc just for testing purposes in the real application you would never automatically distribute the context because it is unsafe you want to be able to control who gets which context precisely
-            {
-                ScriptFactory sf = new ScriptFactory(Facade);
-                int v = Facade.BasicValidationBeforeCompiling(justForTesting.SourceCode!).versionInt;
+                int v = Facade.BasicValidationBeforeCompiling(autoDetectFromScript.SourceCode!).versionInt;
                 ctx = sf.CreateContextForApiV(v);
 
             }

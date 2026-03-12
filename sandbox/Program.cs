@@ -352,7 +352,7 @@ async Task MainProgramSwitch(IServiceProvider provider)
                         sourceDict = await em.ListAllStoredSourceCodes(dontPrint: true);
                         scriptId = sourceDict[Int32.Parse(userInput)];
                         CustomerScript justForTesting = await facade.GetScript(scriptId);
-                        object resultObj2 = await facade.ExecuteScriptById(scriptId, await em.GetTestingContext<GeneratorContextNoInherVaccineV5.GeneratorContext>(justForTesting: justForTesting));
+                        object resultObj2 = await facade.ExecuteScriptById(scriptId, await em.GetTestingContext<GeneratorContextNoInherVaccineV5.GeneratorContext>(autoDetectFromScript: justForTesting));
 
                         if (typeof(bool).IsAssignableFrom(resultObj2.GetType()))       //good idea to check what type was returne, you could also just check the property from db normally
                         {
