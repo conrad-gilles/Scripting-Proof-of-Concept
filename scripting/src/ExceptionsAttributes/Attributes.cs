@@ -10,7 +10,7 @@ public class MetaDataIGeneratorScript : Attribute
     {
         Version = version;
         ReturnType = returnType;
-        Type = IGeneratorScriptType.DefaultVersioned;
+        Type = type;
     }
 
     public MetaDataIGeneratorScript(int version)

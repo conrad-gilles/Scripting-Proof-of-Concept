@@ -38,10 +38,10 @@ public class ScriptTests
         CustomerScript retrievedScript = await facade.GetScript(id);
         var context = await em!.GetTestingContext<GeneratorContextNoInherVaccineV5.GeneratorContext>(justForTesting: retrievedScript);
         object resultBeforeUpgrade = await facade.ExecuteScriptById(id, context);
-        ActionResultV3.ActionResultV3NoInheritance result = (ActionResultV3.ActionResultV3NoInheritance)EmberMethods.UpgradeActionResult(resultBeforeUpgrade);
+        ActionResultV3.ActionResult result = (ActionResultV3.ActionResult)EmberMethods.UpgradeActionResult(resultBeforeUpgrade);
         string shouldReturn = ActionResultVersionSpecific + "Pediatric tests added";
         Assert.IsInstanceOfType(result, typeof(ActionResultBaseClass));
-        Assert.IsInstanceOfType(result, typeof(ActionResultV3.ActionResultV3NoInheritance));
+        Assert.IsInstanceOfType(result, typeof(ActionResultV3.ActionResult));
         Assert.IsTrue(result.ToString().Contains(shouldReturn));
 
         //todo make negative test
@@ -53,10 +53,10 @@ public class ScriptTests
         CustomerScript retrievedScript = await facade.GetScript(id);
         var context = await em!.GetTestingContext<GeneratorContextNoInherVaccineV5.GeneratorContext>(justForTesting: retrievedScript);
         object resultBeforeUpgrade = await facade.ExecuteScriptById(id, context);
-        ActionResultV3.ActionResultV3NoInheritance result = (ActionResultV3.ActionResultV3NoInheritance)EmberMethods.UpgradeActionResult(resultBeforeUpgrade);
+        ActionResultV3.ActionResult result = (ActionResultV3.ActionResult)EmberMethods.UpgradeActionResult(resultBeforeUpgrade);
         string shouldReturn = ActionResultVersionSpecific + "Pediatric tests added";
         Assert.IsInstanceOfType(result, typeof(ActionResultBaseClass));
-        Assert.IsInstanceOfType(result, typeof(ActionResultV3.ActionResultV3NoInheritance));
+        Assert.IsInstanceOfType(result, typeof(ActionResultV3.ActionResult));
         Assert.IsTrue(result.ToString().Contains(shouldReturn));
 
         //todo make negative test
@@ -68,10 +68,10 @@ public class ScriptTests
         CustomerScript retrievedScript = await facade.GetScript(id);
         var context = await em!.GetTestingContext<GeneratorContextNoInherVaccineV5.GeneratorContext>(justForTesting: retrievedScript);
         object resultBeforeUpgrade = await facade.ExecuteScriptById(id, context);
-        ActionResultV3.ActionResultV3NoInheritance result = (ActionResultV3.ActionResultV3NoInheritance)EmberMethods.UpgradeActionResult(resultBeforeUpgrade);
+        ActionResultV3.ActionResult result = (ActionResultV3.ActionResult)EmberMethods.UpgradeActionResult(resultBeforeUpgrade);
         string shouldReturn = ActionResultVersionSpecific + "Pediatric tests added V3";
         Assert.IsInstanceOfType(result, typeof(ActionResultBaseClass));
-        Assert.IsInstanceOfType(result, typeof(ActionResultV3.ActionResultV3NoInheritance));
+        Assert.IsInstanceOfType(result, typeof(ActionResultV3.ActionResult));
         Assert.IsTrue(result.ToString().Contains(shouldReturn));
 
         //todo make negative test
@@ -85,7 +85,7 @@ public class ScriptTests
         object result = await facade.ExecuteScriptById(id, context);
         string shouldReturn = ActionResultVersionSpecific + "Polio Vaccine added";
         Assert.IsInstanceOfType(result, typeof(ActionResultBaseClass));
-        Assert.IsInstanceOfType(result, typeof(ActionResultV3.ActionResultV3NoInheritance));
+        Assert.IsInstanceOfType(result, typeof(ActionResultV3.ActionResult));
         Assert.IsTrue(result.ToString()!.Contains(shouldReturn));
 
         //todo make negative test

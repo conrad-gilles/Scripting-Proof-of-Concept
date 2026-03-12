@@ -39,25 +39,25 @@ namespace ActionResultV1
     }
 }
 
-namespace ActionResult_V2
+namespace ActionResultV2
 {
     [MetaDataActionResult(version: 2)]
-    public class ActionResultV2 : ActionResultV1.ActionResult
+    public class ActionResult : ActionResultV1.ActionResult
     {
         public List<string> LoggedActions { get; private set; }
 
-        private ActionResultV2(bool isSuccess, string message, string? errorCode, List<string> loggedActions) : base(isSuccess, message, errorCode!)
+        private ActionResult(bool isSuccess, string message, string? errorCode, List<string> loggedActions) : base(isSuccess, message, errorCode!)
         {
             LoggedActions = loggedActions;
         }
-        public new static ActionResultV2 Success(string message)
+        public new static ActionResult Success(string message)
         {
             // return new ActionResult(true, message);
-            return new ActionResultV2(true, message, null, new List<string>()); //todo check inheritance use base idk
+            return new ActionResult(true, message, null, new List<string>()); //todo check inheritance use base idk
         }
-        public static ActionResultV2 Failure(string message, List<string> loggedActions, string errorCode = "GENERIC_ERROR")
+        public static ActionResult Failure(string message, List<string> loggedActions, string errorCode = "GENERIC_ERROR")
         {
-            return new ActionResultV2(false, message, errorCode, loggedActions);
+            return new ActionResult(false, message, errorCode, loggedActions);
         }
         public void AppendLoggedActions(string action)
         {
@@ -69,12 +69,12 @@ namespace ActionResult_V2
             return LoggedActions;
         }
 
-        public static ActionResultV2 UpgradeV1(ActionResultV1.ActionResult actionResult
+        public static ActionResult UpgradeV1(ActionResultV1.ActionResult actionResult
             // bool isSuccess, string message, string errorCode
             , List<string> loggedActions
             )
         {
-            return new ActionResultV2(actionResult.IsSuccess, actionResult.Message, actionResult.ErrorCode, loggedActions);
+            return new ActionResult(actionResult.IsSuccess, actionResult.Message, actionResult.ErrorCode, loggedActions);
             // return new ActionResultV2(isSuccess, message, errorCode, loggedActions);
         }
 
@@ -94,35 +94,35 @@ namespace ActionResult_V2
 namespace ActionResultV3
 {
     [MetaDataActionResult(version: 3)]
-    public class ActionResultV3NoInheritance : ActionResultBaseClass
+    public class ActionResult : ActionResultBaseClass
     {
         public bool FailedOrNot { get; private set; }
         public string Message { get; private set; }
 
 
-        protected ActionResultV3NoInheritance(bool failedOrNot, string message)
+        protected ActionResult(bool failedOrNot, string message)
         {
             FailedOrNot = failedOrNot;
             Message = message;
         }
 
         // Factory method
-        public static ActionResultV3NoInheritance Success(string message)
+        public static ActionResult Success(string message)
         {
-            return new ActionResultV3NoInheritance(true, message);
+            return new ActionResult(true, message);
         }
 
         // Factory method
-        public static ActionResultV3NoInheritance Failure(string message)
+        public static ActionResult Failure(string message)
         {
-            return new ActionResultV3NoInheritance(false, message);
+            return new ActionResult(false, message);
         }
 
         public override string ToString()
         {
             return $"[Message contains either failure or succes: ] {Message}";
         }
-        public static ActionResultV3NoInheritance UpgradeV2(ActionResult_V2.ActionResultV2 actionResult)    //interface plus downgrade async
+        public static ActionResult UpgradeV2(ActionResultV2.ActionResult actionResult)    //interface plus downgrade async
         {
             string tempMessage = "";
             if (actionResult.Message != null)
@@ -133,14 +133,14 @@ namespace ActionResultV3
             {
                 tempMessage = tempMessage + actionResult.ErrorCode;
             }
-            return new ActionResultV3NoInheritance(actionResult.IsSuccess, tempMessage);
+            return new ActionResult(actionResult.IsSuccess, tempMessage);
         }
 
         public override ActionResultBaseClass Upgrade(ActionResultBaseClass actionResult)
         {
-            if (actionResult is ActionResult_V2.ActionResultV2)
+            if (actionResult is ActionResultV2.ActionResult)
             {
-                return UpgradeV2((ActionResult_V2.ActionResultV2)actionResult);
+                return UpgradeV2((ActionResultV2.ActionResult)actionResult);
             }
             throw new ArgumentException("Provided action result is not an ActionResultV2.");
         }

@@ -23,6 +23,7 @@ public static class ActionResultVersionScanner
         {
             Type currentType = subClasses[i];
             var uninitializedContext = (Ember.Scripting.ActionResultBaseClass)System.Runtime.CompilerServices.RuntimeHelpers.GetUninitializedObject(currentType);
+
             System.Reflection.TypeInfo typeInfo = uninitializedContext.GetType().GetTypeInfo();
 
             var metaDataAttribute = typeInfo.GetCustomAttribute<MetaDataActionResult>();

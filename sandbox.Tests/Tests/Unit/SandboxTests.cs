@@ -89,8 +89,8 @@ public class SanboxTests
         Dictionary<int, Type> contextVersionMap = new()
         {
             {1, typeof(ActionResultV1.ActionResult)},
-            {2, typeof(ActionResult_V2.ActionResultV2)},
-            {3, typeof(ActionResultV3.ActionResultV3NoInheritance)},
+            {2, typeof(ActionResultV2.ActionResult)},
+            {3, typeof(ActionResultV3.ActionResult)},
         };
 
         Dictionary<int, Type> retrievedDict = ActionResultVersionScanner.GetClassDictionary();
@@ -208,7 +208,7 @@ public class SanboxTests
         ScriptFactory sf;
         (string className, string baseTypeName, int versionInt) valResult;
         object result;
-        ActionResultV3.ActionResultV3NoInheritance ar;
+        ActionResultV3.ActionResult ar;
         string src;
 
         src = sourceCodeVaccineAction!;
@@ -218,9 +218,9 @@ public class SanboxTests
 
         sf = new ScriptFactory(facade);
         result = await facade.ExecuteScriptById(id, await sf.CreateContextByDowngrade(src!));
-        ar = (ActionResultV3.ActionResultV3NoInheritance)EmberMethods.UpgradeActionResult(result);
+        ar = (ActionResultV3.ActionResult)EmberMethods.UpgradeActionResult(result);
         Console.WriteLine(ar.ToString());
-        Assert.IsInstanceOfType(ar, typeof(ActionResultV3.ActionResultV3NoInheritance));
+        Assert.IsInstanceOfType(ar, typeof(ActionResultV3.ActionResult));
 
         src = sourceCodeActionV3!;
         valResult = facade.BasicValidationBeforeCompiling(src!);
@@ -228,9 +228,9 @@ public class SanboxTests
 
         sf = new ScriptFactory(facade);
         result = await facade.ExecuteScriptById(id, await sf.CreateContextByDowngrade(src!));
-        ar = (ActionResultV3.ActionResultV3NoInheritance)EmberMethods.UpgradeActionResult(result);
+        ar = (ActionResultV3.ActionResult)EmberMethods.UpgradeActionResult(result);
         Console.WriteLine(ar.ToString());
-        Assert.IsInstanceOfType(ar, typeof(ActionResultV3.ActionResultV3NoInheritance));
+        Assert.IsInstanceOfType(ar, typeof(ActionResultV3.ActionResult));
 
         src = sourceCodeActionV1!;
         valResult = facade.BasicValidationBeforeCompiling(src!);
@@ -238,9 +238,9 @@ public class SanboxTests
 
         sf = new ScriptFactory(facade);
         result = await facade.ExecuteScriptById(id, await sf.CreateContextByDowngrade(src!));
-        ar = (ActionResultV3.ActionResultV3NoInheritance)EmberMethods.UpgradeActionResult(result);
+        ar = (ActionResultV3.ActionResult)EmberMethods.UpgradeActionResult(result);
         Console.WriteLine(ar.ToString());
-        Assert.IsInstanceOfType(ar, typeof(ActionResultV3.ActionResultV3NoInheritance));
+        Assert.IsInstanceOfType(ar, typeof(ActionResultV3.ActionResult));
 
         src = sourceCodePedia!;
         valResult = facade.BasicValidationBeforeCompiling(src!);

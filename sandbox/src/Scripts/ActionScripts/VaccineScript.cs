@@ -22,7 +22,7 @@ using GeneratorScriptsV4;
 
 public class VaccineScript : GeneratorScriptsV4.IGeneratorActionScript
 {
-    public async Task<ActionResultV3.ActionResultV3NoInheritance> ExecuteAsync(IGeneratorContextNoInheritance_V5.IGeneratorContext context)
+    public async Task<ActionResultV3.ActionResult> ExecuteAsync(IGeneratorContextNoInheritance_V5.IGeneratorContext context)
     {
         string number = context.LabOrder.OrderNumber;
         if (number == "1")
@@ -32,6 +32,6 @@ public class VaccineScript : GeneratorScriptsV4.IGeneratorActionScript
         // context.LabOrder.OrderNumber = "2";  //doesnt work because red only
         string name = context.Vaccine.GetName();
 
-        return ActionResultV3.ActionResultV3NoInheritance.Success(name + " Vaccine added");
+        return ActionResultV3.ActionResult.Success(name + " Vaccine added");
     }
 }

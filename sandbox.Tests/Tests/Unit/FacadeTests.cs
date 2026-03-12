@@ -275,8 +275,8 @@ public class ScriptManagerFacadeTests
         Assert.IsNotNull(result);
         // Assert.IsTrue(result.IsSuccess);
         // Assert.IsTrue(result.Message.Contains("Pediatric"));
-        result = (ActionResultV3.ActionResultV3NoInheritance)EmberMethods.UpgradeActionResult(result);
-        Assert.IsInstanceOfType(result, typeof(ActionResultV3.ActionResultV3NoInheritance));
+        result = (ActionResultV3.ActionResult)EmberMethods.UpgradeActionResult(result);
+        Assert.IsInstanceOfType(result, typeof(ActionResultV3.ActionResult));
 
         Guid id2 = await facade.CreateScript(sourceCodePedia!);
         await Assert.ThrowsExceptionAsync<Ember.Scripting.FacadeException>(async () =>

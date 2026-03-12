@@ -4,6 +4,7 @@ using Ember.Scripting;
 using Serilog;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.VisualStudio.SolutionPersistence.Serializer.SlnV12;
 
 [TestClass]
 public class EmberVersioningTests
@@ -25,6 +26,9 @@ public class EmberVersioningTests
     public
      void Setup()
     {
+        int v = EmberMethods.GetEmberApiVersion();
+        facade = EmberMethods.GetNewScriptManagerInstance(v);
+        em = new EmberMethods(facade);
         ActionResultVersionSpecific = "[Message contains either failure or succes: ] ";  //change this if action result version changes it will thraow cause of message contains
     }
 
@@ -75,10 +79,10 @@ public class EmberVersioningTests
 
             if (resultBeforeUpgrade is ActionResultBaseClass)
             {
-                ActionResultV3.ActionResultV3NoInheritance result = (ActionResultV3.ActionResultV3NoInheritance)EmberMethods.UpgradeActionResult(resultBeforeUpgrade);
+                ActionResultV3.ActionResult result = (ActionResultV3.ActionResult)EmberMethods.UpgradeActionResult(resultBeforeUpgrade);
                 string shouldReturn = ActionResultVersionSpecific + "Pediatric tests added";
                 Assert.IsInstanceOfType(result, typeof(ActionResultBaseClass));
-                Assert.IsInstanceOfType(result, typeof(ActionResultV3.ActionResultV3NoInheritance));
+                Assert.IsInstanceOfType(result, typeof(ActionResultV3.ActionResult));
                 Assert.IsTrue(result.ToString().Contains(shouldReturn));
             }
             else
@@ -158,5 +162,71 @@ public class EmberVersioningTests
         // Console.WriteLine(sourceCodeAV);
         // Console.WriteLine(sourceCodeV1);
         // Assert.IsTrue(false);
+    }
+
+    [TestMethod]
+    public void ScriptVersionScannerTest()
+    {
+        Dictionary<int, Type> contextVersionMap = new()
+        {
+            {1, typeof(GeneratorScriptsGenericSimple.IGeneratorConditionScript<>)},
+            {2, typeof(GeneratorScriptsV2.IGeneratorActionScript)},
+            {3, typeof(GeneratorScriptsV3.IGeneratorActionScript)},
+            {4, typeof(GeneratorScriptsV4.IGeneratorActionScript)},
+        };
+
+        Dictionary<int, Type> retrievedDict = ScriptVersionScanner.GetClassDictionary();
+        PrintDictToConsole(retrievedDict);
+
+
+        CollectionAssert.AreEquivalent(contextVersionMap, retrievedDict);
+        // Assert.IsTrue(false);
+    }
+
+    [TestMethod]
+    public void ActionResultVersionScannerTest()
+    {
+        Dictionary<int, Type> contextVersionMap = new()
+        {
+            {1, typeof(ActionResultV1.ActionResult)},
+            {2, typeof(ActionResultV2.ActionResult)},
+            {3, typeof(ActionResultV3.ActionResult)},
+        };
+
+        Dictionary<int, Type> retrievedDict = ActionResultVersionScanner.GetClassDictionary();
+        PrintDictToConsole(retrievedDict);
+
+
+        CollectionAssert.AreEquivalent(contextVersionMap, retrievedDict);
+        // Assert.IsTrue(false);
+    }
+
+    [TestMethod]
+    public void ContextVersionScannerTest()
+    {
+        Dictionary<int, Type> contextVersionMap = new()
+        {
+            {1, typeof(ReadOnlyContextV1.GeneratorContext)},
+            {2, typeof(RWContextV2.GeneratorContext)},
+            {3, typeof(GeneratorContextV3.GeneratorContext)},
+            {4, typeof(GeneratorContextV4.GeneratorContext)},
+            {5, typeof(GeneratorContextNoInherVaccineV5.GeneratorContext)},
+        };
+
+        Dictionary<int, Type> retrievedDict = ContextVersionScanner.GetClassDictionary();
+        PrintDictToConsole(retrievedDict);
+
+
+        CollectionAssert.AreEquivalent(contextVersionMap, retrievedDict);
+        // Assert.IsTrue(false);
+    }
+
+    public void PrintDictToConsole(Dictionary<int, Type> dict)
+    {
+        Console.WriteLine("Start of dict String:");
+        foreach (var pair in dict)
+        {
+            Console.WriteLine("Key: " + pair.Key + ", Value: " + pair.Value);
+        }
     }
 }
