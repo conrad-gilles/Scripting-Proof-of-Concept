@@ -75,10 +75,10 @@ public class EmberVersioningTests
 
             if (resultBeforeUpgrade is ActionResultBaseClass)
             {
-                ActionResultV3NoInheritance result = (ActionResultV3NoInheritance)EmberMethods.UpgradeActionResult(resultBeforeUpgrade);
+                ActionResultV3.ActionResultV3NoInheritance result = (ActionResultV3.ActionResultV3NoInheritance)EmberMethods.UpgradeActionResult(resultBeforeUpgrade);
                 string shouldReturn = ActionResultVersionSpecific + "Pediatric tests added";
                 Assert.IsInstanceOfType(result, typeof(ActionResultBaseClass));
-                Assert.IsInstanceOfType(result, typeof(ActionResultV3NoInheritance));
+                Assert.IsInstanceOfType(result, typeof(ActionResultV3.ActionResultV3NoInheritance));
                 Assert.IsTrue(result.ToString().Contains(shouldReturn));
             }
             else

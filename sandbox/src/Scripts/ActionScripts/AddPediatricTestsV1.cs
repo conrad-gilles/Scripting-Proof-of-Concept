@@ -6,9 +6,9 @@ using GeneratorScriptsGeneric;
 using IGeneratorContext_V2;
 
 // using static System.Threading.Mutex; //if uncomment it wont run which is good
-public class AddPediatricTestsV2 : GeneratorScriptsGeneric.IGeneratorActionScript<IGeneratorContext_V2.IGeneratorContext, ActionResult>
+public class AddPediatricTestsV2 : GeneratorScriptsGeneric.IGeneratorActionScript<IGeneratorContext_V2.IGeneratorContext, ActionResultV1.ActionResult>
 {
-    public async Task<ActionResult> ExecuteAsync(IGeneratorContext_V2.IGeneratorContext context)    //error is here in Basyns
+    public async Task<ActionResultV1.ActionResult> ExecuteAsync(IGeneratorContext_V2.IGeneratorContext context)    //error is here in Basyns
     {
         context.Logger.Info("Adding pediatric standard tests");
 
@@ -21,7 +21,7 @@ public class AddPediatricTestsV2 : GeneratorScriptsGeneric.IGeneratorActionScrip
         // double versionExample = context.LabOrder.RandomNewDouble;    //example of newer version
         // Console.WriteLine(versionExample);
         context.LabOrder.SetCustomField("ProcessedByGenerator", true);
-        return ActionResult.Success("Pediatric tests added");   //todo check what happens if you return this object without calling the function on it
+        return ActionResultV1.ActionResult.Success("Pediatric tests added");   //todo check what happens if you return this object without calling the function on it
         // return null; //just for compiler
     }
 }

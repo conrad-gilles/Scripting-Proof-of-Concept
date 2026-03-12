@@ -33,7 +33,7 @@ using GeneratorScriptsV2;
 public class AddPediatricTestsV3 : GeneratorScriptsV2.IGeneratorActionScript
 {
     // public async Task<ActionResult> ExecuteAsync(IGeneratorContext context)
-    public async Task<ActionResultV2> ExecuteAsync(IGeneratorContext_V3.IGeneratorContext context)
+    public async Task<ActionResult_V2.ActionResultV2> ExecuteAsync(IGeneratorContext_V3.IGeneratorContext context)
     {
         context.Logger.Info("Adding pediatric standard tests");
 
@@ -51,7 +51,7 @@ public class AddPediatricTestsV3 : GeneratorScriptsV2.IGeneratorActionScript
         // string exampleV3 = context.LabOrder.randomNewFunctionInV3("Gilles");
         // Console.WriteLine("Return also works if here:" + exampleV3);
 
-        return ActionResultV2.Success("Pediatric tests added");
+        return ActionResult_V2.ActionResultV2.Success("Pediatric tests added");
         // return null; //just for compiler
     }
 }
