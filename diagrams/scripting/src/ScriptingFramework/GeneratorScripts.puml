@@ -1,8 +1,0 @@
-@startuml
-interface IGeneratorConditionScript {
-    EvaluateAsync(context:IGeneratorBaseInterface) : Task<bool>
-}
-interface IGeneratorActionScript {
-    ExecuteAsync(context:IGeneratorBaseInterface) : Task<ActionResultBaseClass>
-}
-@enduml

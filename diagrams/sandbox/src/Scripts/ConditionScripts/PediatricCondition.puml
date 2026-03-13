@@ -1,6 +1,0 @@
-@startuml
-class PediatricCondition {
-    + <<async>> EvaluateAsync(context:IGeneratorReadOnlyContext) : Task<bool>
-}
-"IGeneratorConditionScript`1" "<IGeneratorReadOnlyContext>" <|-- PediatricCondition
-@enduml

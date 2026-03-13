@@ -1,4 +1,0 @@
-@startuml
-class "MapRazorComponents`1"<T> {
-}
-@enduml
