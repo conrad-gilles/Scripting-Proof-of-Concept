@@ -86,7 +86,7 @@ namespace ReadOnlyContextV1
         ConsoleLoggerInterface IGeneratorReadOnlyContextV1.IGeneratorContext.Logger => logger;
         DataAccessInterface IGeneratorReadOnlyContextV1.IGeneratorContext.Data => data;
 
-        public override Ember.Scripting.GeneratorContext CreateUsingData(DataBaseClass data)
+        public override Ember.Scripting.GeneratorContext CreateUsingData(DataAbstractClass data)
         {
             try
             {
@@ -141,7 +141,7 @@ namespace RWContextV2
         public DataAccessInterface Data => data;
 
         ILabOrderInterface IGeneratorReadOnlyContextV1.IGeneratorContext.LabOrder => LabOrder;
-        public override Ember.Scripting.GeneratorContext CreateUsingData(DataBaseClass data)
+        public override Ember.Scripting.GeneratorContext CreateUsingData(DataAbstractClass data)
         {
             try
             {
@@ -198,7 +198,7 @@ namespace GeneratorContextV3
         }
         ILabOrderInterfaceV2 IGeneratorContext_V3.IGeneratorContext.LabOrder => labOrderV2;
 
-        public override Ember.Scripting.GeneratorContext CreateUsingData(DataBaseClass data)
+        public override Ember.Scripting.GeneratorContext CreateUsingData(DataAbstractClass data)
         {
             try
             {
@@ -256,7 +256,7 @@ namespace GeneratorContextV4
         }
         ILabOrderInterfaceV3 IGeneratorContext_V4.IGeneratorContext.LabOrder => labOrderV3;
 
-        public override Ember.Scripting.GeneratorContext CreateUsingData(DataBaseClass data)
+        public override Ember.Scripting.GeneratorContext CreateUsingData(DataAbstractClass data)
         {
             try
             {
@@ -308,7 +308,7 @@ namespace GeneratorContextNoInherVaccineV5
 
         IVaccineInterface IGeneratorContextNoInheritance_V5.IGeneratorContext.Vaccine => Vaccine;
 
-        public override Ember.Scripting.GeneratorContext CreateUsingData(DataBaseClass data)
+        public override Ember.Scripting.GeneratorContext CreateUsingData(DataAbstractClass data)
         {
             try
             {

@@ -8,6 +8,7 @@ public interface IGeneratorConditionScript
     Task<bool> EvaluateAsync(IGeneratorBaseInterface context);
 }
 [MetaDataIGeneratorScript(version: 1, returnType: IGeneratorScriptReturnType.Action, type: IGeneratorScriptType.AbstractBaseInSF)]
+// public interface IGeneratorActionScript<Tcontext,TActionResult>
 public interface IGeneratorActionScript
 {
     // int VersionSript { get; }

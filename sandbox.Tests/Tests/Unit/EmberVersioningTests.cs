@@ -245,7 +245,7 @@ public class EmberVersioningTests
 
         await Assert.ThrowsExceptionAsync<Exception>(async () =>
         {
-            ctx = ContextFactory.CreateContext(desiredContextVersion, data);
+            ctx = ContextFactory.CreateUsingData(desiredContextVersion, data);
         });
         ContextFactory sf = new ContextFactory(facade);
         var obj = sf.ScriptObjects();
@@ -253,10 +253,14 @@ public class EmberVersioningTests
         data = new MockData(labOrder: obj.labOrder, patient: obj.patient, consoleLogger: obj.logger,
         dataAccess: obj.testDataAccess, vaccine: obj.vaccine);
 
-        ctx = ContextFactory.CreateContext(desiredContextVersion, data);
+        ctx = ContextFactory.CreateUsingData(desiredContextVersion, data);
         var result1 = await facade.ExecuteScriptById(id, ctx);
 
         var result = EmberMethods.UpgradeActionResult(result1);
+
+        // GeneratorContext ctx=GeneratorContextFactory.Create("Laborder");
+        // ActionResult result= await facade.executescript<GeneratorContex,ActionResult>(ctx);
+        // ActionResult result= await facade.executescript<GeneratorActionScript>(ctx);
 
         string shouldReturn = ActionResultVersionSpecific + "Pediatric tests added";
         Assert.IsInstanceOfType(result, typeof(ActionResultBaseClass));

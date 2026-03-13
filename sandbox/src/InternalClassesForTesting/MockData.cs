@@ -1,6 +1,6 @@
 using Ember.Scripting;
 
-public class MockData : DataBaseClass
+public class MockData : DataAbstractClass
 {
     internal ConsoleLogger? ConsoleLogger;
     internal DataAccess? DataAccess;

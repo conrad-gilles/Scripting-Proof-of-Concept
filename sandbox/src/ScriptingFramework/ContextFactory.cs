@@ -23,11 +23,12 @@ public class ContextFactory
 
         MockData data = new MockData(labOrder: obj.labOrder, patient: obj.patient, consoleLogger: obj.logger,
         dataAccess: obj.testDataAccess, vaccine: obj.vaccine);
-        GeneratorContext ctx = CreateContext((int)apiV, data);
+        GeneratorContext ctx = CreateUsingData((int)apiV, data);
 
         return ctx;
     }
-    public async Task<GeneratorContext> CreateContextByDowngrade(string sourceCode)
+    public async Task<GeneratorContext> CreateByDowngrade(string sourceCode)
+    // public async Task<GeneratorContextV3.GeneratorContext> CreateByDowngrade(string sourceCode)
     {
         var vali = ScriptManager.BasicValidationBeforeCompiling(sourceCode);
         int? apiV = null;
@@ -72,7 +73,7 @@ public class ContextFactory
         }
         return (GeneratorContext)context;
     }
-    public static GeneratorContext CreateContext(int version, DataBaseClass data)
+    public static GeneratorContext CreateUsingData(int version, DataAbstractClass data)
     {
         MockData mockData = (MockData)data;
 

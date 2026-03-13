@@ -224,7 +224,7 @@ public class SanboxTests
         id = await facade.CreateScript(src!);
 
         sf = new ContextFactory(facade);
-        result = await facade.ExecuteScriptById(id, await sf.CreateContextByDowngrade(src!));
+        result = await facade.ExecuteScriptById(id, await sf.CreateByDowngrade(src!));
         ar = (ActionResultV3.ActionResult)EmberMethods.UpgradeActionResult(result);
         Console.WriteLine(ar.ToString());
         Assert.IsInstanceOfType(ar, typeof(ActionResultV3.ActionResult));
@@ -234,7 +234,7 @@ public class SanboxTests
         id = await facade.CreateScript(src!);
 
         sf = new ContextFactory(facade);
-        result = await facade.ExecuteScriptById(id, await sf.CreateContextByDowngrade(src!));
+        result = await facade.ExecuteScriptById(id, await sf.CreateByDowngrade(src!));
         ar = (ActionResultV3.ActionResult)EmberMethods.UpgradeActionResult(result);
         Console.WriteLine(ar.ToString());
         Assert.IsInstanceOfType(ar, typeof(ActionResultV3.ActionResult));
@@ -244,7 +244,7 @@ public class SanboxTests
         id = await facade.CreateScript(src!);
 
         sf = new ContextFactory(facade);
-        result = await facade.ExecuteScriptById(id, await sf.CreateContextByDowngrade(src!));
+        result = await facade.ExecuteScriptById(id, await sf.CreateByDowngrade(src!));
         ar = (ActionResultV3.ActionResult)EmberMethods.UpgradeActionResult(result);
         Console.WriteLine(ar.ToString());
         Assert.IsInstanceOfType(ar, typeof(ActionResultV3.ActionResult));
@@ -254,7 +254,7 @@ public class SanboxTests
         id = await facade.CreateScript(src!);
 
         sf = new ContextFactory(facade);
-        result = await facade.ExecuteScriptById(id, await sf.CreateContextByDowngrade(src!));
+        result = await facade.ExecuteScriptById(id, await sf.CreateByDowngrade(src!));
         // ar = EmberMethods.UpgradeActionResult(result);
         Console.WriteLine(result.ToString());
 
