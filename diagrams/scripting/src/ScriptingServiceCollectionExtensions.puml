@@ -1,5 +1,0 @@
-@startuml
-class ScriptingServiceCollectionExtensions <<static>> {
-    + {static} AddEmberScripting(services:IServiceCollection, references:List<MetadataReference>, maxSupportedApiVersion:int) : IServiceCollection
-}
-@enduml

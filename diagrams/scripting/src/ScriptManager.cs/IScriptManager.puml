@@ -1,5 +1,0 @@
-@startuml
-interface IScriptManager {
-    ExecuteScriptById(scriptId:Guid, context:GeneratorContext, currentApiVersion:int?) : Task<object>
-}
-@enduml

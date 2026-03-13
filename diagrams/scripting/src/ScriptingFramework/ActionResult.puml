@@ -1,5 +1,0 @@
-@startuml
-abstract class ActionResultBaseClass {
-    + {abstract} Upgrade(actionResult:ActionResultBaseClass) : ActionResultBaseClass
-}
-@enduml
