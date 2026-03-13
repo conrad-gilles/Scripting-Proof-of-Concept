@@ -1,6 +1,5 @@
 @startuml
-class AddPediatricTestsV3 {
-    + <<async>> ExecuteAsync(context:IGeneratorContext_V3) : Task<ActionResultV3NoInheritance>
+class AddPediatricTestsV4 {
+    + <<async>> ExecuteAsync(context:IGeneratorContext_V4.IGeneratorContext) : Task<ActionResultV3.ActionResult>
 }
-IGeneratorActionScriptV3 <|-- AddPediatricTestsV3
 @enduml

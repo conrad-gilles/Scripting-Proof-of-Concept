@@ -12,5 +12,6 @@ class CustomerScript {
     + CustomerScript()
     + <<override>> ToString() : string
     + ToStringShorter() : string
+    + Equals(script:CustomerScript) : bool
 }
 @enduml

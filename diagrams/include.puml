@@ -1,17 +1,19 @@
 @startuml
-' !include .\\.\scripting\src\ScriptingServiceCollectionExtensions.puml
-' !include .\\.\scripting\src\CompilationAndExecution\ScriptCompiler.puml
-' !include .\\.\scripting\src\CompilationAndExecution\ScriptExecutor.puml
-' !include .\\.\scripting\src\DbFiles\CustomerScript.puml
-' !include .\\.\scripting\src\DbFiles\DbHelper.puml
-' !include .\\.\scripting\src\DbFiles\EmberInstances.puml
-' !include .\\.\scripting\src\DbFiles\MyContext.puml
-' !include .\\.\scripting\src\DbFiles\ScriptCompiledCache.puml
-' ' !include .\\.\scripting\src\Exceptions\Exceptions.puml
-' !include .\\.\scripting\src\ScriptingFramework\ActionResult.puml
-' !include .\\.\scripting\src\ScriptingFramework\GeneratorContexts.puml
-' !include .\\.\scripting\src\ScriptingFramework\GeneratorScripts.puml
-!include .\\.\scripting\src\ScriptManager.cs\IScripManagerAdvanced.puml
-!include .\\.\scripting\src\ScriptManager.cs\IScriptManager.puml
-!include .\\.\scripting\src\ScriptManager.cs\ScriptManager.puml
+!include .\\.\sandbox\src\EmberMethods.puml
+!include .\\.\sandbox\src\LoggerForScripting.puml
+!include .\\.\sandbox\src\InternalClassesForTesting\HelperServices.puml
+!include .\\.\sandbox\src\InternalClassesForTesting\LabOrder.puml
+!include .\\.\sandbox\src\InternalClassesForTesting\MockData.puml
+!include .\\.\sandbox\src\InternalClassesForTesting\Patient.puml
+!include .\\.\sandbox\src\InternalClassesForTesting\Test.puml
+!include .\\.\sandbox\src\InternalClassesForTesting\Vaccine.puml
+!include .\\.\sandbox\src\ScriptingFramework\ActionResult.puml
+!include .\\.\sandbox\src\ScriptingFramework\ContextFactory.puml
+!include .\\.\sandbox\src\ScriptingFramework\GeneratorContexts.puml
+!include .\\.\sandbox\src\ScriptingFramework\GeneratorScripts.puml
+!include .\\.\sandbox\src\Scripts\ActionScripts\AddPediatricTestsV1.puml
+!include .\\.\sandbox\src\Scripts\ActionScripts\AddPediatricTestsV2.puml
+!include .\\.\sandbox\src\Scripts\ActionScripts\AddPediatricTestsV3.puml
+!include .\\.\sandbox\src\Scripts\ActionScripts\VaccineScript.puml
+!include .\\.\sandbox\src\Scripts\ConditionScripts\PediatricCondition.puml
 @enduml

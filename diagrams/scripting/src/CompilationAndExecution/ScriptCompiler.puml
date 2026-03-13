@@ -1,12 +1,14 @@
 @startuml
 class ScriptCompiler {
-    - <<readonly>> References2 : MetadataReference[]? = null
+    - <<readonly>> References2 : List<MetadataReference>? = null
     - <<readonly>> Logger : ILogger<ScriptCompiler>
-    + ScriptCompiler(references2:MetadataReference[], logger:ILogger<ScriptCompiler>)
-    + RunCompilation(script:string, references:MetadataReference[]?, apiVersion:int, metaData:(string className, string baseTypeName, int versionInt)?) : byte[]
+    - <<readonly>> StandardRefrencesForAllScripts : List<MetadataReference>
+    + ScriptCompiler(references2:List<MetadataReference>, logger:ILogger<ScriptCompiler>)
+    + RunCompilation(script:string, apiVersion:int?, metaData:(string className, string baseTypeName, int versionInt)?) : byte[]
+    + GetBaseType(script:string) : INamedTypeSymbol
     + BasicValidationBeforeCompiling(script:string) : (string className, string baseTypeName, int versionInt)
     - ValidateNamespaceUsage(tree:SyntaxTree, model:SemanticModel) : void
     + IsTheSameTree(script1:string, script2:string) : bool
-    + GetReferencesForVersion(version:int, customDlls:string[]?, loadCurrentRT:bool) : MetadataReference[]
+    + GetReferencesForOldVersion(version:int, customDlls:List<string>?, loadCurrentRT:bool) : List<MetadataReference>
 }
 @enduml

@@ -6,6 +6,7 @@ class ScriptCompiledCache {
     + CompilationDate : DateTime <<get>> <<set>>
     + CompilationSuccess : bool <<get>> <<set>>
     + CompilationErrors : string? <<get>> <<set>>
+    + OldSourceCode : string? <<get>> <<set>>
     + CustomerScript : CustomerScript? <<get>> <<set>>
     + <<override>> ToString() : string
     + ToStringBetter() : string

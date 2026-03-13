@@ -7,26 +7,28 @@ class ActionResult {
     + {static} Success(message:string) : ActionResult
     + {static} Failure(message:string, errorCode:string) : ActionResult
     + <<override>> ToString() : string
+    + <<override>> Upgrade(actionResult:ActionResultBaseClass) : ActionResultBaseClass
 }
-class ActionResultV2 {
+class ActionResult {
     + LoggedActions : List<string> <<get>>
-    - ActionResultV2(isSuccess:bool, message:string, errorCode:string?, loggedActions:List<string>)
-    + <<new>> {static} Success(message:string) : ActionResultV2
-    + {static} Failure(message:string, loggedActions:List<string>, errorCode:string) : ActionResultV2
+    - ActionResult(isSuccess:bool, message:string, errorCode:string?, loggedActions:List<string>)
+    + <<new>> {static} Success(message:string) : ActionResult
+    + {static} Failure(message:string, loggedActions:List<string>, errorCode:string) : ActionResult
     + AppendLoggedActions(action:string) : void
     + GetLoggedActions() : List<string>
-    + {static} UpgradeV1(actionResult:ActionResult, loggedActions:List<string>) : ActionResultV2
+    + {static} UpgradeV1(actionResult:ActionResultV1.ActionResult, loggedActions:List<string>) : ActionResult
+    + <<override>> Upgrade(actionResult:ActionResultBaseClass) : ActionResultBaseClass
 }
-class ActionResultV3NoInheritance {
+class ActionResult {
     + FailedOrNot : bool <<get>>
     + Message : string <<get>>
-    # ActionResultV3NoInheritance(failedOrNot:bool, message:string)
-    + {static} Success(message:string) : ActionResultV3NoInheritance
-    + {static} Failure(message:string) : ActionResultV3NoInheritance
+    # ActionResult(failedOrNot:bool, message:string)
+    + {static} Success(message:string) : ActionResult
+    + {static} Failure(message:string) : ActionResult
     + <<override>> ToString() : string
-    + {static} UpgradeV2(actionResult:ActionResultV2) : ActionResultV3NoInheritance
+    + {static} UpgradeV2(actionResult:ActionResultV2.ActionResult) : ActionResult
+    + <<override>> Upgrade(actionResult:ActionResultBaseClass) : ActionResultBaseClass
 }
 ActionResultBaseClass <|-- ActionResult
-ActionResult <|-- ActionResultV2
-ActionResultBaseClass <|-- ActionResultV3NoInheritance
+ActionResultBaseClass <|-- ActionResult
 @enduml

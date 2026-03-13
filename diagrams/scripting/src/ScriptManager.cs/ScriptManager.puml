@@ -3,43 +3,49 @@ class ScriptManagerFacade {
     - <<readonly>> Db : DbHelper
     - <<readonly>> Compiler : ScriptCompiler
     - <<readonly>> Executor : ScriptExecutor
-    - <<readonly>> References : MetadataReference[]
+    - <<readonly>> References : List<MetadataReference>
     - <<readonly>> Logger : ILogger<ScriptManagerFacade>
-    <<internal>> ScriptManagerFacade(db:DbHelper, compiler:ScriptCompiler, executor:ScriptExecutor, references:MetadataReference[], logger:ILogger<ScriptManagerFacade>)
-    + <<async>> CreateScript(sourceCode:string, userName:string, apiVersion:int, createdAt:DateTime?) : Task<Guid>
-    + <<async>> UpdateScript(scriptId:Guid, newSourceCode:string, userName:string, apiVersion:int) : Task
+    - <<readonly>> RecentApiVersion : int
+    <<internal>> ScriptManagerFacade(db:DbHelper, compiler:ScriptCompiler, executor:ScriptExecutor, references:List<MetadataReference>, logger:ILogger<ScriptManagerFacade>, recentApiVersion:int)
+    + <<async>> CreateScript(sourceCode:string, userName:string, apiVersion:int?, createdAt:DateTime?, checkForDuplicates:bool) : Task<Guid>
+    + <<async>> UpdateScript(scriptId:Guid, newSourceCode:string, userName:string?, apiVersion:int?) : Task
     + <<async>> DeleteScript(scriptId:Guid) : Task
     + <<async>> GetScript(scriptId:Guid, includeCaches:bool) : Task<CustomerScript>
     + <<async>> ListScripts(filters:CustomerScriptFilter?, includeCaches:bool) : Task<List<CustomerScript>>
-    + <<async>> CompileScript(scriptId:Guid, targetApiVersion:int) : Task
+    + <<async>> CompileScript(scriptId:Guid, targetApiVersion:int?) : Task
     + <<async>> CompileAllScripts() : Task
+    + <<async>> SaveScriptWithoutCompiling(id:Guid, sourceCode:string) : Task
     + <<async>> RecompileScript(scriptId:Guid) : Task
-    + <<async>> ValidateScript(sourceCode:string) : Task<string>
-    + <<async>> GetCompilationErrors(scriptId:Guid, apiVersion:int) : Task<string>
+    + ValidateScript(sourceCode:string) : string
+    + <<async>> GetCompilationErrors(scriptId:Guid, apiVersion:int?) : Task<string>
     + BasicValidationBeforeCompiling(script:string) : (string className, string baseTypeName, int versionInt)
-    + <<async>> ExecuteActionScript(scriptId:Guid, context:GeneratorContext, currentApiVersion:int) : Task<ActionResultBaseClass>
-    + <<async>> ExecuteConditionScript(scriptId:Guid, context:GeneratorContext, ApiVersion:int) : Task<bool>
-    + <<async>> ExecuteScriptById(scriptId:Guid, context:GeneratorContext, currentApiVersion:int) : Task<object>
-    + <<async>> GetCompiledCache(scriptId:Guid, currentApiVersion:int) : Task<byte[]>
+    + GetBaseType(script:string) : INamedTypeSymbol
+    + <<async>> ExecuteActionScript(scriptId:Guid, context:GeneratorContext, currentApiVersion:int?) : Task<ActionResultBaseClass>
+    + <<async>> ExecuteConditionScript(scriptId:Guid, context:GeneratorContext, ApiVersion:int?) : Task<bool>
+    + <<async>> ExecuteScriptById(scriptId:Guid, context:GeneratorContext, apiVersion:int?) : Task<object>
+    + <<async>> GetCompiledCache(scriptId:Guid, currentApiVersion:int?) : Task<ScriptCompiledCache>
     + <<async>> ClearScriptCache(scriptId:Guid) : Task
+    + <<async>> DeleteScriptCache(id:Guid, ApiVersion:int) : Task
     + <<async>> GetAllCompiledScriptCaches() : Task<List<ScriptCompiledCache>>
     + <<async>> ClearAllCaches() : Task
     + <<async>> PrecompileForApiVersion() : Task
     + <<async>> EnsureDeletedCreated() : Task
     + <<async>> GetActiveApiVersions() : Task<List<int>>
-    + <<async>> GetRecentApiVersion() : Task<int>
+    + GetRunningApiVersion() : int
     + <<async>> GetScriptCompatibility(scriptId:Guid) : Task<int>
     + <<async>> CheckVersionCompatibility(scriptId:Guid, targetApiVersion:int) : Task<bool>
-    + <<async>> RegisterEmberInstance(instanceId:Guid, emberVersion:string, apiVersion:int) : Task
+    + RegisterEmberInstance(instanceId:Guid, emberVersion:string, apiVersion:int) : void
     + <<async>> DetectDuplicates() : Task<(List<Guid> scriptGUIDs, Dictionary<Guid, int> cacheGUIDs)>
     + <<async>> RemoveDuplicates() : Task
     + <<async>> CleanupOrphanedCaches() : Task
-    + <<async>> GetScriptExecutionHistory(scriptId:Guid) : Task
-    + <<async>> GetCompilationStatistics() : Task
+    + GetScriptExecutionHistory(scriptId:Guid) : void
+    + GetCompilationStatistics() : void
     + <<async>> HealthCheck() : Task
     + <<async>> GetScriptMetadata(scriptId:Guid) : Task<string>
+    + <<async>> GetCachesForEachApiVersion() : Task<Dictionary<int, List<ScriptCompiledCache>>>
     + GetUserName() : string
 }
 IScriptManager <|-- ScriptManagerFacade
 IScriptManagerExtended <|-- ScriptManagerFacade
+ISccriptManagerDeleteAfter <|-- ScriptManagerFacade
 @enduml

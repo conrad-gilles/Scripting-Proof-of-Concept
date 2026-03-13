@@ -1,6 +1,5 @@
 @startuml
 class VaccineScript {
-    + <<async>> ExecuteAsync(context:IGeneratorContextNoInheritance_V4) : Task<ActionResultV3NoInheritance>
+    + <<async>> ExecuteAsync(context:IGeneratorContextNoInheritance_V5.IGeneratorContext) : Task<ActionResultV3.ActionResult>
 }
-"IGeneratorActionScript`2" "<IGeneratorContextNoInheritance_V4,ActionResultV3NoInheritance>" <|-- VaccineScript
 @enduml

@@ -1,5 +1,5 @@
 @startuml
-interface IGeneratorReadOnlyContext {
+interface IGeneratorContext {
     LabOrder : ILabOrderInterface <<get>>
     Patient : PatientInterface <<get>>
     Logger : ConsoleLoggerInterface <<get>>
@@ -8,75 +8,72 @@ interface IGeneratorReadOnlyContext {
 interface IGeneratorContext {
     <<new>> LabOrder : ILabOrderRWInterface <<get>>
 }
-interface IGeneratorContext_V2 {
+interface IGeneratorContext {
     <<new>> LabOrder : ILabOrderInterfaceV2 <<get>>
 }
-interface IGeneratorContext_V3 {
+interface IGeneratorContext {
     <<new>> LabOrder : ILabOrderInterfaceV3 <<get>>
 }
-interface IGeneratorContextNoInheritance_V4 {
+interface IGeneratorContext {
     LabOrder : ILabOrderInterfaceV4NoInheritence <<get>>
     Vaccine : IVaccineInterface <<get>>
 }
-class ReadOnlyContext {
+class GeneratorContext {
     + labOrder : ILabOrderInterface
     + patient : PatientInterface
     + logger : ConsoleLoggerInterface
     + data : DataAccessInterface
-    + ReadOnlyContext(pLabOrder:ILabOrderInterface, pPatient:PatientInterface, plogger:ConsoleLoggerInterface, pdata:DataAccessInterface)
+    + GeneratorContext(pLabOrder:ILabOrderInterface, pPatient:PatientInterface, plogger:ConsoleLoggerInterface, pdata:DataAccessInterface)
     - LabOrder : ILabOrderInterface <<get>>
     - Patient : PatientInterface <<get>>
     - Logger : ConsoleLoggerInterface <<get>>
     - Data : DataAccessInterface <<get>>
+    + <<override>> CreateUsingData(data:DataBaseClass) : Ember.Scripting.GeneratorContext
+    + <<override>> Downgrade() : Ember.Scripting.GeneratorContext
 }
-class RWContext {
+class GeneratorContext {
     + labOrder : ILabOrderRWInterface
     + patient : PatientInterface
     + logger : ConsoleLoggerInterface
     + data : DataAccessInterface
-    + RWContext(pLabOrder:ILabOrderRWInterface, pPatient:PatientInterface, plogger:ConsoleLoggerInterface, pdata:DataAccessInterface)
+    + GeneratorContext(pLabOrder:ILabOrderRWInterface, pPatient:PatientInterface, plogger:ConsoleLoggerInterface, pdata:DataAccessInterface)
     + LabOrder : ILabOrderRWInterface <<get>>
     + Patient : PatientInterface <<get>>
     + Logger : ConsoleLoggerInterface <<get>>
     + Data : DataAccessInterface <<get>>
     - LabOrder : ILabOrderInterface <<get>>
+    + <<override>> CreateUsingData(data:DataBaseClass) : Ember.Scripting.GeneratorContext
+    + <<override>> Downgrade() : Ember.Scripting.GeneratorContext
 }
-class GeneratorContextV2 {
+class GeneratorContext {
     + labOrderV2 : ILabOrderInterfaceV2
     + <<new>> patient : PatientInterface
     + <<new>> logger : ConsoleLoggerInterface
     + <<new>> data : DataAccessInterface
-    + GeneratorContextV2(pLabOrder:ILabOrderInterfaceV2, pPatient:PatientInterface, plogger:ConsoleLoggerInterface, pdata:DataAccessInterface)
+    + GeneratorContext(pLabOrder:ILabOrderInterfaceV2, pPatient:PatientInterface, plogger:ConsoleLoggerInterface, pdata:DataAccessInterface)
     - LabOrder : ILabOrderInterfaceV2 <<get>>
+    + <<override>> CreateUsingData(data:DataBaseClass) : Ember.Scripting.GeneratorContext
+    + <<override>> Downgrade() : Ember.Scripting.GeneratorContext
 }
-class GeneratorContextV3 {
+class GeneratorContext {
     + labOrderV3 : ILabOrderInterfaceV3
     + <<new>> patient : PatientInterface
     + <<new>> logger : ConsoleLoggerInterface
     + <<new>> data : DataAccessInterface
-    + GeneratorContextV3(pLabOrderV3:ILabOrderInterfaceV3, pPatient:PatientInterface, plogger:ConsoleLoggerInterface, pdata:DataAccessInterface)
+    + GeneratorContext(pLabOrderV3:ILabOrderInterfaceV3, pPatient:PatientInterface, plogger:ConsoleLoggerInterface, pdata:DataAccessInterface)
     - LabOrder : ILabOrderInterfaceV3 <<get>>
+    + <<override>> CreateUsingData(data:DataBaseClass) : Ember.Scripting.GeneratorContext
+    + <<override>> Downgrade() : Ember.Scripting.GeneratorContext
 }
-class GeneratorContextNoInherVaccine {
+class GeneratorContext {
     - LabOrder : ILabOrderInterfaceV4NoInheritence
     - Vaccine : IVaccineInterface
-    + GeneratorContextNoInherVaccine(labOrder:ILabOrderInterfaceV4NoInheritence, vaccine:IVaccineInterface)
+    + GeneratorContext(labOrder:ILabOrderInterfaceV4NoInheritence, vaccine:IVaccineInterface)
     - LabOrder : ILabOrderInterfaceV4NoInheritence <<get>>
     - Vaccine : IVaccineInterface <<get>>
+    + <<override>> CreateUsingData(data:DataBaseClass) : Ember.Scripting.GeneratorContext
+    + <<override>> Downgrade() : Ember.Scripting.GeneratorContext
 }
-IGeneratorBaseInterface <|-- IGeneratorReadOnlyContext
-IGeneratorReadOnlyContext <|-- IGeneratorContext
-IGeneratorContext <|-- IGeneratorContext_V2
-IGeneratorContext_V2 <|-- IGeneratorContext_V3
-IGeneratorBaseInterface <|-- IGeneratorContextNoInheritance_V4
-GeneratorContext <|-- ReadOnlyContext
-IGeneratorReadOnlyContext <|-- ReadOnlyContext
-GeneratorContext <|-- RWContext
-IGeneratorContext <|-- RWContext
-RWContext <|-- GeneratorContextV2
-IGeneratorContext_V2 <|-- GeneratorContextV2
-GeneratorContextV2 <|-- GeneratorContextV3
-IGeneratorContext_V3 <|-- GeneratorContextV3
-GeneratorContext <|-- GeneratorContextNoInherVaccine
-IGeneratorContextNoInheritance_V4 <|-- GeneratorContextNoInherVaccine
+IGeneratorBaseInterface <|-- IGeneratorContext
+IGeneratorBaseInterface <|-- IGeneratorContext
 @enduml
