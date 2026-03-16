@@ -210,6 +210,12 @@ internal class DbHelper
 
 
     }
+    public async Task RecompileCache(Guid scriptId, int apiVersion)
+    {
+        await DeleteScriptCache(scriptId, apiVersion);
+        CustomerScript script = await GetCustomerScript(scriptId);
+        await CreateAndInsertCompiledCache(script, apiVersion);
+    }
     public async Task AutomaticCompilationOnVersionUpdate(int currentApiVersion)
     {
         Logger.LogTrace("Entered {MethodName} in {ClassName} with currentApiVersion: {ApiVersion}.", nameof(AutomaticCompilationOnVersionUpdate), nameof(DbHelper), currentApiVersion);

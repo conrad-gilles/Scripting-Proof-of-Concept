@@ -35,7 +35,9 @@ public interface ISccriptManagerDeleteAfter : IScriptManagerExtended
   /// </summary>
   /// <param name="scriptId"></param>
   /// <returns></returns>
-  Task RecompileScript(Guid scriptId);
+  Task RecompileAllCaches(Guid scriptId);
+
+  Task RecompileCache(Guid scriptId, int apiVersion);
 
   /// <summary>
   /// Performs syntax and interface validation without saving

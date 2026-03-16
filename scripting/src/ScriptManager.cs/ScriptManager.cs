@@ -147,11 +147,16 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
     }
 
     // Recompiles script for all active API versions
-    public async Task RecompileScript(Guid scriptId)  //todo maybe get rid of the currentapi and create global var in dbhelper class
+    public async Task RecompileAllCaches(Guid scriptId)  //todo maybe get rid of the currentapi and create global var in dbhelper class
     {
-        Logger.LogTrace("Entered {MethodName} in {ClassName} with scriptId: {ScriptId}.", nameof(RecompileScript), nameof(ScriptManagerFacade), scriptId);
+        Logger.LogTrace("Entered {MethodName} in {ClassName} with scriptId: {ScriptId}.", nameof(RecompileAllCaches), nameof(ScriptManagerFacade), scriptId);
 
         await Db.RecompileScript(scriptId, deleteAlso: true);  //todo fix this i need old version dlls or something like that which will need to be passed maybe as fodler path or file path
+    }
+
+    public async Task RecompileCache(Guid scriptId, int apiVersion)
+    {
+        await Db.RecompileCache(scriptId, apiVersion);
     }
 
     /// Performs syntax and interface validation without saving
@@ -233,151 +238,118 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
     public async Task<ActionResultSF> ExecuteActionScript(Guid scriptId, GeneratorContextSF context, int? currentApiVersion = null)    //lowkey so many errors better to have one
     {
         Logger.LogTrace("Entered {MethodName} in {ClassName} with scriptId: {ScriptId}.", nameof(ExecuteActionScript), nameof(ScriptManagerFacade), scriptId);
+        if (currentApiVersion == null)
+        {
+            currentApiVersion = GetRunningApiVersion();
+        }
+
+        byte[]? compiledScript = null;
         try
         {
-            if (currentApiVersion == null)
-            {
-                currentApiVersion = GetRunningApiVersion();
-            }
-
-            byte[]? compiledScript = null;
-            try
-            {
-                var temp = await Db.GetCompiledScripCache(scriptId, (int)currentApiVersion);
-                compiledScript = temp.AssemblyBytes;
-            }
-            catch (Exception e)
-            {
-                Logger.LogError("Retrieval failed jit comp launched:" + e.ToString());
-                await CompileScript(scriptId, currentApiVersion);
-                //try again, if fails again we catch error outside
-                var temp = await Db.GetCompiledScripCache(scriptId, (int)currentApiVersion);
-                compiledScript = temp.AssemblyBytes;
-            }
-
-            //possibly add a null check for compiledScript
-            // ScriptExecutor executor = new ScriptExecutor();
-            ActionResultSF result = (ActionResultSF)Executor.RunScriptExecution<object>(compiledScript!, context);  //todo maybe better handling than casting although the error will be thrown in the class itself
-            return result;
+            var temp = await Db.GetCompiledScripCache(scriptId, (int)currentApiVersion);
+            compiledScript = temp.AssemblyBytes;
         }
         catch (Exception e)
         {
-            Logger.LogError(e.ToString());
-            throw new FacadeException(e.ToString(), e);
+            Logger.LogError("Retrieval failed jit comp launched:" + e.ToString());
+            await CompileScript(scriptId, currentApiVersion);
+            //try again, if fails again we catch error outside
+            var temp = await Db.GetCompiledScripCache(scriptId, (int)currentApiVersion);
+            compiledScript = temp.AssemblyBytes;
         }
 
+        //possibly add a null check for compiledScript
+        // ScriptExecutor executor = new ScriptExecutor();
+        ActionResultSF result = (ActionResultSF)Executor.RunScriptExecution<object>(compiledScript!, context);  //todo maybe better handling than casting although the error will be thrown in the class itself
+        return result;
     }
 
     // Executes a Generator Condition script and returns boolean result, realisitcally not needed
     public async Task<bool> ExecuteConditionScript(Guid scriptId, GeneratorContextSF context, int? ApiVersion = null)
     {
         Logger.LogTrace("Entered {MethodName} in {ClassName} with scriptId: {ScriptId}.", nameof(ExecuteConditionScript), nameof(ScriptManagerFacade), scriptId);
+        if (ApiVersion == null)
+        {
+            ApiVersion = GetRunningApiVersion();
+        }
+
+        byte[]? compiledScript = null;
         try
         {
-            if (ApiVersion == null)
-            {
-                ApiVersion = GetRunningApiVersion();
-            }
-
-            byte[]? compiledScript = null;
-            try
-            {
-                var temp = await Db.GetCompiledScripCache(scriptId, (int)ApiVersion);
-                compiledScript = temp.AssemblyBytes;
-            }
-            catch (Exception e)
-            {
-                Logger.LogError("Retrieval failed jit comp launched:" + e.ToString());
-                await CompileScript(scriptId, GetRunningApiVersion());
-                //try again, if fails again we catch error outside
-                var temp = await Db.GetCompiledScripCache(scriptId, (int)ApiVersion);
-                compiledScript = temp.AssemblyBytes;
-            }
-
-            //possibly add a null check for compiledScript
-            // ScriptExecutor executor = new ScriptExecutor();
-            bool result = (bool)Executor.RunScriptExecution<object>(compiledScript!, context);  //todo maybe better handling than casting although the error will be thrown in the class itself
-            return result;
+            var temp = await Db.GetCompiledScripCache(scriptId, (int)ApiVersion);
+            compiledScript = temp.AssemblyBytes;
         }
         catch (Exception e)
         {
-            Logger.LogError(e.ToString());
-            throw new FacadeException(e.ToString(), e);
+            Logger.LogError("Retrieval failed jit comp launched:" + e.ToString());
+            await CompileScript(scriptId, GetRunningApiVersion());
+            //try again, if fails again we catch error outside
+            var temp = await Db.GetCompiledScripCache(scriptId, (int)ApiVersion);
+            compiledScript = temp.AssemblyBytes;
         }
+
+        //possibly add a null check for compiledScript
+        // ScriptExecutor executor = new ScriptExecutor();
+        bool result = (bool)Executor.RunScriptExecution<object>(compiledScript!, context);  //todo maybe better handling than casting although the error will be thrown in the class itself
+        return result;
     }
 
     // Generic execution that detects script type automatically
     public async Task<object> ExecuteScriptById(Guid scriptId, GeneratorContextSF context, int? apiVersion = null)
     {
         Logger.LogTrace("Entered {MethodName} in {ClassName} with scriptId: {ScriptId}.", nameof(ExecuteScriptById), nameof(ScriptManagerFacade), scriptId);
+        if (apiVersion == null)
+        {
+            apiVersion = GetRunningApiVersion();
+        }
+        byte[]? compiledScript = null;
         try
         {
-            if (apiVersion == null)
-            {
-                apiVersion = GetRunningApiVersion();
-            }
-            byte[]? compiledScript = null;
-            try
-            {
-                var temp = await Db.GetCompiledScripCache(scriptId, (int)apiVersion);
-                compiledScript = temp.AssemblyBytes;
-            }
-            catch (Exception e)
-            {
-                Logger.LogError("Retrieval failed jit comp launched:" + e.ToString());
-                await CompileScript(scriptId, GetRunningApiVersion());
-                //try again, if fails again we catch error outside
-                var temp = await Db.GetCompiledScripCache(scriptId, (int)apiVersion);
-                compiledScript = temp.AssemblyBytes;
-            }
-
-            //possibly add a null check for compiledScript
-            // ScriptExecutor executor = new ScriptExecutor();
-            object result = Executor.RunScriptExecution<object>(compiledScript!, context);  //returns either bool or action result todo maybe add checks if thats the case but normally should be
-            return result;
+            var temp = await Db.GetCompiledScripCache(scriptId, (int)apiVersion);
+            compiledScript = temp.AssemblyBytes;
         }
         catch (Exception e)
         {
-            Logger.LogError(e.ToString());
-            throw;
+            Logger.LogError("Retrieval failed jit comp launched:" + e.ToString());
+            await CompileScript(scriptId, GetRunningApiVersion());
+            //try again, if fails again we catch error outside
+            var temp = await Db.GetCompiledScripCache(scriptId, (int)apiVersion);
+            compiledScript = temp.AssemblyBytes;
         }
+
+        //possibly add a null check for compiledScript
+        // ScriptExecutor executor = new ScriptExecutor();
+        object result = Executor.RunScriptExecution<object>(compiledScript!, context);  //returns either bool or action result todo maybe add checks if thats the case but normally should be
+        return result;
     }
 
     public async Task<object> ExecuteScriptByNameAndType(string Name, ScriptTypes scriptType, GeneratorContextSF context, int? apiVersion = null)
     {
         Logger.LogTrace("Entered {MethodName} in {ClassName} with scriptName: {ScriptId}.", nameof(ExecuteScriptByNameAndType), nameof(ScriptManagerFacade), Name);
+        Guid scriptId = await Db.GetScriptId(Name, scriptType);
+        if (apiVersion == null)
+        {
+            apiVersion = GetRunningApiVersion();
+        }
+        byte[]? compiledScript = null;
         try
         {
-            Guid scriptId = await Db.GetScriptId(Name, scriptType);
-            if (apiVersion == null)
-            {
-                apiVersion = GetRunningApiVersion();
-            }
-            byte[]? compiledScript = null;
-            try
-            {
-                var temp = await Db.GetCompiledScripCache(scriptId, (int)apiVersion);
-                compiledScript = temp.AssemblyBytes;
-            }
-            catch (Exception e)
-            {
-                Logger.LogError("Retrieval failed jit comp launched:" + e.ToString());
-                await CompileScript(scriptId, GetRunningApiVersion());
-                //try again, if fails again we catch error outside
-                var temp = await Db.GetCompiledScripCache(scriptId, (int)apiVersion);
-                compiledScript = temp.AssemblyBytes;
-            }
-
-            //possibly add a null check for compiledScript
-            // ScriptExecutor executor = new ScriptExecutor();
-            object result = Executor.RunScriptExecution<object>(compiledScript!, context);  //returns either bool or action result todo maybe add checks if thats the case but normally should be
-            return result;
+            var temp = await Db.GetCompiledScripCache(scriptId, (int)apiVersion);
+            compiledScript = temp.AssemblyBytes;
         }
         catch (Exception e)
         {
-            Logger.LogError(e.ToString());
-            throw;
+            Logger.LogError("Retrieval failed jit comp launched:" + e.ToString());
+            await CompileScript(scriptId, GetRunningApiVersion());
+            //try again, if fails again we catch error outside
+            var temp = await Db.GetCompiledScripCache(scriptId, (int)apiVersion);
+            compiledScript = temp.AssemblyBytes;
         }
+
+        //possibly add a null check for compiledScript
+        // ScriptExecutor executor = new ScriptExecutor();
+        object result = Executor.RunScriptExecution<object>(compiledScript!, context);  //returns either bool or action result todo maybe add checks if thats the case but normally should be
+        return result;
     }
 
     #endregion
@@ -393,19 +365,9 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
         {
             currentApiVersion = GetRunningApiVersion();
         }
-        try
-        {
-            var temp = await Db.GetCompiledScripCache(scriptId, (int)currentApiVersion);
-            // byte[]? compiledScript = temp.AssemblyBytes;
-            return temp;
-            // return compiledScript!;
-        }
-        catch (Exception e)
-        {
-            Logger.LogError(e.ToString());
-            throw new FacadeException(e.ToString(), e);
-        }
+        var temp = await Db.GetCompiledScripCache(scriptId, (int)currentApiVersion);
 
+        return temp;
     }
 
     // Removes all compiled versions of a script

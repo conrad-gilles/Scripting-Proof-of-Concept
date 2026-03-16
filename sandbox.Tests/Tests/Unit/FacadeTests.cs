@@ -174,7 +174,7 @@ public class ScriptManagerFacadeTests
     {
         Guid id = await facade!.CreateScript(sourceCodePedia!);
 
-        await facade.RecompileScript(id);
+        await facade.RecompileAllCaches(id);
 
         var script = await facade.GetScript(id, includeCaches: true);
         Assert.IsTrue(script.CompiledCaches.Count == 1);
@@ -282,7 +282,7 @@ public class ScriptManagerFacadeTests
         Assert.IsInstanceOfType(result, typeof(ActionResultV3.ActionResult));
 
         Guid id2 = await facade.CreateScript(sourceCodePedia!);
-        await Assert.ThrowsExceptionAsync<Ember.Scripting.FacadeException>(async () =>
+        await Assert.ThrowsExceptionAsync<System.InvalidCastException>(async () =>
         {
             ActionResultSF result2 = await facade.ExecuteActionScript(id2, testingContext);
         });
@@ -301,7 +301,7 @@ public class ScriptManagerFacadeTests
         Assert.IsTrue(result.GetType().ToString() == "System.Boolean");
 
         Guid id2 = await facade.CreateScript(sourceCodeActionV1!);
-        await Assert.ThrowsExceptionAsync<Ember.Scripting.FacadeException>(async () =>
+        await Assert.ThrowsExceptionAsync<System.InvalidCastException>(async () =>
         {
             bool result2 = await facade.ExecuteConditionScript(id2, testingContext);
         });
@@ -353,7 +353,7 @@ public class ScriptManagerFacadeTests
         var script = await facade.GetScript(id, includeCaches: true);
         Assert.AreEqual(0, script.CompiledCaches.Count);
 
-        await Assert.ThrowsExceptionAsync<Ember.Scripting.FacadeException>(async () =>
+        await Assert.ThrowsExceptionAsync<System.InvalidOperationException>(async () =>
         {
             await facade.GetCompiledCache(id);
         });

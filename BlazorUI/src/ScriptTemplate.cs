@@ -3,10 +3,10 @@ using System.Threading.Tasks;
 using System.Collections.Generic;   //todo same for them
 using Ember.Scripting;
 
-public class AddPediatricTestsV3 : GeneratorScriptsV3.IGeneratorActionScript
+public class AddPediatricTestsV4 : GeneratorScriptsV3.IGeneratorActionScript
 {
     // public async Task<ActionResult> ExecuteAsync(IGeneratorContext context)
-    public async Task<ActionResultV3NoInheritance> ExecuteAsync(IGeneratorContext_V4.IGeneratorContext context)
+    public async Task<ActionResultV3.ActionResult> ExecuteAsync(IGeneratorContext_V4.IGeneratorContext context)
     {
         context.Logger.Info("Adding pediatric standard tests");
 
@@ -24,7 +24,7 @@ public class AddPediatricTestsV3 : GeneratorScriptsV3.IGeneratorActionScript
         string exampleV3 = context.LabOrder.randomNewFunctionInV3("Gilles");
         Console.WriteLine("Return also works if here:" + exampleV3);
 
-        return ActionResultV3NoInheritance.Success("Pediatric tests added V3");
+        return ActionResultV3.ActionResult.Success("Pediatric tests added V3");
         // return null; //just for compiler
     }
 }

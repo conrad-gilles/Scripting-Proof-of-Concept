@@ -3,11 +3,13 @@
 @using Ember.Scripting
 @using BlazorUI.TotalExecutions
 @using BlazorUI.Services
+@using BlazorUI.Helpers
 @using Microsoft.CodeAnalysis.Differencing
 @using System.Text.RegularExpressions
 @using Serilog
 @inject ConsoleService Console
 @inject ISccriptManagerDeleteAfter ScriptManager
+
 <PageTitle>Scripts</PageTitle>
 <div class="page-container">
     @if (!isEditing)
@@ -92,7 +94,6 @@
                                             {
                                                 <td>@(script.ModifiedAt?.ToString("MM-dd HH:mm") ?? "N/A")</td>
                                             }
-
                                             <td>
                                                 <div class="action-buttons">
                                                     <button class="btn btn-sm btn-outline-success btn-icon"
@@ -125,21 +126,23 @@
     else
         {
             <div class="d-flex flex-column" style="height: calc(100vh - 40px); overflow: hidden;">
-
                 <div class="top-bar d-flex justify-content-between align-items-center mb-3 flex-shrink-0">
                     <h2 class="mb-0">Edit Script: @_scriptName</h2>
 
                     <div class="d-flex gap-2">
-                        <button class="btn btn-outline-info" @onclick="HandleValidate" disabled="@_isBusy">
+                        <button class="btn btn-outline-info" @onclick="() => _editorHelper?.HandleValidate()!"
+                                disabled="@(_editorHelper?.IsBusy ?? false)">
                             <i class="bi bi-check-circle"></i> Validate
                         </button>
-                        <button class="btn btn-outline-warning" @onclick="HandleCompile" disabled="@_isBusy">
+                        <button class="btn btn-outline-warning" @onclick="() => _editorHelper?.HandleCompile()!"
+                                disabled="@(_editorHelper?.IsBusy ?? false)">
                             <i class="bi bi-hammer"></i> Compile
                         </button>
-                        <button class="btn btn-success" @onclick="HandleSave" disabled="@_isBusy">
+                        <button class="btn btn-success" @onclick="() => _editorHelper?.HandleSave()!"
+                                disabled="@(_editorHelper?.IsBusy ?? false)">
                             <i class="bi bi-save"></i> Save
                         </button>
-                        <button class="btn btn-outline-secondary" @onclick="() => { isEditing = false; }">
+                        <button class="btn btn-outline-secondary" @onclick="CancelEditing">
                             <i class="bi bi-arrow-left"></i> Cancel
                         </button>
                     </div>
@@ -157,7 +160,6 @@
     </div>
 
 @code {
-
     private List<CustomerScript> ScriptsList = new();
     private bool isLoading = true;
 
@@ -165,11 +167,42 @@
     private int currentApiVersion = 0;
     private int selectedApiVersion = 0;
 
+    // Component References
+    private MonacoEditor _editor = default!;
+    private MonacoEditorHelper _editorHelper = default!;
+
+    private string _scriptName = string.Empty;
+    private int _minApiVersion = 6;
+    private string _scriptCode = string.Empty;
+    private Guid _currentScriptId;
+
+    public string DefaultScript = GetTemplate();
+
     protected override async Task OnInitializedAsync()
     {
         currentApiVersion = ScriptManager.GetRunningApiVersion();
         selectedApiVersion = currentApiVersion;
         await LoadScripts();
+    }
+
+    // We instantiate the Helper object when the MonacoEditor reference actually exists.
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (isEditing && _editorHelper == null && _editor != null)
+        {
+            _editorHelper = new MonacoEditorHelper(ScriptManager, _editor, Console)
+            {
+                ScriptName = _scriptName,
+                CurrentScriptId = _currentScriptId
+            };
+            StateHasChanged();
+        }
+    }
+
+    private void CancelEditing()
+    {
+        isEditing = false;
+        _editorHelper = null!;
     }
 
     private async Task OnVersionChanged()
@@ -186,29 +219,26 @@
         });
 
         ScriptingServiceCollectionExtensions.AddEmberScripting(services2, EmberMethods.GetReferences(),
-EmberMethods.GetEmberApiVersion(testingDiffrentVersion: selectedApiVersion));
+            EmberMethods.GetEmberApiVersion(testingDiffrentVersion: selectedApiVersion));
 
         using var provider2 = services2.BuildServiceProvider();
 
         ScriptManager = provider2.GetRequiredService<ISccriptManagerDeleteAfter>();
         Console.Log($"User selected API Version: {selectedApiVersion}");
 
-        // TODO: If you want to filter your script table by the selected version,
-        // you can modify LoadScripts() to accept the selectedApiVersion as a parameter
         await LoadScripts();
     }
+
     private async Task LoadScripts()
     {
         isLoading = true;
         try
         {
-            // Call your backend facade
             ScriptsList = await ScriptManager.ListScripts(null!, includeCaches: false);
         }
         finally
         {
             isLoading = false;
-            // Tell Blazor to re-render the HTML now that data changed
             StateHasChanged();
         }
     }
@@ -234,7 +264,7 @@ EmberMethods.GetEmberApiVersion(testingDiffrentVersion: selectedApiVersion));
             else
             {
                 Console.Log("Script was neither returned a bool nor an ActionResultBaseClass, it was a: " +
-                resultObj.GetType().ToString());
+resultObj.GetType().ToString());
             }
             TotalExecutions.IncrementTotalExecutions();
             await LoadScripts();
@@ -243,57 +273,29 @@ EmberMethods.GetEmberApiVersion(testingDiffrentVersion: selectedApiVersion));
         {
             Console.Log(e.ToString());
         }
-
     }
 
-    @* private async Task EditScript(Guid id)
-    {
-        isEditing = true;
-        StateHasChanged();
-    } *@
-    // Connects to a UI button
     private async Task CompileScript(Guid id)
     {
         try
         {
             await ScriptManager.CompileScript(id);
-            // Reload to show updated status
             await LoadScripts();
         }
         catch (Exception e)
         {
             Console.Log(e.ToString());
         }
-
     }
 
-    // Connects to a UI button
     private async Task DeleteScript(Guid id)
     {
         await ScriptManager.DeleteScript(id);
-        // Refresh the table
         await LoadScripts();
     }
 
-
-    // This variable holds a reference to the child component
-    private MonacoEditor _editor = default!;
-
-    private bool _isBusy = false;
-    private string _scriptName = string.Empty;
-    private int _minApiVersion = 6;
-
-    public string DefaultScript = GetTemplate();
-
-    // Add these variables to hold the current script being edited
-    private string _scriptCode = string.Empty;
-    private Guid _currentScriptId;
-
-
     public static string GetTemplate()
     {
-        @* string path = @"C:\Users\Gilles\Desktop\UNI\Semester 6\Code\Codebase\Scripting-Proof-of-Concept\BlazorUI\src\ScriptTemplate.cs"; *@
-
         string path = Path.GetFullPath(Path.Combine(
             AppDomain.CurrentDomain.BaseDirectory,
             "..", "..", "..",
@@ -302,117 +304,18 @@ EmberMethods.GetEmberApiVersion(testingDiffrentVersion: selectedApiVersion));
         return EmberMethods.CreateStringFromCsFile(path);
     }
 
-    public async Task HandleValidate()
-    {
-        // CALL THE CHILD COMPONENT METHOD to get the text
-        var code = await _editor.GetValueAsync();
-        Console.Log("Validating script:");
-        try
-        {
-            ScriptManager.BasicValidationBeforeCompiling(code);
-            Console.Log("Validation successfull!");
-        }
-        catch (Exception e)
-        {
-            Console.Log(e.ToString());
-        }
-    }
-
-    public async Task HandleCompile()
-    {
-        _isBusy = true;
-
-        // GET VALUE FROM CHILD
-        var code = await _editor.GetValueAsync();
-
-        // CLEAR ERRORS IN CHILD
-        await _editor.ClearErrorsAsync();
-
-        Console.Log($"Compiling '{_scriptName}'...");
-
-        try
-        {
-            @* await ScriptManager.CreateScript(code); *@
-            await ScriptManager.UpdateScript(_currentScriptId, code);
-            Console.Log("Update compiled successfully, script was updated and inserted into the DB.");
-        }
-        catch (Exception ex)
-        {
-            Console.Log($"Compilation Failed: {ex.ToString()}");
-
-            var errorsList = new List<object>();
-            var regex = new Regex(@"Line (\d+), Col (\d+): (.*)");
-            var matches = regex.Matches(ex.Message);
-
-            foreach (System.Text.RegularExpressions.Match match in matches)
-            {
-                if (match.Success)
-                {
-                    errorsList.Add(new
-                    {
-                        line = int.Parse(match.Groups[1].Value),
-                        column = int.Parse(match.Groups[2].Value),
-                        message = match.Groups[3].Value
-                    });
-                }
-            }
-
-            // SET ERRORS IN CHILD
-            if (errorsList.Any())
-            {
-                await _editor.SetErrorsAsync(errorsList);
-            }
-        }
-        finally
-        {
-            _isBusy = false;
-        }
-    }
-
-    public async Task HandleSave()
-    {
-        _isBusy = true;
-        var code = await _editor.GetValueAsync();
-        Console.Log($"Saving '{_scriptName}'...");
-        try
-        {
-            try
-            {
-                await ScriptManager.UpdateScript(_currentScriptId, code);
-            }
-            catch
-            {
-                Console.Log("Script did not compile successfully but still trying to save it.");
-                await ScriptManager.SaveScriptWithoutCompiling(_currentScriptId, code);
-            }
-
-            // TODO: call ScriptManager.SaveScript(...)
-            Console.Log("Script saved successfully.");
-        }
-        catch (Exception ex)
-        {
-            Console.Log($"Error: {ex.Message}");
-        }
-        finally { _isBusy = false; }
-    }
-
-
-    // UPDATE the EditScript method:
     private async Task EditScript(Guid id)
     {
         try
         {
-            // 1. Fetch the script from your backend
             CustomerScript script = await ScriptManager.GetScript(id);
 
             if (script != null)
             {
-                // 2. Save the details
                 _currentScriptId = id;
                 _scriptName = script.ScriptName!;
-                _scriptCode = script.SourceCode ?? string.Empty; // Use the actual DB code!
+                _scriptCode = script.SourceCode ?? string.Empty;
 
-                // 3. Flip the UI to editing mode
                 isEditing = true;
                 StateHasChanged();
                 await LoadScripts();

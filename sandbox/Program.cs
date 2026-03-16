@@ -187,7 +187,7 @@ async Task MainProgramSwitch(IServiceProvider provider)
 
                     case "RecompileScript":
                         scriptId = await em.GetIdInConsoleAsync(fromSrc: true);
-                        await facade.RecompileScript(scriptId);
+                        await facade.RecompileAllCaches(scriptId);
                         break;
 
                     case "ValidateScript":
