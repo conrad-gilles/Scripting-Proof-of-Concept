@@ -4,6 +4,7 @@ using Ember.Scripting;
 using Serilog;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using System.ComponentModel.DataAnnotations;
 
 [TestClass]
 public class SanboxTests
@@ -23,9 +24,11 @@ public class SanboxTests
 
     [TestInitialize]
     public
-     void Setup()
+     async Task Setup()
     {
+        facade = EmberMethods.GetNewScriptManagerInstance();
         em = new EmberMethods(facade!);
+        await facade.DeleteAllData();
         ActionResultVersionSpecific = "[Message contains either failure or succes: ] ";
         obj = em.ScriptObjects();
         // data = new DataV1.MockData(labOrder: obj.labOrder, patient: obj.patient, consoleLogger: obj.logger,
@@ -182,47 +185,54 @@ public class SanboxTests
 
         facade = EmberMethods.GetNewScriptManagerInstance();
 
-        valResult = facade.BasicValidationBeforeCompiling(sourceCodeActionV2!);
-        id = await facade.CreateScript(sourceCodeActionV2!);
+        valResult = facade.BasicValidationBeforeCompiling(sourceCodeActionV1!);
+        id = await facade.CreateScript(sourceCodeActionV1!);
 
         sf = new ContextFactory(facade);
 
 
-        await facade.ExecuteScriptById(id, sf.CreateContextForApiV(data, valResult.versionInt));
+        await facade.ExecuteScriptById(id, sf.CreateContextForApiV(data!, valResult.versionInt));
+        valResult = facade.BasicValidationBeforeCompiling(sourceCodeActionV2!);
 
-        for (int i = 0; i < 6; i++)
+        id = await facade.CreateScript(sourceCodeActionV2!);
+        Console.WriteLine("Class dict start i: " + ContextVersionScanner.GetClassDictionary().Keys.Min() + ", Calss dict max: " + ContextVersionScanner.GetClassDictionary().Keys.Max());
+        for (int i = 1; i < ContextVersionScanner.GetClassDictionary().Count(); i++)
         {
+
             facade = EmberMethods.GetNewScriptManagerInstance(i);
-            valResult = facade.BasicValidationBeforeCompiling(sourceCodeActionV2!);
-            id = await facade.CreateScript(sourceCodeActionV2!);
+            await facade.CompileScript(id);
+            // valResult = facade.BasicValidationBeforeCompiling(sourceCodeActionV2!);
+            // id = await facade.CreateScript(sourceCodeActionV2!);
 
             sf = new ContextFactory(facade);
-            await facade.ExecuteScriptById(id, sf.CreateContextForApiV(data, valResult.versionInt));
+            // await facade.ExecuteScriptById(id, sf.CreateContextForApiV(data!, valResult.versionInt));
+            Console.WriteLine("Running API version: " + facade.GetRunningApiVersion());
+            await facade.ExecuteScriptById(id, sf.CreateContextForApiV(data!, valResult.versionInt));
         }
 
-        for (int i = 0; i < 6; i++)
+        valResult = facade.BasicValidationBeforeCompiling(sourceCodeVaccineAction!);
+        id = await facade.CreateScript(sourceCodeVaccineAction!);
+        for (int i = 1; i < ContextVersionScanner.GetClassDictionary().Count(); i++)
         {
             facade = EmberMethods.GetNewScriptManagerInstance(i);
-            valResult = facade.BasicValidationBeforeCompiling(sourceCodeVaccineAction!);
-            id = await facade.CreateScript(sourceCodeVaccineAction!);
-
             sf = new ContextFactory(facade);
-            await facade.ExecuteScriptById(id, sf.CreateContextForApiV(data, valResult.versionInt));
+            await facade.ExecuteScriptById(id, sf.CreateContextForApiV(data!, valResult.versionInt));
         }
-        for (int i = 0; i < 6; i++)
+
+        valResult = facade.BasicValidationBeforeCompiling(sourceCodePedia!);
+        id = await facade.CreateScript(sourceCodePedia!);
+        for (int i = 1; i < ContextVersionScanner.GetClassDictionary().Count(); i++)
         {
             facade = EmberMethods.GetNewScriptManagerInstance(i);
-            valResult = facade.BasicValidationBeforeCompiling(sourceCodePedia!);
-            id = await facade.CreateScript(sourceCodePedia!);
-
             sf = new ContextFactory(facade);
-            await facade.ExecuteScriptById(id, sf.CreateContextForApiV(data, valResult.versionInt));
+            await facade.ExecuteScriptById(id, sf.CreateContextForApiV(data!, valResult.versionInt));
         }
     }
 
     [TestMethod]
     public async Task CreateContextByDowngradeTest()
     {
+
         ActiveGeneratorContext data = new ActiveGeneratorContext(labOrder: obj.labOrder, vaccine: obj.vaccine);
 
         Guid id;

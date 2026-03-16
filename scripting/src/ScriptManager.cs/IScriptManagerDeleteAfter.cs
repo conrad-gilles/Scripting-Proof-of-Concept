@@ -138,6 +138,8 @@ public interface ISccriptManagerDeleteAfter : IScriptManagerExtended
   /// <returns></returns>
   Task EnsureDeletedCreated();
 
+  Task DeleteAllData();
+
   #endregion
 
   #region Version Management

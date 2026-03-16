@@ -297,7 +297,8 @@ block in Home.razor -->
     }
     private async Task HandleDeleteAllScripts()
     {
-        await ScriptManager.EnsureDeletedCreated();
+        @* await ScriptManager.EnsureDeletedCreated(); *@
+        await ScriptManager.DeleteAllData();
         await LoadDashBoardData();
     }
 }

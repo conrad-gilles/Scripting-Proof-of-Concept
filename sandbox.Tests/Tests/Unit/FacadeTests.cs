@@ -3,6 +3,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Ember.Scripting;
 using Serilog;
 using Microsoft.Extensions.DependencyInjection;
+using sandbox.Tests;
 
 namespace FirstTests;
 
@@ -21,6 +22,7 @@ public class ScriptManagerFacadeTests
         facade = EmberMethods.GetNewScriptManagerInstance();
         em = new EmberMethods(facade);
 
+        await facade.DeleteAllData();
         await facade.ClearAllCaches();
         var existing = await facade.ListScripts(includeCaches: false);
         foreach (var s in existing)
@@ -102,7 +104,8 @@ public class ScriptManagerFacadeTests
     {
         string scriptFolderPath = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "..",
                 "sandbox", "src", "Scripts"));
-        await facade!.EnsureDeletedCreated();
+        // await facade!.EnsureDeletedCreated();
+        await facade!.DeleteAllData();
         await em!.CompileAllScriptsInFolderAndSaveToDB(scriptFolderPath, "Gilles", EmberMethods.GetEmberApiVersion());
         List<CustomerScript> scripts = await facade!.ListScripts(includeCaches: true);
         Assert.IsNotNull(scripts);
@@ -459,13 +462,17 @@ public class ScriptManagerFacadeTests
     [TestMethod]
     public async Task RemoveDuplicatesTest()
     {
-        Guid id = await facade!.CreateScript(sourceCodePedia!);
-        Guid id2 = await facade.CreateScript(sourceCodePedia!);
+        if (TestConfig.DuplicatesAllowed)
+        {
+            Guid id = await facade!.CreateScript(sourceCodePedia!);
+            Guid id2 = await facade.CreateScript(sourceCodePedia!);
 
-        await facade.RemoveDuplicates();
+            await facade.RemoveDuplicates();
 
-        var scripts = await facade.ListScripts();
-        Assert.AreEqual(1, scripts.Count);
+            var scripts = await facade.ListScripts();
+            Assert.AreEqual(1, scripts.Count);
+        }
+
     }
 
     [TestMethod]

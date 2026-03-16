@@ -21,10 +21,11 @@ public class ScriptTests
 
     [TestInitialize]
     public
-     void Setup()
+async Task SetupAsync()
     {
         facade = EmberMethods.GetNewScriptManagerInstance();
         em = new EmberMethods(facade);
+        await facade.DeleteAllData();
 
         ActionResultVersionSpecific = "[Message contains either failure or succes: ] ";
     }
@@ -33,7 +34,8 @@ public class ScriptTests
     [TestMethod]
     public async Task ActionV1Test()
     {
-        await facade!.EnsureDeletedCreated();
+        // await facade!.EnsureDeletedCreated();
+        await facade!.DeleteAllData();
         Guid id = await facade!.CreateScript(sourceCodeActionV1!);
         CustomerScript retrievedScript = await facade.GetScript(id);
         var context = await em!.GetTestingContext<GeneratorContextNoInherVaccineV5.GeneratorContext>(autoDetectFromScript: retrievedScript);
@@ -126,7 +128,8 @@ public class ScriptTests
     [TestMethod]
     public async Task TestCreatedAt()
     {
-        await facade!.EnsureDeletedCreated();
+        // await facade!.EnsureDeletedCreated();
+        await facade!.DeleteAllData();
         // await rm!.CompileAllScriptsInFolderAndSaveToDB(path, "Default", await facade.GetRecentApiVersion());
 
         Guid id = await facade!.CreateScript(sourceCodePedia!);

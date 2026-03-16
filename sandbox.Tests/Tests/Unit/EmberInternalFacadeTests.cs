@@ -28,6 +28,7 @@ public class EmberInternalFacadeTests
         ActionResultVersionSpecific = "[Message contains either failure or succes: ] ";
         ScriptManager = EmberMethods.GetNewScriptManagerInstance();
         InternalScriptManager = new EmberInternalFacade(ScriptManager);
+        ScriptManager.DeleteAllData();
         em = new EmberMethods(ScriptManager!);
         ActionResultVersionSpecific = "[Message contains either failure or succes: ] ";
         obj = em.ScriptObjects();
@@ -76,7 +77,8 @@ public class EmberInternalFacadeTests
     [TestMethod]
     public async Task TestingQueryAndExecutionByNameAndType()
     {
-        (string Name, ScriptTypes ScriptType) script = await ScriptManager!.CreateScript2(sourceCodeActionV1!);
+        (string Name, ScriptTypes ScriptType) script;
+        script = await ScriptManager!.CreateScriptUsingNameType(sourceCodeActionV1!);
 
         var ctx = InternalScriptManager!.CreateContext(obj.labOrder, obj.vaccine);
         ActiveActionResult ar = await InternalScriptManager.ExecuteScriptByNameAndType(script.Name, script.ScriptType, ctx);
@@ -84,7 +86,29 @@ public class EmberInternalFacadeTests
         Console.WriteLine("Name: " + script.Name + ", ScriptType: " + script.ScriptType);
         Console.WriteLine("Type name: " + ar.GetType().FullName);
         Console.WriteLine("Returned result: " + ar);
-        Assert.IsTrue(false);
+
+        Assert.IsTrue(script.Name == "AddPediatricTestsV2");
+        Assert.IsTrue(script.ScriptType == ScriptTypes.GeneratorActionScript);
+        Assert.IsTrue(ar.ToString().Contains("[Message contains either failure or succes: ] Pediatric tests added"));
+
+        Exception e = await Assert.ThrowsExceptionAsync<Ember.Scripting.DbHelperException>(async () =>
+         {
+             script = await ScriptManager!.CreateScriptUsingNameType(sourceCodeActionV1!);
+         });
+        Console.WriteLine(e.ToString());
+
+        script = await ScriptManager!.CreateScriptUsingNameType(sourceCodeActionV3!);
+        ctx = InternalScriptManager!.CreateContext(obj.labOrder, obj.vaccine);
+        ar = await InternalScriptManager.ExecuteScriptByNameAndType(script.Name, script.ScriptType, ctx);
+
+        Console.WriteLine("Name: " + script.Name + ", ScriptType: " + script.ScriptType);
+        Console.WriteLine("Type name: " + ar.GetType().FullName);
+        Console.WriteLine("Returned result: " + ar);
+
+        Assert.IsTrue(script.Name == "AddPediatricTestsV4");
+        Assert.IsTrue(script.ScriptType == ScriptTypes.GeneratorActionScript);
+        Assert.IsTrue(ar.ToString().Contains("[Message contains either failure or succes: ] Pediatric tests added V3"));
+        // Assert.IsTrue(false);
     }
 
 }

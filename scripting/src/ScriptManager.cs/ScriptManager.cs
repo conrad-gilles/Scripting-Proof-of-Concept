@@ -47,9 +47,9 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
 
     }
 
-    public async Task<(string Name, ScriptTypes ScriptType)> CreateScript2(string sourceCode, string userName = "Default", int? apiVersion = null, DateTime? createdAt = null, bool checkForDuplicates = false)
+    public async Task<(string Name, ScriptTypes ScriptType)> CreateScriptUsingNameType(string sourceCode, string userName = "Default", int? apiVersion = null, DateTime? createdAt = null, bool checkForDuplicates = false)
     {
-        Logger.LogDebug("Entered {MethodName} in {ClassName} apiVersion: {apiVersion}.", nameof(CreateScript2), nameof(ScriptManagerFacade), apiVersion);
+        Logger.LogDebug("Entered {MethodName} in {ClassName} apiVersion: {apiVersion}.", nameof(CreateScriptUsingNameType), nameof(ScriptManagerFacade), apiVersion);
 
         int currentApiVersion = GetRunningApiVersion();
         Guid id = Guid.NewGuid();
@@ -464,6 +464,11 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
     public async Task EnsureDeletedCreated()
     {
         await Db.EnsureDeletedCreated();
+    }
+
+    public async Task DeleteAllData()
+    {
+        await Db.DeleteAllData();
     }
     #endregion
 

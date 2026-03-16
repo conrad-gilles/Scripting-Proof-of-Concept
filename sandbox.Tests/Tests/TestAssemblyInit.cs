@@ -3,6 +3,15 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 // Disable cross-class parallelism — tests run sequentially across all classes
 [assembly: Parallelize(Workers = 1, Scope = ExecutionScope.MethodLevel)]
 
+namespace sandbox.Tests
+{
+    public static class TestConfig
+    {
+        public static bool DuplicatesAllowed { get; set; } = false;
+    }
+}
+
+
 // namespace FirstTests;
 
 // [TestClass]

@@ -91,7 +91,8 @@ async Task MainProgramSwitch(IServiceProvider provider)
                         await em.GetSourceCodeInSwitch();
                         break;
                     case "reset":
-                        await facade.EnsureDeletedCreated();
+                        // await facade.EnsureDeletedCreated();
+                        await facade!.DeleteAllData();
                         await em.ListAllCompiledFromDB();
                         break;
                     case "comp":

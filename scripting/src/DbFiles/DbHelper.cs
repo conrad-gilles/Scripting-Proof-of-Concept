@@ -40,6 +40,24 @@ internal class DbHelper
             throw new DbHelperException(nameof(EnsureDeletedCreated) + " failed in " + nameof(DbHelper), e);
         }
     }
+    public async Task DeleteAllData()
+    {
+        try
+        {
+            Logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(DeleteAllData), nameof(DbHelper));
+
+            using (var db = new MyContext())
+            {
+                await db.ScriptCompiledCaches.ExecuteDeleteAsync();
+                await db.CustomerScripts.ExecuteDeleteAsync();
+            }
+        }
+        catch (Exception e)
+        {
+            Logger.LogError(e.ToString());
+            throw new DbHelperException(nameof(DeleteAllData) + " failed in " + nameof(DbHelper), e);
+        }
+    }
     public async Task<List<CustomerScript>> GetAllCustomerScripts(bool includeCaches = false, CustomerScriptFilter? filters = null)
     {
         try
@@ -262,11 +280,12 @@ internal class DbHelper
         }
 
     }
-    public async Task<CustomerScript> CreateAndInsertCustomerScript(string scriptString, Guid randomGUID, string createdBy, int? oldApiV = null, DateTime? createdAt = null, bool alsoCompAndSave = false, bool checkForDuplicates = false)
+    public async Task<CustomerScript> CreateAndInsertCustomerScript(string scriptString, Guid randomGUID, string createdBy, int? oldApiV = null, DateTime? createdAt = null, bool alsoCompAndSave = false, bool checkForDuplicates = true)
     //todo make sure compiling happens after verification of isDuplicate
     {
         try
         {
+
             Logger.LogTrace("Entered {MethodName} in {ClassName} with ID: {ScriptId}.", nameof(CreateAndInsertCustomerScript), nameof(DbHelper), randomGUID);
 
 
@@ -291,7 +310,7 @@ internal class DbHelper
                     ModifiedAt = DateTime.UtcNow,
                     CreatedBy = createdBy
                 };
-
+                checkForDuplicates = true;
                 if (checkForDuplicates)
                 {
                     checkForDuplicates = await IsDuplicateScript(randomTestScript2);  //uncomment this if you dont want to check for duplicate existing in db when inserting
@@ -641,7 +660,7 @@ internal class DbHelper
         {
             Logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(IsDuplicateScript), nameof(DbHelper));
             // CustomerScriptFilter filter = new CustomerScriptFilter(scriptName: script.ScriptName, sourceCode: script.SourceCode);
-            CustomerScriptFilter filter = new CustomerScriptFilter(scriptName: script.ScriptName);
+            CustomerScriptFilter filter = new CustomerScriptFilter(scriptName: script.ScriptName, scriptType: script.ScriptType);
             List<CustomerScript> allScripts = await GetAllCustomerScripts(filters: filter);
 
 
@@ -650,14 +669,15 @@ internal class DbHelper
             {
                 return false;
             }
-            foreach (var item in allScripts)
-            {
-                if (Compiler.IsTheSameTree(item.SourceCode!, script.SourceCode!))
-                {
-                    return true;
-                }
-            }
-            return false;   //but name is duplicate! only source code is unique, also this could be an issue if the name of the script is not taken from the source code as it could lead to a script having a diffrent name but the same source code as another this would lead to this algorithm not finginh the duplicate script
+            return true;
+            // foreach (var item in allScripts)
+            // {
+            //     if (Compiler.IsTheSameTree(item.SourceCode!, script.SourceCode!))
+            //     {
+            //         return true;
+            //     }
+            // }
+            // return false;   //but name is duplicate! only source code is unique, also this could be an issue if the name of the script is not taken from the source code as it could lead to a script having a diffrent name but the same source code as another this would lead to this algorithm not finginh the duplicate script
         }
         catch (Exception e)
         {
