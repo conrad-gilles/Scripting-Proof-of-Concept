@@ -21,5 +21,9 @@ internal class EmberInternalFacade
         return ar;
     }
 
-
+    public ActiveGeneratorContext CreateContext(ILabOrderInterfaceV4NoInheritence labOrder, IVaccineInterface vaccine)
+    {
+        ActiveGeneratorContext ctx = new ActiveGeneratorContext(labOrder: labOrder, vaccine: vaccine);
+        return ctx;
+    }
 }

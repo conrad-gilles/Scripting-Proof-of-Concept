@@ -52,7 +52,10 @@ public class EmberInternalFacadeTests
         DataV2.DataV2 data = new DataV2.DataV2(labOrder: obj.labOrder, patient: obj.patient, consoleLogger: obj.logger,
                                 dataAccess: obj.testDataAccess, vaccine: obj.vaccine);
 
-        ActiveGeneratorContext ctx = new ActiveGeneratorContext(labOrder: obj.labOrder, vaccine: obj.vaccine);
+
+        // ActiveGeneratorContext ctx = new ActiveGeneratorContext(labOrder: obj.labOrder, vaccine: obj.vaccine);
+
+        var ctx = eif.CreateContext(obj.labOrder, obj.vaccine);
 
         ar = await eif.ExecuteScriptById(id, ctx!);
 
