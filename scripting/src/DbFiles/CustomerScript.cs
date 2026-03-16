@@ -15,13 +15,13 @@ public class CustomerScript
     public string? ScriptName { get; set; }
 
     [Column("script_type")]
-    public string? ScriptType { get; set; } // "GeneratorCondition" or "GeneratorAction"
+    public string? ScriptType { get; set; }
 
     [Column("source_code")]
-    public string? SourceCode { get; set; } //todo not urgent fix make this not be ablte to be null
+    public string? SourceCode { get; set; }
 
     [Column("min_api_version")]
-    public int MinApiVersion { get; set; }  //maybe do ?
+    public int MinApiVersion { get; set; }
 
     [Column("created_at")]
     public DateTime? CreatedAt { get; set; } = DateTime.UtcNow;
@@ -38,16 +38,6 @@ public class CustomerScript
     {
         CompiledCaches = new List<ScriptCompiledCache>();
     }
-    //todo maybe add factories?
-    // public CustomerScript(Guid? id=null,string? scriptName=null,string? scriptType)
-    // {
-    //     CompiledCaches = new List<ScriptCompiledCache>();
-    // }
-    // public CustomerScript CreateScript()
-    // {
-    //     Guid newRandomId = Guid.NewGuid();
-
-    // }
 
     public override string ToString()
     {

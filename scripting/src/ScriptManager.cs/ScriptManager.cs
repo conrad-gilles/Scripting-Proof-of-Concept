@@ -83,24 +83,6 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
     {
         Logger.LogTrace("Entered {MethodName} in {ClassName} with scriptId: {ScriptId}.", nameof(UpdateScript), nameof(ScriptManagerFacade), scriptId);
 
-        // if (apiVersion == -1)
-        // {
-        //     apiVersion = await GetRecentApiVersion();
-        // }
-        // var customerScript = await Db.GetCustomerScript(scriptId);
-        // var creationDate = customerScript.CreatedAt;
-        // try
-        // {
-        //     await Db.DeleteCustomerScript(scriptId);    //todo update is still inefficient
-        //     await Db.CreateAndInsertCustomerScript(newSourceCode, scriptId, userName, createdAt: (DateTime)creationDate!); //todo unsafe af 
-        // }
-        // catch
-        // {
-        //     await Db.SaveScriptWithoutCompiling(scriptId, newSourceCode, userName);
-        //     Logger.LogTrace("Could not save the actual Script so had to save without compiling");
-        //     throw;
-        // }
-        // // await RecompileScript(scriptId);    //todo inefficient also untested, ineff because compiles 2 for 1 api v
         await Db.UpdateScript(scriptId, newSourceCode, userName, apiVersion);
     }
 
@@ -459,11 +441,6 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
 
         int currentApiVersion = GetRunningApiVersion();
         await Db.AutomaticCompilationOnVersionUpdate(currentApiVersion);
-    }
-
-    public async Task EnsureDeletedCreated()
-    {
-        await Db.EnsureDeletedCreated();
     }
 
     public async Task DeleteAllData()

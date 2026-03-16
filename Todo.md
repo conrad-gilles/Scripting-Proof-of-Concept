@@ -1,5 +1,6 @@
 # Todo
 
+improve isduplicate function in db helper to add semantic treee check to see if no script in db has same tree?: this would be unnessecary if class name enforced as scriptname
 hard coded connection string still need to fix
 create composite primary key from name and type of script (condition action)
 

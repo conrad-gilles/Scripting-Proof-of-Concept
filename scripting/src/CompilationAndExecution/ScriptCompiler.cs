@@ -9,7 +9,7 @@ namespace Ember.Scripting;
 
 internal class ScriptCompiler
 {
-    private readonly List<MetadataReference>? References2 = null;
+    private readonly List<MetadataReference>? ReferencesRO = null;
     private readonly ILogger<ScriptCompiler> Logger;
 
     private readonly List<MetadataReference> StandardRefrencesForAllScripts = [MetadataReference.CreateFromFile(typeof(object).Assembly.Location),
@@ -18,16 +18,16 @@ internal class ScriptCompiler
                         MetadataReference.CreateFromFile(typeof(Task<>).Assembly.Location),
                         MetadataReference.CreateFromFile(typeof(DateTime).Assembly.Location),
                         ];
-    public ScriptCompiler(List<MetadataReference> references2, ILogger<ScriptCompiler> logger)
+    public ScriptCompiler(List<MetadataReference> referencesRO, ILogger<ScriptCompiler> logger)
     {
-        References2 = references2;
+        ReferencesRO = referencesRO;
         Logger = logger;
     }
     public byte[] RunCompilation(string script, int? apiVersion = null, (string className, string baseTypeName, int versionInt)? metaData = null) //references param there to enable later on users to define custom references
     {
         try
         {
-            References2!.AddRange(StandardRefrencesForAllScripts);
+            ReferencesRO!.AddRange(StandardRefrencesForAllScripts);
 
             List<MetadataReference>? references = [];
 
@@ -39,10 +39,10 @@ internal class ScriptCompiler
 
             //Takes C# source string and turns it into a "Roslyn parsed syntax tree representation" of a normal C# file
             SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(script);
-            if (References2 != null)
+            if (ReferencesRO != null)
             {
                 Logger.LogInformation("References 2 added references in {MethodName}.", nameof(RunCompilation));
-                references = References2;
+                references = ReferencesRO;
             }
             if (apiVersion != null)
             {
@@ -322,22 +322,4 @@ internal class ScriptCompiler
 
         return references;
     }
-    // static void RemoveReferencesByAssemblyName(List<MetadataReference> refs, params string[] simpleNames)
-    // {
-    //     refs.RemoveAll(r =>
-    //     {
-    //         if (r is not PortableExecutableReference pe || string.IsNullOrWhiteSpace(pe.FilePath))
-    //             return false;
-
-    //         try
-    //         {
-    //             var an = AssemblyName.GetAssemblyName(pe.FilePath);
-    //             return simpleNames.Any(n => string.Equals(n, an.Name, StringComparison.OrdinalIgnoreCase));
-    //         }
-    //         catch
-    //         {
-    //             return false; // ignore non-file refs
-    //         }
-    //     });
-    // }
 }

@@ -21,139 +21,126 @@ internal class DbHelper
         Logger = logger;
         RecentApiVersion = recentApiVersion;
     }
-    public async Task EnsureDeletedCreated()    //todo delete this for obvious safety reasons before production
-    {
-        try
-        {
-            Logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(EnsureDeletedCreated), nameof(DbHelper));
+    // public async Task EnsureDeletedCreated()    //todo delete this for obvious safety reasons before production
+    // {
+    //     try
+    //     {
+    //         Logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(EnsureDeletedCreated), nameof(DbHelper));
 
-            using (var db = new MyContext())
-            {
-                await db.Database.EnsureDeletedAsync();
-                await db.Database.EnsureCreatedAsync();
-            }
-        }
+    //         using (var db = new MyContext())
+    //         {
+    //             await db.Database.EnsureDeletedAsync();
+    //             await db.Database.EnsureCreatedAsync();
+    //         }
+    //     }
 
-        catch (Exception e)
-        {
-            Logger.LogError(e.ToString());
-            throw new DbHelperException(nameof(EnsureDeletedCreated) + " failed in " + nameof(DbHelper), e);
-        }
-    }
+    //     catch (Exception e)
+    //     {
+    //         Logger.LogError(e.ToString());
+    //         throw new DbHelperException(nameof(EnsureDeletedCreated) + " failed in " + nameof(DbHelper), e);
+    //     }
+    // }
     public async Task DeleteAllData()
     {
-        try
-        {
-            Logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(DeleteAllData), nameof(DbHelper));
 
-            using (var db = new MyContext())
-            {
-                await db.ScriptCompiledCaches.ExecuteDeleteAsync();
-                await db.CustomerScripts.ExecuteDeleteAsync();
-            }
-        }
-        catch (Exception e)
+        Logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(DeleteAllData), nameof(DbHelper));
+
+        using (var db = new MyContext())
         {
-            Logger.LogError(e.ToString());
-            throw new DbHelperException(nameof(DeleteAllData) + " failed in " + nameof(DbHelper), e);
+            await db.ScriptCompiledCaches.ExecuteDeleteAsync();
+            await db.CustomerScripts.ExecuteDeleteAsync();
         }
+
+
     }
     public async Task<List<CustomerScript>> GetAllCustomerScripts(bool includeCaches = false, CustomerScriptFilter? filters = null)
     {
-        try
+
+        Logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(GetAllCustomerScripts), nameof(DbHelper));
+
+        if (filters != null)
         {
-            Logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(GetAllCustomerScripts), nameof(DbHelper));
+            using (var db = new MyContext())
+            {
+                IQueryable<CustomerScript> query = db.CustomerScripts;
+                if (includeCaches)
+                {
+                    query = query.Include(s => s.CompiledCaches);
+                }
+                if (filters.ScriptName != null && filters.ScriptName != "")
+                {
+                    query = query.Where(s => s.ScriptName == filters.ScriptName);
+                }
+                if (filters.ScriptType != null && filters.ScriptType != "")
+                {
+                    query = query.Where(s => s.ScriptType == filters.ScriptType);
+                }
+                if (filters.SourceCode != null && filters.SourceCode != "")
+                {
+                    query = query.Where(s => s.SourceCode == filters.SourceCode);
+                }
+                if (filters.MinApiVersion != null)
+                {
+                    query = query.Where(s => s.MinApiVersion == filters.MinApiVersion);
+                }
+                if (filters.CreatedAt != null)
+                {
+                    query = query.Where(s => s.CreatedAt == filters.CreatedAt);
+                }
+                if (filters.ModifiedAt != null)
+                {
+                    query = query.Where(s => s.ModifiedAt == filters.ModifiedAt);
+                }
+                if (filters.CreatedBy != null && filters.CreatedBy != "")
+                {
+                    query = query.Where(s => s.CreatedBy == filters.CreatedBy);
+                }
 
-            if (filters != null)
-            {
-                using (var db = new MyContext())
-                {
-                    IQueryable<CustomerScript> query = db.CustomerScripts;
-                    if (includeCaches)
-                    {
-                        query = query.Include(s => s.CompiledCaches);
-                    }
-                    if (filters.ScriptName != null && filters.ScriptName != "")
-                    {
-                        query = query.Where(s => s.ScriptName == filters.ScriptName);
-                    }
-                    if (filters.ScriptType != null && filters.ScriptType != "")
-                    {
-                        query = query.Where(s => s.ScriptType == filters.ScriptType);
-                    }
-                    if (filters.SourceCode != null && filters.SourceCode != "")
-                    {
-                        query = query.Where(s => s.SourceCode == filters.SourceCode);
-                    }
-                    if (filters.MinApiVersion != null)
-                    {
-                        query = query.Where(s => s.MinApiVersion == filters.MinApiVersion);
-                    }
-                    if (filters.CreatedAt != null)
-                    {
-                        query = query.Where(s => s.CreatedAt == filters.CreatedAt);
-                    }
-                    if (filters.ModifiedAt != null)
-                    {
-                        query = query.Where(s => s.ModifiedAt == filters.ModifiedAt);
-                    }
-                    if (filters.CreatedBy != null && filters.CreatedBy != "")
-                    {
-                        query = query.Where(s => s.CreatedBy == filters.CreatedBy);
-                    }
-
-                    return await query.ToListAsync();
-                }
-            }
-            if (includeCaches == false)
-            {
-                using (var db = new MyContext())
-                {
-                    var scripts = await db.CustomerScripts.ToListAsync();
-                    return scripts;
-                }
-            }
-            else
-            {
-                using (var db = new MyContext())
-                {
-                    var scripts = await db.CustomerScripts.Include(s => s.CompiledCaches).ToListAsync();
-                    return scripts;
-                }
+                return await query.ToListAsync();
             }
         }
-        catch (Exception e)
+        if (includeCaches == false)
         {
-            throw new DbHelperException(nameof(GetAllCustomerScripts) + " failed in " + nameof(DbHelper), e);
+            using (var db = new MyContext())
+            {
+                var scripts = await db.CustomerScripts.ToListAsync();
+                return scripts;
+            }
         }
+        else
+        {
+            using (var db = new MyContext())
+            {
+                var scripts = await db.CustomerScripts.Include(s => s.CompiledCaches).ToListAsync();
+                return scripts;
+            }
+        }
+
+
 
     }
     public async Task<List<ScriptCompiledCache>> GetAllCompiledScriptCaches(bool includeScripts = true)
     {
-        try
+
+        Logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(GetAllCompiledScriptCaches), nameof(DbHelper));
+        if (!includeScripts)
         {
-            Logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(GetAllCompiledScriptCaches), nameof(DbHelper));
-            if (!includeScripts)
-            {
-                using (var db = new MyContext())
-                {
-                    var caches = await db.ScriptCompiledCaches
-                    .ToListAsync();
-                    return caches;
-                }
-            }
             using (var db = new MyContext())
             {
                 var caches = await db.ScriptCompiledCaches
-                .Include(c => c.CustomerScript)
                 .ToListAsync();
                 return caches;
             }
         }
-        catch (Exception e)
+        using (var db = new MyContext())
         {
-            throw new DbHelperException(nameof(GetAllCompiledScriptCaches) + " failed in " + nameof(DbHelper), e);
+            var caches = await db.ScriptCompiledCaches
+            .Include(c => c.CustomerScript)
+            .ToListAsync();
+            return caches;
         }
+
+
     }
     public int GetRecentApiVersion()
     {
@@ -175,17 +162,12 @@ internal class DbHelper
         }
         for (int i = 0; i <= currentApiVersion; i++)    //checks above if current APi is highest
         {
-            try
-            {
-                await DeleteScriptCache(scriptId, i);
-                Logger.LogInformation("Deleted: " + i);
-                Console.WriteLine("Deleted: " + i);
-            }
-            catch (Exception e)
-            {
-                Logger.LogError(e.ToString());
-                throw new DbHelperException(nameof(ClearScriptCache) + " failed", e);
-            }
+
+            await DeleteScriptCache(scriptId, i);
+            Logger.LogInformation("Deleted: " + i);
+            Console.WriteLine("Deleted: " + i);
+
+
 
         }
 
@@ -194,266 +176,193 @@ internal class DbHelper
     {
         Logger.LogTrace("Entered {MethodName} in {ClassName} with scriptId: {ScriptId}.", nameof(RecompileScript), nameof(DbHelper), scriptId);
 
-        try
+        int currentApiVersion = GetRecentApiVersion();
+        CustomerScript script = await GetCustomerScript(scriptId, includeCaches: true);
+
+        int start = script.MinApiVersion;
+        int count = currentApiVersion - start + 1;
+        int[] versions = Enumerable.Range(start, count).ToArray();
+        if (deleteAlso)
         {
-            int currentApiVersion = GetRecentApiVersion();
-            CustomerScript script = await GetCustomerScript(scriptId, includeCaches: true);
-
-            int start = script.MinApiVersion;
-            int count = currentApiVersion - start + 1;
-            int[] versions = Enumerable.Range(start, count).ToArray();
-            if (deleteAlso)
-            {
-                await ClearScriptCache(scriptId);
-            }
-            foreach (var itemN in script.CompiledCaches)    //todo fix this once old version implemented
-            {
-                if (versions.Contains(itemN.ApiVersion) == false)
-                {
-                    try
-                    {
-                        await CreateAndInsertCompiledCache(script, itemN.ApiVersion);
-                        Logger.LogInformation("Mock recompilation of old V" + itemN.ApiVersion);
-                        Console.WriteLine("Mock recompilation of old V" + itemN.ApiVersion);
-                    }
-                    catch (Exception e) { Logger.LogError("Compilation of old version failed" + e.ToString()); }
-
-                }
-                if (itemN.ApiVersion == currentApiVersion)  //this is only temporary until the if statement above works
-                {
-                    await CreateAndInsertCompiledCache(script);
-                    Logger.LogInformation("Real recompilation of new V" + itemN.ApiVersion + " , normal if twice");
-                    Console.WriteLine("Real recompilation of new V" + itemN.ApiVersion + " , normal if twice");
-                    break;
-                }
-            }
-
+            await ClearScriptCache(scriptId);
         }
-        catch (Exception e)
+        foreach (var itemN in script.CompiledCaches)    //todo fix this once old version implemented
         {
-            Logger.LogError(e.ToString());
-            throw new DbHelperException(nameof(RecompileScript) + " failed in " + nameof(DbHelper), e);
+            if (versions.Contains(itemN.ApiVersion) == false)
+            {
+                try
+                {
+                    await CreateAndInsertCompiledCache(script, itemN.ApiVersion);
+                    Logger.LogInformation("Mock recompilation of old V" + itemN.ApiVersion);
+                    Console.WriteLine("Mock recompilation of old V" + itemN.ApiVersion);
+                }
+                catch (Exception e) { Logger.LogError("Compilation of old version failed" + e.ToString()); }
+
+            }
+            if (itemN.ApiVersion == currentApiVersion)  //this is only temporary until the if statement above works
+            {
+                await CreateAndInsertCompiledCache(script);
+                Logger.LogInformation("Real recompilation of new V" + itemN.ApiVersion + " , normal if twice");
+                Console.WriteLine("Real recompilation of new V" + itemN.ApiVersion + " , normal if twice");
+                break;
+            }
         }
+
+
     }
     public async Task AutomaticCompilationOnVersionUpdate(int currentApiVersion)
     {
         Logger.LogTrace("Entered {MethodName} in {ClassName} with currentApiVersion: {ApiVersion}.", nameof(AutomaticCompilationOnVersionUpdate), nameof(DbHelper), currentApiVersion);
 
-        try
+        foreach (var item in await GetAllCustomerScripts(includeCaches: true))
         {
-            foreach (var item in await GetAllCustomerScripts(includeCaches: true))
+            bool currentImplementation = false;
+            foreach (var itemN in item.CompiledCaches)
             {
-                bool currentImplementation = false;
-                foreach (var itemN in item.CompiledCaches)
+                int start = item.MinApiVersion;
+                int count = currentApiVersion - start + 1;
+
+                int[] versions = Enumerable.Range(start, count).ToArray();
+                if (versions.Contains(itemN.ApiVersion) == false)
                 {
-                    int start = item.MinApiVersion;
-                    int count = currentApiVersion - start + 1;
-
-                    int[] versions = Enumerable.Range(start, count).ToArray();
-                    if (versions.Contains(itemN.ApiVersion) == false)
-                    {
-                        // await CreateAndInsertCompiledCache(item, currentApiVersion); //todo create a method to compile to all older versions also
-                    }
-
-                    if (itemN.ApiVersion == currentApiVersion)
-                    {
-                        currentImplementation = true;
-                    }
-                    if (itemN.ApiVersion < item.MinApiVersion)
-                    {
-                        await DeleteScriptCache(itemN.ScriptId, currentApiVersion);
-                        Logger.LogInformation("Deleted an old Script Cache!");
-                        Console.WriteLine("Deleted an old Script Cache!");
-                    }
+                    // await CreateAndInsertCompiledCache(item, currentApiVersion); //todo create a method to compile to all older versions also
                 }
 
-                if (currentImplementation == false)
+                if (itemN.ApiVersion == currentApiVersion)
                 {
-                    await CreateAndInsertCompiledCache(item);
+                    currentImplementation = true;
+                }
+                if (itemN.ApiVersion < item.MinApiVersion)
+                {
+                    await DeleteScriptCache(itemN.ScriptId, currentApiVersion);
+                    Logger.LogInformation("Deleted an old Script Cache!");
+                    Console.WriteLine("Deleted an old Script Cache!");
                 }
             }
-        }
-        catch (Exception e)
-        {
-            Logger.LogError(e.ToString());
-            throw new DbHelperException(nameof(AutomaticCompilationOnVersionUpdate) + " failed in " + nameof(DbHelper), e);
-        }
 
+            if (currentImplementation == false)
+            {
+                await CreateAndInsertCompiledCache(item);
+            }
+        }
     }
     public async Task<CustomerScript> CreateAndInsertCustomerScript(string scriptString, Guid randomGUID, string createdBy, int? oldApiV = null, DateTime? createdAt = null, bool alsoCompAndSave = false, bool checkForDuplicates = true)
     //todo make sure compiling happens after verification of isDuplicate
     {
-        try
+        Logger.LogTrace("Entered {MethodName} in {ClassName} with ID: {ScriptId}.", nameof(CreateAndInsertCustomerScript), nameof(DbHelper), randomGUID);
+
+        using (var db = new MyContext())
         {
-
-            Logger.LogTrace("Entered {MethodName} in {ClassName} with ID: {ScriptId}.", nameof(CreateAndInsertCustomerScript), nameof(DbHelper), randomGUID);
-
-
-            using (var db = new MyContext())
+            int currentApiVersion = GetRecentApiVersion();
+            if (createdAt == null)
             {
-                int currentApiVersion = GetRecentApiVersion();
-                if (createdAt == null)
-                {
-                    createdAt = DateTime.UtcNow;
-                }
-                // ScriptCompiler compiler = new ScriptCompiler(References);
-                var getTupleFromVal = Compiler.BasicValidationBeforeCompiling(scriptString);
-
-                CustomerScript randomTestScript2 = new CustomerScript
-                {
-                    Id = randomGUID,
-                    ScriptName = getTupleFromVal.className,
-                    ScriptType = getTupleFromVal.baseTypeName,
-                    SourceCode = scriptString,
-                    MinApiVersion = getTupleFromVal.versionInt,
-                    CreatedAt = createdAt,
-                    ModifiedAt = DateTime.UtcNow,
-                    CreatedBy = createdBy
-                };
-                checkForDuplicates = true;
-                if (checkForDuplicates)
-                {
-                    checkForDuplicates = await IsDuplicateScript(randomTestScript2);  //uncomment this if you dont want to check for duplicate existing in db when inserting
-                }
-
-                if (checkForDuplicates == false)
-                {
-                    db.CustomerScripts.Add(randomTestScript2);
-                    await db.SaveChangesAsync();
-
-                    await CreateAndInsertCompiledCache(randomTestScript2, oldApiV);
-
-                    // byte[] tempComp;
-                    // if (oldApiV != null)
-                    // {
-                    //     tempComp = Compiler.RunCompilation(scriptString, apiVersion: (int)oldApiV, metaData: getTupleFromVal);
-                    //     currentApiVersion = (int)oldApiV;
-                    // }
-                    // else
-                    // {
-                    //     currentApiVersion = GetRecentApiVersion();
-                    //     tempComp = Compiler.RunCompilation(scriptString, metaData: getTupleFromVal);
-                    // }
-
-                    // randomTestScript2.CompiledCaches.Add(new ScriptCompiledCache
-                    // {
-                    //     ScriptId = randomGUID,
-                    //     ApiVersion = currentApiVersion,
-                    //     AssemblyBytes = tempComp,
-                    //     CompilationDate = DateTime.UtcNow,
-                    //     CompilationSuccess = true,
-                    //     CompilationErrors = "",
-                    //     OldSourceCode = scriptString    //todo
-                    // });
-                    // db.CustomerScripts.Add(randomTestScript2);
-                    // await db.SaveChangesAsync();
-                    return randomTestScript2;
-                }
-                else
-                {
-                    // return randomTestScript2;
-                    throw new DbHelperException(nameof(CreateAndInsertCustomerScript) + " failed in " + nameof(DbHelper) + " because a duplicate script was already in the database!");
-                }
+                createdAt = DateTime.UtcNow;
             }
-        }
-        catch (Exception e)
-        {
-            Logger.LogError(e.ToString());
-            throw;
-            // throw new DbHelperException(nameof(CreateAndInsertCustomerScript) + " failed in " + nameof(DbHelper), e);
+            // ScriptCompiler compiler = new ScriptCompiler(References);
+            var getTupleFromVal = Compiler.BasicValidationBeforeCompiling(scriptString);
+
+            CustomerScript randomTestScript2 = new CustomerScript
+            {
+                Id = randomGUID,
+                ScriptName = getTupleFromVal.className,
+                ScriptType = getTupleFromVal.baseTypeName,
+                SourceCode = scriptString,
+                MinApiVersion = getTupleFromVal.versionInt,
+                CreatedAt = createdAt,
+                ModifiedAt = DateTime.UtcNow,
+                CreatedBy = createdBy
+            };
+            checkForDuplicates = true;
+            if (checkForDuplicates)
+            {
+                checkForDuplicates = await IsDuplicateScript(randomTestScript2);  //uncomment this if you dont want to check for duplicate existing in db when inserting
+            }
+
+            if (checkForDuplicates == false)
+            {
+                db.CustomerScripts.Add(randomTestScript2);
+                await db.SaveChangesAsync();
+
+                await CreateAndInsertCompiledCache(randomTestScript2, oldApiV);
+                return randomTestScript2;
+            }
+            else
+            {
+                throw new DbHelperException(nameof(CreateAndInsertCustomerScript) + " failed in " + nameof(DbHelper) + " because a duplicate script was already in the database!");
+            }
         }
     }
     public async Task CreateAndInsertCompiledCache(CustomerScript script, int? apiV = null)
     {
-        try
+        Logger.LogTrace("Entered {MethodName} in {ClassName} with ID: {ScriptId}.", nameof(CreateAndInsertCompiledCache), nameof(DbHelper), script.Id);
+
+        using (var db = new MyContext())
         {
-            Logger.LogTrace("Entered {MethodName} in {ClassName} with ID: {ScriptId}.", nameof(CreateAndInsertCompiledCache), nameof(DbHelper), script.Id);
-
-            using (var db = new MyContext())
+            // int currentApiVersion;
+            if (apiV == null)
             {
-                // int currentApiVersion;
-                if (apiV == null)
-                {
-                    apiV = GetRecentApiVersion();
-                }
-
-                var getTupleFromVal = Compiler.BasicValidationBeforeCompiling(script.SourceCode!);
-
-                if (await db.ScriptCompiledCaches.AnyAsync(c => c.ScriptId == script.Id && c.ApiVersion == apiV))
-                {
-                    Logger.LogInformation("Skipping insert of: " + getTupleFromVal.className + " because it already exists already exists.");
-                    Console.WriteLine("Skipping insert of: " + getTupleFromVal.className + " because it already exists already exists.");
-                    throw new DbHelperException(nameof(CreateAndInsertCompiledCache) + " failed in " + nameof(DbHelper) + "more details: " + "Skipping insert of: " + getTupleFromVal.className + " because it already exists already exists."); ;
-                    // return;
-                }
-                else
-                {
-                    byte[] tempComp;
-                    tempComp = Compiler.RunCompilation(script.SourceCode!, metaData: getTupleFromVal);
-
-                    ScriptCompiledCache tempCache = new ScriptCompiledCache
-                    {
-                        ScriptId = script.Id,
-                        ApiVersion = (int)apiV,
-                        AssemblyBytes = tempComp,
-                        CompilationDate = DateTime.UtcNow,
-                        CompilationSuccess = true,
-                        CompilationErrors = "",
-                        OldSourceCode = script.SourceCode
-                    };
-                    await InsertScriptCompiledCache(tempCache);
-                    await db.SaveChangesAsync();
-                }
+                apiV = GetRecentApiVersion();
             }
-        }
-        catch (Exception e)
-        {
-            throw new DbHelperException(nameof(CreateAndInsertCompiledCache) + " failed in " + nameof(DbHelper), e);
-        }
 
-    }
-    public async Task DeleteCustomerScript(Guid id)
-    {
-        try
-        {
-            Logger.LogTrace("Entered {MethodName} in {ClassName} with ID: {ScriptId}.", nameof(DeleteCustomerScript), nameof(DbHelper), id);
+            var getTupleFromVal = Compiler.BasicValidationBeforeCompiling(script.SourceCode!);
 
-            using (var db = new MyContext())
+            if (await db.ScriptCompiledCaches.AnyAsync(c => c.ScriptId == script.Id && c.ApiVersion == apiV))
             {
-                CustomerScript temp = await GetCustomerScript(id);
-                db.Remove(temp);
+                Logger.LogInformation("Skipping insert of: " + getTupleFromVal.className + " because it already exists already exists.");
+                Console.WriteLine("Skipping insert of: " + getTupleFromVal.className + " because it already exists already exists.");
+                throw new DbHelperException(nameof(CreateAndInsertCompiledCache) + " failed in " + nameof(DbHelper) + "more details: " + "Skipping insert of: " + getTupleFromVal.className + " because it already exists already exists."); ;
+                // return;
+            }
+            else
+            {
+                byte[] tempComp;
+                tempComp = Compiler.RunCompilation(script.SourceCode!, metaData: getTupleFromVal);
+
+                ScriptCompiledCache tempCache = new ScriptCompiledCache
+                {
+                    ScriptId = script.Id,
+                    ApiVersion = (int)apiV,
+                    AssemblyBytes = tempComp,
+                    CompilationDate = DateTime.UtcNow,
+                    CompilationSuccess = true,
+                    CompilationErrors = "",
+                    OldSourceCode = script.SourceCode
+                };
+                await InsertScriptCompiledCache(tempCache);
                 await db.SaveChangesAsync();
             }
         }
-        catch (Exception e)
+    }
+    public async Task DeleteCustomerScript(Guid id)
+    {
+        Logger.LogTrace("Entered {MethodName} in {ClassName} with ID: {ScriptId}.", nameof(DeleteCustomerScript), nameof(DbHelper), id);
+
+        using (var db = new MyContext())
         {
-            throw new DbHelperException(nameof(DeleteCustomerScript) + " failed in " + nameof(DbHelper), e);
+            CustomerScript temp = await GetCustomerScript(id);
+            db.Remove(temp);
+            await db.SaveChangesAsync();
         }
     }
     public async Task DeleteScriptCache(Guid id, int ApiVersion)
     {
-        try
-        {
-            Logger.LogTrace("Entered {MethodName} in {ClassName} with ID: {ScriptId} and ApiVersion: {ApiVersion}.", nameof(DeleteScriptCache), nameof(DbHelper), id, ApiVersion);
+        Logger.LogTrace("Entered {MethodName} in {ClassName} with ID: {ScriptId} and ApiVersion: {ApiVersion}.", nameof(DeleteScriptCache), nameof(DbHelper), id, ApiVersion);
 
-            using (var db = new MyContext())
-            {
-                try
-                {
-                    ScriptCompiledCache temp = await GetCompiledScripCache(id, ApiVersion);
-                    db.Remove(temp);
-                    await db.SaveChangesAsync();
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e.ToString());
-                    Console.WriteLine("Could not execute DeleteScriptCache");
-                }
-            }
-        }
-        catch (Exception e)
+        using (var db = new MyContext())
         {
-            throw new DbHelperException(nameof(DeleteScriptCache) + " failed in " + nameof(DbHelper), e);
+            try
+            {
+                ScriptCompiledCache temp = await GetCompiledScripCache(id, ApiVersion);
+                db.Remove(temp);
+                await db.SaveChangesAsync();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.ToString());
+                Logger.LogError(e.ToString());
+                Console.WriteLine("Could not execute DeleteScriptCache");
+                Logger.LogInformation("Could not execute DeleteScriptCache");
+            }
         }
     }
     public async Task UpdateScript(Guid scriptId, string newSourceCode, string? userName = null, int? apiVersion = null)
@@ -463,10 +372,6 @@ internal class DbHelper
         {
             userName = "Default";
         }
-        // if (apiVersion == null)
-        // {
-        //     apiVersion = GetRecentApiVersion();
-        // }
 
         using (var db = new MyContext())
         {
@@ -493,45 +398,29 @@ internal class DbHelper
     }
     public async Task InsertScriptCompiledCache(ScriptCompiledCache scriptCompiledCache)
     {
-        try
-        {
-            Logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(InsertScriptCompiledCache), nameof(DbHelper));
+        Logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(InsertScriptCompiledCache), nameof(DbHelper));
 
-            using (var db = new MyContext())
-            {
-                scriptCompiledCache.CustomerScript = null!;
-
-                db.ScriptCompiledCaches.Add(scriptCompiledCache);
-                await db.SaveChangesAsync();
-            }
-        }
-        catch (Exception e)
+        using (var db = new MyContext())
         {
-            throw new DbHelperException(nameof(InsertScriptCompiledCache) + " failed in " + nameof(DbHelper), e);
+            scriptCompiledCache.CustomerScript = null!;
+
+            db.ScriptCompiledCaches.Add(scriptCompiledCache);
+            await db.SaveChangesAsync();
         }
     }
 
     public async Task<ScriptCompiledCache> GetCompiledScripCache(Guid id, int ApiVersion)
     {
-        try
-        {
-            Logger.LogTrace("Entered {MethodName} in {ClassName} with ID: {ScriptId}.", nameof(GetCompiledScripCache), nameof(DbHelper), id);
+        Logger.LogTrace("Entered {MethodName} in {ClassName} with ID: {ScriptId}.", nameof(GetCompiledScripCache), nameof(DbHelper), id);
 
-            using (var db = new MyContext())
-            {
-                var cache = await db.ScriptCompiledCaches.SingleAsync(b => b.ScriptId == id && b.ApiVersion == ApiVersion);
-                return cache;
-            }
-        }
-        catch (Exception e)
+        using (var db = new MyContext())
         {
-            throw new DbHelperException(nameof(GetCompiledScripCache) + " failed in " + nameof(DbHelper), e);
+            var cache = await db.ScriptCompiledCaches.SingleAsync(b => b.ScriptId == id && b.ApiVersion == ApiVersion);
+            return cache;
         }
     }
     public async Task<CustomerScript> GetCustomerScript(Guid id, bool includeCaches = false)
     {
-        // try
-        // {
         Logger.LogTrace("Entered {MethodName} in {ClassName} with ID: {ScriptId}.", nameof(GetCustomerScript), nameof(DbHelper), id);
 
         if (includeCaches == true)
@@ -551,11 +440,6 @@ internal class DbHelper
                 return script;
             }
         }
-        // }
-        // catch (Exception e)
-        // {
-        //     throw new DbHelperException(nameof(GetCustomerScript) + " failed in " + nameof(DbHelper), e);
-        // }
     }
 
     public async Task<Guid> GetScriptId(string scriptName, ScriptTypes scriptType)
@@ -583,22 +467,14 @@ internal class DbHelper
     {
         Logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(CompileAllStoredScripts), nameof(DbHelper));
 
-        try
+        using (var db = new MyContext())
         {
-            using (var db = new MyContext())
+            List<CustomerScript> allScriptSC = await GetAllCustomerScripts();
+            for (int i = 0; i < allScriptSC.Count(); i++)
             {
-                List<CustomerScript> allScriptSC = await GetAllCustomerScripts();
-                for (int i = 0; i < allScriptSC.Count(); i++)
-                {
-                    await CreateAndInsertCompiledCache(allScriptSC[i]);
-                    await db.SaveChangesAsync();
-                }
+                await CreateAndInsertCompiledCache(allScriptSC[i]);
+                await db.SaveChangesAsync();
             }
-        }
-        catch (Exception e)
-        {
-            Logger.LogError(e.ToString());
-            throw new DbHelperException(nameof(CompileAllStoredScripts) + " failed in " + nameof(DbHelper), e);
         }
     }
 
@@ -641,113 +517,89 @@ internal class DbHelper
     {
         Logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(DeleteAllCachedScripts), nameof(DbHelper));
 
-        try
+        using (var db = new MyContext())
         {
-            using (var db = new MyContext())
-            {
-                await db.ScriptCompiledCaches.ExecuteDeleteAsync();
-            }
-        }
-        catch (Exception e)
-        {
-            Logger.LogError(e.ToString());
-            throw new DbHelperException(nameof(DeleteAllCachedScripts) + " failed in " + nameof(DbHelper), e);
+            await db.ScriptCompiledCaches.ExecuteDeleteAsync();
         }
     }
     public async Task<bool> IsDuplicateScript(CustomerScript script)    //todo make more efficient using ef core
     {
-        try
+        Logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(IsDuplicateScript), nameof(DbHelper));
+        // CustomerScriptFilter filter = new CustomerScriptFilter(scriptName: script.ScriptName, sourceCode: script.SourceCode);
+        CustomerScriptFilter filter = new CustomerScriptFilter(scriptName: script.ScriptName, scriptType: script.ScriptType);
+        List<CustomerScript> allScripts = await GetAllCustomerScripts(filters: filter);
+
+
+
+        if (allScripts.Count() == 0)
         {
-            Logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(IsDuplicateScript), nameof(DbHelper));
-            // CustomerScriptFilter filter = new CustomerScriptFilter(scriptName: script.ScriptName, sourceCode: script.SourceCode);
-            CustomerScriptFilter filter = new CustomerScriptFilter(scriptName: script.ScriptName, scriptType: script.ScriptType);
-            List<CustomerScript> allScripts = await GetAllCustomerScripts(filters: filter);
-
-
-
-            if (allScripts.Count() == 0)
-            {
-                return false;
-            }
-            return true;
-            // foreach (var item in allScripts)
-            // {
-            //     if (Compiler.IsTheSameTree(item.SourceCode!, script.SourceCode!))
-            //     {
-            //         return true;
-            //     }
-            // }
-            // return false;   //but name is duplicate! only source code is unique, also this could be an issue if the name of the script is not taken from the source code as it could lead to a script having a diffrent name but the same source code as another this would lead to this algorithm not finginh the duplicate script
+            return false;
         }
-        catch (Exception e)
-        {
-            Logger.LogError(e.ToString());
-            throw new DbHelperException(nameof(IsDuplicateScript) + " failed in " + nameof(DbHelper), e);
-        }
+        return true;
+        // foreach (var item in allScripts)
+        // {
+        //     if (Compiler.IsTheSameTree(item.SourceCode!, script.SourceCode!))
+        //     {
+        //         return true;
+        //     }
+        // }
+        // return false;   //but name is duplicate! only source code is unique, also this could be an issue if the name of the script is not taken from the source code as it could lead to a script having a diffrent name but the same source code as another this would lead to this algorithm not finginh the duplicate script
     }
     public async Task<(List<Guid> scriptGUIDs, Dictionary<Guid, int> cacheGUIDs)> DetectDuplicates()
     {
         Logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(DetectDuplicates), nameof(DbHelper));
 
-        try
+        List<CustomerScript> allScripts = await GetAllCustomerScripts(includeCaches: true);
+        List<Guid> duplicateGuids = [];
+        for (int i = 0; i < allScripts.Count(); i++)
         {
-            List<CustomerScript> allScripts = await GetAllCustomerScripts(includeCaches: true);
-            List<Guid> duplicateGuids = [];
-            for (int i = 0; i < allScripts.Count(); i++)
+            for (int j = 0; j < allScripts.Count(); j++)
             {
-                for (int j = 0; j < allScripts.Count(); j++)
+                if (i != j && j > i)
                 {
-                    if (i != j && j > i)
+                    if (allScripts[i].Id == allScripts[j].Id
+                    || allScripts[i].ScriptName == allScripts[j].ScriptName
+                    || allScripts[i].SourceCode == allScripts[j].SourceCode
+                    || Compiler.IsTheSameTree(allScripts[i].SourceCode!, allScripts[j].SourceCode!)
+                    )
                     {
-                        if (allScripts[i].Id == allScripts[j].Id
-                        || allScripts[i].ScriptName == allScripts[j].ScriptName
-                        || allScripts[i].SourceCode == allScripts[j].SourceCode
-                        || Compiler.IsTheSameTree(allScripts[i].SourceCode!, allScripts[j].SourceCode!)
-                        )
+                        if (duplicateGuids.Contains(allScripts[j].Id) == false)
                         {
-                            if (duplicateGuids.Contains(allScripts[j].Id) == false)
-                            {
-                                duplicateGuids.Add(allScripts[j].Id);
-                            }
+                            duplicateGuids.Add(allScripts[j].Id);
                         }
                     }
                 }
             }
-            List<ScriptCompiledCache> allCaches = await GetAllCompiledScriptCaches();
-            Dictionary<Guid, int> cachesToDelete = [];
-            for (int i = 0; i < allCaches.Count(); i++)
+        }
+        List<ScriptCompiledCache> allCaches = await GetAllCompiledScriptCaches();
+        Dictionary<Guid, int> cachesToDelete = [];
+        for (int i = 0; i < allCaches.Count(); i++)
+        {
+            Guid cacheID = allCaches[i].ScriptId;
+            bool found = false;
+            for (int j = 0; j < allScripts.Count(); j++)
             {
-                Guid cacheID = allCaches[i].ScriptId;
-                bool found = false;
-                for (int j = 0; j < allScripts.Count(); j++)
+                if (allScripts[j].Id == cacheID)
                 {
-                    if (allScripts[j].Id == cacheID)
-                    {
-                        found = true;
-                    }
-                }
-                if (found == false)
-                {
-                    try
-                    {
-                        cachesToDelete.Add(cacheID, allCaches[i].ApiVersion);        //also add the version
-                        // await DeleteScriptCache(cacheID);   //deletes if there is a cache without a script attached to it
-                    }
-                    catch (Exception e)
-                    {
-                        Logger.LogError(e.ToString());
-                        throw new Exception();
-                    }
-
+                    found = true;
                 }
             }
-            return (scriptGUIDs: duplicateGuids, cacheGUIDs: cachesToDelete);
+            if (found == false)
+            {
+                try
+                {
+                    cachesToDelete.Add(cacheID, allCaches[i].ApiVersion);        //also add the version
+                                                                                 // await DeleteScriptCache(cacheID);   //deletes if there is a cache without a script attached to it
+                }
+                catch (Exception e)
+                {
+                    Logger.LogError("Could not add cache to DB." + e.ToString());
+                    throw new DbHelperException("Could not add cache to DB.", e);
+                }
+
+            }
         }
-        catch (Exception e)
-        {
-            Logger.LogError(e.ToString());
-            throw new DbHelperException(nameof(DetectDuplicates) + " failed in " + nameof(DbHelper), e);
-        }
+        return (scriptGUIDs: duplicateGuids, cacheGUIDs: cachesToDelete);
     }
     public async Task<List<int>> GetActiveApiVersions()
     {
@@ -773,40 +625,31 @@ internal class DbHelper
     {
         Logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(RemoveDuplicates), nameof(DbHelper));
 
-        try
-        {
-            List<Guid> duplicateGuids = (await DetectDuplicates()).scriptGUIDs;
-            Dictionary<Guid, int> cachesWithoutScript = (await DetectDuplicates()).cacheGUIDs;
+        List<Guid> duplicateGuids = (await DetectDuplicates()).scriptGUIDs;
+        Dictionary<Guid, int> cachesWithoutScript = (await DetectDuplicates()).cacheGUIDs;
 
-            for (int i = 0; i < duplicateGuids.Count(); i++)
+        for (int i = 0; i < duplicateGuids.Count(); i++)
+        {
+            if (duplicateGuids.Contains(duplicateGuids[i]))
             {
-                if (duplicateGuids.Contains(duplicateGuids[i]))
+                try
                 {
-                    try
-                    {
-                        await DeleteCustomerScript(duplicateGuids[i]);
-                    }
-                    catch (Exception e)
-                    {
-                        Logger.LogError(e.ToString());
-                        Logger.LogError("Error when deleting index: " + i + " the GUID: " + duplicateGuids[i]);
-                    }
+                    await DeleteCustomerScript(duplicateGuids[i]);
                 }
-            }
-            foreach (var item in cachesWithoutScript.Keys)
-            {
-                try { await DeleteScriptCache(item, cachesWithoutScript[item]); }
                 catch (Exception e)
                 {
-                    Logger.LogError(e.ToString());
-                    throw new Exception();
+                    Logger.LogError("Error when deleting index: " + i + " the GUID: " + duplicateGuids[i] + ". Full Exception: " + e.ToString());
                 }
             }
         }
-        catch (Exception e)
+        foreach (var item in cachesWithoutScript.Keys)
         {
-            Logger.LogError(e.ToString());
-            throw new DbHelperException(nameof(GetActiveApiVersions) + " failed in " + nameof(DbHelper), e);
+            try { await DeleteScriptCache(item, cachesWithoutScript[item]); }
+            catch (Exception e)
+            {
+                Logger.LogError("Failed to delete Script Cache." + e.ToString());
+                throw new DbHelperException("Failed to delete Script Cache.");
+            }
         }
     }
     //Ai generated
