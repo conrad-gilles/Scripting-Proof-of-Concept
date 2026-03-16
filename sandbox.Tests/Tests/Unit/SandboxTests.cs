@@ -223,6 +223,8 @@ public class SanboxTests
     [TestMethod]
     public async Task CreateContextByDowngradeTest()
     {
+        ActiveGeneratorContext data = new ActiveGeneratorContext(labOrder: obj.labOrder, vaccine: obj.vaccine);
+
         Guid id;
         ContextFactory sf;
         (string className, string baseTypeName, int versionInt) valResult;

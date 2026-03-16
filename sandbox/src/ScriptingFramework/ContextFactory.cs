@@ -27,7 +27,8 @@ public class ContextFactory
 
         return ctx;
     }
-    public async Task<Ember.Scripting.GeneratorContextSF> CreateByDowngrade(Guid id, ActiveDataClass data)
+    public async Task<GeneratorContextSF> CreateByDowngrade(Guid id, ActiveGeneratorContext ctx)
+    // public async Task<Ember.Scripting.GeneratorContextSF> CreateByDowngrade(Guid id, ActiveDataClass data)
     // public async Task<ActiveGeneratorContext> CreateByDowngrade(string sourceCode)
     {
         CustomerScript script = await ScriptManager.GetScript(id);
@@ -53,9 +54,11 @@ public class ContextFactory
         recentType = contextVersionMap[(int)apiV];
         Type desiredType = contextVersionMap[vali.versionInt];
         var objs = ScriptObjects();
-        Ember.Scripting.GeneratorContextSF context = CreateContextForApiV(data);
+        // Ember.Scripting.GeneratorContextSF context = CreateContextForApiV(data);
+        Ember.Scripting.GeneratorContextSF context = ctx;
         int iterations = 0;
         int maxIterations = ContextVersionScanner.GetClassDictionary().Keys.Count() + 3;
+
         while (recentType != desiredType && iterations <= maxIterations)
         {
             if (recentType == typeof(GeneratorContextNoInherVaccineV5.GeneratorContext))
