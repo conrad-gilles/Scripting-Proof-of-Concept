@@ -217,7 +217,7 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
     #region Execution Operations
 
     // Executes a Generator Action script with provided context, realisitcally not needed
-    public async Task<ActionResultBaseClass> ExecuteActionScript(Guid scriptId, GeneratorContext context, int? currentApiVersion = null)    //lowkey so many errors better to have one
+    public async Task<ActionResultSF> ExecuteActionScript(Guid scriptId, GeneratorContextSF context, int? currentApiVersion = null)    //lowkey so many errors better to have one
     {
         Logger.LogTrace("Entered {MethodName} in {ClassName} with scriptId: {ScriptId}.", nameof(ExecuteActionScript), nameof(ScriptManagerFacade), scriptId);
         try
@@ -244,7 +244,7 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
 
             //possibly add a null check for compiledScript
             // ScriptExecutor executor = new ScriptExecutor();
-            ActionResultBaseClass result = (ActionResultBaseClass)Executor.RunScriptExecution<object>(compiledScript!, context);  //todo maybe better handling than casting although the error will be thrown in the class itself
+            ActionResultSF result = (ActionResultSF)Executor.RunScriptExecution<object>(compiledScript!, context);  //todo maybe better handling than casting although the error will be thrown in the class itself
             return result;
         }
         catch (Exception e)
@@ -256,7 +256,7 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
     }
 
     // Executes a Generator Condition script and returns boolean result, realisitcally not needed
-    public async Task<bool> ExecuteConditionScript(Guid scriptId, GeneratorContext context, int? ApiVersion = null)
+    public async Task<bool> ExecuteConditionScript(Guid scriptId, GeneratorContextSF context, int? ApiVersion = null)
     {
         Logger.LogTrace("Entered {MethodName} in {ClassName} with scriptId: {ScriptId}.", nameof(ExecuteConditionScript), nameof(ScriptManagerFacade), scriptId);
         try
@@ -294,7 +294,7 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
     }
 
     // Generic execution that detects script type automatically
-    public async Task<object> ExecuteScriptById(Guid scriptId, GeneratorContext context, int? apiVersion = null)
+    public async Task<object> ExecuteScriptById(Guid scriptId, GeneratorContextSF context, int? apiVersion = null)
     {
         Logger.LogTrace("Entered {MethodName} in {ClassName} with scriptId: {ScriptId}.", nameof(ExecuteScriptById), nameof(ScriptManagerFacade), scriptId);
         try

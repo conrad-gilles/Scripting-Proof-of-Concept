@@ -1,0 +1,6 @@
+global using ActiveActionResult = ActionResultV3.ActionResult;
+global using ActiveIGeneratorContext = IGeneratorContextNoInheritance_V5.IGeneratorContext;
+global using ActiveGeneratorContext = GeneratorContextNoInherVaccineV5.GeneratorContext;
+global using ActiveIGeneratorConditionScript = GeneratorScriptsGenericSimple.IGeneratorConditionScript<IGeneratorReadOnlyContextV1.IGeneratorContext>;
+global using ActiveIGeneratorActionScript = GeneratorScriptsV4.IGeneratorActionScript;
+global using ActiveDataClass = DataV2.DataV2;

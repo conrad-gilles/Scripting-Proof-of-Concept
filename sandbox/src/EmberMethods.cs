@@ -36,6 +36,7 @@ public class EmberMethods
         ServiceCollection services2 = new ServiceCollection();
 
         LoggerForScripting logger = new LoggerForScripting();
+        // Log.Logger = logger.SetUpAndGetSeriLogger(); // ADD THIS LINE
         Log.Debug("New instance.");
 
         services2 = new ServiceCollection();
@@ -168,11 +169,11 @@ public class EmberMethods
         }
 
     }
-    public static ActionResultBaseClass UpgradeActionResult(object resultValue)   //todo change to base class return and cast in tests and so on
+    public static ActionResultSF UpgradeActionResult(object resultValue)   //todo change to base class return and cast in tests and so on
     {
         Serilog.Log.Verbose("Entered {MethodName} in {ClassName}.", nameof(UpgradeActionResult), nameof(EmberMethods));
 
-        ActionResultBaseClass currentActionResult = (ActionResultBaseClass)resultValue;
+        ActionResultSF currentActionResult = (ActionResultSF)resultValue;
 
         TypeInfo typeInfo = currentActionResult.GetType().GetTypeInfo();
         var attrs = typeInfo.GetCustomAttributes();
@@ -199,7 +200,7 @@ public class EmberMethods
             var nextVersionType = dict[metaDatatVersionAtt];
 
             var uninitializedNextVersion =
-            (ActionResultBaseClass)System.Runtime.CompilerServices.RuntimeHelpers.GetUninitializedObject(nextVersionType);
+            (ActionResultSF)System.Runtime.CompilerServices.RuntimeHelpers.GetUninitializedObject(nextVersionType);
 
             try
             {
@@ -248,13 +249,13 @@ public class EmberMethods
         // GeneratorContext ctx = GetTestingContext();
         return "Gilles";
     }
-    public async Task<GeneratorContext> GetTestingContext<T>(CustomerScript? autoDetectFromScript = null) where T : GeneratorContext
+    public async Task<Ember.Scripting.GeneratorContextSF> GetTestingContext<T>(CustomerScript? autoDetectFromScript = null) where T : Ember.Scripting.GeneratorContextSF
     {
         Serilog.Log.Verbose("Entered {MethodName} in {ClassName}.", nameof(GetTestingContext), nameof(EmberMethods));
         try
         {
             ContextFactory sf = new ContextFactory(Facade);
-            GeneratorContext ctx;
+            Ember.Scripting.GeneratorContextSF ctx;
             var objs = sf.ScriptObjects();
             if (autoDetectFromScript == null)
             {
@@ -276,13 +277,13 @@ public class EmberMethods
                 {
                     throw new Exception(message: "Version int was null, this should not happen.");
                 }
-                ctx = sf.CreateContextForApiV(v);
+                ctx = sf.CreateContextForApiV(GetTestData(), v);
             }
             else
             {
 
                 int v = Facade.BasicValidationBeforeCompiling(autoDetectFromScript.SourceCode!).versionInt;
-                ctx = sf.CreateContextForApiV(v);
+                ctx = sf.CreateContextForApiV(GetTestData(), v);
 
             }
             return ctx;
@@ -350,5 +351,22 @@ public class EmberMethods
         }
 
     }
+    internal (LabOrder labOrder, Patient patient, ConsoleLogger logger, DataAccess testDataAccess,
+    Vaccine vaccine) ScriptObjects()
+    {
+        LabOrder labOrder = new LabOrder("1", "Pediatrics");
+        Patient patient = new Patient("1", "TestFirst", "TestLast", new DateTime(2010, 6, 1, 7, 47, 0), "M");   //mfu
+        ConsoleLogger logger = new ConsoleLogger();
+        DataAccess testDataAccess = new DataAccess();
+        Vaccine vaccine = new Vaccine("Polio", 1, DateTime.UtcNow);
 
+        return (labOrder, patient, logger, testDataAccess, vaccine);
+    }
+
+    internal ActiveDataClass GetTestData()
+    {
+        var obj = ScriptObjects();
+        return new ActiveDataClass(labOrder: obj.labOrder, patient: obj.patient, consoleLogger: obj.logger,
+          dataAccess: obj.testDataAccess, vaccine: obj.vaccine);
+    }
 }

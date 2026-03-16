@@ -4,15 +4,15 @@ using System.Runtime.InteropServices;
 namespace Ember.Scripting;
 
 [MetaDataIGeneratorIntrfc(version: 0, type: TypeInfo.AbstractBaseInSF)]
-public interface IGeneratorBaseInterface
+public interface IGeneratorBaseInterfaceSF
 {
 }
 
 [MetaDataGeneratorClass(version: 0, type: TypeInfo.AbstractBaseInSF)]
-public abstract class GeneratorContext
+public abstract class GeneratorContextSF
 {
-    public abstract GeneratorContext Downgrade();
-    public abstract GeneratorContext CreateUsingData(DataAbstractClass data);
+    public abstract GeneratorContextSF Downgrade();
+    public abstract GeneratorContextSF CreateUsingData(DataAbstractClass data);
 }
 
 public abstract class DataAbstractClass

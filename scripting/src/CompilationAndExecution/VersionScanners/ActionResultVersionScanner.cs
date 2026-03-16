@@ -7,7 +7,7 @@ public static class ActionResultVersionScanner
 {
     public static Dictionary<int, Type> GetClassDictionary()
     {
-        Type baseType = typeof(Ember.Scripting.ActionResultBaseClass);
+        Type baseType = typeof(Ember.Scripting.ActionResultSF);
         return GetBaseTypeDictionary(baseType);
     }
 
@@ -22,7 +22,7 @@ public static class ActionResultVersionScanner
         for (int i = 0; i < subClasses.Count(); i++)
         {
             Type currentType = subClasses[i];
-            var uninitializedContext = (Ember.Scripting.ActionResultBaseClass)System.Runtime.CompilerServices.RuntimeHelpers.GetUninitializedObject(currentType);
+            var uninitializedContext = (Ember.Scripting.ActionResultSF)System.Runtime.CompilerServices.RuntimeHelpers.GetUninitializedObject(currentType);
 
             System.Reflection.TypeInfo typeInfo = uninitializedContext.GetType().GetTypeInfo();
 

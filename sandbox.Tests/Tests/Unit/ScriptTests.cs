@@ -40,7 +40,7 @@ public class ScriptTests
         object resultBeforeUpgrade = await facade.ExecuteScriptById(id, context);
         ActionResultV3.ActionResult result = (ActionResultV3.ActionResult)EmberMethods.UpgradeActionResult(resultBeforeUpgrade);
         string shouldReturn = ActionResultVersionSpecific + "Pediatric tests added";
-        Assert.IsInstanceOfType(result, typeof(ActionResultBaseClass));
+        Assert.IsInstanceOfType(result, typeof(ActionResultSF));
         Assert.IsInstanceOfType(result, typeof(ActionResultV3.ActionResult));
         Assert.IsTrue(result.ToString().Contains(shouldReturn));
 
@@ -55,7 +55,7 @@ public class ScriptTests
         object resultBeforeUpgrade = await facade.ExecuteScriptById(id, context);
         ActionResultV3.ActionResult result = (ActionResultV3.ActionResult)EmberMethods.UpgradeActionResult(resultBeforeUpgrade);
         string shouldReturn = ActionResultVersionSpecific + "Pediatric tests added";
-        Assert.IsInstanceOfType(result, typeof(ActionResultBaseClass));
+        Assert.IsInstanceOfType(result, typeof(ActionResultSF));
         Assert.IsInstanceOfType(result, typeof(ActionResultV3.ActionResult));
         Assert.IsTrue(result.ToString().Contains(shouldReturn));
 
@@ -70,7 +70,7 @@ public class ScriptTests
         object resultBeforeUpgrade = await facade.ExecuteScriptById(id, context);
         ActionResultV3.ActionResult result = (ActionResultV3.ActionResult)EmberMethods.UpgradeActionResult(resultBeforeUpgrade);
         string shouldReturn = ActionResultVersionSpecific + "Pediatric tests added V3";
-        Assert.IsInstanceOfType(result, typeof(ActionResultBaseClass));
+        Assert.IsInstanceOfType(result, typeof(ActionResultSF));
         Assert.IsInstanceOfType(result, typeof(ActionResultV3.ActionResult));
         Assert.IsTrue(result.ToString().Contains(shouldReturn));
 
@@ -84,7 +84,7 @@ public class ScriptTests
         var context = await em!.GetTestingContext<GeneratorContextNoInherVaccineV5.GeneratorContext>(autoDetectFromScript: retrievedScript);
         object result = await facade.ExecuteScriptById(id, context);
         string shouldReturn = ActionResultVersionSpecific + "Polio Vaccine added";
-        Assert.IsInstanceOfType(result, typeof(ActionResultBaseClass));
+        Assert.IsInstanceOfType(result, typeof(ActionResultSF));
         Assert.IsInstanceOfType(result, typeof(ActionResultV3.ActionResult));
         Assert.IsTrue(result.ToString()!.Contains(shouldReturn));
 

@@ -14,7 +14,7 @@ namespace GeneratorScriptsGenericSimple
     {
         Task<bool> EvaluateAsync(TContext context);
         // Task<bool> IGeneratorConditionScript.EvaluateAsync(IGeneratorReadOnlyContext context)
-        Task<bool> IGeneratorConditionScript.EvaluateAsync(IGeneratorBaseInterface context)
+        Task<bool> IGeneratorConditionScript.EvaluateAsync(IGeneratorBaseInterfaceSF context)
         {
             return EvaluateAsync((TContext)context);
         }
@@ -24,11 +24,11 @@ namespace GeneratorScriptsGenericSimple
     where TContext : IGeneratorContext_V2.IGeneratorContext
     {
 
-        Task<ActionResultBaseClass> ExecuteAsync(TContext context);
+        Task<ActionResultSF> ExecuteAsync(TContext context);
 
         //explicit default implementation for the base interface
         // Task<ActionResultBaseClass> IGeneratorActionScript.ExecuteAsync(IGeneratorContext context)
-        Task<ActionResultBaseClass> IGeneratorActionScript.ExecuteAsync(IGeneratorBaseInterface context)
+        Task<ActionResultSF> IGeneratorActionScript.ExecuteAsync(IGeneratorBaseInterfaceSF context)
         {
             return ExecuteAsync((TContext)context);
         }
@@ -42,13 +42,13 @@ namespace GeneratorScriptsGeneric
     /// </summary>
     [MetaDataIGeneratorScript(version: 1, returnType: IGeneratorScriptReturnType.Action, type: IGeneratorScriptType.Generic)]
     public interface IGeneratorActionScript<TContext, TActionResult> : IGeneratorActionScript
-        where TContext : IGeneratorBaseInterface    //changed from IGeneratorContext
-        where TActionResult : ActionResultBaseClass
+        where TContext : IGeneratorBaseInterfaceSF    //changed from IGeneratorContext
+        where TActionResult : ActionResultSF
     {
         Task<TActionResult> ExecuteAsync(TContext context);
 
         //explicit default implementation for the base interface
-        async Task<ActionResultBaseClass> IGeneratorActionScript.ExecuteAsync(IGeneratorBaseInterface context)
+        async Task<ActionResultSF> IGeneratorActionScript.ExecuteAsync(IGeneratorBaseInterfaceSF context)
         {
             return await ExecuteAsync((TContext)context);
         }
@@ -67,7 +67,7 @@ namespace GeneratorScriptsV2
     {
         Task<ActionResultV2.ActionResult> ExecuteAsync(IGeneratorContext_V3.IGeneratorContext context);
 
-        Task<ActionResultBaseClass> Ember.Scripting.IGeneratorActionScript.ExecuteAsync(IGeneratorBaseInterface context)     //if bugs maybe put as async and await ExecuteAsync
+        Task<ActionResultSF> Ember.Scripting.IGeneratorActionScript.ExecuteAsync(IGeneratorBaseInterfaceSF context)     //if bugs maybe put as async and await ExecuteAsync
         {
             return ExecuteAsync(context);
         }
@@ -80,7 +80,7 @@ namespace GeneratorScriptsV3
     {
         Task<ActionResultV3.ActionResult> ExecuteAsync(IGeneratorContext_V4.IGeneratorContext context);
 
-        Task<ActionResultBaseClass> Ember.Scripting.IGeneratorActionScript.ExecuteAsync(IGeneratorBaseInterface context)     //if bugs maybe put as async and await ExecuteAsync
+        Task<ActionResultSF> Ember.Scripting.IGeneratorActionScript.ExecuteAsync(IGeneratorBaseInterfaceSF context)     //if bugs maybe put as async and await ExecuteAsync
         {
             return ExecuteAsync(context);
         }
@@ -93,7 +93,7 @@ namespace GeneratorScriptsV4
     {
         Task<ActionResultV3.ActionResult> ExecuteAsync(IGeneratorContextNoInheritance_V5.IGeneratorContext context);
 
-        Task<ActionResultBaseClass> Ember.Scripting.IGeneratorActionScript.ExecuteAsync(IGeneratorBaseInterface context)     //if bugs maybe put as async and await ExecuteAsync
+        Task<ActionResultSF> Ember.Scripting.IGeneratorActionScript.ExecuteAsync(IGeneratorBaseInterfaceSF context)     //if bugs maybe put as async and await ExecuteAsync
         {
             return ExecuteAsync(context);
         }

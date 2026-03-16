@@ -9,7 +9,10 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 public class SanboxTests
 {
     ISccriptManagerDeleteAfter? facade;
-    // EmberMethods? em;
+    EmberMethods? em;
+    (LabOrder labOrder, Patient patient, ConsoleLogger logger, DataAccess testDataAccess, Vaccine vaccine) obj;
+    // DataV1.MockData? data;
+    DataV2.DataV2? data;
     string? ActionResultVersionSpecific;
     string? sourceCodeActionV1 = TestHelper.GetSC().sourceCodeActionV1;
     string? sourceCodeActionV2 = TestHelper.GetSC().sourceCodeActionV2;
@@ -22,23 +25,29 @@ public class SanboxTests
     public
      void Setup()
     {
+        em = new EmberMethods(facade!);
         ActionResultVersionSpecific = "[Message contains either failure or succes: ] ";
+        obj = em.ScriptObjects();
+        // data = new DataV1.MockData(labOrder: obj.labOrder, patient: obj.patient, consoleLogger: obj.logger,
+        // dataAccess: obj.testDataAccess, vaccine: obj.vaccine);
+        data = new DataV2.DataV2(labOrder: obj.labOrder, patient: obj.patient, consoleLogger: obj.logger,
+                               dataAccess: obj.testDataAccess, vaccine: obj.vaccine);
     }
     [TestMethod]
     public async Task CreateContextTest()
     {
         ContextFactory sf;
-        GeneratorContext ctx;
+        Ember.Scripting.GeneratorContextSF ctx;
 
         facade = EmberMethods.GetNewScriptManagerInstance(1);
         sf = new ContextFactory(facade);
-        ctx = sf.CreateContextForApiV();
+        ctx = sf.CreateContextForApiV(data!);
 
         Assert.IsTrue(ctx.GetType() == typeof(ReadOnlyContextV1.GeneratorContext));
 
         facade = EmberMethods.GetNewScriptManagerInstance(2);
         sf = new ContextFactory(facade);
-        ctx = sf.CreateContextForApiV();
+        ctx = sf.CreateContextForApiV(data!);
 
         Assert.IsTrue(ctx.GetType() == typeof(RWContextV2.GeneratorContext));
 
@@ -47,7 +56,7 @@ public class SanboxTests
 
         Exception ex = await Assert.ThrowsExceptionAsync<Exception>(async () =>  //todo check this one
          {
-             ctx = sf.CreateContextForApiV();
+             ctx = sf.CreateContextForApiV(data!);
          });
         // Assert.IsTrue(ex.Message.Contains("No Context class defined in") && ex.Message.Contains("for the passed API version."));
         Assert.IsTrue(ex.Message.Contains("The version was not found in the Dictionary"));
@@ -172,11 +181,14 @@ public class SanboxTests
         (string className, string baseTypeName, int versionInt) valResult;
 
         facade = EmberMethods.GetNewScriptManagerInstance();
+
         valResult = facade.BasicValidationBeforeCompiling(sourceCodeActionV2!);
         id = await facade.CreateScript(sourceCodeActionV2!);
 
         sf = new ContextFactory(facade);
-        await facade.ExecuteScriptById(id, sf.CreateContextForApiV(valResult.versionInt));
+
+
+        await facade.ExecuteScriptById(id, sf.CreateContextForApiV(data, valResult.versionInt));
 
         for (int i = 0; i < 6; i++)
         {
@@ -185,7 +197,7 @@ public class SanboxTests
             id = await facade.CreateScript(sourceCodeActionV2!);
 
             sf = new ContextFactory(facade);
-            await facade.ExecuteScriptById(id, sf.CreateContextForApiV(valResult.versionInt));
+            await facade.ExecuteScriptById(id, sf.CreateContextForApiV(data, valResult.versionInt));
         }
 
         for (int i = 0; i < 6; i++)
@@ -195,7 +207,7 @@ public class SanboxTests
             id = await facade.CreateScript(sourceCodeVaccineAction!);
 
             sf = new ContextFactory(facade);
-            await facade.ExecuteScriptById(id, sf.CreateContextForApiV(valResult.versionInt));
+            await facade.ExecuteScriptById(id, sf.CreateContextForApiV(data, valResult.versionInt));
         }
         for (int i = 0; i < 6; i++)
         {
@@ -204,7 +216,7 @@ public class SanboxTests
             id = await facade.CreateScript(sourceCodePedia!);
 
             sf = new ContextFactory(facade);
-            await facade.ExecuteScriptById(id, sf.CreateContextForApiV(valResult.versionInt));
+            await facade.ExecuteScriptById(id, sf.CreateContextForApiV(data, valResult.versionInt));
         }
     }
 
@@ -224,7 +236,10 @@ public class SanboxTests
         id = await facade.CreateScript(src!);
 
         sf = new ContextFactory(facade);
-        result = await facade.ExecuteScriptById(id, await sf.CreateByDowngrade(src!));
+        GeneratorContextSF ctx = await sf.CreateByDowngrade(id, data!);
+        Console.WriteLine("Type name: " + ctx.GetType().FullName);
+
+        result = await facade.ExecuteScriptById(id, ctx);
         ar = (ActionResultV3.ActionResult)EmberMethods.UpgradeActionResult(result);
         Console.WriteLine(ar.ToString());
         Assert.IsInstanceOfType(ar, typeof(ActionResultV3.ActionResult));
@@ -234,7 +249,10 @@ public class SanboxTests
         id = await facade.CreateScript(src!);
 
         sf = new ContextFactory(facade);
-        result = await facade.ExecuteScriptById(id, await sf.CreateByDowngrade(src!));
+        ctx = await sf.CreateByDowngrade(id!, data!);
+        Console.WriteLine("Type name: " + ctx.GetType().FullName);
+
+        result = await facade.ExecuteScriptById(id, ctx);
         ar = (ActionResultV3.ActionResult)EmberMethods.UpgradeActionResult(result);
         Console.WriteLine(ar.ToString());
         Assert.IsInstanceOfType(ar, typeof(ActionResultV3.ActionResult));
@@ -244,7 +262,10 @@ public class SanboxTests
         id = await facade.CreateScript(src!);
 
         sf = new ContextFactory(facade);
-        result = await facade.ExecuteScriptById(id, await sf.CreateByDowngrade(src!));
+        ctx = await sf.CreateByDowngrade(id!, data!);
+        Console.WriteLine("Type name: " + ctx.GetType().FullName);
+
+        result = await facade.ExecuteScriptById(id, ctx);
         ar = (ActionResultV3.ActionResult)EmberMethods.UpgradeActionResult(result);
         Console.WriteLine(ar.ToString());
         Assert.IsInstanceOfType(ar, typeof(ActionResultV3.ActionResult));
@@ -254,11 +275,20 @@ public class SanboxTests
         id = await facade.CreateScript(src!);
 
         sf = new ContextFactory(facade);
-        result = await facade.ExecuteScriptById(id, await sf.CreateByDowngrade(src!));
+        ctx = await sf.CreateByDowngrade(id!, data!);
+        Console.WriteLine("Type name: " + ctx.GetType().FullName);
+
+        result = await facade.ExecuteScriptById(id, ctx);
         // ar = EmberMethods.UpgradeActionResult(result);
         Console.WriteLine(result.ToString());
 
         Assert.IsInstanceOfType(result, typeof(bool));
+
+
+        ////////////////////////////////////////////
+        ctx = await sf.CreateByDowngrade(id!, data!);
+        result = await facade.ExecuteScriptById(id, ctx);
+
 
         // Assert.IsTrue(false);
     }

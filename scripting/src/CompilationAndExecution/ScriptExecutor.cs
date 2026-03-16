@@ -16,7 +16,7 @@ internal class ScriptExecutor
         Logger = logger;
     }
 
-    public T RunScriptExecution<T>(byte[] compiledScript, GeneratorContext genContext)
+    public T RunScriptExecution<T>(byte[] compiledScript, GeneratorContextSF genContext)
     {
         Logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(RunScriptExecution), nameof(ScriptExecutor));
         try
@@ -82,7 +82,7 @@ internal class ScriptExecutor
         }
 
     }
-    public bool RunConditionScript(Type type, object scriptInstance, GeneratorContext genContext)
+    public bool RunConditionScript(Type type, object scriptInstance, GeneratorContextSF genContext)
     {
         Logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(RunConditionScript), nameof(ScriptExecutor));
         try
@@ -109,7 +109,7 @@ internal class ScriptExecutor
         }
 
     }
-    public ActionResultBaseClass RunActionScript(Type type, object scriptInstance, GeneratorContext genContext)
+    public ActionResultSF RunActionScript(Type type, object scriptInstance, GeneratorContextSF genContext)
     {
         Logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(RunActionScript), nameof(ScriptExecutor));
         try
@@ -128,7 +128,7 @@ internal class ScriptExecutor
 
             Logger.LogInformation($"Result in 86 sExecuter: {resultValue}");
 
-            return (ActionResultBaseClass)resultValue!;  //this might fail because not baseclass idk, if it does maybe change whole structure to only one function
+            return (ActionResultSF)resultValue!;  //this might fail because not baseclass idk, if it does maybe change whole structure to only one function
         }
         catch (Exception e)
         {

@@ -270,7 +270,7 @@ public class ScriptManagerFacadeTests
         Guid id = await facade!.CreateScript(sourceCodeActionV1!);
         var testingContext = await em!.GetTestingContext<GeneratorContextV4.GeneratorContext>();
 
-        ActionResultBaseClass result = await facade.ExecuteActionScript(id, testingContext);
+        ActionResultSF result = await facade.ExecuteActionScript(id, testingContext);
 
         Assert.IsNotNull(result);
         // Assert.IsTrue(result.IsSuccess);
@@ -281,7 +281,7 @@ public class ScriptManagerFacadeTests
         Guid id2 = await facade.CreateScript(sourceCodePedia!);
         await Assert.ThrowsExceptionAsync<Ember.Scripting.FacadeException>(async () =>
         {
-            ActionResultBaseClass result2 = await facade.ExecuteActionScript(id2, testingContext);
+            ActionResultSF result2 = await facade.ExecuteActionScript(id2, testingContext);
         });
 
     }
@@ -316,7 +316,7 @@ public class ScriptManagerFacadeTests
 
         Guid actId = await facade.CreateScript(sourceCodeActionV1!);
         object actResult = await facade.ExecuteScriptById(actId, context);
-        Assert.IsInstanceOfType(actResult, typeof(ActionResultBaseClass));
+        Assert.IsInstanceOfType(actResult, typeof(ActionResultSF));
         // Assert.IsTrue(((ActionResultBaseClass)actResult).IsSuccess);
     }
 

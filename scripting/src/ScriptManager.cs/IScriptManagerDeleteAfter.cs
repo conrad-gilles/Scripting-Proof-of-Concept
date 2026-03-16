@@ -72,7 +72,7 @@ public interface ISccriptManagerDeleteAfter : IScriptManagerExtended
   /// <param name="context"></param>
   /// <param name="apiVersion"></param>
   /// <returns></returns>
-  Task<ActionResultBaseClass> ExecuteActionScript(Guid scriptId, GeneratorContext context, int? apiVersion = null);
+  Task<ActionResultSF> ExecuteActionScript(Guid scriptId, GeneratorContextSF context, int? apiVersion = null);
 
   /// <summary>
   /// Executes a Generator Condition script and returns boolean result, realisitcally not needed
@@ -81,7 +81,7 @@ public interface ISccriptManagerDeleteAfter : IScriptManagerExtended
   /// <param name="context"></param>
   /// <param name="apiVersion"></param>
   /// <returns></returns>
-  Task<bool> ExecuteConditionScript(Guid scriptId, GeneratorContext context, int? apiVersion = null);
+  Task<bool> ExecuteConditionScript(Guid scriptId, GeneratorContextSF context, int? apiVersion = null);
 
   // /// <summary>
   // /// Generic execution that detects script type automatically

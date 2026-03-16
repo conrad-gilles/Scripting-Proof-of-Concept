@@ -1,5 +1,16 @@
 # Todo
 
+create diffrent data classes for each api version, then you need to pass this data in create below;
+create() needs to somehow be type safe so it throws compile time error
+maybe diffrent create factories for each context version
+
+GeneratorContext ctx=GeneratorContextFactory.Create(data);    no id fro script;
+ExecuteById(id,context)   executes script, calls a facade of facade, in ember that upgradesaction result, and also auto downgrades in previes ctx was not right one.  
+
+- define global using that is somethign like this: using Project = PC.MyCompany.Project;
+- this using will only be used by ember and not by customer scripts because those cant be auto refactored
+
+- make sure that when executing script, the passed context is the correct one, error should be at compile time not run time
 - remove hardcoded paths using ctrl alt f C:\Users\Gilles\Desktop\UNI\Semester 6\Code\Codebase\Scripting-Proof-of-Concept\sandbox\src\Scripts
 - pass data in context so when you execute script(id,context) it gives data to the script //maybe add it to facade instead but idk
 - this data needs to be standardized maybe using something like fluentvalidation idk
@@ -23,3 +34,12 @@
   - ScriptManager downgrades the context until it is of the version defined at the customer
   - ScriptManager executes the script and provides the correctly versioned context
   - ScriptManager upgrades the result returned from the Script to the version of the API Version (so V6)
+
+### How Context should be instantiated and execute called
+- GeneratorContext ctx=GeneratorContextFactory.Create("Laborder");
+- ActionResult result= await facade.executescript< GeneratorContex,ActionResult >(ctx);
+- ActionResult result= await facade.executescript< GeneratorActionScript >(ctx);
+
+### Redefine IGeneratorActionScript so it takes maybe generics
+- somethign like this
+- public interface IGeneratorActionScript< Tcontext,TActionResult >

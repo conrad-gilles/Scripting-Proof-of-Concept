@@ -208,7 +208,7 @@ async Task MainProgramSwitch(IServiceProvider provider)
 
                     case "ExecuteActionScript":
                         scriptId = await em.GetIdInConsoleAsync(fromSrc: true);
-                        ActionResultBaseClass result = await facade.ExecuteActionScript(scriptId, await em.GetTestingContext<GeneratorContextV4.GeneratorContext>());
+                        ActionResultSF result = await facade.ExecuteActionScript(scriptId, await em.GetTestingContext<GeneratorContextV4.GeneratorContext>());
                         Console.WriteLine(result.ToString());   //you could do whatever with it
                         break;
 
@@ -226,7 +226,7 @@ async Task MainProgramSwitch(IServiceProvider provider)
                         {
                             Console.WriteLine("Script returned a bool: " + resultObj.ToString());
                         }
-                        else if (typeof(ActionResultBaseClass).IsAssignableFrom(resultObj.GetType()))
+                        else if (typeof(ActionResultSF).IsAssignableFrom(resultObj.GetType()))
                         {
                             Console.WriteLine("Script returned an ActionResult: " + resultObj.ToString());
                         }
@@ -358,7 +358,7 @@ async Task MainProgramSwitch(IServiceProvider provider)
                         {
                             Console.WriteLine("Script returned a bool: " + resultObj2.ToString());
                         }
-                        else if (typeof(ActionResultBaseClass).IsAssignableFrom(resultObj2.GetType()))
+                        else if (typeof(ActionResultSF).IsAssignableFrom(resultObj2.GetType()))
                         {
                             Console.WriteLine("Script returned an ActionResult: " + resultObj2.ToString());
                         }

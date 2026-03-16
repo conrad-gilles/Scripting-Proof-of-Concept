@@ -227,7 +227,7 @@ EmberMethods.GetEmberApiVersion(testingDiffrentVersion: selectedApiVersion));
             {
                 Console.Log("Script returned a bool: " + resultObj.ToString());
             }
-            else if (typeof(ActionResultBaseClass).IsAssignableFrom(resultObj.GetType()))
+            else if (typeof(ActionResultSF).IsAssignableFrom(resultObj.GetType()))
             {
                 Console.Log("Script returned an ActionResult: " + resultObj.ToString());
             }

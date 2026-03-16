@@ -12,7 +12,7 @@ public class ContextFactory
         ScriptManager = scriptManager;
     }
 
-    public GeneratorContext CreateContextForApiV(int? apiV = null)
+    public Ember.Scripting.GeneratorContextSF CreateContextForApiV(ActiveDataClass data, int? apiV = null)
     {
         if (apiV == null)
         {
@@ -21,16 +21,21 @@ public class ContextFactory
 
         var obj = ScriptObjects();
 
-        MockData data = new MockData(labOrder: obj.labOrder, patient: obj.patient, consoleLogger: obj.logger,
-        dataAccess: obj.testDataAccess, vaccine: obj.vaccine);
-        GeneratorContext ctx = CreateUsingData((int)apiV, data);
+        // MockData data = new MockData(labOrder: obj.labOrder, patient: obj.patient, consoleLogger: obj.logger,
+        // dataAccess: obj.testDataAccess, vaccine: obj.vaccine);
+        Ember.Scripting.GeneratorContextSF ctx = CreateUsingData((int)apiV, data);
 
         return ctx;
     }
-    public async Task<GeneratorContext> CreateByDowngrade(string sourceCode)
-    // public async Task<GeneratorContextV3.GeneratorContext> CreateByDowngrade(string sourceCode)
+    public async Task<Ember.Scripting.GeneratorContextSF> CreateByDowngrade(Guid id, ActiveDataClass data)
+    // public async Task<ActiveGeneratorContext> CreateByDowngrade(string sourceCode)
     {
-        var vali = ScriptManager.BasicValidationBeforeCompiling(sourceCode);
+        CustomerScript script = await ScriptManager.GetScript(id);
+        if (script.SourceCode == null)
+        {
+            throw new Exception();
+        }
+        var vali = ScriptManager.BasicValidationBeforeCompiling(script.SourceCode!);
         int? apiV = null;
         if (apiV == null)
         {
@@ -48,7 +53,7 @@ public class ContextFactory
         recentType = contextVersionMap[(int)apiV];
         Type desiredType = contextVersionMap[vali.versionInt];
         var objs = ScriptObjects();
-        GeneratorContext context = CreateContextForApiV();
+        Ember.Scripting.GeneratorContextSF context = CreateContextForApiV(data);
         int iterations = 0;
         int maxIterations = ContextVersionScanner.GetClassDictionary().Keys.Count() + 3;
         while (recentType != desiredType && iterations <= maxIterations)
@@ -71,11 +76,12 @@ public class ContextFactory
             }
             iterations++;
         }
-        return (GeneratorContext)context;
+        // return (ActiveGeneratorContext)context;
+        return (GeneratorContextSF)context;
     }
-    public static GeneratorContext CreateUsingData(int version, DataAbstractClass data)
+    public static Ember.Scripting.GeneratorContextSF CreateUsingData(int version, ActiveDataClass data)
     {
-        MockData mockData = (MockData)data;
+        ActiveDataClass mockData = (ActiveDataClass)data;
 
         Dictionary<int, Type> retrievedDict = ContextVersionScanner.GetClassDictionary();
         if (retrievedDict.Keys.Contains(version) == false)
@@ -83,7 +89,7 @@ public class ContextFactory
             throw new Exception(message: "The version was not found in the Dictionary");
         }
         Type neededType = retrievedDict[version];
-        GeneratorContext uninitializedContext = (Ember.Scripting.GeneratorContext)RuntimeHelpers.GetUninitializedObject(neededType);
+        Ember.Scripting.GeneratorContextSF uninitializedContext = (Ember.Scripting.GeneratorContextSF)RuntimeHelpers.GetUninitializedObject(neededType);
         var ctx = uninitializedContext.CreateUsingData(data);
         return ctx;
     }

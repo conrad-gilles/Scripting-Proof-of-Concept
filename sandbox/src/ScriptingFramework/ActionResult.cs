@@ -2,7 +2,7 @@ using Ember.Scripting;
 namespace ActionResultV1
 {
     [MetaDataActionResult(version: 1)]
-    public class ActionResult : ActionResultBaseClass
+    public class ActionResult : ActionResultSF
     {
         public bool IsSuccess { get; private set; }
         public string Message { get; private set; }
@@ -32,7 +32,7 @@ namespace ActionResultV1
             return IsSuccess ? $"[Success] {Message}" : $"[Error: {ErrorCode}] {Message}";
         }
 
-        public override ActionResultBaseClass Upgrade(ActionResultBaseClass actionResult)
+        public override ActionResultSF Upgrade(ActionResultSF actionResult)
         {
             throw new NotImplementedException(message: "This can not be implemented because and also should never be called since the verson below this one is abstract.");
         }
@@ -78,7 +78,7 @@ namespace ActionResultV2
             // return new ActionResultV2(isSuccess, message, errorCode, loggedActions);
         }
 
-        public override ActionResultBaseClass Upgrade(ActionResultBaseClass actionResult)
+        public override ActionResultSF Upgrade(ActionResultSF actionResult)
         {
             List<string> loggedActions = [];
 
@@ -94,7 +94,7 @@ namespace ActionResultV2
 namespace ActionResultV3
 {
     [MetaDataActionResult(version: 3)]
-    public class ActionResult : ActionResultBaseClass
+    public class ActionResult : ActionResultSF
     {
         public bool FailedOrNot { get; private set; }
         public string Message { get; private set; }
@@ -136,7 +136,7 @@ namespace ActionResultV3
             return new ActionResult(actionResult.IsSuccess, tempMessage);
         }
 
-        public override ActionResultBaseClass Upgrade(ActionResultBaseClass actionResult)
+        public override ActionResultSF Upgrade(ActionResultSF actionResult)
         {
             if (actionResult is ActionResultV2.ActionResult)
             {

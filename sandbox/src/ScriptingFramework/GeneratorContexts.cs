@@ -7,7 +7,7 @@ using IGeneratorReadOnlyContextV1;
 namespace IGeneratorReadOnlyContextV1
 {
     [MetaDataIGeneratorIntrfc(version: 1)]
-    public interface IGeneratorContext : IGeneratorBaseInterface
+    public interface IGeneratorContext : IGeneratorBaseInterfaceSF
     {
         ILabOrderInterface LabOrder { get; }      // Read current order data
         PatientInterface Patient { get; }     // Read patient data
@@ -49,7 +49,7 @@ namespace IGeneratorContext_V4
 namespace IGeneratorContextNoInheritance_V5
 {
     [MetaDataIGeneratorIntrfc(version: 5)]
-    public interface IGeneratorContext : IGeneratorBaseInterface
+    public interface IGeneratorContext : IGeneratorBaseInterfaceSF
     {
         ILabOrderInterfaceV4NoInheritence LabOrder { get; }
         IVaccineInterface Vaccine { get; }
@@ -64,7 +64,7 @@ namespace IGeneratorContextNoInheritance_V5
 namespace ReadOnlyContextV1
 {
     [MetaDataGeneratorClass(version: 1)]
-    public class GeneratorContext : Ember.Scripting.GeneratorContext, IGeneratorReadOnlyContextV1.IGeneratorContext
+    public class GeneratorContext : Ember.Scripting.GeneratorContextSF, IGeneratorReadOnlyContextV1.IGeneratorContext
     {
         public ILabOrderInterface labOrder;
         public PatientInterface patient;
@@ -86,11 +86,11 @@ namespace ReadOnlyContextV1
         ConsoleLoggerInterface IGeneratorReadOnlyContextV1.IGeneratorContext.Logger => logger;
         DataAccessInterface IGeneratorReadOnlyContextV1.IGeneratorContext.Data => data;
 
-        public override Ember.Scripting.GeneratorContext CreateUsingData(DataAbstractClass data)
+        public override Ember.Scripting.GeneratorContextSF CreateUsingData(DataAbstractClass data)
         {
             try
             {
-                MockData mockData = (MockData)data;
+                ActiveDataClass mockData = (ActiveDataClass)data;
                 if (mockData.LabOrder == null || mockData.Patient == null || mockData.ConsoleLogger == null || mockData.DataAccess == null)
                 {
                     throw new Exception(message: "One of the inserted Parameters in Data was null");
@@ -103,7 +103,7 @@ namespace ReadOnlyContextV1
             }
         }
 
-        public override Ember.Scripting.GeneratorContext Downgrade()
+        public override Ember.Scripting.GeneratorContextSF Downgrade()
         {
             // return null;
             throw new Exception("Can not instaniate the abstract base class.");
@@ -114,7 +114,7 @@ namespace ReadOnlyContextV1
 namespace RWContextV2
 {
     [MetaDataGeneratorClass(version: 2)]
-    public class GeneratorContext : Ember.Scripting.GeneratorContext, IGeneratorContext_V2.IGeneratorContext
+    public class GeneratorContext : Ember.Scripting.GeneratorContextSF, IGeneratorContext_V2.IGeneratorContext
     {
         public ILabOrderRWInterface labOrder;
         public PatientInterface patient;
@@ -141,11 +141,11 @@ namespace RWContextV2
         public DataAccessInterface Data => data;
 
         ILabOrderInterface IGeneratorReadOnlyContextV1.IGeneratorContext.LabOrder => LabOrder;
-        public override Ember.Scripting.GeneratorContext CreateUsingData(DataAbstractClass data)
+        public override Ember.Scripting.GeneratorContextSF CreateUsingData(DataAbstractClass data)
         {
             try
             {
-                MockData mockData = (MockData)data;
+                ActiveDataClass mockData = (ActiveDataClass)data;
                 if (mockData.LabOrder == null || mockData.Patient == null || mockData.ConsoleLogger == null || mockData.DataAccess == null)
                 {
                     throw new Exception(message: "One of the inserted Parameters in Data was null");
@@ -157,7 +157,7 @@ namespace RWContextV2
                 throw new Exception(message: "Something went wrong trying to CreateUsing Data", e);
             }
         }
-        public override Ember.Scripting.GeneratorContext Downgrade()
+        public override Ember.Scripting.GeneratorContextSF Downgrade()
         {
             try
             {
@@ -198,11 +198,11 @@ namespace GeneratorContextV3
         }
         ILabOrderInterfaceV2 IGeneratorContext_V3.IGeneratorContext.LabOrder => labOrderV2;
 
-        public override Ember.Scripting.GeneratorContext CreateUsingData(DataAbstractClass data)
+        public override Ember.Scripting.GeneratorContextSF CreateUsingData(DataAbstractClass data)
         {
             try
             {
-                MockData mockData = (MockData)data;
+                ActiveDataClass mockData = (ActiveDataClass)data;
                 if (mockData.LabOrder == null || mockData.Patient == null || mockData.ConsoleLogger == null || mockData.DataAccess == null)
                 {
                     throw new Exception(message: "One of the inserted Parameters in Data was null");
@@ -215,7 +215,7 @@ namespace GeneratorContextV3
             }
         }
 
-        public override Ember.Scripting.GeneratorContext Downgrade()
+        public override Ember.Scripting.GeneratorContextSF Downgrade()
         {
             try
             {
@@ -256,11 +256,11 @@ namespace GeneratorContextV4
         }
         ILabOrderInterfaceV3 IGeneratorContext_V4.IGeneratorContext.LabOrder => labOrderV3;
 
-        public override Ember.Scripting.GeneratorContext CreateUsingData(DataAbstractClass data)
+        public override Ember.Scripting.GeneratorContextSF CreateUsingData(DataAbstractClass data)
         {
             try
             {
-                MockData mockData = (MockData)data;
+                ActiveDataClass mockData = (ActiveDataClass)data;
                 if (mockData.LabOrder == null || mockData.Patient == null || mockData.ConsoleLogger == null || mockData.DataAccess == null)
                 {
                     throw new Exception(message: "One of the inserted Parameters in Data was null");
@@ -273,7 +273,7 @@ namespace GeneratorContextV4
             }
         }
 
-        public override Ember.Scripting.GeneratorContext Downgrade()
+        public override Ember.Scripting.GeneratorContextSF Downgrade()
         {
             try
             {
@@ -294,7 +294,7 @@ namespace GeneratorContextV4
 namespace GeneratorContextNoInherVaccineV5
 {
     [MetaDataGeneratorClass(version: 5)]
-    public class GeneratorContext : Ember.Scripting.GeneratorContext, IGeneratorContextNoInheritance_V5.IGeneratorContext   //into diffrent namespaces blocks later folders
+    public class GeneratorContext : Ember.Scripting.GeneratorContextSF, IGeneratorContextNoInheritance_V5.IGeneratorContext   //into diffrent namespaces blocks later folders
     {
         ILabOrderInterfaceV4NoInheritence LabOrder;
         IVaccineInterface Vaccine;
@@ -308,11 +308,11 @@ namespace GeneratorContextNoInherVaccineV5
 
         IVaccineInterface IGeneratorContextNoInheritance_V5.IGeneratorContext.Vaccine => Vaccine;
 
-        public override Ember.Scripting.GeneratorContext CreateUsingData(DataAbstractClass data)
+        public override Ember.Scripting.GeneratorContextSF CreateUsingData(DataAbstractClass data)
         {
             try
             {
-                MockData mockData = (MockData)data;
+                ActiveDataClass mockData = (ActiveDataClass)data;
                 if (mockData.LabOrder == null || mockData.Vaccine == null)
                 {
                     throw new Exception(message: "One of the inserted Parameters in Data was null");
@@ -325,7 +325,7 @@ namespace GeneratorContextNoInherVaccineV5
             }
         }
 
-        public override Ember.Scripting.GeneratorContext Downgrade()
+        public override Ember.Scripting.GeneratorContextSF Downgrade()
         {
             try
             {
