@@ -1,5 +1,8 @@
 # Todo
 
+hard coded connection string still need to fix
+create composite primary key from name and type of script (condition action)
+
 create diffrent data classes for each api version, then you need to pass this data in create below;
 create() needs to somehow be type safe so it throws compile time error
 maybe diffrent create factories for each context version

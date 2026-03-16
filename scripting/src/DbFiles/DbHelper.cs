@@ -5,6 +5,7 @@ using Ember.Scripting;
 using Microsoft.Extensions.Logging;
 using Microsoft.CodeAnalysis.Scripting;
 using System.ComponentModel;
+using System.Runtime.CompilerServices;
 namespace Ember.Scripting;
 
 internal class DbHelper
@@ -538,7 +539,27 @@ internal class DbHelper
         // }
     }
 
-
+    public async Task<Guid> GetScriptId(string scriptName, ScriptTypes scriptType)
+    {
+        Logger.LogTrace("Entered {MethodName} in {ClassName} with Name: {ScriptId}.", nameof(GetCustomerScript), nameof(DbHelper), scriptName);
+        string sScriptType;
+        switch (scriptType)
+        {
+            case ScriptTypes.GeneratorActionScript:
+                sScriptType = "IGeneratorActionScript";
+                break;
+            case ScriptTypes.GeneratorConditionScript:
+                sScriptType = "IGeneratorConditionScript";
+                break;
+            default:
+                throw new DbHelperException(message: "Could not convert Script type enum to string");
+        }
+        using (var db = new MyContext())
+        {
+            var script = await db.CustomerScripts.SingleAsync(b => b.ScriptName == scriptName && b.ScriptType == sScriptType);
+            return script.Id;
+        }
+    }
     public async Task CompileAllStoredScripts(int currentApiVersion)
     {
         Logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(CompileAllStoredScripts), nameof(DbHelper));

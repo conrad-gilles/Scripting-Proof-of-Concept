@@ -21,6 +21,16 @@ internal class EmberInternalFacade
         return ar;
     }
 
+    public async Task<ActiveActionResult> ExecuteScriptByNameAndType(string Name, ScriptTypes scriptType, ActiveGeneratorContext ctx)
+    {
+        Guid id = await ScriptManager.GetScriptId(Name, scriptType);
+        var cf = new ContextFactory(ScriptManager);
+        GeneratorContextSF context = await cf.CreateByDowngrade(id, ctx);
+        var result = await ScriptManager.ExecuteScriptById(id, context);
+        ActiveActionResult ar = (ActiveActionResult)EmberMethods.UpgradeActionResult(result);
+        return ar;
+    }
+
     public ActiveGeneratorContext CreateContext(ILabOrderInterfaceV4NoInheritence labOrder, IVaccineInterface vaccine)
     {
         ActiveGeneratorContext ctx = new ActiveGeneratorContext(labOrder: labOrder, vaccine: vaccine);

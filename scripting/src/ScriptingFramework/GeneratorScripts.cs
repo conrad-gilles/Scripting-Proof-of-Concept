@@ -15,3 +15,8 @@ public interface IGeneratorActionScript
     // Task<ActionResultBaseClass> ExecuteAsync(IGeneratorContext context);
     Task<ActionResultSF> ExecuteAsync(IGeneratorBaseInterfaceSF context);
 }
+
+public enum ScriptTypes
+{
+    GeneratorConditionScript, GeneratorActionScript
+}

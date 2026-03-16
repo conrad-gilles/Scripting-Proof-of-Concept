@@ -47,6 +47,37 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
 
     }
 
+    public async Task<(string Name, ScriptTypes ScriptType)> CreateScript2(string sourceCode, string userName = "Default", int? apiVersion = null, DateTime? createdAt = null, bool checkForDuplicates = false)
+    {
+        Logger.LogDebug("Entered {MethodName} in {ClassName} apiVersion: {apiVersion}.", nameof(CreateScript2), nameof(ScriptManagerFacade), apiVersion);
+
+        int currentApiVersion = GetRunningApiVersion();
+        Guid id = Guid.NewGuid();
+        CustomerScript? script = null;
+
+        if (apiVersion == null)
+        {
+            script = await Db.CreateAndInsertCustomerScript(sourceCode, id, userName, createdAt: createdAt, checkForDuplicates: checkForDuplicates);
+        }
+        else
+        {
+            script = await Db.CreateAndInsertCustomerScript(sourceCode, id, userName, (int)apiVersion, createdAt: createdAt, checkForDuplicates: checkForDuplicates);
+        }
+        ScriptTypes sType;
+        switch (script.ScriptType)
+        {
+            case "IGeneratorActionScript":
+                sType = ScriptTypes.GeneratorActionScript;
+                break;
+            case "IGeneratorConditionScript":
+                sType = ScriptTypes.GeneratorConditionScript;
+                break;
+            default:
+                throw new Exception(message: "Could not assign baseTypeName");
+        }
+        return (Name: script.ScriptName!, ScriptType: sType);
+    }
+
     // Updates existing script source code and recompiles for all compatible API versions
     public async Task UpdateScript(Guid scriptId, string newSourceCode, string? userName = null, int? apiVersion = null)
     {
@@ -330,6 +361,43 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
         }
     }
 
+    public async Task<object> ExecuteScriptByNameAndType(string Name, ScriptTypes scriptType, GeneratorContextSF context, int? apiVersion = null)
+    {
+        Logger.LogTrace("Entered {MethodName} in {ClassName} with scriptName: {ScriptId}.", nameof(ExecuteScriptByNameAndType), nameof(ScriptManagerFacade), Name);
+        try
+        {
+            Guid scriptId = await Db.GetScriptId(Name, scriptType);
+            if (apiVersion == null)
+            {
+                apiVersion = GetRunningApiVersion();
+            }
+            byte[]? compiledScript = null;
+            try
+            {
+                var temp = await Db.GetCompiledScripCache(scriptId, (int)apiVersion);
+                compiledScript = temp.AssemblyBytes;
+            }
+            catch (Exception e)
+            {
+                Logger.LogError("Retrieval failed jit comp launched:" + e.ToString());
+                await CompileScript(scriptId, GetRunningApiVersion());
+                //try again, if fails again we catch error outside
+                var temp = await Db.GetCompiledScripCache(scriptId, (int)apiVersion);
+                compiledScript = temp.AssemblyBytes;
+            }
+
+            //possibly add a null check for compiledScript
+            // ScriptExecutor executor = new ScriptExecutor();
+            object result = Executor.RunScriptExecution<object>(compiledScript!, context);  //returns either bool or action result todo maybe add checks if thats the case but normally should be
+            return result;
+        }
+        catch (Exception e)
+        {
+            Logger.LogError(e.ToString());
+            throw;
+        }
+    }
+
     #endregion
 
     #region Cache Management
@@ -517,6 +585,11 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
         CustomerScript script = await Db.GetCustomerScript(scriptId, includeCaches: true);
         string str = "Metadata for script: " + script.ToString();
         return str;
+    }
+
+    public async Task<Guid> GetScriptId(string scriptName, ScriptTypes scriptType)
+    {
+        return await Db.GetScriptId(scriptName, scriptType);
     }
 
     public async Task<Dictionary<int, List<ScriptCompiledCache>>> GetCachesForEachApiVersion()

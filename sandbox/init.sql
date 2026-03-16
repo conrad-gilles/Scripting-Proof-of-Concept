@@ -2,14 +2,14 @@
 CREATE TABLE customer_scripts (
     id UUID PRIMARY KEY,
     script_name VARCHAR(100),
-    script_type VARCHAR(50),
-    -- 'GeneratorCondition', 'GeneratorAction'
+    script_type VARCHAR(50),    -- 'GeneratorCondition', 'GeneratorAction'
     source_code TEXT NOT NULL,
     min_api_version INT NOT NULL,
     -- From [ScriptMetadata] attribute
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     modified_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     created_by VARCHAR(100)
+    -- PRIMARY KEY (script_name,script_type)
 );
 -- Compiled versions per API
 CREATE TABLE script_compiled_cache (

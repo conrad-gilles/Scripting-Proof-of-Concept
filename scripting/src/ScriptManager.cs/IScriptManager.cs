@@ -10,6 +10,8 @@ public interface IScriptManager
     /// <param name="currentApiVersion"></param>
     /// <returns></returns>
     Task<object> ExecuteScriptById(Guid scriptId, GeneratorContextSF context, int? currentApiVersion = null);
+
+    Task<object> ExecuteScriptByNameAndType(string Name, ScriptTypes scriptType, GeneratorContextSF context, int? currentApiVersion = null);
 }
 
 

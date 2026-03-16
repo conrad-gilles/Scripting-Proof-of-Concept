@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Ember.Scripting;
 
+// [Microsoft.EntityFrameworkCore.PrimaryKey(nameof(ScriptName), nameof(ScriptType))]
 [Table("customer_scripts")]
 public class CustomerScript
 {
@@ -50,7 +51,9 @@ public class CustomerScript
 
     public override string ToString()
     {
-        string str = "ID: " + Id.ToString() + "@" + "Script Name: " + ScriptName + "@" + "Script Type: "
+        string str =
+        "ID: " + Id.ToString() +
+        "@" + "Script Name: " + ScriptName + "@" + "Script Type: "
         + ScriptType + "@"
         + "Source Code: " + SourceCode
         + "@" + "MinApiVersion: "
