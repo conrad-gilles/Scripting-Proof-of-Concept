@@ -59,7 +59,7 @@ public interface ISccriptManagerDeleteAfter : IScriptManagerExtended
   /// </summary>
   /// <param name="script"></param>
   /// <returns></returns>
-  (string className, string baseTypeName, int versionInt) BasicValidationBeforeCompiling(string script);
+  ValidationRecord BasicValidationBeforeCompiling(string script);
 
   INamedTypeSymbol GetBaseType(string script);
 

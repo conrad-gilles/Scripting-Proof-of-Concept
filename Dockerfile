@@ -2,7 +2,7 @@
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 WORKDIR /src
 
-# Copy the project files first (this helps Docker cache dependencies)
+# Copy the project files first (this helps Docker cache dependencies)   probably add the sandbox but also make sure the paths are secure and not buggy
 COPY ["BlazorUI/BlazorUI.csproj", "BlazorUI/"]
 COPY ["scripting/scripting.csproj", "scripting/"]
 

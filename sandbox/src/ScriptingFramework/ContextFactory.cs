@@ -52,7 +52,7 @@ public class ContextFactory
             // recentType = contextVersionMap.Last().Value;
         }
         recentType = contextVersionMap[(int)apiV];
-        Type desiredType = contextVersionMap[vali.versionInt];
+        Type desiredType = contextVersionMap[vali.Version];
         var objs = ScriptObjects();
         // Ember.Scripting.GeneratorContextSF context = CreateContextForApiV(data);
         Ember.Scripting.GeneratorContextSF context = ctx;

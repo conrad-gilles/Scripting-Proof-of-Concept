@@ -122,55 +122,55 @@ public class SanboxTests
     public void BasicValidationTestUsingGetDictionary()
     {
         facade = EmberMethods.GetNewScriptManagerInstance();
-        (string className, string baseTypeName, int versionInt) valResult = facade.BasicValidationBeforeCompiling(sourceCodeActionV2!);
+        ValidationRecord valResult = facade.BasicValidationBeforeCompiling(sourceCodeActionV2!);
 
-        Console.WriteLine(nameof(valResult.baseTypeName) + " : " + valResult.baseTypeName);
-        Console.WriteLine(nameof(valResult.className) + " : " + valResult.className);
-        Console.WriteLine(nameof(valResult.versionInt) + " : " + valResult.versionInt);
+        Console.WriteLine(nameof(valResult.BaseTypeName) + " : " + valResult.BaseTypeName);
+        Console.WriteLine(nameof(valResult.ClassName) + " : " + valResult.ClassName);
+        Console.WriteLine(nameof(valResult.Version) + " : " + valResult.Version);
 
-        Assert.IsTrue(valResult.baseTypeName == "IGeneratorActionScript");
-        Assert.IsTrue(valResult.className == "AddPediatricTestsV3");
-        Assert.IsTrue(valResult.versionInt == 3);
+        Assert.IsTrue(valResult.BaseTypeName == "IGeneratorActionScript");
+        Assert.IsTrue(valResult.ClassName == "AddPediatricTestsV3");
+        Assert.IsTrue(valResult.Version == 3);
 
         valResult = facade.BasicValidationBeforeCompiling(sourceCodeActionV1!);
 
-        Console.WriteLine(nameof(valResult.baseTypeName) + " : " + valResult.baseTypeName);
-        Console.WriteLine(nameof(valResult.className) + " : " + valResult.className);
-        Console.WriteLine(nameof(valResult.versionInt) + " : " + valResult.versionInt);
+        Console.WriteLine(nameof(valResult.BaseTypeName) + " : " + valResult.BaseTypeName);
+        Console.WriteLine(nameof(valResult.ClassName) + " : " + valResult.ClassName);
+        Console.WriteLine(nameof(valResult.Version) + " : " + valResult.Version);
 
-        Assert.IsTrue(valResult.baseTypeName == "IGeneratorActionScript");
-        Assert.IsTrue(valResult.className == "AddPediatricTestsV2");
-        Assert.IsTrue(valResult.versionInt == 2);
+        Assert.IsTrue(valResult.BaseTypeName == "IGeneratorActionScript");
+        Assert.IsTrue(valResult.ClassName == "AddPediatricTestsV2");
+        Assert.IsTrue(valResult.Version == 2);
 
         valResult = facade.BasicValidationBeforeCompiling(sourceCodeActionV3!);
 
-        Console.WriteLine(nameof(valResult.baseTypeName) + " : " + valResult.baseTypeName);
-        Console.WriteLine(nameof(valResult.className) + " : " + valResult.className);
-        Console.WriteLine(nameof(valResult.versionInt) + " : " + valResult.versionInt);
+        Console.WriteLine(nameof(valResult.BaseTypeName) + " : " + valResult.BaseTypeName);
+        Console.WriteLine(nameof(valResult.ClassName) + " : " + valResult.ClassName);
+        Console.WriteLine(nameof(valResult.Version) + " : " + valResult.Version);
 
-        Assert.IsTrue(valResult.baseTypeName == "IGeneratorActionScript");
-        Assert.IsTrue(valResult.className == "AddPediatricTestsV4");
-        Assert.IsTrue(valResult.versionInt == 4);
+        Assert.IsTrue(valResult.BaseTypeName == "IGeneratorActionScript");
+        Assert.IsTrue(valResult.ClassName == "AddPediatricTestsV4");
+        Assert.IsTrue(valResult.Version == 4);
 
         valResult = facade.BasicValidationBeforeCompiling(sourceCodeVaccineAction!);
 
-        Console.WriteLine(nameof(valResult.baseTypeName) + " : " + valResult.baseTypeName);
-        Console.WriteLine(nameof(valResult.className) + " : " + valResult.className);
-        Console.WriteLine(nameof(valResult.versionInt) + " : " + valResult.versionInt);
+        Console.WriteLine(nameof(valResult.BaseTypeName) + " : " + valResult.BaseTypeName);
+        Console.WriteLine(nameof(valResult.ClassName) + " : " + valResult.ClassName);
+        Console.WriteLine(nameof(valResult.Version) + " : " + valResult.Version);
 
-        Assert.IsTrue(valResult.baseTypeName == "IGeneratorActionScript");
-        Assert.IsTrue(valResult.className == "VaccineScript");
-        Assert.IsTrue(valResult.versionInt == 5);
+        Assert.IsTrue(valResult.BaseTypeName == "IGeneratorActionScript");
+        Assert.IsTrue(valResult.ClassName == "VaccineScript");
+        Assert.IsTrue(valResult.Version == 5);
 
         valResult = facade.BasicValidationBeforeCompiling(sourceCodePedia!);
 
-        Console.WriteLine(nameof(valResult.baseTypeName) + " : " + valResult.baseTypeName);
-        Console.WriteLine(nameof(valResult.className) + " : " + valResult.className);
-        Console.WriteLine(nameof(valResult.versionInt) + " : " + valResult.versionInt);
+        Console.WriteLine(nameof(valResult.BaseTypeName) + " : " + valResult.BaseTypeName);
+        Console.WriteLine(nameof(valResult.ClassName) + " : " + valResult.ClassName);
+        Console.WriteLine(nameof(valResult.Version) + " : " + valResult.Version);
 
-        Assert.IsTrue(valResult.baseTypeName == "IGeneratorConditionScript");
-        Assert.IsTrue(valResult.className == "PediatricCondition");
-        Assert.IsTrue(valResult.versionInt == 1);
+        Assert.IsTrue(valResult.BaseTypeName == "IGeneratorConditionScript");
+        Assert.IsTrue(valResult.ClassName == "PediatricCondition");
+        Assert.IsTrue(valResult.Version == 1);
 
         // Assert.IsTrue(false);
 
@@ -181,7 +181,7 @@ public class SanboxTests
     {
         Guid id;
         ContextFactory sf;
-        (string className, string baseTypeName, int versionInt) valResult;
+        ValidationRecord valResult;
 
         facade = EmberMethods.GetNewScriptManagerInstance();
 
@@ -191,7 +191,7 @@ public class SanboxTests
         sf = new ContextFactory(facade);
 
 
-        await facade.ExecuteScriptById(id, sf.CreateContextForApiV(data!, valResult.versionInt));
+        await facade.ExecuteScriptById(id, sf.CreateContextForApiV(data!, valResult.Version));
         valResult = facade.BasicValidationBeforeCompiling(sourceCodeActionV2!);
 
         id = await facade.CreateScript(sourceCodeActionV2!);
@@ -207,7 +207,7 @@ public class SanboxTests
             sf = new ContextFactory(facade);
             // await facade.ExecuteScriptById(id, sf.CreateContextForApiV(data!, valResult.versionInt));
             Console.WriteLine("Running API version: " + facade.GetRunningApiVersion());
-            await facade.ExecuteScriptById(id, sf.CreateContextForApiV(data!, valResult.versionInt));
+            await facade.ExecuteScriptById(id, sf.CreateContextForApiV(data!, valResult.Version));
         }
 
         valResult = facade.BasicValidationBeforeCompiling(sourceCodeVaccineAction!);
@@ -216,7 +216,7 @@ public class SanboxTests
         {
             facade = EmberMethods.GetNewScriptManagerInstance(i);
             sf = new ContextFactory(facade);
-            await facade.ExecuteScriptById(id, sf.CreateContextForApiV(data!, valResult.versionInt));
+            await facade.ExecuteScriptById(id, sf.CreateContextForApiV(data!, valResult.Version));
         }
 
         valResult = facade.BasicValidationBeforeCompiling(sourceCodePedia!);
@@ -225,7 +225,7 @@ public class SanboxTests
         {
             facade = EmberMethods.GetNewScriptManagerInstance(i);
             sf = new ContextFactory(facade);
-            await facade.ExecuteScriptById(id, sf.CreateContextForApiV(data!, valResult.versionInt));
+            await facade.ExecuteScriptById(id, sf.CreateContextForApiV(data!, valResult.Version));
         }
     }
 
@@ -237,7 +237,7 @@ public class SanboxTests
 
         Guid id;
         ContextFactory sf;
-        (string className, string baseTypeName, int versionInt) valResult;
+        ValidationRecord valResult;
         object result;
         ActionResultV3.ActionResult ar;
         string src;

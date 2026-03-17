@@ -253,7 +253,7 @@ public class EmberVersioningTests
         Guid id;
         id = await facade!.CreateScript(sourceCodeActionV2!);
         var vali = facade.BasicValidationBeforeCompiling(sourceCodeActionV2!);
-        int desiredContextVersion = vali.versionInt;
+        int desiredContextVersion = vali.Version;
 
         Console.WriteLine(nameof(desiredContextVersion) + ": " + desiredContextVersion);
 
@@ -291,7 +291,7 @@ public class EmberVersioningTests
         Guid id;
         id = await facade!.CreateScript(sourceCodeActionV2!);
         var vali = facade.BasicValidationBeforeCompiling(sourceCodeActionV2!);
-        int desiredContextVersion = vali.versionInt;
+        int desiredContextVersion = vali.Version;
 
         await Assert.ThrowsExceptionAsync<Exception>(async () =>
         {

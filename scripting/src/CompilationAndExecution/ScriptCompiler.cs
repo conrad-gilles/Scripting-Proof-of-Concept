@@ -23,7 +23,7 @@ internal class ScriptCompiler
         ReferencesRO = referencesRO;
         Logger = logger;
     }
-    public byte[] RunCompilation(string script, int? apiVersion = null, (string className, string baseTypeName, int versionInt)? metaData = null) //references param there to enable later on users to define custom references
+    public byte[] RunCompilation(string script, int? apiVersion = null, ValidationRecord? metaData = null) //references param there to enable later on users to define custom references
     {
         try
         {
@@ -34,7 +34,7 @@ internal class ScriptCompiler
             Logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(RunCompilation), nameof(ScriptCompiler));
             if (metaData != null)
             {
-                Logger.LogTrace("Trying to compile script:" + metaData.Value.className);
+                Logger.LogTrace("Trying to compile script:" + metaData.ClassName);
             }
 
             //Takes C# source string and turns it into a "Roslyn parsed syntax tree representation" of a normal C# file
@@ -109,7 +109,7 @@ internal class ScriptCompiler
         var baseType = myClassSymbol!.BaseType!;
         return baseType;
     }
-    public (string className, string baseTypeName, int versionInt) BasicValidationBeforeCompiling(string script)//record
+    public ValidationRecord BasicValidationBeforeCompiling(string script)//record
     {
         Logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(BasicValidationBeforeCompiling), nameof(ScriptCompiler));
         try
@@ -194,7 +194,14 @@ internal class ScriptCompiler
             Logger.LogTrace("Version Int = " + versionInt);
 
             ValidateNamespaceUsage(tree, model);
-            return (className, baseTypeName, (int)versionInt!);
+            ValidationRecord returnedRecord = new ValidationRecord
+            {
+                ClassName = className,
+                BaseTypeName = baseTypeName,
+                Version = (int)versionInt
+            };
+            return returnedRecord;
+            // return (className, baseTypeName, (int)versionInt!);
         }
         catch (Exception e)
         {
@@ -322,4 +329,12 @@ internal class ScriptCompiler
 
         return references;
     }
+}
+
+
+public record ValidationRecord
+{
+    public required string ClassName { get; init; }
+    public required string BaseTypeName { get; init; }
+    public required int Version { get; init; }
 }

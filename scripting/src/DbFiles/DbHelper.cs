@@ -270,10 +270,10 @@ internal class DbHelper
             CustomerScript randomTestScript2 = new CustomerScript
             {
                 Id = randomGUID,
-                ScriptName = getTupleFromVal.className,
-                ScriptType = getTupleFromVal.baseTypeName,
+                ScriptName = getTupleFromVal.ClassName,
+                ScriptType = getTupleFromVal.BaseTypeName,
                 SourceCode = scriptString,
-                MinApiVersion = getTupleFromVal.versionInt,
+                MinApiVersion = getTupleFromVal.Version,
                 CreatedAt = createdAt,
                 ModifiedAt = DateTime.UtcNow,
                 CreatedBy = createdBy
@@ -314,9 +314,9 @@ internal class DbHelper
 
             if (await db.ScriptCompiledCaches.AnyAsync(c => c.ScriptId == script.Id && c.ApiVersion == apiV))
             {
-                Logger.LogInformation("Skipping insert of: " + getTupleFromVal.className + " because it already exists already exists.");
-                Console.WriteLine("Skipping insert of: " + getTupleFromVal.className + " because it already exists already exists.");
-                throw new DbHelperException(nameof(CreateAndInsertCompiledCache) + " failed in " + nameof(DbHelper) + "more details: " + "Skipping insert of: " + getTupleFromVal.className + " because it already exists already exists."); ;
+                Logger.LogInformation("Skipping insert of: " + getTupleFromVal.ClassName + " because it already exists already exists.");
+                Console.WriteLine("Skipping insert of: " + getTupleFromVal.ClassName + " because it already exists already exists.");
+                throw new DbHelperException(nameof(CreateAndInsertCompiledCache) + " failed in " + nameof(DbHelper) + "more details: " + "Skipping insert of: " + getTupleFromVal.ClassName + " because it already exists already exists."); ;
                 // return;
             }
             else

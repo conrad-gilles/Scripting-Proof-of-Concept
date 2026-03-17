@@ -282,7 +282,7 @@ public class EmberMethods
             else
             {
 
-                int v = Facade.BasicValidationBeforeCompiling(autoDetectFromScript.SourceCode!).versionInt;
+                int v = Facade.BasicValidationBeforeCompiling(autoDetectFromScript.SourceCode!).Version;
                 ctx = sf.CreateContextForApiV(GetTestData(), v);
 
             }

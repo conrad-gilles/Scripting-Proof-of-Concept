@@ -60,5 +60,11 @@
     <ItemGroup>
         <InternalsVisibleTo Include="sandbox.Tests" />
     </ItemGroup>
+    <ItemGroup>
+  <None Update="src\Scripts\**\*.cs">
+    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+  </None>
+</ItemGroup>
+
 
 </Project>

@@ -166,9 +166,9 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
         try
         {
             var validation = Compiler.BasicValidationBeforeCompiling(sourceCode);
-            string className = validation.className;    //figure out if i should do something with this
-            string baseTypeName = validation.baseTypeName;
-            int versionInt = validation.versionInt;
+            string className = validation.ClassName;    //figure out if i should do something with this
+            string baseTypeName = validation.BaseTypeName;
+            int versionInt = validation.Version;
 
             return "Success: ClassName: " + className + ", BaseTypeName: " + baseTypeName + ", VersionInt: " + versionInt;
         }
@@ -186,7 +186,7 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
         Logger.LogTrace("Entered {MethodName} in {ClassName} with scriptId: {ScriptId}.", nameof(GetCompilationErrors), nameof(ScriptManagerFacade), scriptId);
         try
         {
-            (string className, string baseTypeName, int versionInt)? metaData = null;
+            ValidationRecord? metaData = null;
             CustomerScript script;
             string sourceCode;
 
@@ -220,7 +220,7 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
         }
     }
 
-    public (string className, string baseTypeName, int versionInt) BasicValidationBeforeCompiling(string script)
+    public ValidationRecord BasicValidationBeforeCompiling(string script)
     {
         return Compiler.BasicValidationBeforeCompiling(script);
     }
