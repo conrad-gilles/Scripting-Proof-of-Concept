@@ -14,7 +14,7 @@ COPY . .
 
 # Build and publish the BlazorUI app
 WORKDIR "/src/BlazorUI"
-RUN dotnet publish "BlazorUI.csproj" -c Release -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "BlazorUI.csproj" -c Release -o /app/publish /p:UseAppHost=false /p:NoWarn=NU1605
 
 # Stage 2: Run the app
 FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS final
