@@ -1,9 +1,10 @@
 using Ember.Scripting;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
 
 namespace EFModeling.EntityProperties.FluentAPI.Required;
 
-public class MyContext : DbContext
+public class MyContext : DbContext, IDataProtectionKeyContext
 {
     public MyContext(DbContextOptions<MyContext> options) : base(options)
     {
@@ -12,6 +13,7 @@ public class MyContext : DbContext
     {
     }
 
+    public DbSet<DataProtectionKey> DataProtectionKeys { get; set; } = null!;
     public DbSet<CustomerScript> CustomerScripts { get; set; }
     public DbSet<ScriptCompiledCache> ScriptCompiledCaches { get; set; }
     public DbSet<EmberInstance> EmberInstances { get; set; }
