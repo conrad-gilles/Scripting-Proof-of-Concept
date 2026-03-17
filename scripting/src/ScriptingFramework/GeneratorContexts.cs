@@ -15,6 +15,10 @@ public abstract class GeneratorContextSF
     public abstract GeneratorContextSF CreateUsingData(DataAbstractClass data);
 }
 
+public interface IContextFactory
+{
+    public static abstract GeneratorContextSF Create(IServiceProvider serviceProvider);
+}
 public abstract class DataAbstractClass
 {
 

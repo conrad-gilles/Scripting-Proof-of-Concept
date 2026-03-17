@@ -1,5 +1,13 @@
 # Todo
 
+store v1 of action scripts maybe in hitory not in diffrent file
+
+ create factories and cleanup
+
+ public async Task<ActiveActionResult> ExecuteScriptByNameAndType(string Name, ScriptTypes scriptType, ActiveGeneratorContext ctx) //maybe make generic
+
+ make basicVal return record or class
+
 add update cache method to db helper and then also to  scriptmanager
 
 improve isduplicate function in db helper to add semantic treee check to see if no script in db has same tree?: this would be unnessecary if class name enforced as scriptname

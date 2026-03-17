@@ -109,7 +109,7 @@ internal class ScriptCompiler
         var baseType = myClassSymbol!.BaseType!;
         return baseType;
     }
-    public (string className, string baseTypeName, int versionInt) BasicValidationBeforeCompiling(string script)
+    public (string className, string baseTypeName, int versionInt) BasicValidationBeforeCompiling(string script)//record
     {
         Logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(BasicValidationBeforeCompiling), nameof(ScriptCompiler));
         try

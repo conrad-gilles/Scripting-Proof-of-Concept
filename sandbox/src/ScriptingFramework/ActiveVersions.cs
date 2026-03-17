@@ -4,3 +4,4 @@ global using ActiveGeneratorContext = GeneratorContextNoInherVaccineV5.Generator
 global using ActiveIGeneratorConditionScript = GeneratorScriptsGenericSimple.IGeneratorConditionScript<IGeneratorReadOnlyContextV1.IGeneratorContext>;
 global using ActiveIGeneratorActionScript = GeneratorScriptsV4.IGeneratorActionScript;
 global using ActiveDataClass = DataV2.DataV2;
+global using ActiveContextFactory = GeneratorContextNoInherVaccineV5.ContextFactory;

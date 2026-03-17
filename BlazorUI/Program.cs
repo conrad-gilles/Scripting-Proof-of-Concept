@@ -1,6 +1,7 @@
 using BlazorUI.Components;
 using Ember.Scripting;
 using BlazorUI.Services;
+using Microsoft.EntityFrameworkCore;
 // using sandbox; // only if RandomMethods is in the sandbox project/namespace
 
 
@@ -14,10 +15,20 @@ builder.Services.AddRazorComponents()
 var references = EmberMethods.GetReferences();
 int version = EmberMethods.GetEmberApiVersion();
 builder.Services.AddEmberScripting(references, version);
+builder.Services.AddDbContext<EFModeling.EntityProperties.FluentAPI.Required.MyContext>();
+
 
 builder.Services.AddScoped<ConsoleService>();
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<EFModeling.EntityProperties.FluentAPI.Required.MyContext>();
+
+    // This will look for the Migrations folder and apply them to Neon automatically
+    db.Database.Migrate();
+}
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

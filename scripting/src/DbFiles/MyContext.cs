@@ -28,8 +28,18 @@ public class MyContext : DbContext
     {
         if (optionsBuilder.IsConfigured == false)
         {
-            optionsBuilder.UseNpgsql(
-            @"Host=localhost;Port=5432;Database=script_registry;Username=admin;Password=your_secure_password");
+            // 1. Try to get the connection string from Koyeb's environment variables
+            var connectionString = Environment.GetEnvironmentVariable("DATABASE_URL");
+
+            // 2. If it is null or empty (meaning you are running locally), fall back to localhost
+            if (string.IsNullOrEmpty(connectionString))
+            {
+                connectionString = "Host=localhost;Port=5432;Database=script_registry;Username=admin;Password=your_secure_password";
+            }
+
+            // optionsBuilder.UseNpgsql(connectionString);
+            optionsBuilder.UseNpgsql(connectionString, b => b.MigrationsAssembly("BlazorUI"));
+
         }
 
     }
