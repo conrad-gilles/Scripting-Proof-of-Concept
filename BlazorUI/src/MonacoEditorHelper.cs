@@ -125,7 +125,7 @@ namespace BlazorUI.Helpers
                     {
                         var validation = _scriptManager.BasicValidationBeforeCompiling(code);
                         ScriptTypes sType;
-                        switch (validation.baseTypeName)
+                        switch (validation.BaseTypeName)
                         {
                             case "IGeneratorConditionScript":
                                 sType = ScriptTypes.GeneratorConditionScript;
@@ -136,7 +136,7 @@ namespace BlazorUI.Helpers
                             default:
                                 throw new Exception();
                         }
-                        Guid id = await _scriptManager.GetScriptId(validation.className, sType);
+                        Guid id = await _scriptManager.GetScriptId(validation.ClassName, sType);
                         CurrentScriptId = id;
                     }
                     catch (System.Exception) { }

@@ -25,17 +25,16 @@ internal class ScriptCompiler
     }
     public byte[] RunCompilation(string script, int? apiVersion = null, ValidationRecord? metaData = null) //references param there to enable later on users to define custom references
     {
+        Logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(RunCompilation), nameof(ScriptCompiler));
+        if (metaData != null)
+        {
+            Logger.LogTrace("Trying to compile script:" + metaData.ClassName);
+        }
         try
         {
             ReferencesRO!.AddRange(StandardRefrencesForAllScripts);
 
             List<MetadataReference>? references = [];
-
-            Logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(RunCompilation), nameof(ScriptCompiler));
-            if (metaData != null)
-            {
-                Logger.LogTrace("Trying to compile script:" + metaData.ClassName);
-            }
 
             //Takes C# source string and turns it into a "Roslyn parsed syntax tree representation" of a normal C# file
             SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(script);

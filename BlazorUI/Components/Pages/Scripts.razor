@@ -296,12 +296,16 @@ resultObj.GetType().ToString());
 
     public static string GetTemplate()
     {
-        string path = Path.GetFullPath(Path.Combine(
-            AppDomain.CurrentDomain.BaseDirectory,
-            "..", "..", "..",
-            "src", "ScriptTemplate.cs"
-        ));
-        return EmberMethods.CreateStringFromCsFile(path);
+        var resourceName = "BlazorUI.src.ScriptTemplate.cs";
+        var assembly = System.Reflection.Assembly.GetExecutingAssembly();
+        using (Stream stream = assembly.GetManifestResourceStream(resourceName)!)
+        {
+            if (stream == null) return "// Template missing";
+            using (StreamReader reader = new StreamReader(stream))
+            {
+                return reader.ReadToEnd();
+            }
+        }
     }
 
     private async Task EditScript(Guid id)
