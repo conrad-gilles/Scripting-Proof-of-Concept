@@ -436,10 +436,11 @@ internal class DbHelper
         switch (scriptType)
         {
             case ScriptTypes.GeneratorActionScript:
-                sScriptType = "IGeneratorActionScript";
+                // sScriptType = "IGeneratorActionScript";
+                sScriptType = nameof(IGeneratorActionScript);
                 break;
             case ScriptTypes.GeneratorConditionScript:
-                sScriptType = "IGeneratorConditionScript";
+                sScriptType = nameof(IGeneratorConditionScript);
                 break;
             default:
                 throw new DbHelperException(message: "Could not convert Script type enum to string");

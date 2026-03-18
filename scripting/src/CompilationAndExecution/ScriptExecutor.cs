@@ -93,6 +93,8 @@ internal class ScriptExecutor
 
             if (!resultTask.Wait(ScriptTimeout))
             {
+                resultTask.Dispose();
+                // resultTask.
                 throw new ScriptTimeoutException("Condition script exceeded time limit.");
             }
 

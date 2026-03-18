@@ -1,26 +1,20 @@
 # Todo
 
-monaco editor when right clicking bugs and is super dark not ui friendly
-store v1 of action scripts maybe in hitory not in diffrent file
+- monaco editor when right clicking bugs and is super dark not ui friendly
+- store v1 of action scripts maybe in hitory not in diffrent file
+- create factories and cleanup
 
- create factories and cleanup
-
- public async Task<ActiveActionResult> ExecuteScriptByNameAndType(string Name, ScriptTypes scriptType, ActiveGeneratorContext ctx) //maybe make generic
-
- make basicVal return record or class
-
-add update cache method to db helper and then also to  scriptmanager
-
-improve isduplicate function in db helper to add semantic treee check to see if no script in db has same tree?: this would be unnessecary if class name enforced as scriptname
-hard coded connection string still need to fix
-create composite primary key from name and type of script (condition action)
-
-create diffrent data classes for each api version, then you need to pass this data in create below;
-create() needs to somehow be type safe so it throws compile time error
-maybe diffrent create factories for each context version
-
-GeneratorContext ctx=GeneratorContextFactory.Create(data);    no id fro script;
-ExecuteById(id,context)   executes script, calls a facade of facade, in ember that upgradesaction result, and also auto downgrades in previes ctx was not right one.  
+- public async Task<ActiveActionResult> ExecuteScriptByNameAndType(string Name, ScriptTypes scriptType, ActiveGeneratorContext ctx) //maybe make generic
+- make basicVal return record or class
+- add update cache method to db helper and then also to  scriptmanager
+- improve isduplicate function in db helper to add semantic treee check to see if no script in db has same tree?: this would be unnessecary if - class name enforced as scriptname
+- hard coded connection string still need to fix
+- create composite primary key from name and type of script (condition action)
+- create diffrent data classes for each api version, then you need to pass this data in create below;
+- create() needs to somehow be type safe so it throws compile time error
+- maybe diffrent create factories for each context version
+- GeneratorContext ctx=GeneratorContextFactory.Create(data);    no id fro script;
+- ExecuteById(id,context)   executes script, calls a facade of facade, in ember that upgradesaction result, and also auto downgrades in previes ctx was not right one.  
 
 - define global using that is somethign like this: using Project = PC.MyCompany.Project;
 - this using will only be used by ember and not by customer scripts because those cant be auto refactored
