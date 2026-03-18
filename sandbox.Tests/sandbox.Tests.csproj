@@ -21,8 +21,8 @@
     <ProjectReference Include="..\scripting\scripting.csproj" />
   </ItemGroup>
 
-<ItemGroup>
-  <!-- Adjust the relative path if your folder structure is slightly different -->
-  <Compile Include="..\sandbox\src\ScriptingFramework\ActiveVersions.cs" Link="ActiveVersions.cs" />
-</ItemGroup>
+  <ItemGroup>
+    <!-- Adjust the relative path if your folder structure is slightly different -->
+    <Compile Include="..\sandbox\src\ScriptingFramework\ActiveVersions.cs" Link="ActiveVersions.cs" />
+  </ItemGroup>
 </Project>

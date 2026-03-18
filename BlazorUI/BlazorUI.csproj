@@ -16,8 +16,8 @@
   </ItemGroup>
 
   <ItemGroup>
-  <EmbeddedResource Include="src\ScriptTemplate.cs" />
-</ItemGroup>
+    <EmbeddedResource Include="src\ScriptTemplate.cs" />
+  </ItemGroup>
 
 
   <PropertyGroup>

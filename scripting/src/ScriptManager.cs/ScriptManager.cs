@@ -91,6 +91,14 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
         await Db.UpdateScript(scriptId, newSourceCode, userName, apiVersion);
     }
 
+    public async Task UpdateScriptNT(string name, ScriptTypes scriptType, string newSourceCode, string? userName = null, int? apiVersion = null)
+    {
+        Logger.LogTrace("Entered {MethodName} in {ClassName} with Name: {name}.", nameof(UpdateScriptNT), nameof(ScriptManagerFacade), name);
+
+        Guid scriptId = await GetScriptId(name, scriptType);
+        await UpdateScript(scriptId, newSourceCode, userName, apiVersion);
+    }
+
     // Removes script and all associated compiled caches
     public async Task DeleteScript(Guid scriptId)
     {
@@ -99,6 +107,12 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
         await Db.DeleteCustomerScript(scriptId);    //todo check if this also deletes the caches
     }
 
+    public async Task DeleteScriptNT(string scriptName, ScriptTypes scriptType)
+    {
+        Logger.LogTrace("Entered {MethodName} in {ClassName} with scriptName: {scriptName}.", nameof(DeleteScript), nameof(ScriptManagerFacade), scriptName);
+        Guid id = await GetScriptId(scriptName, scriptType);
+        await DeleteScript(id);
+    }
     // Retrieves script metadata and source code
     public async Task<CustomerScript> GetScript(Guid scriptId, bool includeCaches = false)
     {
@@ -106,6 +120,14 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
 
         CustomerScript script = await Db.GetCustomerScript(scriptId, includeCaches);
         return script;
+    }
+
+    public async Task<CustomerScript> GetScriptNT(string name, ScriptTypes scriptType, bool includeCaches = false)
+    {
+        Logger.LogTrace("Entered {MethodName} in {ClassName} with Name: {name}.", nameof(GetScriptNT), nameof(ScriptManagerFacade), name);
+
+        Guid scriptId = await GetScriptId(name, scriptType);
+        return await GetScript(scriptId);
     }
 
     // Returns all scripts with optional filtering by type, API version, or creation date

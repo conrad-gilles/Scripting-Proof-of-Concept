@@ -15,7 +15,7 @@
         <ProjectReference Include="..\scripting\scripting.csproj" />
         <!-- Existing: Roslyn scripting support -->
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="5.0.0" />
-                <!-- ADD THESE 4 LINES to fix the NU1608 EF Core/Roslyn warnings -->
+        <!-- ADD THESE 4 LINES to fix the NU1608 EF Core/Roslyn warnings -->
         <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="5.0.0" />
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="5.0.0" />
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="5.0.0" />
@@ -56,15 +56,15 @@
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
     </ItemGroup>
-    
+
     <ItemGroup>
         <InternalsVisibleTo Include="sandbox.Tests" />
     </ItemGroup>
     <ItemGroup>
-  <None Update="src\Scripts\**\*.cs">
-    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-  </None>
-</ItemGroup>
+        <None Update="src\Scripts\**\*.cs">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+    </ItemGroup>
 
 
 </Project>
