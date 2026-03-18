@@ -6,17 +6,17 @@ using Ember.Scripting;
 
 public class ContextFactory
 {
-    private readonly ISccriptManagerDeleteAfter ScriptManager;
+    private readonly ISccriptManagerDeleteAfter _scriptManager;
     public ContextFactory(ISccriptManagerDeleteAfter scriptManager)
     {
-        ScriptManager = scriptManager;
+        _scriptManager = scriptManager;
     }
 
     public Ember.Scripting.GeneratorContextSF CreateContextForApiV(ActiveDataClass data, int? apiV = null)
     {
         if (apiV == null)
         {
-            apiV = ScriptManager.GetRunningApiVersion();
+            apiV = _scriptManager.GetRunningApiVersion();
         }
 
         var obj = ScriptObjects();
@@ -31,16 +31,16 @@ public class ContextFactory
     // public async Task<Ember.Scripting.GeneratorContextSF> CreateByDowngrade(Guid id, ActiveDataClass data)
     // public async Task<ActiveGeneratorContext> CreateByDowngrade(string sourceCode)
     {
-        CustomerScript script = await ScriptManager.GetScript(id);
+        CustomerScript script = await _scriptManager.GetScript(id);
         if (script.SourceCode == null)
         {
             throw new Exception();
         }
-        var vali = ScriptManager.BasicValidationBeforeCompiling(script.SourceCode!);
+        var vali = _scriptManager.BasicValidationBeforeCompiling(script.SourceCode!);
         int? apiV = null;
         if (apiV == null)
         {
-            apiV = ScriptManager.GetRunningApiVersion();
+            apiV = _scriptManager.GetRunningApiVersion();
         }
         Type recentType;
         Dictionary<int, Type> contextVersionMap = ContextVersionScanner.GetClassDictionary();

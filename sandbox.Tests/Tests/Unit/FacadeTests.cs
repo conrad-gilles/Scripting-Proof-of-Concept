@@ -10,24 +10,24 @@ namespace FirstTests;
 [TestClass]
 public class ScriptManagerFacadeTests
 {
-    private ISccriptManagerDeleteAfter? facade;
-    string? sourceCodePedia = TestHelper.GetSC().sourceCodePedia;
-    private string? sourceCodeActionV1 = TestHelper.GetSC().sourceCodeActionV1;
-    private string? sourceCodeActionV3 = TestHelper.GetSC().sourceCodeActionV3;
-    private EmberMethods? em;
+    private ISccriptManagerDeleteAfter? _facade;
+    string? _sourceCodePedia = TestHelper.GetSC().sourceCodePedia;
+    private string? _sourceCodeActionV1 = TestHelper.GetSC().sourceCodeActionV1;
+    private string? _sourceCodeActionV3 = TestHelper.GetSC().sourceCodeActionV3;
+    private EmberMethods? _em;
 
     [TestInitialize]
     public async Task Setup()
     {
-        facade = EmberMethods.GetNewScriptManagerInstance();
-        em = new EmberMethods(facade);
+        _facade = EmberMethods.GetNewScriptManagerInstance();
+        _em = new EmberMethods(_facade);
 
-        await facade.DeleteAllData();
-        await facade.ClearAllCaches();
-        var existing = await facade.ListScripts(includeCaches: false);
+        await _facade.DeleteAllData();
+        await _facade.ClearAllCaches();
+        var existing = await _facade.ListScripts(includeCaches: false);
         foreach (var s in existing)
         {
-            await facade.DeleteScript(s.Id);
+            await _facade.DeleteScript(s.Id);
         }
     }
 
@@ -36,66 +36,66 @@ public class ScriptManagerFacadeTests
     [TestMethod]
     public async Task CreateScriptTest()
     {
-        Guid id = await facade!.CreateScript(sourceCodePedia!, "ConditionScriptTest");
-        CustomerScript retrievedScript = await facade.GetScript(id);
+        Guid id = await _facade!.CreateScript(_sourceCodePedia!, "ConditionScriptTest");
+        CustomerScript retrievedScript = await _facade.GetScript(id);
 
-        Assert.AreEqual(retrievedScript.SourceCode, sourceCodePedia);
+        Assert.AreEqual(retrievedScript.SourceCode, _sourceCodePedia);
     }
     [TestMethod]
     public async Task CreateScriptWithOldTest()
     {
 
-        Guid id = await facade!.CreateScript(sourceCodePedia!, apiVersion: 2);
-        CustomerScript retrievedScript = await facade.GetScript(id);
-        var context = await em!.GetTestingContext<GeneratorContextNoInherVaccineV5.GeneratorContext>(retrievedScript);
-        await facade.ExecuteScriptById(retrievedScript.Id, context);
+        Guid id = await _facade!.CreateScript(_sourceCodePedia!, apiVersion: 2);
+        CustomerScript retrievedScript = await _facade.GetScript(id);
+        var context = await _em!.GetTestingContext<GeneratorContextNoInherVaccineV5.GeneratorContext>(retrievedScript);
+        await _facade.ExecuteScriptById(retrievedScript.Id, context);
 
-        Assert.AreEqual(retrievedScript.SourceCode, sourceCodePedia);
+        Assert.AreEqual(retrievedScript.SourceCode, _sourceCodePedia);
     }
 
     [TestMethod]
     public async Task UpdateScriptTest()
     {
-        Guid id = await facade!.CreateScript(sourceCodePedia!);
-        string newSourceCode = sourceCodePedia + System.Environment.NewLine + @"//new line added for testing";
+        Guid id = await _facade!.CreateScript(_sourceCodePedia!);
+        string newSourceCode = _sourceCodePedia + System.Environment.NewLine + @"//new line added for testing";
         // newSourceCode = newSourceCode.Replace("@", "@" + System.Environment.NewLine);
-        await facade.UpdateScript(id, newSourceCode);
+        await _facade.UpdateScript(id, newSourceCode);
 
-        CustomerScript retrievedScript = await facade.GetScript(id);
+        CustomerScript retrievedScript = await _facade.GetScript(id);
         Assert.AreEqual(retrievedScript.SourceCode, newSourceCode);
     }
 
     [TestMethod]
     public async Task DeleteScriptTest()
     {
-        Guid id = await facade!.CreateScript(sourceCodePedia!);
-        await facade.DeleteScript(id);
+        Guid id = await _facade!.CreateScript(_sourceCodePedia!);
+        await _facade.DeleteScript(id);
 
 
         await Assert.ThrowsExceptionAsync<System.InvalidOperationException>(async () =>    //todo check that this implements the correct exception
         {
-            CustomerScript script = await facade.GetScript(id);
+            CustomerScript script = await _facade.GetScript(id);
         });
     }
 
     [TestMethod]
     public async Task GetScriptTest()
     {
-        Guid id = await facade!.CreateScript(sourceCodePedia!);
-        CustomerScript script = await facade.GetScript(id);
+        Guid id = await _facade!.CreateScript(_sourceCodePedia!);
+        CustomerScript script = await _facade.GetScript(id);
 
         Assert.IsNotNull(script);
         Assert.AreEqual(id, script.Id);
-        Assert.AreEqual(sourceCodePedia, script.SourceCode);
+        Assert.AreEqual(_sourceCodePedia, script.SourceCode);
     }
 
     [TestMethod]
     public async Task ListScriptsTest()
     {
-        await facade!.ClearAllCaches();
-        Guid id1 = await facade.CreateScript(sourceCodePedia!);
-        Guid id2 = await facade.CreateScript(sourceCodeActionV1!);
-        List<CustomerScript> scripts = await facade.ListScripts(includeCaches: true);
+        await _facade!.ClearAllCaches();
+        Guid id1 = await _facade.CreateScript(_sourceCodePedia!);
+        Guid id2 = await _facade.CreateScript(_sourceCodeActionV1!);
+        List<CustomerScript> scripts = await _facade.ListScripts(includeCaches: true);
         Assert.IsNotNull(scripts);
         Assert.IsTrue(scripts.Count == 2);
     }
@@ -105,14 +105,14 @@ public class ScriptManagerFacadeTests
         string scriptFolderPath = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "..",
                 "sandbox", "src", "Scripts"));
         // await facade!.EnsureDeletedCreated();
-        await facade!.DeleteAllData();
-        await em!.CompileAllScriptsInFolderAndSaveToDB(scriptFolderPath, "Gilles", EmberMethods.GetEmberApiVersion());
-        List<CustomerScript> scripts = await facade!.ListScripts(includeCaches: true);
+        await _facade!.DeleteAllData();
+        await _em!.CompileAllScriptsInFolderAndSaveToDB(scriptFolderPath, "Gilles", EmberMethods.GetEmberApiVersion());
+        List<CustomerScript> scripts = await _facade!.ListScripts(includeCaches: true);
         Assert.IsNotNull(scripts);
         Assert.IsTrue(scripts.Count == 5);
 
         CustomerScriptFilter filters = new CustomerScriptFilter(scriptName: "VaccineScript");   //todo fix this oine thorws errors
-        List<CustomerScript> scriptsFiltered = await facade.ListScripts(includeCaches: true, filters: filters);
+        List<CustomerScript> scriptsFiltered = await _facade.ListScripts(includeCaches: true, filters: filters);
         Assert.IsNotNull(scriptsFiltered);
         Assert.IsTrue(scriptsFiltered.Count == 1);
 
@@ -135,15 +135,15 @@ public class ScriptManagerFacadeTests
     [TestMethod]
     public async Task CompileScriptTest()
     {
-        Guid id = await facade!.CreateScript(sourceCodePedia!);
+        Guid id = await _facade!.CreateScript(_sourceCodePedia!);
 
-        await facade.ClearScriptCache(id);
-        var before = await facade.GetScript(id, includeCaches: true);
+        await _facade.ClearScriptCache(id);
+        var before = await _facade.GetScript(id, includeCaches: true);
         Assert.AreEqual(0, before.CompiledCaches.Count);
 
-        await facade.CompileScript(id);
+        await _facade.CompileScript(id);
 
-        var after = await facade.GetScript(id, includeCaches: true);
+        var after = await _facade.GetScript(id, includeCaches: true);
         Assert.IsTrue(after.CompiledCaches.Count == 1);
         Assert.IsTrue(after.CompiledCaches.Any(c => c.AssemblyBytes != null && c.AssemblyBytes.Length >= 1));   //todo check why this fails when ==1 but i think its correct
     }
@@ -151,20 +151,20 @@ public class ScriptManagerFacadeTests
     [TestMethod]
     public async Task CompileAllScriptsTest()
     {
-        Guid id1 = await facade!.CreateScript(sourceCodePedia!);
-        Guid id2 = await facade.CreateScript(sourceCodeActionV1!);
+        Guid id1 = await _facade!.CreateScript(_sourceCodePedia!);
+        Guid id2 = await _facade.CreateScript(_sourceCodeActionV1!);
 
-        await facade.ClearAllCaches();
+        await _facade.ClearAllCaches();
 
-        var beforeS1 = await facade.GetScript(id1, includeCaches: true);
-        var beforeS2 = await facade.GetScript(id2, includeCaches: true);
+        var beforeS1 = await _facade.GetScript(id1, includeCaches: true);
+        var beforeS2 = await _facade.GetScript(id2, includeCaches: true);
         Assert.AreEqual(0, beforeS1.CompiledCaches.Count);
         Assert.AreEqual(0, beforeS2.CompiledCaches.Count);
 
-        await facade.CompileAllScripts();
+        await _facade.CompileAllScripts();
 
-        var afterS1 = await facade.GetScript(id1, includeCaches: true);
-        var afterS2 = await facade.GetScript(id2, includeCaches: true);
+        var afterS1 = await _facade.GetScript(id1, includeCaches: true);
+        var afterS2 = await _facade.GetScript(id2, includeCaches: true);
         Assert.IsTrue(afterS1.CompiledCaches.Count == 1);
         Assert.IsTrue(afterS2.CompiledCaches.Count == 1);
     }
@@ -172,11 +172,11 @@ public class ScriptManagerFacadeTests
     [TestMethod]
     public async Task RecompileScriptTest()
     {
-        Guid id = await facade!.CreateScript(sourceCodePedia!);
+        Guid id = await _facade!.CreateScript(_sourceCodePedia!);
 
-        await facade.RecompileAllCaches(id);
+        await _facade.RecompileAllCaches(id);
 
-        var script = await facade.GetScript(id, includeCaches: true);
+        var script = await _facade.GetScript(id, includeCaches: true);
         Assert.IsTrue(script.CompiledCaches.Count == 1);
         Assert.IsTrue(script.CompiledCaches.Any(c => c.AssemblyBytes != null && c.AssemblyBytes.Length > 0));
     }
@@ -184,12 +184,12 @@ public class ScriptManagerFacadeTests
     [TestMethod]
     public void ValidateScriptTest()
     {
-        string result = facade!.ValidateScript(sourceCodePedia!);
+        string result = _facade!.ValidateScript(_sourceCodePedia!);
 
         Assert.IsTrue(result.StartsWith("Success:", StringComparison.OrdinalIgnoreCase));
         Assert.IsTrue(result.Contains("PediatricCondition"));
 
-        string result2 = facade.ValidateScript("wrong input test could be whatever");
+        string result2 = _facade.ValidateScript("wrong input test could be whatever");
 
         Assert.IsTrue(result2.StartsWith("Error:", StringComparison.OrdinalIgnoreCase));
         Assert.IsTrue(result2.Contains("Exception"));
@@ -198,16 +198,16 @@ public class ScriptManagerFacadeTests
     [TestMethod]
     public async Task GetCompilationErrorsTest()
     {
-        Guid id = await facade!.CreateScript(sourceCodePedia!);
+        Guid id = await _facade!.CreateScript(_sourceCodePedia!);
 
-        string result = await facade.GetCompilationErrors(id);
+        string result = await _facade.GetCompilationErrors(id);
         Assert.IsTrue(result.Contains("Successful Compilation!"));
 
         await Assert.ThrowsExceptionAsync<ValidationBeforeCompilationException>(async () =>    //before was basicvalidation exception todo
         {
-            Guid id2 = await facade.CreateScript("wrong input test could be whatever");
+            Guid id2 = await _facade.CreateScript("wrong input test could be whatever");
             // string result2 = await facade.GetCompilationErrors(id2);
-            string result2 = await facade.GetCompilationErrors(id2);
+            string result2 = await _facade.GetCompilationErrors(id2);
         });
 
         // try
@@ -232,9 +232,9 @@ public class ScriptManagerFacadeTests
     public async Task GetCompilationErrorsTestNegative()
     {
         Guid id2 = Guid.NewGuid();
-        await facade!.SaveScriptWithoutCompiling(id2, "wrong input test could be whatever");
+        await _facade!.SaveScriptWithoutCompiling(id2, "wrong input test could be whatever");
         // string result2 = await facade.GetCompilationErrors(id2);
-        string result2 = await facade.GetCompilationErrors(id2);
+        string result2 = await _facade.GetCompilationErrors(id2);
         Console.WriteLine("Start of Result:");
         Console.WriteLine(result2);
         Console.WriteLine("End of Result.");
@@ -250,9 +250,9 @@ public class ScriptManagerFacadeTests
         Assert.IsTrue(result2.Contains(desiredOutput));
 
         Guid id3 = Guid.NewGuid();
-        await facade.SaveScriptWithoutCompiling(id3, "public class Test : IFakeInterface{}");
+        await _facade.SaveScriptWithoutCompiling(id3, "public class Test : IFakeInterface{}");
         // string result2 = await facade.GetCompilationErrors(id2);
-        string result3 = await facade.GetCompilationErrors(id3);
+        string result3 = await _facade.GetCompilationErrors(id3);
         Console.WriteLine("Start of Result:");
         Console.WriteLine(result3);
         Console.WriteLine("End of Result.");
@@ -270,10 +270,10 @@ public class ScriptManagerFacadeTests
     [TestMethod]
     public async Task ExecuteActionScriptTest()
     {
-        Guid id = await facade!.CreateScript(sourceCodeActionV1!);
-        var testingContext = await em!.GetTestingContext<GeneratorContextV4.GeneratorContext>();
+        Guid id = await _facade!.CreateScript(_sourceCodeActionV1!);
+        var testingContext = await _em!.GetTestingContext<GeneratorContextV4.GeneratorContext>();
 
-        ActionResultSF result = await facade.ExecuteActionScript(id, testingContext);
+        ActionResultSF result = await _facade.ExecuteActionScript(id, testingContext);
 
         Assert.IsNotNull(result);
         // Assert.IsTrue(result.IsSuccess);
@@ -281,10 +281,10 @@ public class ScriptManagerFacadeTests
         result = (ActionResultV3.ActionResult)EmberMethods.UpgradeActionResult(result);
         Assert.IsInstanceOfType(result, typeof(ActionResultV3.ActionResult));
 
-        Guid id2 = await facade.CreateScript(sourceCodePedia!);
+        Guid id2 = await _facade.CreateScript(_sourceCodePedia!);
         await Assert.ThrowsExceptionAsync<System.InvalidCastException>(async () =>
         {
-            ActionResultSF result2 = await facade.ExecuteActionScript(id2, testingContext);
+            ActionResultSF result2 = await _facade.ExecuteActionScript(id2, testingContext);
         });
 
     }
@@ -292,33 +292,33 @@ public class ScriptManagerFacadeTests
     [TestMethod]
     public async Task ExecuteConditionScriptTest()
     {
-        Guid id = await facade!.CreateScript(sourceCodePedia!);
-        var testingContext = await em!.GetTestingContext<GeneratorContextV4.GeneratorContext>();
+        Guid id = await _facade!.CreateScript(_sourceCodePedia!);
+        var testingContext = await _em!.GetTestingContext<GeneratorContextV4.GeneratorContext>();
 
-        bool result = await facade.ExecuteConditionScript(id, testingContext);
+        bool result = await _facade.ExecuteConditionScript(id, testingContext);
 
         Assert.IsNotNull(result);
         Assert.IsTrue(result.GetType().ToString() == "System.Boolean");
 
-        Guid id2 = await facade.CreateScript(sourceCodeActionV1!);
+        Guid id2 = await _facade.CreateScript(_sourceCodeActionV1!);
         await Assert.ThrowsExceptionAsync<System.InvalidCastException>(async () =>
         {
-            bool result2 = await facade.ExecuteConditionScript(id2, testingContext);
+            bool result2 = await _facade.ExecuteConditionScript(id2, testingContext);
         });
     }
 
     [TestMethod]
     public async Task ExecuteScriptByIdTest()
     {
-        var context = await em!.GetTestingContext<GeneratorContextV4.GeneratorContext>();
+        var context = await _em!.GetTestingContext<GeneratorContextV4.GeneratorContext>();
 
-        Guid condId = await facade!.CreateScript(sourceCodePedia!);
-        object condResult = await facade.ExecuteScriptById(condId, context);
+        Guid condId = await _facade!.CreateScript(_sourceCodePedia!);
+        object condResult = await _facade.ExecuteScriptById(condId, context);
         Assert.IsInstanceOfType(condResult, typeof(bool));
         Assert.AreEqual(true, (bool)condResult);
 
-        Guid actId = await facade.CreateScript(sourceCodeActionV1!);
-        object actResult = await facade.ExecuteScriptById(actId, context);
+        Guid actId = await _facade.CreateScript(_sourceCodeActionV1!);
+        object actResult = await _facade.ExecuteScriptById(actId, context);
         Assert.IsInstanceOfType(actResult, typeof(ActionResultSF));
         // Assert.IsTrue(((ActionResultBaseClass)actResult).IsSuccess);
     }
@@ -330,9 +330,9 @@ public class ScriptManagerFacadeTests
     [TestMethod]
     public async Task GetCompiledCacheTest()
     {
-        Guid id = await facade!.CreateScript(sourceCodePedia!);
+        Guid id = await _facade!.CreateScript(_sourceCodePedia!);
 
-        ScriptCompiledCache cache = await facade.GetCompiledCache(id);
+        ScriptCompiledCache cache = await _facade.GetCompiledCache(id);
         byte[] cacheAB = cache.AssemblyBytes!;
 
         Assert.IsNotNull(cacheAB);
@@ -342,47 +342,47 @@ public class ScriptManagerFacadeTests
     [TestMethod]
     public async Task ClearScriptCacheTest()
     {
-        Guid id = await facade!.CreateScript(sourceCodePedia!);
+        Guid id = await _facade!.CreateScript(_sourceCodePedia!);
 
-        ScriptCompiledCache cache = await facade.GetCompiledCache(id);
+        ScriptCompiledCache cache = await _facade.GetCompiledCache(id);
         byte[] cacheAB = cache.AssemblyBytes!;
         Assert.IsTrue(cacheAB.Length > 0);
 
-        await facade.ClearScriptCache(id);
+        await _facade.ClearScriptCache(id);
 
-        var script = await facade.GetScript(id, includeCaches: true);
+        var script = await _facade.GetScript(id, includeCaches: true);
         Assert.AreEqual(0, script.CompiledCaches.Count);
 
         await Assert.ThrowsExceptionAsync<System.InvalidOperationException>(async () =>
         {
-            await facade.GetCompiledCache(id);
+            await _facade.GetCompiledCache(id);
         });
     }
 
     [TestMethod]
     public async Task ClearAllCachesTest()
     {
-        Guid id = await facade!.CreateScript(sourceCodePedia!);
-        Guid id2 = await facade.CreateScript(sourceCodeActionV1!);
+        Guid id = await _facade!.CreateScript(_sourceCodePedia!);
+        Guid id2 = await _facade.CreateScript(_sourceCodeActionV1!);
 
-        await facade.ClearAllCaches();
+        await _facade.ClearAllCaches();
 
-        var caches = await facade.GetAllCompiledScriptCaches();
+        var caches = await _facade.GetAllCompiledScriptCaches();
         Assert.AreEqual(0, caches.Count);
     }
 
     [TestMethod]
     public async Task PrecompileForApiVersionTest()
     {
-        Guid id = await facade!.CreateScript(sourceCodePedia!);
+        Guid id = await _facade!.CreateScript(_sourceCodePedia!);
 
-        await facade.ClearAllCaches();
-        var before = await facade.GetScript(id, includeCaches: true);
+        await _facade.ClearAllCaches();
+        var before = await _facade.GetScript(id, includeCaches: true);
         Assert.AreEqual(0, before.CompiledCaches.Count);
 
-        await facade.PrecompileForApiVersion();
+        await _facade.PrecompileForApiVersion();
 
-        var after = await facade.GetScript(id, includeCaches: true);
+        var after = await _facade.GetScript(id, includeCaches: true);
         Assert.IsTrue(after.CompiledCaches.Count >= 1);
     }
 
@@ -393,10 +393,10 @@ public class ScriptManagerFacadeTests
     [TestMethod]
     public async Task GetActiveApiVersionsTest()
     {
-        Guid id = await facade!.CreateScript(sourceCodePedia!);
-        int currentVersion = facade.GetRunningApiVersion();
+        Guid id = await _facade!.CreateScript(_sourceCodePedia!);
+        int currentVersion = _facade.GetRunningApiVersion();
 
-        List<int> versions = await facade.GetActiveApiVersions();
+        List<int> versions = await _facade.GetActiveApiVersions();
 
         Assert.IsNotNull(versions);
         Assert.IsTrue(versions.Count >= 1);
@@ -406,7 +406,7 @@ public class ScriptManagerFacadeTests
     [TestMethod]
     public void GetRecentApiVersionTest()
     {
-        int v = facade!.GetRunningApiVersion();
+        int v = _facade!.GetRunningApiVersion();
         Assert.IsInstanceOfType(v, typeof(System.Int32));   //todo implement maybe real
     }
 
@@ -423,10 +423,10 @@ public class ScriptManagerFacadeTests
     [TestMethod]
     public async Task CheckVersionCompatibilityTest()
     {
-        Guid id = await facade!.CreateScript(sourceCodePedia!);
-        int currentVersion = facade.GetRunningApiVersion();
+        Guid id = await _facade!.CreateScript(_sourceCodePedia!);
+        int currentVersion = _facade.GetRunningApiVersion();
 
-        bool hasRecent = await facade.CheckVersionCompatibility(id, currentVersion);
+        bool hasRecent = await _facade.CheckVersionCompatibility(id, currentVersion);
 
         Assert.IsTrue(hasRecent);
     }
@@ -464,12 +464,12 @@ public class ScriptManagerFacadeTests
     {
         if (TestConfig.DuplicatesAllowed)
         {
-            Guid id = await facade!.CreateScript(sourceCodePedia!);
-            Guid id2 = await facade.CreateScript(sourceCodePedia!);
+            Guid id = await _facade!.CreateScript(_sourceCodePedia!);
+            Guid id2 = await _facade.CreateScript(_sourceCodePedia!);
 
-            await facade.RemoveDuplicates();
+            await _facade.RemoveDuplicates();
 
-            var scripts = await facade.ListScripts();
+            var scripts = await _facade.ListScripts();
             Assert.AreEqual(1, scripts.Count);
         }
 
@@ -512,16 +512,16 @@ public class ScriptManagerFacadeTests
     [TestMethod]
     public async Task HealthCheckTest() //todo
     {
-        await facade!.HealthCheck();
+        await _facade!.HealthCheck();
         Assert.IsTrue(true);
     }
 
     [TestMethod]
     public async Task GetScriptMetadataTest()
     {
-        Guid id = await facade!.CreateScript(sourceCodePedia!);
+        Guid id = await _facade!.CreateScript(_sourceCodePedia!);
 
-        string metaData = await facade.GetScriptMetadata(id);
+        string metaData = await _facade.GetScriptMetadata(id);
 
         Assert.IsNotNull(metaData);
         Assert.IsTrue(metaData.Contains("Metadata for script:", StringComparison.OrdinalIgnoreCase));

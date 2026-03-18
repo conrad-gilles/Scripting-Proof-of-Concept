@@ -10,17 +10,17 @@ public class AddPediatricTestsV2 : GeneratorScriptsGeneric.IGeneratorActionScrip
 {
     public async Task<ActionResultV1.ActionResult> ExecuteAsync(IGeneratorContext_V2.IGeneratorContext context)    //error is here in Basyns
     {
-        context.Logger.Info("Adding pediatric standard tests");
+        context.Logger2.Info("Adding pediatric standard tests");
 
         // Check if test already exists (might be auto-added by business rule)
-        if (!context.LabOrder.HasTest("PED-BASIC"))
+        if (!context.LabOrder2.HasTest("PED-BASIC"))
         {
-            context.LabOrder.AddTest("PED-BASIC");
+            context.LabOrder2.AddTest("PED-BASIC");
         }
         // System.IO.BufferedStream? stream = null;
         // double versionExample = context.LabOrder.RandomNewDouble;    //example of newer version
         // Console.WriteLine(versionExample);
-        context.LabOrder.SetCustomField("ProcessedByGenerator", true);
+        context.LabOrder2.SetCustomField("ProcessedByGenerator", true);
         return ActionResultV1.ActionResult.Success("Pediatric tests added");   //todo check what happens if you return this object without calling the function on it
         // return null; //just for compiler
     }

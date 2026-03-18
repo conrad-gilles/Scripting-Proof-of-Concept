@@ -9,16 +9,16 @@ namespace Ember.Scripting;
 
 internal class ScriptExecutor
 {
-    private readonly static int ScriptTimeout = 5000;   // ms of how much time scripts get to execute
-    private readonly ILogger<ScriptExecutor> Logger;
+    private readonly static int _scriptTimeout = 5000;   // ms of how much time scripts get to execute
+    private readonly ILogger<ScriptExecutor> _logger;
     public ScriptExecutor(ILogger<ScriptExecutor> logger)
     {
-        Logger = logger;
+        _logger = logger;
     }
 
     public T RunScriptExecution<T>(byte[] compiledScript, GeneratorContextSF genContext)
     {
-        Logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(RunScriptExecution), nameof(ScriptExecutor));
+        _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(RunScriptExecution), nameof(ScriptExecutor));
         try
         {
             if (compiledScript.Length > 5 * 1024 * 1024) // 5 mb maximum size
@@ -49,7 +49,7 @@ internal class ScriptExecutor
             }
             else if (typeArray.Length > 1)
             {
-                Logger.LogInformation("more than one class found in script");
+                _logger.LogInformation("more than one class found in script");
                 throw new MoreThanOneClassFoundInScriptException("more than one class found in script");   //to implement more than one name you would need to pass name of class into this class
             }
 
@@ -70,28 +70,28 @@ internal class ScriptExecutor
             }
             else
             {
-                Logger.LogInformation("Could not run your script because it is neither a ActionScript nor a ConditionScript.");
+                _logger.LogInformation("Could not run your script because it is neither a ActionScript nor a ConditionScript.");
                 throw new ScriptExecutionException("Could not run your script because it is neither a ActionScript nor a ConditionScript.");
             }
         }
         catch (Exception e)
         {
-            Logger.LogInformation("Something went wrong when trying to execute your code, here are some details:");
-            Logger.LogError(e.ToString());
+            _logger.LogInformation("Something went wrong when trying to execute your code, here are some details:");
+            _logger.LogError(e.ToString());
             throw new ScriptExecutionException("Something went wrong when trying to execute your code, here are some details:", e);
         }
 
     }
     public bool RunConditionScript(Type type, object scriptInstance, GeneratorContextSF genContext)
     {
-        Logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(RunConditionScript), nameof(ScriptExecutor));
+        _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(RunConditionScript), nameof(ScriptExecutor));
         try
         {
             MethodInfo method = type.GetMethod("EvaluateAsync")!;
 
             var resultTask = (Task)method.Invoke(scriptInstance, new object[] { genContext })!;
 
-            if (!resultTask.Wait(ScriptTimeout))
+            if (!resultTask.Wait(_scriptTimeout))
             {
                 resultTask.Dispose();
                 // resultTask.
@@ -101,26 +101,26 @@ internal class ScriptExecutor
             var resultProperty = resultTask.GetType().GetProperty("Result");
             var resultValue = resultProperty!.GetValue(resultTask);
 
-            Logger.LogInformation($"Result: {resultValue}");
+            _logger.LogInformation($"Result: {resultValue}");
             return (bool)resultValue!;
         }
         catch (Exception e)
         {
-            Logger.LogInformation(e.ToString());
+            _logger.LogInformation(e.ToString());
             throw new ConditionScriptExecutionException("RunConditionScrptFailed.", e);
         }
 
     }
     public ActionResultSF RunActionScript(Type type, object scriptInstance, GeneratorContextSF genContext)
     {
-        Logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(RunActionScript), nameof(ScriptExecutor));
+        _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(RunActionScript), nameof(ScriptExecutor));
         try
         {
             MethodInfo method = type.GetMethod("ExecuteAsync")!;
 
             var resultTask = (Task)method.Invoke(scriptInstance, new object[] { genContext })!;
 
-            if (!resultTask.Wait(ScriptTimeout))
+            if (!resultTask.Wait(_scriptTimeout))
             {
                 throw new ScriptTimeoutException("Action script exceeded time limit.");
             }
@@ -128,14 +128,14 @@ internal class ScriptExecutor
             var resultProperty = resultTask.GetType().GetProperty("Result");
             var resultValue = resultProperty!.GetValue(resultTask);
 
-            Logger.LogInformation($"Result in 86 sExecuter: {resultValue}");
+            _logger.LogInformation($"Result in 86 sExecuter: {resultValue}");
 
             return (ActionResultSF)resultValue!;  //this might fail because not baseclass idk, if it does maybe change whole structure to only one function
         }
         catch (Exception e)
         {
-            Logger.LogError(e.ToString());
-            Logger.LogWarning("You might have passed the wrong GeneratorContext class, ex V1 instead of V2");
+            _logger.LogError(e.ToString());
+            _logger.LogWarning("You might have passed the wrong GeneratorContext class, ex V1 instead of V2");
             throw new ActionScriptExecutionException("You might have passed the wrong GeneratorContext class, ex V1 instead of V2", e);
         }
 

@@ -13,11 +13,11 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 public class EmberMethods
 {
-    private readonly ISccriptManagerDeleteAfter Facade;
+    private readonly ISccriptManagerDeleteAfter _facade;
 
     public EmberMethods(ISccriptManagerDeleteAfter facade)
     {
-        Facade = facade;
+        _facade = facade;
     }
     public static int GetEmberApiVersion(int? testingDiffrentVersion = null)
     {
@@ -55,7 +55,7 @@ public class EmberMethods
     {
         Serilog.Log.Verbose("Entered {MethodName} in {ClassName}.", nameof(ListAllCompiledFromDB), nameof(EmberMethods));
         // var db = new DbHelper(UsefulMethods.GetReferences());
-        List<ScriptCompiledCache> caches = await Facade.GetAllCompiledScriptCaches();
+        List<ScriptCompiledCache> caches = await _facade.GetAllCompiledScriptCaches();
 
         Dictionary<int, Guid> cacheDict = new Dictionary<int, Guid>();
         for (int i = 0; i < caches.Count(); i++)
@@ -74,7 +74,7 @@ public class EmberMethods
     {
         Serilog.Log.Verbose("Entered {MethodName} in {ClassName}.", nameof(ListAllStoredSourceCodes), nameof(EmberMethods));
         // var db = new DbHelper(UsefulMethods.GetReferences());
-        List<CustomerScript> sourceCodes = await Facade.ListScripts(includeCaches: true);
+        List<CustomerScript> sourceCodes = await _facade.ListScripts(includeCaches: true);
 
         Dictionary<int, Guid> sourceDict = new Dictionary<int, Guid>();
         for (int i = 0; i < sourceCodes.Count; i++)
@@ -105,7 +105,7 @@ public class EmberMethods
                 // var db = new DbHelper(UsefulMethods.GetReferences());
                 string scriptString = CreateStringFromCsFile(files[i]);
                 Guid id = Guid.NewGuid();
-                Guid randomTestScript2Id = await Facade.CreateScript(scriptString);
+                Guid randomTestScript2Id = await _facade.CreateScript(scriptString);
                 // Console.WriteLine(randomTestScript2.ScriptName + "Added script N" + i + ". to both tables.");
 
             }
@@ -127,7 +127,7 @@ public class EmberMethods
     {
         Serilog.Log.Verbose("Entered {MethodName} in {ClassName} with scriptId: {ScriptId}.", nameof(EditScriptInSwitch), nameof(EmberMethods), id);
         // var db = new DbHelper(UsefulMethods.GetReferences());
-        var customerScript = await Facade.GetScript(id);
+        var customerScript = await _facade.GetScript(id);
         var creationDate = customerScript.CreatedAt;
         Console.WriteLine("Here is the old version of the script source code:");
         Console.WriteLine(customerScript.SourceCode);
@@ -136,13 +136,13 @@ public class EmberMethods
         string userInput2 = Console.ReadLine()!;
 
         string str = CreateStringFromCsFile(userInput2!);
-        await Facade.DeleteScript(id);
+        await _facade.DeleteScript(id);
 
         //In reality it would be better like this but doesnt work because cant paste too much in console:
         // Console.WriteLine("Copy paste your new version now:");
         // string userInput2 = Console.ReadLine();
 
-        await Facade.CreateScript(str, userName, createdAt: (DateTime)creationDate!); //todo unsafe af
+        await _facade.CreateScript(str, userName, createdAt: (DateTime)creationDate!); //todo unsafe af
 
 
     }
@@ -154,7 +154,7 @@ public class EmberMethods
         if (userInput == null || userInput == "")
         {
 
-            List<CustomerScript> customerScripts = await Facade.ListScripts();
+            List<CustomerScript> customerScripts = await _facade.ListScripts();
             for (int i = 0; i < customerScripts.Count; i++)
             {
                 Console.WriteLine(customerScripts[i]);
@@ -164,7 +164,7 @@ public class EmberMethods
         {
             var listAllCompiledFromDB = await ListAllCompiledFromDB();
             Guid idEdit = listAllCompiledFromDB[Int32.Parse(userInput)];
-            CustomerScript scr = await Facade.GetScript(idEdit);
+            CustomerScript scr = await _facade.GetScript(idEdit);
             Console.WriteLine(scr.SourceCode);
         }
 
@@ -234,14 +234,14 @@ public class EmberMethods
         Guid id = cacheDict[Int32.Parse(userInputForEdit)];
         return id;
     }
-    private static List<MetadataReference> references = [
+    private static List<MetadataReference> _references = [
         MetadataReference.CreateFromFile(typeof(object).Assembly.Location), // System.Private.CoreLib
                         MetadataReference.CreateFromFile(typeof(IGeneratorConditionScript).Assembly.Location),
                 MetadataReference.CreateFromFile(typeof(IGeneratorReadOnlyContextV1.IGeneratorContext).Assembly.Location),//try removing if works good i guess but still need to pass from sandbox];
                           ];
     public static List<MetadataReference> GetReferences()
     {
-        return references;
+        return _references;
     }
 
     public static string GetUserName()
@@ -254,7 +254,7 @@ public class EmberMethods
         Serilog.Log.Verbose("Entered {MethodName} in {ClassName}.", nameof(GetTestingContext), nameof(EmberMethods));
         try
         {
-            ContextFactory sf = new ContextFactory(Facade);
+            ContextFactory sf = new ContextFactory(_facade);
             Ember.Scripting.GeneratorContextSF ctx;
             var objs = sf.ScriptObjects();
             if (autoDetectFromScript == null)
@@ -282,7 +282,7 @@ public class EmberMethods
             else
             {
 
-                int v = Facade.BasicValidationBeforeCompiling(autoDetectFromScript.SourceCode!).Version;
+                int v = _facade.BasicValidationBeforeCompiling(autoDetectFromScript.SourceCode!).Version;
                 ctx = sf.CreateContextForApiV(GetTestData(), v);
 
             }

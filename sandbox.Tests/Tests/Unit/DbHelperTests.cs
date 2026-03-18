@@ -10,49 +10,49 @@ namespace FirstTests;
 [TestClass]
 public class DbHelperTests
 {
-    private ISccriptManagerDeleteAfter? facade;
-    string? sourceCodePedia = TestHelper.GetSC().sourceCodePedia;
-    private string? sourceCodeActionV1 = TestHelper.GetSC().sourceCodeActionV1;
-    private string? sourceCodeActionV3 = TestHelper.GetSC().sourceCodeActionV3;
-    private EmberMethods? em;
+    private ISccriptManagerDeleteAfter? _facade;
+    private string? _sourceCodePedia = TestHelper.GetSC().sourceCodePedia;
+    private string? _sourceCodeActionV1 = TestHelper.GetSC().sourceCodeActionV1;
+    private string? _sourceCodeActionV3 = TestHelper.GetSC().sourceCodeActionV3;
+    private EmberMethods? _em;
 
     [TestInitialize]
     public async Task Setup()
     {
-        facade = EmberMethods.GetNewScriptManagerInstance();
-        em = new EmberMethods(facade);
-        await facade.DeleteAllData();
+        _facade = EmberMethods.GetNewScriptManagerInstance();
+        _em = new EmberMethods(_facade);
+        await _facade.DeleteAllData();
 
-        await facade.ClearAllCaches();
-        var existing = await facade.ListScripts(includeCaches: false);
+        await _facade.ClearAllCaches();
+        var existing = await _facade.ListScripts(includeCaches: false);
         foreach (var s in existing)
         {
-            await facade.DeleteScript(s.Id);
+            await _facade.DeleteScript(s.Id);
         }
     }
 
     [TestMethod]
     public async Task CreateAndInsertCompiledCacheTest()
     {
-        Guid id = await facade!.CreateScript(sourceCodePedia!);
+        Guid id = await _facade!.CreateScript(_sourceCodePedia!);
 
-        await facade.ClearScriptCache(id);
-        var before = await facade.GetScript(id, includeCaches: true);
+        await _facade.ClearScriptCache(id);
+        var before = await _facade.GetScript(id, includeCaches: true);
         Assert.AreEqual(0, before.CompiledCaches.Count);
 
 
-        await facade.CompileScript(id);
+        await _facade.CompileScript(id);
 
-        var after = await facade.GetScript(id, includeCaches: true);
-        var getCache = await facade.GetCompiledCache(id, EmberMethods.GetEmberApiVersion());
+        var after = await _facade.GetScript(id, includeCaches: true);
+        var getCache = await _facade.GetCompiledCache(id, EmberMethods.GetEmberApiVersion());
         Assert.IsTrue(after.CompiledCaches.Count == 1);
         Assert.IsTrue(getCache != null && (getCache.ApiVersion == EmberMethods.GetEmberApiVersion()));
         Assert.IsTrue(after.CompiledCaches.Any(c => c.AssemblyBytes != null && c.AssemblyBytes.Length >= 1));
 
         var e = await Assert.ThrowsExceptionAsync<Ember.Scripting.DbHelperException>(async () =>
          {
-             await facade.CompileScript(id, EmberMethods.GetEmberApiVersion());
-             var after3 = await facade.GetScript(id, includeCaches: true);
+             await _facade.CompileScript(id, EmberMethods.GetEmberApiVersion());
+             var after3 = await _facade.GetScript(id, includeCaches: true);
              Assert.IsTrue(after3.CompiledCaches.Count == 1);
              Assert.IsTrue(after3.CompiledCaches.Any(c => c.AssemblyBytes != null && c.AssemblyBytes.Length >= 1));
          });
@@ -60,10 +60,10 @@ public class DbHelperTests
 
         // Assert.IsFalse(true);
         int oldV = 3;
-        await facade.CompileScript(id, oldV);
+        await _facade.CompileScript(id, oldV);
 
-        var after2 = await facade.GetScript(id, includeCaches: true);
-        ScriptCompiledCache cache = await facade.GetCompiledCache(id, oldV);
+        var after2 = await _facade.GetScript(id, includeCaches: true);
+        ScriptCompiledCache cache = await _facade.GetCompiledCache(id, oldV);
         Assert.IsTrue(after2.CompiledCaches.Count == 2);
         Console.WriteLine("Api Version = " + cache.ApiVersion);
         Assert.IsTrue(cache != null && (cache.ApiVersion == oldV));
@@ -75,36 +75,36 @@ public class DbHelperTests
     {
         if (TestConfig.DuplicatesAllowed)
         {
-            Guid id1 = await facade!.CreateScript(sourceCodePedia!);
-            CustomerScript script1 = await facade.GetScript(id1);
+            Guid id1 = await _facade!.CreateScript(_sourceCodePedia!);
+            CustomerScript script1 = await _facade.GetScript(id1);
 
-            Guid id2 = await facade!.CreateScript(sourceCodePedia!);
-            CustomerScript script2 = await facade.GetScript(id2);
+            Guid id2 = await _facade!.CreateScript(_sourceCodePedia!);
+            CustomerScript script2 = await _facade.GetScript(id2);
 
             Assert.IsTrue(script1.Equals(script2));
             var e = await Assert.ThrowsExceptionAsync<Ember.Scripting.DbHelperException>(async () =>
             {
-                Guid id3 = await facade!.CreateScript(sourceCodePedia!, checkForDuplicates: true);
+                Guid id3 = await _facade!.CreateScript(_sourceCodePedia!, checkForDuplicates: true);
             });
 
-            var allScripts = await facade.ListScripts();
+            var allScripts = await _facade.ListScripts();
             Console.WriteLine("Count of allScrips= " + allScripts.Count());
             Assert.IsTrue(allScripts.Count() == 2);
 
             CustomerScriptFilter filter = new CustomerScriptFilter(scriptName: script1.ScriptName, sourceCode: script1.SourceCode);
-            var allScripts2 = await facade.ListScripts(filter);
+            var allScripts2 = await _facade.ListScripts(filter);
             Console.WriteLine("Count of allScrips= " + allScripts2.Count());
             Assert.IsTrue(allScripts2.Count() == 2);
 
-            await facade!.CreateScript(sourceCodeActionV1!);
-            await facade!.CreateScript(sourceCodeActionV3!);
-            await facade!.CreateScript(sourceCodeActionV3!);
+            await _facade!.CreateScript(_sourceCodeActionV1!);
+            await _facade!.CreateScript(_sourceCodeActionV3!);
+            await _facade!.CreateScript(_sourceCodeActionV3!);
 
-            await facade!.CreateScript(sourceCodePedia!);
-            await facade!.CreateScript(sourceCodePedia!);
-            await facade!.CreateScript(sourceCodePedia!);
-            await facade!.CreateScript(sourceCodePedia!);
-            var allScripts3 = await facade.ListScripts(filter);
+            await _facade!.CreateScript(_sourceCodePedia!);
+            await _facade!.CreateScript(_sourceCodePedia!);
+            await _facade!.CreateScript(_sourceCodePedia!);
+            await _facade!.CreateScript(_sourceCodePedia!);
+            var allScripts3 = await _facade.ListScripts(filter);
             Console.WriteLine("Count of allScrips= " + allScripts3.Count());
             Assert.IsTrue(allScripts3.Count() == 6);
         }

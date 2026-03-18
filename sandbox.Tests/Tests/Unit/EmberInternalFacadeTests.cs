@@ -8,32 +8,32 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 [TestClass]
 public class EmberInternalFacadeTests
 {
-    ISccriptManagerDeleteAfter? ScriptManager;
-    EmberInternalFacade? InternalScriptManager;
-    EmberMethods? em;
-    (LabOrder labOrder, Patient patient, ConsoleLogger logger, DataAccess testDataAccess, Vaccine vaccine) obj;
-    DataV1.MockData? data;
-    string? ActionResultVersionSpecific;
-    string? sourceCodeActionV1 = TestHelper.GetSC().sourceCodeActionV1;
-    string? sourceCodeActionV2 = TestHelper.GetSC().sourceCodeActionV2;
-    string? sourceCodeActionV3 = TestHelper.GetSC().sourceCodeActionV3;
-    string? sourceCodeVaccineAction = TestHelper.GetSC().sourceCodeVaccineAction;
-    string? sourceCodePedia = TestHelper.GetSC().sourceCodePedia;
-    List<string>? sourceCodes = TestHelper.GetSC(includeCondInList: false).sourceCodes;
+    private ISccriptManagerDeleteAfter? _ScriptManager;
+    private EmberInternalFacade? _InternalScriptManager;
+    private EmberMethods? _em;
+    private (LabOrder labOrder, Patient patient, ConsoleLogger logger, DataAccess testDataAccess, Vaccine vaccine) _obj;
+    private DataV1.MockData? _data;
+    private string? ActionResultVersionSpecific;
+    private string? _sourceCodeActionV1 = TestHelper.GetSC().sourceCodeActionV1;
+    private string? _sourceCodeActionV2 = TestHelper.GetSC().sourceCodeActionV2;
+    private string? _sourceCodeActionV3 = TestHelper.GetSC().sourceCodeActionV3;
+    private string? _sourceCodeVaccineAction = TestHelper.GetSC().sourceCodeVaccineAction;
+    private string? _sourceCodePedia = TestHelper.GetSC().sourceCodePedia;
+    private List<string>? _sourceCodes = TestHelper.GetSC(includeCondInList: false).sourceCodes;
 
     [TestInitialize]
     public
      void Setup()
     {
         ActionResultVersionSpecific = "[Message contains either failure or succes: ] ";
-        ScriptManager = EmberMethods.GetNewScriptManagerInstance();
-        InternalScriptManager = new EmberInternalFacade(ScriptManager);
-        ScriptManager.DeleteAllData();
-        em = new EmberMethods(ScriptManager!);
+        _ScriptManager = EmberMethods.GetNewScriptManagerInstance();
+        _InternalScriptManager = new EmberInternalFacade(_ScriptManager);
+        _ScriptManager.DeleteAllData();
+        _em = new EmberMethods(_ScriptManager!);
         ActionResultVersionSpecific = "[Message contains either failure or succes: ] ";
-        obj = em.ScriptObjects();
-        data = new DataV1.MockData(labOrder: obj.labOrder, patient: obj.patient, consoleLogger: obj.logger,
-        dataAccess: obj.testDataAccess, vaccine: obj.vaccine);
+        _obj = _em.ScriptObjects();
+        _data = new DataV1.MockData(labOrder: _obj.labOrder, patient: _obj.patient, consoleLogger: _obj.logger,
+        dataAccess: _obj.testDataAccess, vaccine: _obj.vaccine);
     }
 
     [TestMethod]
@@ -43,23 +43,23 @@ public class EmberInternalFacadeTests
         ActionResultV3.ActionResult ar;
         string src;
 
-        src = sourceCodeVaccineAction!;
-        ScriptManager = EmberMethods.GetNewScriptManagerInstance();
+        src = _sourceCodeVaccineAction!;
+        _ScriptManager = EmberMethods.GetNewScriptManagerInstance();
 
-        EmberInternalFacade InternalScriptManager = new EmberInternalFacade(ScriptManager);
+        EmberInternalFacade InternalScriptManager = new EmberInternalFacade(_ScriptManager);
 
-        id = await ScriptManager.CreateScript(sourceCodeActionV2!);
+        id = await _ScriptManager.CreateScript(_sourceCodeActionV2!);
 
         // DataV1.MockData data = new DataV1.MockData(labOrder: obj.labOrder, patient: obj.patient, consoleLogger: obj.logger,
         //                 dataAccess: obj.testDataAccess, vaccine: obj.vaccine);
 
-        DataV2.DataV2 data = new DataV2.DataV2(labOrder: obj.labOrder, patient: obj.patient, consoleLogger: obj.logger,
-                                dataAccess: obj.testDataAccess, vaccine: obj.vaccine);
+        DataV2.DataV2 data = new DataV2.DataV2(labOrder: _obj.labOrder, patient: _obj.patient, consoleLogger: _obj.logger,
+                                dataAccess: _obj.testDataAccess, vaccine: _obj.vaccine);
 
 
         // ActiveGeneratorContext ctx = new ActiveGeneratorContext(labOrder: obj.labOrder, vaccine: obj.vaccine);
 
-        var ctx = InternalScriptManager.CreateContext(obj.labOrder, obj.vaccine);
+        var ctx = InternalScriptManager.CreateContext(_obj.labOrder, _obj.vaccine);
 
         ar = await InternalScriptManager.ExecuteScriptById(id, ctx!);
 
@@ -78,10 +78,10 @@ public class EmberInternalFacadeTests
     public async Task TestingQueryAndExecutionByNameAndType()
     {
         ScriptNameType scriptTuple;
-        scriptTuple = await ScriptManager!.CreateScriptUsingNameType(sourceCodeActionV1!);
+        scriptTuple = await _ScriptManager!.CreateScriptUsingNameType(_sourceCodeActionV1!);
 
-        var ctx = InternalScriptManager!.CreateContext(obj.labOrder, obj.vaccine);
-        ActiveActionResult ar = await InternalScriptManager.ExecuteScriptByNameAndType(scriptTuple.Name, scriptTuple.Type, ctx);
+        var ctx = _InternalScriptManager!.CreateContext(_obj.labOrder, _obj.vaccine);
+        ActiveActionResult ar = await _InternalScriptManager.ExecuteScriptByNameAndType(scriptTuple.Name, scriptTuple.Type, ctx);
 
         Console.WriteLine("Name: " + scriptTuple.Name + ", ScriptType: " + scriptTuple.Type);
         Console.WriteLine("Type name: " + ar.GetType().FullName);
@@ -93,13 +93,13 @@ public class EmberInternalFacadeTests
 
         Exception e = await Assert.ThrowsExceptionAsync<Ember.Scripting.DbHelperException>(async () =>
          {
-             scriptTuple = await ScriptManager!.CreateScriptUsingNameType(sourceCodeActionV1!);
+             scriptTuple = await _ScriptManager!.CreateScriptUsingNameType(_sourceCodeActionV1!);
          });
         Console.WriteLine(e.ToString());
 
-        scriptTuple = await ScriptManager!.CreateScriptUsingNameType(sourceCodeActionV3!);
-        ctx = InternalScriptManager!.CreateContext(obj.labOrder, obj.vaccine);
-        ar = await InternalScriptManager.ExecuteScriptByNameAndType(scriptTuple.Name, scriptTuple.Type, ctx);
+        scriptTuple = await _ScriptManager!.CreateScriptUsingNameType(_sourceCodeActionV3!);
+        ctx = _InternalScriptManager!.CreateContext(_obj.labOrder, _obj.vaccine);
+        ar = await _InternalScriptManager.ExecuteScriptByNameAndType(scriptTuple.Name, scriptTuple.Type, ctx);
 
         Console.WriteLine("Name: " + scriptTuple.Name + ", ScriptType: " + scriptTuple.Type);
         Console.WriteLine("Type name: " + ar.GetType().FullName);
@@ -115,15 +115,15 @@ public class EmberInternalFacadeTests
     public async Task TestContextFactoryDI()
     {
         ScriptNameType scriptTuple;
-        scriptTuple = await ScriptManager!.CreateScriptUsingNameType(sourceCodeActionV1!);
+        scriptTuple = await _ScriptManager!.CreateScriptUsingNameType(_sourceCodeActionV1!);
 
-        var objs = em!.ScriptObjects();
+        var objs = _em!.ScriptObjects();
         var services = new ServiceCollection();
         Sandbox.ScriptingServiceCollectionExtensions.AddSandboxData
-        (services, obj.labOrder, obj.patient, obj.logger, obj.testDataAccess, obj.vaccine);
+        (services, _obj.labOrder, _obj.patient, _obj.logger, _obj.testDataAccess, _obj.vaccine);
         using var provider = services.BuildServiceProvider();
         ActiveGeneratorContext ctx = (ActiveGeneratorContext)ActiveContextFactory.Create(provider);
-        ActiveActionResult ar = await InternalScriptManager!.ExecuteScriptByNameAndType(scriptTuple.Name, scriptTuple.Type, ctx);
+        ActiveActionResult ar = await _InternalScriptManager!.ExecuteScriptByNameAndType(scriptTuple.Name, scriptTuple.Type, ctx);
 
         Console.WriteLine("Name: " + scriptTuple.Name + ", ScriptType: " + scriptTuple.Type);
         Console.WriteLine("Type name: " + ar.GetType().FullName);

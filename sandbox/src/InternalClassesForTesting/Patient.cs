@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Ember.Scripting;
 
 // Interface for script access (safe subset)
-public interface PatientInterface
+public interface IPatientInterface
 {
     string PatientId { get; }
     string FirstName { get; }
@@ -15,7 +15,7 @@ public interface PatientInterface
 }
 
 // Full Implementation
-internal class Patient : PatientInterface
+internal class Patient : IPatientInterface
 {
     public string PatientId { get; private set; }
     public string FirstName { get; private set; }

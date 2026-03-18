@@ -8,8 +8,8 @@ using Serilog.Sinks.Grafana.Loki;
 
 public class LoggerForScripting
 {
-    private Serilog.Core.Logger? serilogLogger = null;
-    private ILoggerFactory? factory = null;
+    private Serilog.Core.Logger? _serilogLogger = null;
+    private ILoggerFactory? _factory = null;
 
     //  public BlazorSink MemorySink { get; } = new BlazorSink();
 
@@ -38,27 +38,27 @@ public class LoggerForScripting
     // public Microsoft.Extensions.Logging.Logger<ScriptManagerFacade> GetMicrosoftLogger()
     public Microsoft.Extensions.Logging.Logger<T> GetMicrosoftLogger<T>()
     {
-        if (serilogLogger == null)
+        if (_serilogLogger == null)
         {
-            serilogLogger = SetUpAndGetSeriLogger();
-            Log.Logger = serilogLogger;
+            _serilogLogger = SetUpAndGetSeriLogger();
+            Log.Logger = _serilogLogger;
         }
 
-        if (factory == null)
+        if (_factory == null)
         {
-            factory = new SerilogLoggerFactory(serilogLogger);
+            _factory = new SerilogLoggerFactory(_serilogLogger);
         }
 
         // using var factory = new SerilogLoggerFactory(serilogLogger);
 
         Microsoft.Extensions.Logging.Logger<T>? microsoftLogger =
-              new Microsoft.Extensions.Logging.Logger<T>(factory);
+              new Microsoft.Extensions.Logging.Logger<T>(_factory);
         return microsoftLogger;
     }
     public void Dispose()
     {
-        factory?.Dispose();
-        serilogLogger?.Dispose();
+        _factory?.Dispose();
+        _serilogLogger?.Dispose();
     }
     // Source - https://stackoverflow.com/a/68559937
     // Posted by mihails.kuzmins, modified by community. See post 'Timeline' for change history

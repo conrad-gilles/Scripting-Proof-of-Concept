@@ -9,10 +9,10 @@ namespace Ember.Scripting;
 
 internal class ScriptCompiler
 {
-    private readonly List<MetadataReference>? ReferencesRO = null;
-    private readonly ILogger<ScriptCompiler> Logger;
+    private readonly List<MetadataReference>? _referencesRO = null;
+    private readonly ILogger<ScriptCompiler> _logger;
 
-    private readonly List<MetadataReference> StandardRefrencesForAllScripts = [MetadataReference.CreateFromFile(typeof(object).Assembly.Location),
+    private readonly List<MetadataReference> _standardRefrencesForAllScripts = [MetadataReference.CreateFromFile(typeof(object).Assembly.Location),
                         MetadataReference.CreateFromFile(typeof(Console).Assembly.Location),
                         MetadataReference.CreateFromFile(Assembly.Load("System.Runtime").Location),
                         MetadataReference.CreateFromFile(typeof(Task<>).Assembly.Location),
@@ -20,32 +20,32 @@ internal class ScriptCompiler
                         ];
     public ScriptCompiler(List<MetadataReference> referencesRO, ILogger<ScriptCompiler> logger)
     {
-        ReferencesRO = referencesRO;
-        Logger = logger;
+        _referencesRO = referencesRO;
+        _logger = logger;
     }
     public byte[] RunCompilation(string script, int? apiVersion = null, ValidationRecord? metaData = null) //references param there to enable later on users to define custom references
     {
-        Logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(RunCompilation), nameof(ScriptCompiler));
+        _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(RunCompilation), nameof(ScriptCompiler));
         if (metaData != null)
         {
-            Logger.LogTrace("Trying to compile script:" + metaData.ClassName);
+            _logger.LogTrace("Trying to compile script:" + metaData.ClassName);
         }
         try
         {
-            ReferencesRO!.AddRange(StandardRefrencesForAllScripts);
+            _referencesRO!.AddRange(_standardRefrencesForAllScripts);
 
             List<MetadataReference>? references = [];
 
             //Takes C# source string and turns it into a "Roslyn parsed syntax tree representation" of a normal C# file
             SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(script);
-            if (ReferencesRO != null)
+            if (_referencesRO != null)
             {
-                Logger.LogInformation("References 2 added references in {MethodName}.", nameof(RunCompilation));
-                references = ReferencesRO;
+                _logger.LogInformation("References 2 added references in {MethodName}.", nameof(RunCompilation));
+                references = _referencesRO;
             }
             if (apiVersion != null)
             {
-                Logger.LogInformation("Added custom references in {MethodName}.", nameof(RunCompilation));  //if this works remove the if references is null if stat above
+                _logger.LogInformation("Added custom references in {MethodName}.", nameof(RunCompilation));  //if this works remove the if references is null if stat above
                 references = GetReferencesForOldVersion((int)apiVersion);
             }
             //this initiates the process of the compilation (does not produce bytes yet), it binds the source code with the refrences and the config options
@@ -72,10 +72,10 @@ internal class ScriptCompiler
 
                 foreach (var diag in emitResult.Diagnostics)
                 {
-                    Logger.LogInformation(diag.ToString());
+                    _logger.LogInformation(diag.ToString());
                 }
                 ;   //Iterates through the list of compiler messages
-                Logger.LogError("Error in ScriptCompiler RunCompilation method compilation probably failed in if (!emitResult.Success)");
+                _logger.LogError("Error in ScriptCompiler RunCompilation method compilation probably failed in if (!emitResult.Success)");
                 throw new CompilationFailedException("Error in ScriptCompiler RunCompilation method compilation probably failed in if (!emitResult.Success) errors: " + errors);
             }
 
@@ -84,7 +84,7 @@ internal class ScriptCompiler
         }
         catch (Exception e)
         {
-            Logger.LogError(e.ToString());
+            _logger.LogError(e.ToString());
             throw new CompilationFailedException("RunCompilation failed exception caught.", e);
         }
 
@@ -93,14 +93,14 @@ internal class ScriptCompiler
     public INamedTypeSymbol GetBaseType(string script)
     {
         SyntaxTree tree = CSharpSyntaxTree.ParseText(script);   //being called twice also in RunCompilation() might be better for performance to remove twice but also you want to be able to compile without having to parse always
-        var Mscorlib = MetadataReference.CreateFromFile(typeof(object).Assembly.Location);
+        var mscorlib = MetadataReference.CreateFromFile(typeof(object).Assembly.Location);
         var compilation = CSharpCompilation.Create("MyCompilation",
-            syntaxTrees: new[] { tree }, references: new[] { Mscorlib });   // i might be able to use this method to init the refrences also above?
+            syntaxTrees: new[] { tree }, references: new[] { mscorlib });   // i might be able to use this method to init the refrences also above?
         var model = compilation.GetSemanticModel(tree);
         var classesInTree = tree.GetRoot().DescendantNodes().OfType<ClassDeclarationSyntax>();
         if (classesInTree.Count() > 1)
         {
-            Logger.LogError("More Than one class found in Script string.");
+            _logger.LogError("More Than one class found in Script string.");
             throw new MoreThanOneClassFoundInScriptException("More Than one class found in Script string. in if (classesInTree.Count() > 1)"); //this might throw even if there is one class in script if compiler adds classes or something like that, so if it does maybe change this if statement
         }
         var myClass = classesInTree.Last();
@@ -110,7 +110,7 @@ internal class ScriptCompiler
     }
     public ValidationRecord BasicValidationBeforeCompiling(string script)//record
     {
-        Logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(BasicValidationBeforeCompiling), nameof(ScriptCompiler));
+        _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(BasicValidationBeforeCompiling), nameof(ScriptCompiler));
         try
         {
             //Does basic validation such as correct interface usage, or if only one class is in the script file.
@@ -120,14 +120,14 @@ internal class ScriptCompiler
             // Source - https://stackoverflow.com/a/33095466
 
             SyntaxTree tree = CSharpSyntaxTree.ParseText(script);   //being called twice also in RunCompilation() might be better for performance to remove twice but also you want to be able to compile without having to parse always
-            var Mscorlib = MetadataReference.CreateFromFile(typeof(object).Assembly.Location);
+            var mscorlib = MetadataReference.CreateFromFile(typeof(object).Assembly.Location);
             var compilation = CSharpCompilation.Create("MyCompilation",
-                syntaxTrees: new[] { tree }, references: new[] { Mscorlib });   // i might be able to use this method to init the refrences also above?
+                syntaxTrees: new[] { tree }, references: new[] { mscorlib });   // i might be able to use this method to init the refrences also above?
             var model = compilation.GetSemanticModel(tree);
             var classesInTree = tree.GetRoot().DescendantNodes().OfType<ClassDeclarationSyntax>();
             if (classesInTree.Count() > 1)
             {
-                Logger.LogError("More Than one class found in Script string.");
+                _logger.LogError("More Than one class found in Script string.");
                 throw new MoreThanOneClassFoundInScriptException("More Than one class found in Script string. in if (classesInTree.Count() > 1)"); //this might throw even if there is one class in script if compiler adds classes or something like that, so if it does maybe change this if statement
             }
             var myClass = classesInTree.Last();
@@ -154,15 +154,15 @@ internal class ScriptCompiler
             }
 
             // Console.WriteLine("Extracted Context Parameter Type: " + contextParameterTypeName);
-            Logger.LogTrace("Extracted Context Parameter Type: " + contextParameterTypeName);
+            _logger.LogTrace("Extracted Context Parameter Type: " + contextParameterTypeName);
 
             Dictionary<int, Type> activeContexts = ContextVersionScanner.GetInterfaceDictionary();
             // Console.WriteLine("Start of dict String:");
-            Logger.LogTrace("Start of dict String:");
+            _logger.LogTrace("Start of dict String:");
             foreach (var pair in activeContexts)
             {
                 // Console.WriteLine("Key: " + pair.Key + ", Value: " + pair.Value);
-                Logger.LogTrace("Key: " + pair.Key + ", Value: " + pair.Value);
+                _logger.LogTrace("Key: " + pair.Key + ", Value: " + pair.Value);
             }
 
             foreach (var ctx in activeContexts)
@@ -185,12 +185,12 @@ internal class ScriptCompiler
             }
             if (baseTypeName == null || className == null)
             {
-                Logger.LogError("BaseTypeName or classname null in BasicValidationBeforeCompiling.");
+                _logger.LogError("BaseTypeName or classname null in BasicValidationBeforeCompiling.");
                 throw new ClassNameOrBaseNameNullException("BaseTypeName or classname null in BasicValidationBeforeCompiling. in if (baseTypeName == null || className == null)");
             }
-            Logger.LogTrace("Class Name = " + className);
-            Logger.LogTrace("BaseClass Name = " + baseTypeName);
-            Logger.LogTrace("Version Int = " + versionInt);
+            _logger.LogTrace("Class Name = " + className);
+            _logger.LogTrace("BaseClass Name = " + baseTypeName);
+            _logger.LogTrace("Version Int = " + versionInt);
 
             ValidateNamespaceUsage(tree, model);
             ValidationRecord returnedRecord = new ValidationRecord
@@ -204,14 +204,14 @@ internal class ScriptCompiler
         }
         catch (Exception e)
         {
-            Logger.LogError("BasicValidation failed:" + e.ToString());
+            _logger.LogError("BasicValidation failed:" + e.ToString());
             throw new ValidationBeforeCompilationException(e.ToString(), e);
         }
 
     }
     private void ValidateNamespaceUsage(SyntaxTree tree, SemanticModel model)
     {
-        Logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(ValidateNamespaceUsage), nameof(ScriptCompiler));
+        _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(ValidateNamespaceUsage), nameof(ScriptCompiler));
         List<string> illegalNamespaces = [
 
                 "System.IO",
@@ -241,7 +241,7 @@ internal class ScriptCompiler
             {
                 if (illegal == usingItem || usingItem.StartsWith(illegal + "."))  //to prevent usage of for example System.IO and then System.IO.Compression
                 {
-                    Logger.LogError("Script tried to use a illegal namespace.");
+                    _logger.LogError("Script tried to use a illegal namespace.");
                     throw new ForbiddenNamespaceException($"Script uses forbidden namespace: {illegal}");
                 }
             }
@@ -253,7 +253,7 @@ internal class ScriptCompiler
                     var nameSpaceEx = symbol.ContainingNamespace?.ToString();
                     if (nameSpaceEx != null && (illegal == nameSpaceEx || nameSpaceEx.StartsWith(illegal + ".")))
                     {
-                        Logger.LogError("Script tried to use a illegal type.");
+                        _logger.LogError("Script tried to use a illegal type.");
                         throw new ForbiddenNamespaceException($"Usage of forbidden type: {symbol.ToDisplayString()}");
                     }
                 }
@@ -264,7 +264,7 @@ internal class ScriptCompiler
     public bool IsTheSameTree(string script1, string script2)
     {
         //This function i quickly generated with AI
-        Logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(IsTheSameTree), nameof(ScriptCompiler));
+        _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(IsTheSameTree), nameof(ScriptCompiler));
         SyntaxTree tree1 = CSharpSyntaxTree.ParseText(script1);
         SyntaxTree tree2 = CSharpSyntaxTree.ParseText(script2);
 
@@ -275,8 +275,8 @@ internal class ScriptCompiler
 
     public List<MetadataReference> GetReferencesForOldVersion(int version, List<string>? customDlls = null, bool loadCurrentRT = true)  //todo fix this
     {
-        var stdReferences = StandardRefrencesForAllScripts;
-        Logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(GetReferencesForOldVersion), nameof(ScriptCompiler));
+        var stdReferences = _standardRefrencesForAllScripts;
+        _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(GetReferencesForOldVersion), nameof(ScriptCompiler));
         var references = new List<MetadataReference>();
 
         string tempPath = Path.GetFullPath(
@@ -288,7 +288,7 @@ internal class ScriptCompiler
 
         if (!Directory.Exists(versionPath))
         {
-            Logger.LogError("Could not find references.");
+            _logger.LogError("Could not find references.");
             throw new Exception($"References for version {version} not found at {versionPath}");
         }
 
@@ -303,13 +303,13 @@ internal class ScriptCompiler
 
         if (loadCurrentRT)
         {
-            Logger.LogTrace("loadCurrentRT true.");
+            _logger.LogTrace("loadCurrentRT true.");
             dllsToLoad = ["Framework.dll"];
             references.AddRange(stdReferences);
         }
         if (customDlls != null)
         {
-            Logger.LogTrace("customDlls was not not null");
+            _logger.LogTrace("customDlls was not not null");
             foreach (var item in customDlls)
             {
                 dllsToLoad.Add(item);

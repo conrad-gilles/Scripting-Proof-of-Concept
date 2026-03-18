@@ -1,28 +1,28 @@
 using Ember.Scripting;
 
 // Interfaces
-public interface ConsoleLoggerInterface
+public interface IConsoleLoggerInterface
 {
     void Info(string message);
     void Warning(string message);
     void Error(string message);
 }
 
-public interface DataAccessInterface
+public interface IDataAccessInterface
 {
     // Simulates fetching external data (e.g., "Is this doctor valid?")
     object? GetReferenceData(string category, string key);
 }
 
 // Implementations
-public class ConsoleLogger : ConsoleLoggerInterface
+public class ConsoleLogger : IConsoleLoggerInterface
 {
     public void Info(string message) => Console.WriteLine($"[INFO] {message}");
     public void Warning(string message) => Console.WriteLine($"[WARN] {message}");
     public void Error(string message) => Console.WriteLine($"[ERROR] {message}");
 }
 
-public class DataAccess : DataAccessInterface
+public class DataAccess : IDataAccessInterface
 {
     public object? GetReferenceData(string category, string key)
     {

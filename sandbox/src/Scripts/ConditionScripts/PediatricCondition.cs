@@ -14,9 +14,9 @@ public class PediatricCondition : IGeneratorConditionScript<IGeneratorReadOnlyCo
 
     public async Task<bool> EvaluateAsync(IGeneratorReadOnlyContextV1.IGeneratorContext context)
     {
-        if (context.Patient.DateOfBirth.HasValue)
+        if (context.Patient2.DateOfBirth.HasValue)
         {
-            var age = DateTime.Now.Year - context.Patient.DateOfBirth.Value.Year;
+            var age = DateTime.Now.Year - context.Patient2.DateOfBirth.Value.Year;
             return age < 18 && context.LabOrder.Department == "Pediatrics";
         }
         // var example = context.LabOrder.OrderNumber;

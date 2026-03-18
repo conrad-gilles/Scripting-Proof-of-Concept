@@ -36,7 +36,7 @@ public class AddPediatricTestsV4 : GeneratorScriptsV3.IGeneratorActionScript
     // public async Task<ActionResult> ExecuteAsync(IGeneratorContext context)
     public async Task<ActionResultV3.ActionResult> ExecuteAsync(IGeneratorContext_V4.IGeneratorContext context)
     {
-        context.Logger.Info("Adding pediatric standard tests");
+        context.Logger2.Info("Adding pediatric standard tests");
 
         // Check if test already exists (might be auto-added by business rule)
         if (!context.LabOrder.HasTest("PED-BASIC"))
@@ -49,7 +49,7 @@ public class AddPediatricTestsV4 : GeneratorScriptsV3.IGeneratorActionScript
         double versionExample = context.LabOrder.RandomNewDouble;    //example of newer version
         Console.WriteLine(versionExample);
 
-        string exampleV3 = context.LabOrder.randomNewFunctionInV3("Gilles");
+        string exampleV3 = context.LabOrder.RandomNewFunctionInV3("Gilles");
         Console.WriteLine("Return also works if here:" + exampleV3);
 
         return ActionResultV3.ActionResult.Success("Pediatric tests added V3");

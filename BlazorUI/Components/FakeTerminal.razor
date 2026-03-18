@@ -23,14 +23,14 @@
         @foreach (var log in ConsoleService.Logs)
         {
             <div class="log-line mb-1">
-                <span class="text-secondary">[@log.Timestamp.ToString("HH:mm:ss")]</span>
-                @if (log.Message.Contains("Error"))
+                <span class="text-secondary">[@log.timestamp.ToString("HH:mm:ss")]</span>
+                @if (log.message.Contains("Error"))
                 {
-                    <span class="text-danger">@log.Message</span>
+                    <span class="text-danger">@log.message</span>
                 }
                 else
                 {
-                    <span class="text-success">@log.Message</span>
+                    <span class="text-success">@log.message</span>
                 }
             </div>
         }

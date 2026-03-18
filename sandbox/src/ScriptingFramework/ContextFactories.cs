@@ -24,7 +24,7 @@ namespace GeneratorContextV4
 {
     public class ContextFactory : Ember.Scripting.IContextFactory
     {
-        public static GeneratorContextSF Create(ILabOrderInterfaceV3 labOrder, PatientInterface patient, ConsoleLoggerInterface logger, DataAccessInterface data)
+        public static GeneratorContextSF Create(ILabOrderInterfaceV3 labOrder, IPatientInterface patient, IConsoleLoggerInterface logger, IDataAccessInterface data)
         {
             return new GeneratorContext(labOrder, patient, logger, data);
         }
@@ -44,7 +44,7 @@ namespace GeneratorContextV3
 {
     public class ContextFactory : Ember.Scripting.IContextFactory
     {
-        public static GeneratorContextSF Create(ILabOrderInterfaceV2 labOrder, PatientInterface patient, ConsoleLoggerInterface logger, DataAccessInterface data)
+        public static GeneratorContextSF Create(ILabOrderInterfaceV2 labOrder, IPatientInterface patient, IConsoleLoggerInterface logger, IDataAccessInterface data)
         {
             return new GeneratorContext(labOrder, patient, logger, data);
         }
@@ -64,7 +64,7 @@ namespace RWContextV2
 {
     public class ContextFactory : Ember.Scripting.IContextFactory
     {
-        public static GeneratorContextSF Create(ILabOrderRWInterface labOrder, PatientInterface patient, ConsoleLoggerInterface logger, DataAccessInterface data)
+        public static GeneratorContextSF Create(ILabOrderRWInterface labOrder, IPatientInterface patient, IConsoleLoggerInterface logger, IDataAccessInterface data)
         {
             return new GeneratorContext(labOrder, patient, logger, data);
         }
@@ -84,7 +84,7 @@ namespace ReadOnlyContextV1
 {
     public class ContextFactory : Ember.Scripting.IContextFactory
     {
-        public static GeneratorContextSF Create(ILabOrderInterface labOrder, PatientInterface patient, ConsoleLoggerInterface logger, DataAccessInterface data)
+        public static GeneratorContextSF Create(ILabOrderInterface labOrder, IPatientInterface patient, IConsoleLoggerInterface logger, IDataAccessInterface data)
         {
             return new GeneratorContext(labOrder, patient, logger, data);
         }

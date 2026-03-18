@@ -21,9 +21,9 @@ internal class EmberInternalFacade
         return ar;
     }
 
-    public async Task<ActiveActionResult> ExecuteScriptByNameAndType(string Name, ScriptTypes scriptType, ActiveGeneratorContext ctx) //maybe make generic
+    public async Task<ActiveActionResult> ExecuteScriptByNameAndType(string name, ScriptTypes scriptType, ActiveGeneratorContext ctx) //maybe make generic
     {
-        Guid id = await ScriptManager.GetScriptId(Name, scriptType);
+        Guid id = await ScriptManager.GetScriptId(name, scriptType);
         var cf = new ContextFactory(ScriptManager);
         GeneratorContextSF context = await cf.CreateByDowngrade(id, ctx);
         var result = await ScriptManager.ExecuteScriptById(id, context);

@@ -10,9 +10,9 @@ namespace IGeneratorReadOnlyContextV1
     public interface IGeneratorContext : IGeneratorBaseInterfaceSF
     {
         ILabOrderInterface LabOrder { get; }      // Read current order data
-        PatientInterface Patient { get; }     // Read patient data
-        ConsoleLoggerInterface Logger { get; }
-        DataAccessInterface Data { get; }
+        IPatientInterface Patient2 { get; }     // Read patient data
+        IConsoleLoggerInterface Logger2 { get; }
+        IDataAccessInterface Data2 { get; }
     }
 }
 
@@ -21,7 +21,7 @@ namespace IGeneratorContext_V2
     [MetaDataIGeneratorIntrfc(version: 2)]
     public interface IGeneratorContext : IGeneratorReadOnlyContextV1.IGeneratorContext
     {
-        new ILabOrderRWInterface LabOrder { get; }
+        new ILabOrderRWInterface LabOrder2 { get; }
 
         // List<Patient> Patients;
 
@@ -66,25 +66,25 @@ namespace ReadOnlyContextV1
     [MetaDataGeneratorClass(version: 1)]
     public class GeneratorContext : Ember.Scripting.GeneratorContextSF, IGeneratorReadOnlyContextV1.IGeneratorContext
     {
-        public ILabOrderInterface labOrder;
-        public PatientInterface patient;
+        public ILabOrderInterface LabOrder;
+        public IPatientInterface Patient;
 
-        public ConsoleLoggerInterface logger;
-        public DataAccessInterface data;
+        public IConsoleLoggerInterface Logger;
+        public IDataAccessInterface Data;
 
-        public GeneratorContext(ILabOrderInterface pLabOrder, PatientInterface pPatient, ConsoleLoggerInterface plogger, DataAccessInterface pdata)
+        public GeneratorContext(ILabOrderInterface labOrder, IPatientInterface patient, IConsoleLoggerInterface logger, IDataAccessInterface data)
         {
-            labOrder = pLabOrder;
-            patient = pPatient;
-            logger = plogger;
-            data = pdata;
+            LabOrder = labOrder;
+            Patient = patient;
+            Logger = logger;
+            Data = data;
 
         }
 
-        ILabOrderInterface IGeneratorReadOnlyContextV1.IGeneratorContext.LabOrder => labOrder;
-        PatientInterface IGeneratorReadOnlyContextV1.IGeneratorContext.Patient => patient;
-        ConsoleLoggerInterface IGeneratorReadOnlyContextV1.IGeneratorContext.Logger => logger;
-        DataAccessInterface IGeneratorReadOnlyContextV1.IGeneratorContext.Data => data;
+        ILabOrderInterface IGeneratorReadOnlyContextV1.IGeneratorContext.LabOrder => LabOrder;
+        IPatientInterface IGeneratorReadOnlyContextV1.IGeneratorContext.Patient2 => Patient;
+        IConsoleLoggerInterface IGeneratorReadOnlyContextV1.IGeneratorContext.Logger2 => Logger;
+        IDataAccessInterface IGeneratorReadOnlyContextV1.IGeneratorContext.Data2 => Data;
 
         public override Ember.Scripting.GeneratorContextSF CreateUsingData(DataAbstractClass data)
         {
@@ -116,31 +116,31 @@ namespace RWContextV2
     [MetaDataGeneratorClass(version: 2)]
     public class GeneratorContext : Ember.Scripting.GeneratorContextSF, IGeneratorContext_V2.IGeneratorContext
     {
-        public ILabOrderRWInterface labOrder;
-        public PatientInterface patient;
+        public ILabOrderRWInterface LabOrder;
+        public IPatientInterface Patient;
 
-        public ConsoleLoggerInterface logger;
-        public DataAccessInterface data;
+        public IConsoleLoggerInterface Logger;
+        public IDataAccessInterface Data;
 
 
-        public GeneratorContext(ILabOrderRWInterface pLabOrder, PatientInterface pPatient, ConsoleLoggerInterface plogger, DataAccessInterface pdata)
+        public GeneratorContext(ILabOrderRWInterface labOrder, IPatientInterface patient, IConsoleLoggerInterface logger, IDataAccessInterface data)
         {
-            labOrder = pLabOrder;
-            patient = pPatient;
-            logger = plogger;
-            data = pdata;
+            LabOrder = labOrder;
+            Patient = patient;
+            Logger = logger;
+            Data = data;
 
         }
 
-        public ILabOrderRWInterface LabOrder => labOrder;
+        public ILabOrderRWInterface LabOrder2 => LabOrder;
 
-        public PatientInterface Patient => patient;
+        public IPatientInterface Patient2 => Patient;
 
-        public ConsoleLoggerInterface Logger => logger;
+        public IConsoleLoggerInterface Logger2 => Logger;
 
-        public DataAccessInterface Data => data;
+        public IDataAccessInterface Data2 => Data;
 
-        ILabOrderInterface IGeneratorReadOnlyContextV1.IGeneratorContext.LabOrder => LabOrder;
+        ILabOrderInterface IGeneratorReadOnlyContextV1.IGeneratorContext.LabOrder => LabOrder2;
         public override Ember.Scripting.GeneratorContextSF CreateUsingData(DataAbstractClass data)
         {
             try
@@ -161,8 +161,8 @@ namespace RWContextV2
         {
             try
             {
-                ILabOrderInterface labOrderV1 = (ILabOrderInterface)labOrder;
-                Patient patientV1 = (Patient)patient;
+                ILabOrderInterface labOrderV1 = (ILabOrderInterface)LabOrder;
+                Patient patientV1 = (Patient)Patient;
                 ConsoleLogger loggerV1 = new ConsoleLogger();
                 DataAccess dataV1 = new DataAccess();
                 return new ReadOnlyContextV1.GeneratorContext(labOrderV1!, patientV1!, loggerV1!, dataV1!);
@@ -180,23 +180,23 @@ namespace GeneratorContextV3
     [MetaDataGeneratorClass(version: 3)]
     public class GeneratorContext : RWContextV2.GeneratorContext, IGeneratorContext_V3.IGeneratorContext
     {
-        public ILabOrderInterfaceV2 labOrderV2;
-        public new PatientInterface patient;
+        public ILabOrderInterfaceV2 LabOrderV2;
+        public new IPatientInterface Patient;
 
-        public new ConsoleLoggerInterface logger;
-        public new DataAccessInterface data;
+        public new IConsoleLoggerInterface Logger;
+        public new IDataAccessInterface Data;
 
 
-        public GeneratorContext(ILabOrderInterfaceV2 pLabOrder, PatientInterface pPatient, ConsoleLoggerInterface plogger, DataAccessInterface pdata)
-        : base(pLabOrder, pPatient, plogger, pdata)
+        public GeneratorContext(ILabOrderInterfaceV2 labOrder, IPatientInterface patient, IConsoleLoggerInterface logger, IDataAccessInterface data)
+        : base(labOrder, patient, logger, data)
         {
-            labOrderV2 = pLabOrder;
-            patient = pPatient;
-            logger = plogger;
-            data = pdata;
+            LabOrderV2 = labOrder;
+            Patient = patient;
+            Logger = logger;
+            Data = data;
 
         }
-        ILabOrderInterfaceV2 IGeneratorContext_V3.IGeneratorContext.LabOrder => labOrderV2;
+        ILabOrderInterfaceV2 IGeneratorContext_V3.IGeneratorContext.LabOrder => LabOrderV2;
 
         public override Ember.Scripting.GeneratorContextSF CreateUsingData(DataAbstractClass data)
         {
@@ -219,8 +219,8 @@ namespace GeneratorContextV3
         {
             try
             {
-                ILabOrderRWInterface labOrderV22 = (ILabOrderRWInterface)labOrderV2;
-                Patient patientV2 = (Patient)patient;
+                ILabOrderRWInterface labOrderV22 = (ILabOrderRWInterface)LabOrderV2;
+                Patient patientV2 = (Patient)Patient;
                 ConsoleLogger loggerV2 = new ConsoleLogger();
                 DataAccess dataV2 = new DataAccess();
                 return new RWContextV2.GeneratorContext(labOrderV22!, patientV2!, loggerV2!, dataV2!);
@@ -238,23 +238,23 @@ namespace GeneratorContextV4
     [MetaDataGeneratorClass(version: 4)]
     public class GeneratorContext : GeneratorContextV3.GeneratorContext, IGeneratorContext_V4.IGeneratorContext  //todo implement Adapter pattern
     {
-        public ILabOrderInterfaceV3 labOrderV3;
-        public new PatientInterface patient;
+        public ILabOrderInterfaceV3 LabOrderV3;
+        public new IPatientInterface Patient;
 
-        public new ConsoleLoggerInterface logger;
-        public new DataAccessInterface data;
+        public new IConsoleLoggerInterface Logger;
+        public new IDataAccessInterface Data;
 
 
-        public GeneratorContext(ILabOrderInterfaceV3 pLabOrderV3, PatientInterface pPatient, ConsoleLoggerInterface plogger, DataAccessInterface pdata)
-        : base(pLabOrderV3, pPatient, plogger, pdata)
+        public GeneratorContext(ILabOrderInterfaceV3 labOrderV3, IPatientInterface patient, IConsoleLoggerInterface logger, IDataAccessInterface data)
+        : base(labOrderV3, patient, logger, data)
         {
-            labOrderV3 = pLabOrderV3;
-            patient = pPatient;
-            logger = plogger;
-            data = pdata;
+            LabOrderV3 = labOrderV3;
+            Patient = patient;
+            Logger = logger;
+            Data = data;
 
         }
-        ILabOrderInterfaceV3 IGeneratorContext_V4.IGeneratorContext.LabOrder => labOrderV3;
+        ILabOrderInterfaceV3 IGeneratorContext_V4.IGeneratorContext.LabOrder => LabOrderV3;
 
         public override Ember.Scripting.GeneratorContextSF CreateUsingData(DataAbstractClass data)
         {
@@ -277,8 +277,8 @@ namespace GeneratorContextV4
         {
             try
             {
-                ILabOrderInterfaceV2 labOrderV33 = (ILabOrderInterfaceV2)labOrderV3;
-                Patient patientV3 = (Patient)patient;
+                ILabOrderInterfaceV2 labOrderV33 = (ILabOrderInterfaceV2)LabOrderV3;
+                Patient patientV3 = (Patient)Patient;
                 ConsoleLogger loggerV3 = new ConsoleLogger();
                 DataAccess dataV3 = new DataAccess();
                 return new GeneratorContextV3.GeneratorContext(labOrderV33!, patientV3!, loggerV3!, dataV3!);

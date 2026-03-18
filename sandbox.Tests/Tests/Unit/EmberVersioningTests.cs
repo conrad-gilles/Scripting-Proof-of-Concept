@@ -12,29 +12,29 @@ public class EmberVersioningTests
 {
 
 
-    ISccriptManagerDeleteAfter? facade;
-    EmberMethods? em;
-    DataV2.DataV2? data;
-    string? ActionResultVersionSpecific;
-    string? sourceCodeActionV1 = TestHelper.GetSC().sourceCodeActionV1;
-    string? sourceCodeActionV2 = TestHelper.GetSC().sourceCodeActionV2;
-    string? sourceCodeActionV3 = TestHelper.GetSC().sourceCodeActionV3;
-    string? sourceCodeVaccineAction = TestHelper.GetSC().sourceCodeVaccineAction;
-    string? sourceCodePedia = TestHelper.GetSC().sourceCodePedia;
-    // LoggerForScripting? logger;
-    List<string>? sourceCodes = TestHelper.GetSC(includeCondInList: false).sourceCodes;
+    private ISccriptManagerDeleteAfter? _facade;
+    private EmberMethods? _em;
+    private DataV2.DataV2? _data;
+    private string? _ActionResultVersionSpecific;
+    private string? _sourceCodeActionV1 = TestHelper.GetSC().sourceCodeActionV1;
+    private string? _sourceCodeActionV2 = TestHelper.GetSC().sourceCodeActionV2;
+    private string? _sourceCodeActionV3 = TestHelper.GetSC().sourceCodeActionV3;
+    private string? _sourceCodeVaccineAction = TestHelper.GetSC().sourceCodeVaccineAction;
+    private string? _sourceCodePedia = TestHelper.GetSC().sourceCodePedia;
+    // private LoggerForScripting? logger;
+    private List<string>? _sourceCodes = TestHelper.GetSC(includeCondInList: false).sourceCodes;
 
     [TestInitialize]
     public
      async Task Setup()
     {
         int v = EmberMethods.GetEmberApiVersion();
-        facade = EmberMethods.GetNewScriptManagerInstance(v);
-        em = new EmberMethods(facade);
-        await facade.DeleteAllData();
-        ActionResultVersionSpecific = "[Message contains either failure or succes: ] ";  //change this if action result version changes it will thraow cause of message contains
-        var obj = em!.ScriptObjects();
-        data = new DataV2.DataV2(labOrder: obj.labOrder, patient: obj.patient, consoleLogger: obj.logger,
+        _facade = EmberMethods.GetNewScriptManagerInstance(v);
+        _em = new EmberMethods(_facade);
+        await _facade.DeleteAllData();
+        _ActionResultVersionSpecific = "[Message contains either failure or succes: ] ";  //change this if action result version changes it will thraow cause of message contains
+        var obj = _em!.ScriptObjects();
+        _data = new DataV2.DataV2(labOrder: obj.labOrder, patient: obj.patient, consoleLogger: obj.logger,
                                 dataAccess: obj.testDataAccess, vaccine: obj.vaccine);
     }
 
@@ -44,21 +44,21 @@ public class EmberVersioningTests
     {
         int v = EmberMethods.GetEmberApiVersion();
 
-        facade = EmberMethods.GetNewScriptManagerInstance(v);
-        em = new EmberMethods(facade);
+        _facade = EmberMethods.GetNewScriptManagerInstance(v);
+        _em = new EmberMethods(_facade);
         // await facade!.EnsureDeletedCreated();
-        await facade!.DeleteAllData();
-        await ExecuteEachScript(facade, em);
-        int apiVersionInsideFacade = facade.GetRunningApiVersion();
+        await _facade!.DeleteAllData();
+        await ExecuteEachScript(_facade, _em);
+        int apiVersionInsideFacade = _facade.GetRunningApiVersion();
         Assert.IsTrue(apiVersionInsideFacade == v);
         Assert.IsTrue(apiVersionInsideFacade == 5);
 
-        facade = EmberMethods.GetNewScriptManagerInstance(1);
-        em = new EmberMethods(facade);
+        _facade = EmberMethods.GetNewScriptManagerInstance(1);
+        _em = new EmberMethods(_facade);
         // await facade!.EnsureDeletedCreated();
-        await facade!.DeleteAllData();
-        await ExecuteEachScript(facade, em);
-        apiVersionInsideFacade = facade.GetRunningApiVersion();
+        await _facade!.DeleteAllData();
+        await ExecuteEachScript(_facade, _em);
+        apiVersionInsideFacade = _facade.GetRunningApiVersion();
         Assert.IsTrue(apiVersionInsideFacade == EmberMethods.GetEmberApiVersion(testingDiffrentVersion: 1));
         Assert.IsTrue(apiVersionInsideFacade == 1);
     }
@@ -70,7 +70,7 @@ public class EmberVersioningTests
     public async Task<List<Guid>> SaturateDBAsync(ISccriptManagerDeleteAfter facade, EmberMethods rm)
     {
         List<Guid> ids = [];
-        foreach (var item in sourceCodes!)
+        foreach (var item in _sourceCodes!)
         {
             Guid id = await facade!.CreateScript(item!);
             ids.Add(id);
@@ -88,7 +88,7 @@ public class EmberVersioningTests
             if (resultBeforeUpgrade is ActionResultSF)
             {
                 ActionResultV3.ActionResult result = (ActionResultV3.ActionResult)EmberMethods.UpgradeActionResult(resultBeforeUpgrade);
-                string shouldReturn = ActionResultVersionSpecific + "Pediatric tests added";
+                string shouldReturn = _ActionResultVersionSpecific + "Pediatric tests added";
                 Assert.IsInstanceOfType(result, typeof(ActionResultSF));
                 Assert.IsInstanceOfType(result, typeof(ActionResultV3.ActionResult));
                 Console.WriteLine(result.ToString());
@@ -112,14 +112,14 @@ public class EmberVersioningTests
     {
         int v = EmberMethods.GetEmberApiVersion();
 
-        facade = EmberMethods.GetNewScriptManagerInstance(v);
-        em = new EmberMethods(facade);
+        _facade = EmberMethods.GetNewScriptManagerInstance(v);
+        _em = new EmberMethods(_facade);
         // await facade!.EnsureDeletedCreated();
-        await facade!.DeleteAllData();
-        await ExecuteEachScript(facade, em);
-        int apiVersionInsideFacade = facade.GetRunningApiVersion();
+        await _facade!.DeleteAllData();
+        await ExecuteEachScript(_facade, _em);
+        int apiVersionInsideFacade = _facade.GetRunningApiVersion();
 
-        var versionDict = await facade!.GetCachesForEachApiVersion();
+        var versionDict = await _facade!.GetCachesForEachApiVersion();
         foreach (var item in versionDict)
         {
             Console.WriteLine("Key: " + item.Key);
@@ -132,15 +132,15 @@ public class EmberVersioningTests
         Assert.IsTrue(apiVersionInsideFacade == v);
         Assert.IsTrue(apiVersionInsideFacade == 5);
 
-        facade = EmberMethods.GetNewScriptManagerInstance(1);
-        em = new EmberMethods(facade);
-        await facade.DeleteAllData();
-        await ExecuteEachScript(facade, em);
-        apiVersionInsideFacade = facade.GetRunningApiVersion();
+        _facade = EmberMethods.GetNewScriptManagerInstance(1);
+        _em = new EmberMethods(_facade);
+        await _facade.DeleteAllData();
+        await ExecuteEachScript(_facade, _em);
+        apiVersionInsideFacade = _facade.GetRunningApiVersion();
         Assert.IsTrue(apiVersionInsideFacade == EmberMethods.GetEmberApiVersion(testingDiffrentVersion: 1));
         Assert.IsTrue(apiVersionInsideFacade == 1);
 
-        var versionDict2 = await facade!.GetCachesForEachApiVersion();
+        var versionDict2 = await _facade!.GetCachesForEachApiVersion();
         foreach (var item in versionDict2)
         {
             Console.WriteLine("Key: " + item.Key);
@@ -158,20 +158,20 @@ public class EmberVersioningTests
     [TestMethod]
     public async Task OldSourceCodeVersionsTest()
     {
-        facade = EmberMethods.GetNewScriptManagerInstance(1);
-        Guid id = await facade!.CreateScript(sourceCodeActionV1!);
+        _facade = EmberMethods.GetNewScriptManagerInstance(1);
+        Guid id = await _facade!.CreateScript(_sourceCodeActionV1!);
 
-        facade = EmberMethods.GetNewScriptManagerInstance(2);
-        await facade.UpdateScript(id, sourceCodeActionV2!);
-        await facade.CompileScript(id);
+        _facade = EmberMethods.GetNewScriptManagerInstance(2);
+        await _facade.UpdateScript(id, _sourceCodeActionV2!);
+        await _facade.CompileScript(id);
 
-        string sourceCodeAV = (await facade.GetCompiledCache(id)).OldSourceCode!;
-        string sourceCodeV1 = (await facade.GetCompiledCache(id, 1)).OldSourceCode!;
-        string sourceCodeV2 = (await facade.GetCompiledCache(id, 2)).OldSourceCode!;
+        string sourceCodeAV = (await _facade.GetCompiledCache(id)).OldSourceCode!;
+        string sourceCodeV1 = (await _facade.GetCompiledCache(id, 1)).OldSourceCode!;
+        string sourceCodeV2 = (await _facade.GetCompiledCache(id, 2)).OldSourceCode!;
 
-        Assert.IsTrue(sourceCodeAV == sourceCodeActionV2);
-        Assert.IsTrue(sourceCodeV1 == sourceCodeActionV1);
-        Assert.IsTrue(sourceCodeAV == sourceCodeActionV2);
+        Assert.IsTrue(sourceCodeAV == _sourceCodeActionV2);
+        Assert.IsTrue(sourceCodeV1 == _sourceCodeActionV1);
+        Assert.IsTrue(sourceCodeAV == _sourceCodeActionV2);
         Assert.IsTrue(sourceCodeAV == sourceCodeV2);
         Assert.IsFalse(sourceCodeAV == sourceCodeV1);
         // Console.WriteLine(sourceCodeAV);
@@ -248,27 +248,27 @@ public class EmberVersioningTests
     [TestMethod]
     public async Task CreateUsingDataTestAsync()
     {
-        data = new DataV2.DataV2();
+        _data = new DataV2.DataV2();
         Ember.Scripting.GeneratorContextSF ctx;
         Guid id;
-        id = await facade!.CreateScript(sourceCodeActionV2!);
-        var vali = facade.BasicValidationBeforeCompiling(sourceCodeActionV2!);
+        id = await _facade!.CreateScript(_sourceCodeActionV2!);
+        var vali = _facade.BasicValidationBeforeCompiling(_sourceCodeActionV2!);
         int desiredContextVersion = vali.Version;
 
         Console.WriteLine(nameof(desiredContextVersion) + ": " + desiredContextVersion);
 
         await Assert.ThrowsExceptionAsync<Exception>(async () =>
         {
-            ctx = ContextFactory.CreateUsingData(desiredContextVersion, data!);
+            ctx = ContextFactory.CreateUsingData(desiredContextVersion, _data!);
         });
-        ContextFactory sf = new ContextFactory(facade);
+        ContextFactory sf = new ContextFactory(_facade);
         var obj = sf.ScriptObjects();
 
-        data = new DataV2.DataV2(labOrder: obj.labOrder, patient: obj.patient, consoleLogger: obj.logger,
+        _data = new DataV2.DataV2(labOrder: obj.labOrder, patient: obj.patient, consoleLogger: obj.logger,
                                 dataAccess: obj.testDataAccess, vaccine: obj.vaccine);
 
-        ctx = ContextFactory.CreateUsingData(desiredContextVersion, data!);
-        var result1 = await facade.ExecuteScriptById(id, ctx);
+        ctx = ContextFactory.CreateUsingData(desiredContextVersion, _data!);
+        var result1 = await _facade.ExecuteScriptById(id, ctx);
 
         var result = EmberMethods.UpgradeActionResult(result1);
 
@@ -276,7 +276,7 @@ public class EmberVersioningTests
         // ActionResult result= await facade.executescript<GeneratorContex,ActionResult>(ctx);
         // ActionResult result= await facade.executescript<GeneratorActionScript>(ctx);
 
-        string shouldReturn = ActionResultVersionSpecific + "Pediatric tests added";
+        string shouldReturn = _ActionResultVersionSpecific + "Pediatric tests added";
         Assert.IsInstanceOfType(result, typeof(ActionResultSF));
         Assert.IsInstanceOfType(result, typeof(ActionResultV3.ActionResult));
         Assert.IsInstanceOfType(result, typeof(ActiveActionResult));
@@ -289,21 +289,21 @@ public class EmberVersioningTests
     {
         Ember.Scripting.GeneratorContextSF ctx;
         Guid id;
-        id = await facade!.CreateScript(sourceCodeActionV2!);
-        var vali = facade.BasicValidationBeforeCompiling(sourceCodeActionV2!);
+        id = await _facade!.CreateScript(_sourceCodeActionV2!);
+        var vali = _facade.BasicValidationBeforeCompiling(_sourceCodeActionV2!);
         int desiredContextVersion = vali.Version;
 
         await Assert.ThrowsExceptionAsync<Exception>(async () =>
         {
-            ctx = await em!.GetTestingContext<GeneratorContextV3.GeneratorContext>();
-            var result1 = await facade.ExecuteScriptById(id, ctx);
+            ctx = await _em!.GetTestingContext<GeneratorContextV3.GeneratorContext>();
+            var result1 = await _facade.ExecuteScriptById(id, ctx);
         });
 
-        ctx = await em!.GetTestingContext<RWContextV2.GeneratorContext>();
-        var result1 = await facade.ExecuteScriptById(id, ctx);
+        ctx = await _em!.GetTestingContext<RWContextV2.GeneratorContext>();
+        var result1 = await _facade.ExecuteScriptById(id, ctx);
         var result = EmberMethods.UpgradeActionResult(result1);
 
-        string shouldReturn = ActionResultVersionSpecific + "Pediatric tests added";
+        string shouldReturn = _ActionResultVersionSpecific + "Pediatric tests added";
         Assert.IsInstanceOfType(result, typeof(ActionResultSF));
         Assert.IsInstanceOfType(result, typeof(ActionResultV3.ActionResult));
         Assert.IsTrue(result.ToString()!.Contains(shouldReturn));

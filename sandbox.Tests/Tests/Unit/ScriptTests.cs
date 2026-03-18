@@ -9,25 +9,25 @@ public class ScriptTests
 {
 
 
-    ISccriptManagerDeleteAfter? facade;
-    EmberMethods? em;
-    string? ActionResultVersionSpecific;
-    string? sourceCodeActionV1 = TestHelper.GetSC().sourceCodeActionV1;
-    string? sourceCodeActionV2 = TestHelper.GetSC().sourceCodeActionV2;
-    string? sourceCodeActionV3 = TestHelper.GetSC().sourceCodeActionV3;
-    string? sourceCodeVaccineAction = TestHelper.GetSC().sourceCodeVaccineAction;
-    string? sourceCodePedia = TestHelper.GetSC().sourceCodePedia;
+    private ISccriptManagerDeleteAfter? _facade;
+    private EmberMethods? _em;
+    private string? _ActionResultVersionSpecific;
+    private string? _sourceCodeActionV1 = TestHelper.GetSC().sourceCodeActionV1;
+    private string? _sourceCodeActionV2 = TestHelper.GetSC().sourceCodeActionV2;
+    private string? _sourceCodeActionV3 = TestHelper.GetSC().sourceCodeActionV3;
+    private string? _sourceCodeVaccineAction = TestHelper.GetSC().sourceCodeVaccineAction;
+    private string? _sourceCodePedia = TestHelper.GetSC().sourceCodePedia;
 
 
     [TestInitialize]
     public
 async Task SetupAsync()
     {
-        facade = EmberMethods.GetNewScriptManagerInstance();
-        em = new EmberMethods(facade);
-        await facade.DeleteAllData();
+        _facade = EmberMethods.GetNewScriptManagerInstance();
+        _em = new EmberMethods(_facade);
+        await _facade.DeleteAllData();
 
-        ActionResultVersionSpecific = "[Message contains either failure or succes: ] ";
+        _ActionResultVersionSpecific = "[Message contains either failure or succes: ] ";
     }
 
 
@@ -35,13 +35,13 @@ async Task SetupAsync()
     public async Task ActionV1Test()
     {
         // await facade!.EnsureDeletedCreated();
-        await facade!.DeleteAllData();
-        Guid id = await facade!.CreateScript(sourceCodeActionV1!);
-        CustomerScript retrievedScript = await facade.GetScript(id);
-        var context = await em!.GetTestingContext<GeneratorContextNoInherVaccineV5.GeneratorContext>(autoDetectFromScript: retrievedScript);
-        object resultBeforeUpgrade = await facade.ExecuteScriptById(id, context);
+        await _facade!.DeleteAllData();
+        Guid id = await _facade!.CreateScript(_sourceCodeActionV1!);
+        CustomerScript retrievedScript = await _facade.GetScript(id);
+        var context = await _em!.GetTestingContext<GeneratorContextNoInherVaccineV5.GeneratorContext>(autoDetectFromScript: retrievedScript);
+        object resultBeforeUpgrade = await _facade.ExecuteScriptById(id, context);
         ActionResultV3.ActionResult result = (ActionResultV3.ActionResult)EmberMethods.UpgradeActionResult(resultBeforeUpgrade);
-        string shouldReturn = ActionResultVersionSpecific + "Pediatric tests added";
+        string shouldReturn = _ActionResultVersionSpecific + "Pediatric tests added";
         Assert.IsInstanceOfType(result, typeof(ActionResultSF));
         Assert.IsInstanceOfType(result, typeof(ActionResultV3.ActionResult));
         Assert.IsTrue(result.ToString().Contains(shouldReturn));
@@ -51,12 +51,12 @@ async Task SetupAsync()
     [TestMethod]
     public async Task ActionV2Test()
     {
-        Guid id = await facade!.CreateScript(sourceCodeActionV2!);
-        CustomerScript retrievedScript = await facade.GetScript(id);
-        var context = await em!.GetTestingContext<GeneratorContextNoInherVaccineV5.GeneratorContext>(autoDetectFromScript: retrievedScript);
-        object resultBeforeUpgrade = await facade.ExecuteScriptById(id, context);
+        Guid id = await _facade!.CreateScript(_sourceCodeActionV2!);
+        CustomerScript retrievedScript = await _facade.GetScript(id);
+        var context = await _em!.GetTestingContext<GeneratorContextNoInherVaccineV5.GeneratorContext>(autoDetectFromScript: retrievedScript);
+        object resultBeforeUpgrade = await _facade.ExecuteScriptById(id, context);
         ActionResultV3.ActionResult result = (ActionResultV3.ActionResult)EmberMethods.UpgradeActionResult(resultBeforeUpgrade);
-        string shouldReturn = ActionResultVersionSpecific + "Pediatric tests added";
+        string shouldReturn = _ActionResultVersionSpecific + "Pediatric tests added";
         Assert.IsInstanceOfType(result, typeof(ActionResultSF));
         Assert.IsInstanceOfType(result, typeof(ActionResultV3.ActionResult));
         Assert.IsTrue(result.ToString().Contains(shouldReturn));
@@ -66,12 +66,12 @@ async Task SetupAsync()
     [TestMethod]
     public async Task ActionV3Test()
     {
-        Guid id = await facade!.CreateScript(sourceCodeActionV3!);
-        CustomerScript retrievedScript = await facade.GetScript(id);
-        var context = await em!.GetTestingContext<GeneratorContextNoInherVaccineV5.GeneratorContext>(autoDetectFromScript: retrievedScript);
-        object resultBeforeUpgrade = await facade.ExecuteScriptById(id, context);
+        Guid id = await _facade!.CreateScript(_sourceCodeActionV3!);
+        CustomerScript retrievedScript = await _facade.GetScript(id);
+        var context = await _em!.GetTestingContext<GeneratorContextNoInherVaccineV5.GeneratorContext>(autoDetectFromScript: retrievedScript);
+        object resultBeforeUpgrade = await _facade.ExecuteScriptById(id, context);
         ActionResultV3.ActionResult result = (ActionResultV3.ActionResult)EmberMethods.UpgradeActionResult(resultBeforeUpgrade);
-        string shouldReturn = ActionResultVersionSpecific + "Pediatric tests added V3";
+        string shouldReturn = _ActionResultVersionSpecific + "Pediatric tests added V3";
         Assert.IsInstanceOfType(result, typeof(ActionResultSF));
         Assert.IsInstanceOfType(result, typeof(ActionResultV3.ActionResult));
         Assert.IsTrue(result.ToString().Contains(shouldReturn));
@@ -81,11 +81,11 @@ async Task SetupAsync()
     [TestMethod]
     public async Task VaccineScriptTest()
     {
-        Guid id = await facade!.CreateScript(sourceCodeVaccineAction!);
-        CustomerScript retrievedScript = await facade.GetScript(id);
-        var context = await em!.GetTestingContext<GeneratorContextNoInherVaccineV5.GeneratorContext>(autoDetectFromScript: retrievedScript);
-        object result = await facade.ExecuteScriptById(id, context);
-        string shouldReturn = ActionResultVersionSpecific + "Polio Vaccine added";
+        Guid id = await _facade!.CreateScript(_sourceCodeVaccineAction!);
+        CustomerScript retrievedScript = await _facade.GetScript(id);
+        var context = await _em!.GetTestingContext<GeneratorContextNoInherVaccineV5.GeneratorContext>(autoDetectFromScript: retrievedScript);
+        object result = await _facade.ExecuteScriptById(id, context);
+        string shouldReturn = _ActionResultVersionSpecific + "Polio Vaccine added";
         Assert.IsInstanceOfType(result, typeof(ActionResultSF));
         Assert.IsInstanceOfType(result, typeof(ActionResultV3.ActionResult));
         Assert.IsTrue(result.ToString()!.Contains(shouldReturn));
@@ -96,10 +96,10 @@ async Task SetupAsync()
     [TestMethod]
     public async Task ConditionTest()
     {
-        Guid id = await facade!.CreateScript(sourceCodePedia!);
-        CustomerScript retrievedScript = await facade.GetScript(id);
-        var context = await em!.GetTestingContext<GeneratorContextNoInherVaccineV5.GeneratorContext>(autoDetectFromScript: retrievedScript);
-        object result = await facade.ExecuteScriptById(id, context);
+        Guid id = await _facade!.CreateScript(_sourceCodePedia!);
+        CustomerScript retrievedScript = await _facade.GetScript(id);
+        var context = await _em!.GetTestingContext<GeneratorContextNoInherVaccineV5.GeneratorContext>(autoDetectFromScript: retrievedScript);
+        object result = await _facade.ExecuteScriptById(id, context);
         string shouldReturn = "True";
         Assert.IsInstanceOfType(result, typeof(bool));
         Assert.IsTrue(result.ToString()!.Contains(shouldReturn));
@@ -129,21 +129,21 @@ async Task SetupAsync()
     public async Task TestCreatedAt()
     {
         // await facade!.EnsureDeletedCreated();
-        await facade!.DeleteAllData();
+        await _facade!.DeleteAllData();
         // await rm!.CompileAllScriptsInFolderAndSaveToDB(path, "Default", await facade.GetRecentApiVersion());
 
-        Guid id = await facade!.CreateScript(sourceCodePedia!);
-        CustomerScript retrievedScript = await facade.GetScript(id);
+        Guid id = await _facade!.CreateScript(_sourceCodePedia!);
+        CustomerScript retrievedScript = await _facade.GetScript(id);
         DateTime? beforeUpdateCA = retrievedScript.CreatedAt;
         DateTime? beforeUpdateMA = retrievedScript.ModifiedAt;
 
-        var context = await em!.GetTestingContext<GeneratorContextNoInherVaccineV5.GeneratorContext>(autoDetectFromScript: retrievedScript);
-        object result = await facade.ExecuteScriptById(id, context);
+        var context = await _em!.GetTestingContext<GeneratorContextNoInherVaccineV5.GeneratorContext>(autoDetectFromScript: retrievedScript);
+        object result = await _facade.ExecuteScriptById(id, context);
 
         await Task.Delay(2000);
-        await facade!.UpdateScript(retrievedScript.Id, "new source code doesnt matter if wrong shoudl save to db");
+        await _facade!.UpdateScript(retrievedScript.Id, "new source code doesnt matter if wrong shoudl save to db");
 
-        CustomerScript updatedScript = await facade.GetScript(id);
+        CustomerScript updatedScript = await _facade.GetScript(id);
         DateTime? afterUpdateCA = updatedScript.CreatedAt;
         DateTime? afterUpdateMA = updatedScript.ModifiedAt;
 

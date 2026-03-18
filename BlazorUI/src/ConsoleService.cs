@@ -5,7 +5,7 @@ namespace BlazorUI.Services
 {
     public class ConsoleService
     {
-        public List<(DateTime Timestamp, string Message)> Logs { get; private set; } = new();
+        public List<(DateTime timestamp, string message)> Logs { get; private set; } = new();
         public bool IsExpanded { get; set; } = false;
 
         // Event to tell the UI to re-render when a log is added
