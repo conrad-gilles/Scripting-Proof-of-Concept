@@ -13,7 +13,8 @@ public class MyContext : DbContext, IDataProtectionKeyContext
     {
     }
 
-    public DbSet<DataProtectionKey> DataProtectionKeys { get; set; } = null!;
+    public DbSet<DataProtectionKey> DataProtectionKeys { get; set; } = null!;   //todo this is here for blazor app to prevent loss of performance doesnt work yet app always crashes on Render.com
+
     public DbSet<CustomerScript> CustomerScripts { get; set; }
     public DbSet<ScriptCompiledCache> ScriptCompiledCaches { get; set; }
     public DbSet<EmberInstance> EmberInstances { get; set; }
@@ -30,17 +31,16 @@ public class MyContext : DbContext, IDataProtectionKeyContext
     {
         if (optionsBuilder.IsConfigured == false)
         {
-            // 1. Try to get the connection string from Koyeb's environment variables
+            //tries to get connection string from environment variable if not it falls back to the docker container
             var connectionString = Environment.GetEnvironmentVariable("DATABASE_URL");
 
-            // 2. If it is null or empty (meaning you are running locally), fall back to localhost
             if (string.IsNullOrEmpty(connectionString))
             {
                 connectionString = "Host=localhost;Port=5432;Database=script_registry;Username=admin;Password=your_secure_password";
             }
 
             // optionsBuilder.UseNpgsql(connectionString);
-            optionsBuilder.UseNpgsql(connectionString, b => b.MigrationsAssembly("BlazorUI"));
+            optionsBuilder.UseNpgsql(connectionString, b => b.MigrationsAssembly("BlazorUI"));  //todo might have to delete for local testing but necessary to store the instructions on how to generate the tables
 
         }
 

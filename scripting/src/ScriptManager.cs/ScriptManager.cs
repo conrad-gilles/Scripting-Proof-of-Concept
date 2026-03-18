@@ -47,7 +47,7 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
 
     }
 
-    public async Task<(string Name, ScriptTypes ScriptType)> CreateScriptUsingNameType(string sourceCode, string userName = "Default", int? apiVersion = null, DateTime? createdAt = null, bool checkForDuplicates = false)
+    public async Task<ScriptNameType> CreateScriptUsingNameType(string sourceCode, string userName = "Default", int? apiVersion = null, DateTime? createdAt = null, bool checkForDuplicates = false)
     {
         Logger.LogDebug("Entered {MethodName} in {ClassName} apiVersion: {apiVersion}.", nameof(CreateScriptUsingNameType), nameof(ScriptManagerFacade), apiVersion);
 
@@ -75,7 +75,12 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
             default:
                 throw new Exception(message: "Could not assign baseTypeName");
         }
-        return (Name: script.ScriptName!, ScriptType: sType);
+        // return (Name: script.ScriptName!, ScriptType: sType);
+        return new ScriptNameType
+        {
+            Name = script.ScriptName!,
+            Type = sType
+        };
     }
 
     // Updates existing script source code and recompiles for all compatible API versions
@@ -552,4 +557,11 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
     #endregion
 
 
+}
+
+
+public record ScriptNameType
+{
+    public required string Name { get; init; }
+    public required ScriptTypes Type { get; init; }
 }

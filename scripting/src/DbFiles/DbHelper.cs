@@ -21,25 +21,6 @@ internal class DbHelper
         Logger = logger;
         RecentApiVersion = recentApiVersion;
     }
-    // public async Task EnsureDeletedCreated()    //todo delete this for obvious safety reasons before production
-    // {
-    //     try
-    //     {
-    //         Logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(EnsureDeletedCreated), nameof(DbHelper));
-
-    //         using (var db = new MyContext())
-    //         {
-    //             await db.Database.EnsureDeletedAsync();
-    //             await db.Database.EnsureCreatedAsync();
-    //         }
-    //     }
-
-    //     catch (Exception e)
-    //     {
-    //         Logger.LogError(e.ToString());
-    //         throw new DbHelperException(nameof(EnsureDeletedCreated) + " failed in " + nameof(DbHelper), e);
-    //     }
-    // }
     public async Task DeleteAllData()
     {
 
