@@ -92,9 +92,14 @@ public class EmberMethods
         return sourceDict;
     }
 
-    public async Task CompileAllScriptsInFolderAndSaveToDB(string folderPath, string userName, int currentApiVersion)
+    public async Task CompileAllScriptsInFolderAndSaveToDB(string? folderPath = null, string? userName = null, int? currentApiVersion = null)
     {
         Serilog.Log.Verbose("Entered {MethodName} in {ClassName}.", nameof(CompileAllScriptsInFolderAndSaveToDB), nameof(EmberMethods));
+
+        if (folderPath == null)
+        {
+            folderPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "src", "Scripts");
+        }
 
         string[] files = Directory.GetFiles(folderPath, "*.cs", SearchOption.AllDirectories);  //todo check for infinite loop  https://msdn.microsoft.com/en-us/library/ms143316(v=vs.110).aspx
         for (int i = 0; i < files.Length; i++)

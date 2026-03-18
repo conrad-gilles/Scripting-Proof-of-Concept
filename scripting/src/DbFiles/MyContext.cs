@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
 
 namespace EFModeling.EntityProperties.FluentAPI.Required;
 
-public class MyContext : DbContext, IDataProtectionKeyContext
+public class MyContext : DbContext //, IDataProtectionKeyContext
 {
     public MyContext(DbContextOptions<MyContext> options) : base(options)
     {
@@ -13,7 +13,7 @@ public class MyContext : DbContext, IDataProtectionKeyContext
     {
     }
 
-    public DbSet<DataProtectionKey> DataProtectionKeys { get; set; } = null!;   //todo this is here for blazor app to prevent loss of performance doesnt work yet app always crashes on Render.com
+    // public DbSet<DataProtectionKey> DataProtectionKeys { get; set; } = null!;   //todo this is here for blazor app to prevent loss of performance doesnt work yet app always crashes on Render.com
 
     public DbSet<CustomerScript> CustomerScripts { get; set; }
     public DbSet<ScriptCompiledCache> ScriptCompiledCaches { get; set; }
@@ -39,8 +39,8 @@ public class MyContext : DbContext, IDataProtectionKeyContext
                 connectionString = "Host=localhost;Port=5432;Database=script_registry;Username=admin;Password=your_secure_password";
             }
 
-            // optionsBuilder.UseNpgsql(connectionString);
-            optionsBuilder.UseNpgsql(connectionString, b => b.MigrationsAssembly("BlazorUI"));  //todo might have to delete for local testing but necessary to store the instructions on how to generate the tables
+            optionsBuilder.UseNpgsql(connectionString);
+            // optionsBuilder.UseNpgsql(connectionString, b => b.MigrationsAssembly("BlazorUI"));  //todo might have to delete for local testing but necessary to store the instructions on how to generate the tables
 
         }
 

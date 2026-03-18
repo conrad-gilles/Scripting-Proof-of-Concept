@@ -18,7 +18,7 @@ int version = EmberMethods.GetEmberApiVersion();
 builder.Services.AddEmberScripting(references, version);
 builder.Services.AddDbContext<EFModeling.EntityProperties.FluentAPI.Required.MyContext>();
 
-builder.Services.AddDataProtection().PersistKeysToDbContext<EFModeling.EntityProperties.FluentAPI.Required.MyContext>();
+// builder.Services.AddDataProtection().PersistKeysToDbContext<EFModeling.EntityProperties.FluentAPI.Required.MyContext>();
 
 
 builder.Services.AddScoped<ConsoleService>();
@@ -29,7 +29,7 @@ using (var scope = app.Services.CreateScope())
     var db = scope.ServiceProvider.GetRequiredService<EFModeling.EntityProperties.FluentAPI.Required.MyContext>();
 
     // This will look for the Migrations folder and apply them to Neon automatically
-    db.Database.Migrate();
+    // db.Database.Migrate();
 }
 
 // Configure the HTTP request pipeline.

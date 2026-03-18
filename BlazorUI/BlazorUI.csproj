@@ -19,6 +19,15 @@
     <EmbeddedResource Include="src\ScriptTemplate.cs" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- This links the scripts from the sandbox folder and copies them to the BlazorUI output
+    directory -->
+    <None Include="..\sandbox\src\Scripts\**\*.*">
+      <Link>src\Scripts\%(RecursiveDir)%(FileName)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
