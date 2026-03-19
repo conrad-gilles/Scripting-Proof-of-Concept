@@ -1,4 +1,6 @@
+using EFModeling.EntityProperties.FluentAPI.Required;
 using Microsoft.CodeAnalysis;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -22,7 +24,8 @@ public static class ScriptingServiceCollectionExtensions
             sp.GetRequiredService<ScriptCompiler>(),
             sp.GetRequiredService<List<MetadataReference>>(),
             sp.GetRequiredService<ILogger<DbHelper>>(),
-            maxSupportedApiVersion
+            maxSupportedApiVersion,
+            sp.GetRequiredService<IDbContextFactory<MyContext>>()
         ));
 
         // 4. Register the Facade using a factory to hide the internal parameters

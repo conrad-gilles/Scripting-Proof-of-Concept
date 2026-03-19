@@ -15,6 +15,10 @@ builder.Services.AddRazorComponents()
 // Register Ember scripting services (DI)
 var references = EmberMethods.GetReferences();
 int version = EmberMethods.GetEmberApiVersion();
+// string connectionString = "Host=localhost;Port=5432;Database=script_registry;Username=admin;Password=your_secure_password";
+
+builder.Services.AddDbContextFactory<EFModeling.EntityProperties.FluentAPI.Required.MyContext>();
+
 builder.Services.AddEmberScripting(references, version);
 builder.Services.AddDbContext<EFModeling.EntityProperties.FluentAPI.Required.MyContext>();
 

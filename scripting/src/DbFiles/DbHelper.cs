@@ -11,22 +11,24 @@ namespace Ember.Scripting;
 internal class DbHelper
 {
     private readonly List<MetadataReference> _references;
-    private readonly ScriptCompiler _ompiler;
+    private readonly ScriptCompiler _compiler;
     private readonly ILogger<DbHelper> _logger;
     private readonly int _recentApiVersion;
-    public DbHelper(ScriptCompiler compiler, List<MetadataReference> references, ILogger<DbHelper> logger, int recentApiVersion)
+    private readonly IDbContextFactory<MyContext> _contextFactory;
+    public DbHelper(ScriptCompiler compiler, List<MetadataReference> references, ILogger<DbHelper> logger, int recentApiVersion, IDbContextFactory<MyContext> contextFactory)
     {
         _references = references;
-        _ompiler = compiler;
+        _compiler = compiler;
         _logger = logger;
         _recentApiVersion = recentApiVersion;
+        _contextFactory = contextFactory;
     }
     public async Task DeleteAllData()
     {
 
         _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(DeleteAllData), nameof(DbHelper));
 
-        using (var db = new MyContext())
+        using (var db = await _contextFactory.CreateDbContextAsync())
         {
             await db.ScriptCompiledCaches.ExecuteDeleteAsync();
             await db.CustomerScripts.ExecuteDeleteAsync();
@@ -41,7 +43,7 @@ internal class DbHelper
 
         if (filters != null)
         {
-            using (var db = new MyContext())
+            using (var db = await _contextFactory.CreateDbContextAsync())
             {
                 IQueryable<CustomerScript> query = db.CustomerScripts;
                 if (includeCaches)
@@ -82,7 +84,7 @@ internal class DbHelper
         }
         if (includeCaches == false)
         {
-            using (var db = new MyContext())
+            using (var db = await _contextFactory.CreateDbContextAsync())
             {
                 var scripts = await db.CustomerScripts.ToListAsync();
                 return scripts;
@@ -90,7 +92,7 @@ internal class DbHelper
         }
         else
         {
-            using (var db = new MyContext())
+            using (var db = await _contextFactory.CreateDbContextAsync())
             {
                 var scripts = await db.CustomerScripts.Include(s => s.CompiledCaches).ToListAsync();
                 return scripts;
@@ -106,14 +108,14 @@ internal class DbHelper
         _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(GetAllCompiledScriptCaches), nameof(DbHelper));
         if (!includeScripts)
         {
-            using (var db = new MyContext())
+            using (var db = await _contextFactory.CreateDbContextAsync())
             {
                 var caches = await db.ScriptCompiledCaches
                 .ToListAsync();
                 return caches;
             }
         }
-        using (var db = new MyContext())
+        using (var db = await _contextFactory.CreateDbContextAsync())
         {
             var caches = await db.ScriptCompiledCaches
             .Include(c => c.CustomerScript)
@@ -233,12 +235,12 @@ internal class DbHelper
             }
         }
     }
-    public async Task<CustomerScript> CreateAndInsertCustomerScript(string scriptString, Guid randomGUID, string createdBy, int? oldApiV = null, DateTime? createdAt = null, bool alsoCompAndSave = false, bool checkForDuplicates = true)
+    public async Task<CustomerScript> CreateAndInsertCustomerScript(string scriptString, Guid randomGUID, string createdBy, int? oldApiV = null, DateTime? createdAt = null, bool checkForDuplicates = true)
     //todo make sure compiling happens after verification of isDuplicate
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName} with ID: {ScriptId}.", nameof(CreateAndInsertCustomerScript), nameof(DbHelper), randomGUID);
 
-        using (var db = new MyContext())
+        using (var db = await _contextFactory.CreateDbContextAsync())
         {
             int currentApiVersion = GetRecentApiVersion();
             if (createdAt == null)
@@ -246,7 +248,7 @@ internal class DbHelper
                 createdAt = DateTime.UtcNow;
             }
             // ScriptCompiler compiler = new ScriptCompiler(References);
-            var getTupleFromVal = _ompiler.BasicValidationBeforeCompiling(scriptString);
+            var getTupleFromVal = _compiler.BasicValidationBeforeCompiling(scriptString);
 
             CustomerScript randomTestScript2 = new CustomerScript
             {
@@ -283,7 +285,7 @@ internal class DbHelper
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName} with ID: {ScriptId}.", nameof(CreateAndInsertCompiledCache), nameof(DbHelper), script.Id);
 
-        using (var db = new MyContext())
+        using (var db = await _contextFactory.CreateDbContextAsync())
         {
             // int currentApiVersion;
             if (apiV == null)
@@ -291,7 +293,7 @@ internal class DbHelper
                 apiV = GetRecentApiVersion();
             }
 
-            var getTupleFromVal = _ompiler.BasicValidationBeforeCompiling(script.SourceCode!);
+            var getTupleFromVal = _compiler.BasicValidationBeforeCompiling(script.SourceCode!);
 
             if (await db.ScriptCompiledCaches.AnyAsync(c => c.ScriptId == script.Id && c.ApiVersion == apiV))
             {
@@ -303,7 +305,7 @@ internal class DbHelper
             else
             {
                 byte[] tempComp;
-                tempComp = _ompiler.RunCompilation(script.SourceCode!, metaData: getTupleFromVal);
+                tempComp = _compiler.RunCompilation(script.SourceCode!, metaData: getTupleFromVal);
 
                 CompiledScripts tempCache = new CompiledScripts
                 {
@@ -324,7 +326,7 @@ internal class DbHelper
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName} with ID: {ScriptId}.", nameof(DeleteCustomerScript), nameof(DbHelper), id);
 
-        using (var db = new MyContext())
+        using (var db = await _contextFactory.CreateDbContextAsync())
         {
             CustomerScript temp = await GetCustomerScript(id);
             db.Remove(temp);
@@ -335,7 +337,7 @@ internal class DbHelper
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName} with ID: {ScriptId} and ApiVersion: {ApiVersion}.", nameof(DeleteScriptCache), nameof(DbHelper), id, apiVersion);
 
-        using (var db = new MyContext())
+        using (var db = await _contextFactory.CreateDbContextAsync())
         {
             try
             {
@@ -360,7 +362,7 @@ internal class DbHelper
             userName = "Default";
         }
 
-        using (var db = new MyContext())
+        using (var db = await _contextFactory.CreateDbContextAsync())
         {
             CustomerScript? existingScript = await db.CustomerScripts.FindAsync(scriptId);
 
@@ -387,7 +389,7 @@ internal class DbHelper
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(InsertScriptCompiledCache), nameof(DbHelper));
 
-        using (var db = new MyContext())
+        using (var db = await _contextFactory.CreateDbContextAsync())
         {
             scriptCompiledCache.CustomerScript = null!;
 
@@ -400,7 +402,7 @@ internal class DbHelper
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName} with ID: {ScriptId}.", nameof(GetCompiledScripCache), nameof(DbHelper), id);
 
-        using (var db = new MyContext())
+        using (var db = await _contextFactory.CreateDbContextAsync())
         {
             var cache = await db.ScriptCompiledCaches.SingleAsync(b => b.ScriptId == id && b.ApiVersion == apiVersion);
             return cache;
@@ -412,7 +414,7 @@ internal class DbHelper
 
         if (includeCaches == true)
         {
-            using (var db = new MyContext())
+            using (var db = await _contextFactory.CreateDbContextAsync())
             {
 
                 var script = await db.CustomerScripts.Include(s => s.CompiledCaches).SingleAsync(b => b.Id == id);
@@ -421,7 +423,7 @@ internal class DbHelper
         }
         else
         {
-            using (var db = new MyContext())
+            using (var db = await _contextFactory.CreateDbContextAsync())
             {
                 var script = await db.CustomerScripts.SingleAsync(b => b.Id == id);
                 return script;
@@ -445,7 +447,7 @@ internal class DbHelper
             default:
                 throw new DbHelperException(message: "Could not convert Script type enum to string");
         }
-        using (var db = new MyContext())
+        using (var db = await _contextFactory.CreateDbContextAsync())
         {
             var script = await db.CustomerScripts.SingleAsync(b => b.ScriptName == scriptName && b.ScriptType == sScriptType);
             return script.Id;
@@ -455,7 +457,7 @@ internal class DbHelper
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(CompileAllStoredScripts), nameof(DbHelper));
 
-        using (var db = new MyContext())
+        using (var db = await _contextFactory.CreateDbContextAsync())
         {
             List<CustomerScript> allScriptSC = await GetAllCustomerScripts();
             for (int i = 0; i < allScriptSC.Count(); i++)
@@ -468,7 +470,7 @@ internal class DbHelper
 
     public async Task SaveScriptWithoutCompiling(Guid id, string sourceCode, string? userName = null)
     {
-        using (var db = new MyContext())
+        using (var db = await _contextFactory.CreateDbContextAsync())
         {
             CustomerScript? existingScript = await db.CustomerScripts.FindAsync(id);
 
@@ -505,7 +507,7 @@ internal class DbHelper
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(DeleteAllCachedScripts), nameof(DbHelper));
 
-        using (var db = new MyContext())
+        using (var db = await _contextFactory.CreateDbContextAsync())
         {
             await db.ScriptCompiledCaches.ExecuteDeleteAsync();
         }
@@ -548,7 +550,7 @@ internal class DbHelper
                     if (allScripts[i].Id == allScripts[j].Id
                     || allScripts[i].ScriptName == allScripts[j].ScriptName
                     || allScripts[i].SourceCode == allScripts[j].SourceCode
-                    || _ompiler.IsTheSameTree(allScripts[i].SourceCode!, allScripts[j].SourceCode!)
+                    || _compiler.IsTheSameTree(allScripts[i].SourceCode!, allScripts[j].SourceCode!)
                     )
                     {
                         if (duplicateGuids.Contains(allScripts[j].Id) == false)
@@ -609,12 +611,12 @@ internal class DbHelper
         List<int> versions = await GetActiveApiVersions();
         return versions.Max();
     }
-    public async Task RemoveDuplicates()
+    public async Task RemoveDuplicates(List<Guid>? duplicateGuids = null, Dictionary<Guid, int>? cachesWithoutScript = null)
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(RemoveDuplicates), nameof(DbHelper));
 
-        List<Guid> duplicateGuids = (await DetectDuplicates()).scriptGUIDs;
-        Dictionary<Guid, int> cachesWithoutScript = (await DetectDuplicates()).cacheGUIDs;
+        duplicateGuids = (await DetectDuplicates()).scriptGUIDs;
+        cachesWithoutScript = (await DetectDuplicates()).cacheGUIDs;
 
         for (int i = 0; i < duplicateGuids.Count(); i++)
         {
@@ -648,7 +650,7 @@ internal class DbHelper
         // ScriptCompiler compiler = new ScriptCompiler(References);
 
         //checking if can connect to db
-        using (var context = new MyContext())
+        using (var context = await _contextFactory.CreateDbContextAsync())
         {
             bool canConnect = await context.Database.CanConnectAsync();
             if (!canConnect)
@@ -688,7 +690,7 @@ internal class DbHelper
         }
 
         // 4. Validate Compiler State
-        if (_ompiler == null)
+        if (_compiler == null)
         {
             throw new InvalidOperationException("HealthCheck Failed: ScriptCompiler is not correctly initialized.");
         }

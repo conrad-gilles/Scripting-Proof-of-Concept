@@ -6,6 +6,7 @@
 @using BlazorUI.Helpers
 @using Microsoft.CodeAnalysis.Differencing
 @using System.Text.RegularExpressions
+@using Microsoft.EntityFrameworkCore
 @using Serilog
 @inject ConsoleService Console
 @inject ISccriptManagerDeleteAfter ScriptManager
@@ -218,10 +219,12 @@
             builder.AddSerilog(dispose: true);
         });
 
+        services2.AddDbContextFactory<EFModeling.EntityProperties.FluentAPI.Required.MyContext>();
+
         ScriptingServiceCollectionExtensions.AddEmberScripting(services2, EmberMethods.GetReferences(),
             EmberMethods.GetEmberApiVersion(testingDiffrentVersion: selectedApiVersion));
 
-        using var provider2 = services2.BuildServiceProvider();
+        var provider2 = services2.BuildServiceProvider();
 
         ScriptManager = provider2.GetRequiredService<ISccriptManagerDeleteAfter>();
         Console.Log($"User selected API Version: {selectedApiVersion}");

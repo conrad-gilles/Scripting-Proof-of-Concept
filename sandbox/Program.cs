@@ -41,9 +41,11 @@ try
         builder.AddSerilog(dispose: true);
     });
 
+    services.AddDbContextFactory<EFModeling.EntityProperties.FluentAPI.Required.MyContext>();
+
     ScriptingServiceCollectionExtensions.AddEmberScripting(services, EmberMethods.GetReferences(), EmberMethods.GetEmberApiVersion());
 
-    using var provider = services.BuildServiceProvider();
+    var provider = services.BuildServiceProvider();
     await MainProgramSwitch(provider);
 }
 finally

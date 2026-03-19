@@ -10,6 +10,7 @@ using TypeInfo = System.Reflection.TypeInfo;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.EntityFrameworkCore;
 
 public class EmberMethods
 {
@@ -44,11 +45,9 @@ public class EmberMethods
         {
             builder.AddSerilog(dispose: true);
         });
-
+        services2.AddDbContextFactory<EFModeling.EntityProperties.FluentAPI.Required.MyContext>();
         ScriptingServiceCollectionExtensions.AddEmberScripting(services2, EmberMethods.GetReferences(), EmberMethods.GetEmberApiVersion(testingDiffrentVersion: apiVersion));
-
-        using var provider2 = services2.BuildServiceProvider();
-
+        var provider2 = services2.BuildServiceProvider();
         return facade = provider2.GetRequiredService<ISccriptManagerDeleteAfter>();
     }
     public async Task<Dictionary<int, Guid>> ListAllCompiledFromDB()
