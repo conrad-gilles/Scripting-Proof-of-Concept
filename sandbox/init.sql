@@ -12,7 +12,7 @@ CREATE TABLE customer_scripts (
     -- PRIMARY KEY (script_name,script_type)
 );
 -- Compiled versions per API
-CREATE TABLE script_compiled_cache (
+CREATE TABLE compiled_scripts (
     script_id UUID REFERENCES customer_scripts(id) ON DELETE CASCADE,
     -- script_name VARCHAR(100),
     api_version INT,

@@ -32,11 +32,11 @@ public class CustomerScript
     [Column("created_by")]
     public string? CreatedBy { get; set; }
 
-    public List<ScriptCompiledCache> CompiledCaches { get; set; }
+    public List<CompiledScripts> CompiledCaches { get; set; }
 
     public CustomerScript()
     {
-        CompiledCaches = new List<ScriptCompiledCache>();
+        CompiledCaches = new List<CompiledScripts>();
     }
 
     public override string ToString()

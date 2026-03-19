@@ -55,7 +55,7 @@ public class EmberMethods
     {
         Serilog.Log.Verbose("Entered {MethodName} in {ClassName}.", nameof(ListAllCompiledFromDB), nameof(EmberMethods));
         // var db = new DbHelper(UsefulMethods.GetReferences());
-        List<ScriptCompiledCache> caches = await _facade.GetAllCompiledScriptCaches();
+        List<CompiledScripts> caches = await _facade.GetAllCompiledScriptCaches();
 
         Dictionary<int, Guid> cacheDict = new Dictionary<int, Guid>();
         for (int i = 0; i < caches.Count(); i++)

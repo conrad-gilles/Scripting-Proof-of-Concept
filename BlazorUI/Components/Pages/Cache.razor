@@ -75,7 +75,7 @@
 </div>
 
 @code {
-    private List<ScriptCompiledCache> caches = [];
+    private List<CompiledScripts> caches = [];
 
     protected override async Task OnInitializedAsync()
     {
@@ -94,7 +94,7 @@
         await ScriptManager.ClearAllCaches();
         await LoadCaches();
     }
-    private async Task HandleDeleteCache(ScriptCompiledCache cache)
+    private async Task HandleDeleteCache(CompiledScripts cache)
     {
         await ScriptManager.DeleteScriptCache(cache.ScriptId, cache.ApiVersion);
         await LoadCaches();

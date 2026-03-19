@@ -224,7 +224,7 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
             }
             else
             {
-                ScriptCompiledCache cache = await _db.GetCompiledScripCache(scriptId, (int)apiVersion);
+                CompiledScripts cache = await _db.GetCompiledScripCache(scriptId, (int)apiVersion);
                 sourceCode = cache.OldSourceCode!;
             }
             try
@@ -385,7 +385,7 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
 
     // Retrieves compiled assembly bytes from cache
     // public async Task<byte[]> GetCompiledCache(Guid scriptId, int? currentApiVersion = null)
-    public async Task<ScriptCompiledCache> GetCompiledCache(Guid scriptId, int? currentApiVersion = null)
+    public async Task<CompiledScripts> GetCompiledCache(Guid scriptId, int? currentApiVersion = null)
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName} with scriptId: {ScriptId}.", nameof(GetCompiledCache), nameof(ScriptManagerFacade), scriptId);
         if (currentApiVersion == null)
@@ -410,7 +410,7 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
         await _db.DeleteScriptCache(id, apiVersion);
     }
 
-    public async Task<List<ScriptCompiledCache>> GetAllCompiledScriptCaches()
+    public async Task<List<CompiledScripts>> GetAllCompiledScriptCaches()
     {
         return await _db.GetAllCompiledScriptCaches();
     }
@@ -563,7 +563,7 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
         return await _db.GetScriptId(scriptName, scriptType);
     }
 
-    public async Task<Dictionary<int, List<ScriptCompiledCache>>> GetCachesForEachApiVersion()
+    public async Task<Dictionary<int, List<CompiledScripts>>> GetCachesForEachApiVersion()
     {
         return await _db.GetCachesForEachApiVersion();
     }

@@ -63,7 +63,7 @@ public class DbHelperTests
         await _facade.CompileScript(id, oldV);
 
         var after2 = await _facade.GetScript(id, includeCaches: true);
-        ScriptCompiledCache cache = await _facade.GetCompiledCache(id, oldV);
+        CompiledScripts cache = await _facade.GetCompiledCache(id, oldV);
         Assert.IsTrue(after2.CompiledCaches.Count == 2);
         Console.WriteLine("Api Version = " + cache.ApiVersion);
         Assert.IsTrue(cache != null && (cache.ApiVersion == oldV));

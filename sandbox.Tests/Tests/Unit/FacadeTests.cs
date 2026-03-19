@@ -332,7 +332,7 @@ public class ScriptManagerFacadeTests
     {
         Guid id = await _facade!.CreateScript(_sourceCodePedia!);
 
-        ScriptCompiledCache cache = await _facade.GetCompiledCache(id);
+        CompiledScripts cache = await _facade.GetCompiledCache(id);
         byte[] cacheAB = cache.AssemblyBytes!;
 
         Assert.IsNotNull(cacheAB);
@@ -344,7 +344,7 @@ public class ScriptManagerFacadeTests
     {
         Guid id = await _facade!.CreateScript(_sourceCodePedia!);
 
-        ScriptCompiledCache cache = await _facade.GetCompiledCache(id);
+        CompiledScripts cache = await _facade.GetCompiledCache(id);
         byte[] cacheAB = cache.AssemblyBytes!;
         Assert.IsTrue(cacheAB.Length > 0);
 

@@ -100,7 +100,7 @@ internal class DbHelper
 
 
     }
-    public async Task<List<ScriptCompiledCache>> GetAllCompiledScriptCaches(bool includeScripts = true)
+    public async Task<List<CompiledScripts>> GetAllCompiledScriptCaches(bool includeScripts = true)
     {
 
         _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(GetAllCompiledScriptCaches), nameof(DbHelper));
@@ -305,7 +305,7 @@ internal class DbHelper
                 byte[] tempComp;
                 tempComp = _ompiler.RunCompilation(script.SourceCode!, metaData: getTupleFromVal);
 
-                ScriptCompiledCache tempCache = new ScriptCompiledCache
+                CompiledScripts tempCache = new CompiledScripts
                 {
                     ScriptId = script.Id,
                     ApiVersion = (int)apiV,
@@ -339,7 +339,7 @@ internal class DbHelper
         {
             try
             {
-                ScriptCompiledCache temp = await GetCompiledScripCache(id, apiVersion);
+                CompiledScripts temp = await GetCompiledScripCache(id, apiVersion);
                 db.Remove(temp);
                 await db.SaveChangesAsync();
             }
@@ -383,7 +383,7 @@ internal class DbHelper
             await db.SaveChangesAsync();
         }
     }
-    public async Task InsertScriptCompiledCache(ScriptCompiledCache scriptCompiledCache)
+    public async Task InsertScriptCompiledCache(CompiledScripts scriptCompiledCache)
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(InsertScriptCompiledCache), nameof(DbHelper));
 
@@ -396,7 +396,7 @@ internal class DbHelper
         }
     }
 
-    public async Task<ScriptCompiledCache> GetCompiledScripCache(Guid id, int apiVersion)
+    public async Task<CompiledScripts> GetCompiledScripCache(Guid id, int apiVersion)
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName} with ID: {ScriptId}.", nameof(GetCompiledScripCache), nameof(DbHelper), id);
 
@@ -559,7 +559,7 @@ internal class DbHelper
                 }
             }
         }
-        List<ScriptCompiledCache> allCaches = await GetAllCompiledScriptCaches();
+        List<CompiledScripts> allCaches = await GetAllCompiledScriptCaches();
         Dictionary<Guid, int> cachesToDelete = [];
         for (int i = 0; i < allCaches.Count(); i++)
         {
@@ -694,19 +694,19 @@ internal class DbHelper
         }
     }
 
-    public async Task<Dictionary<int, List<ScriptCompiledCache>>> GetCachesForEachApiVersion()
+    public async Task<Dictionary<int, List<CompiledScripts>>> GetCachesForEachApiVersion()
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(GetActiveApiVersions), nameof(DbHelper));
 
         var caches = await GetAllCompiledScriptCaches();
-        Dictionary<int, List<ScriptCompiledCache>> returnedDict = [];
+        Dictionary<int, List<CompiledScripts>> returnedDict = [];
 
         List<int> ls = [];
         foreach (var cache in caches)
         {
             if (returnedDict.Keys.Contains(cache.ApiVersion) == false)
             {
-                List<ScriptCompiledCache> newList = [];
+                List<CompiledScripts> newList = [];
                 returnedDict.Add(cache.ApiVersion, newList);
                 returnedDict[cache.ApiVersion].Add(cache);
             }

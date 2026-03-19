@@ -16,7 +16,7 @@ public class MyContext : DbContext //, IDataProtectionKeyContext
     // public DbSet<DataProtectionKey> DataProtectionKeys { get; set; } = null!;   //todo this is here for blazor app to prevent loss of performance doesnt work yet app always crashes on Render.com
 
     public DbSet<CustomerScript> CustomerScripts { get; set; }
-    public DbSet<ScriptCompiledCache> ScriptCompiledCaches { get; set; }
+    public DbSet<CompiledScripts> ScriptCompiledCaches { get; set; }
     public DbSet<EmberInstance> EmberInstances { get; set; }
 
     #region Required
@@ -32,7 +32,8 @@ public class MyContext : DbContext //, IDataProtectionKeyContext
         if (optionsBuilder.IsConfigured == false)
         {
             //tries to get connection string from environment variable if not it falls back to the docker container
-            var connectionString = Environment.GetEnvironmentVariable("DATABASE_URL");
+            string? connectionString = null;
+            // connectionString = Environment.GetEnvironmentVariable("DATABASE_URL")!;
 
             if (string.IsNullOrEmpty(connectionString))
             {

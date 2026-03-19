@@ -269,6 +269,7 @@ block in Home.razor -->
                 "..", "..", "..", "..",
                 "sandbox", "src", "Scripts"
             ));
+
             @* await rm.CompileAllScriptsInFolderAndSaveToDB(path, "Gilles", EmberMethods.GetEmberApiVersion()); *@
             await rm.CompileAllScriptsInFolderAndSaveToDB(userName: "Gilles", currentApiVersion: EmberMethods.GetEmberApiVersion());
 

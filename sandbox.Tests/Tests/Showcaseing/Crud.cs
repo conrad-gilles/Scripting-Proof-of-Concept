@@ -13,9 +13,15 @@ public class CrudDemos
     static EmberMethods em = new EmberMethods(ScriptManager);
 
     [TestInitialize]
-    public void Setup()
+    public async Task SetupAsync()
     {
-        ScriptManager.DeleteAllData();
+        //this block is ecessary at least once in the code everytime you modify the init.sql else the db wont be initialized somehow
+        using (var db = new EFModeling.EntityProperties.FluentAPI.Required.MyContext())
+        {
+            await db.Database.EnsureDeletedAsync();
+            await db.Database.EnsureCreatedAsync();
+        }
+        await ScriptManager.DeleteAllData();
     }
 
     public static ISccriptManagerDeleteAfter InitScriptManager()
