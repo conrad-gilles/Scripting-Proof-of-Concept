@@ -15,7 +15,7 @@ public class EmberVersioningTests
     private ISccriptManagerDeleteAfter? _facade;
     private EmberMethods? _em;
     private DataV2.DataV2? _data;
-    private string? _ActionResultVersionSpecific;
+    private string? _actionResultVersionSpecific;
     private string? _sourceCodeActionV1 = TestHelper.GetSC().sourceCodeActionV1;
     private string? _sourceCodeActionV2 = TestHelper.GetSC().sourceCodeActionV2;
     private string? _sourceCodeActionV3 = TestHelper.GetSC().sourceCodeActionV3;
@@ -32,7 +32,7 @@ public class EmberVersioningTests
         _facade = EmberMethods.GetNewScriptManagerInstance(v);
         _em = new EmberMethods(_facade);
         await _facade.DeleteAllData();
-        _ActionResultVersionSpecific = "[Message contains either failure or succes: ] ";  //change this if action result version changes it will thraow cause of message contains
+        _actionResultVersionSpecific = "[Message contains either failure or succes: ] ";  //change this if action result version changes it will thraow cause of message contains
         var obj = TestHelper.ScriptObjects();
         _data = new DataV2.DataV2(labOrder: obj.labOrder, patient: obj.patient, consoleLogger: obj.logger,
                                 dataAccess: obj.testDataAccess, vaccine: obj.vaccine);
@@ -88,7 +88,7 @@ public class EmberVersioningTests
             if (resultBeforeUpgrade is ActionResultSF)
             {
                 ActionResultV3.ActionResult result = (ActionResultV3.ActionResult)EmberMethods.UpgradeActionResult(resultBeforeUpgrade);
-                string shouldReturn = _ActionResultVersionSpecific + "Pediatric tests added";
+                string shouldReturn = _actionResultVersionSpecific + "Pediatric tests added";
                 Assert.IsInstanceOfType(result, typeof(ActionResultSF));
                 Assert.IsInstanceOfType(result, typeof(ActionResultV3.ActionResult));
                 Console.WriteLine(result.ToString());
@@ -276,7 +276,7 @@ public class EmberVersioningTests
         // ActionResult result= await facade.executescript<GeneratorContex,ActionResult>(ctx);
         // ActionResult result= await facade.executescript<GeneratorActionScript>(ctx);
 
-        string shouldReturn = _ActionResultVersionSpecific + "Pediatric tests added";
+        string shouldReturn = _actionResultVersionSpecific + "Pediatric tests added";
         Assert.IsInstanceOfType(result, typeof(ActionResultSF));
         Assert.IsInstanceOfType(result, typeof(ActionResultV3.ActionResult));
         Assert.IsInstanceOfType(result, typeof(ActiveActionResult));
@@ -303,7 +303,7 @@ public class EmberVersioningTests
         var result1 = await _facade.ExecuteScriptById(id, ctx);
         var result = EmberMethods.UpgradeActionResult(result1);
 
-        string shouldReturn = _ActionResultVersionSpecific + "Pediatric tests added";
+        string shouldReturn = _actionResultVersionSpecific + "Pediatric tests added";
         Assert.IsInstanceOfType(result, typeof(ActionResultSF));
         Assert.IsInstanceOfType(result, typeof(ActionResultV3.ActionResult));
         Assert.IsTrue(result.ToString()!.Contains(shouldReturn));

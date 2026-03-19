@@ -11,7 +11,7 @@ public class ScriptTests
 
     private ISccriptManagerDeleteAfter? _facade;
     private EmberMethods? _em;
-    private string? _ActionResultVersionSpecific;
+    private string? _actionResultVersionSpecific;
     private string? _sourceCodeActionV1 = TestHelper.GetSC().sourceCodeActionV1;
     private string? _sourceCodeActionV2 = TestHelper.GetSC().sourceCodeActionV2;
     private string? _sourceCodeActionV3 = TestHelper.GetSC().sourceCodeActionV3;
@@ -27,7 +27,7 @@ async Task SetupAsync()
         _em = new EmberMethods(_facade);
         await _facade.DeleteAllData();
 
-        _ActionResultVersionSpecific = "[Message contains either failure or succes: ] ";
+        _actionResultVersionSpecific = "[Message contains either failure or succes: ] ";
     }
 
 
@@ -41,7 +41,7 @@ async Task SetupAsync()
         var context = await _em!.GetTestingContext<GeneratorContextNoInherVaccineV5.GeneratorContext>(autoDetectFromScript: retrievedScript);
         object resultBeforeUpgrade = await _facade.ExecuteScriptById(id, context);
         ActionResultV3.ActionResult result = (ActionResultV3.ActionResult)EmberMethods.UpgradeActionResult(resultBeforeUpgrade);
-        string shouldReturn = _ActionResultVersionSpecific + "Pediatric tests added";
+        string shouldReturn = _actionResultVersionSpecific + "Pediatric tests added";
         Assert.IsInstanceOfType(result, typeof(ActionResultSF));
         Assert.IsInstanceOfType(result, typeof(ActionResultV3.ActionResult));
         Assert.IsTrue(result.ToString().Contains(shouldReturn));
@@ -56,7 +56,7 @@ async Task SetupAsync()
         var context = await _em!.GetTestingContext<GeneratorContextNoInherVaccineV5.GeneratorContext>(autoDetectFromScript: retrievedScript);
         object resultBeforeUpgrade = await _facade.ExecuteScriptById(id, context);
         ActionResultV3.ActionResult result = (ActionResultV3.ActionResult)EmberMethods.UpgradeActionResult(resultBeforeUpgrade);
-        string shouldReturn = _ActionResultVersionSpecific + "Pediatric tests added";
+        string shouldReturn = _actionResultVersionSpecific + "Pediatric tests added";
         Assert.IsInstanceOfType(result, typeof(ActionResultSF));
         Assert.IsInstanceOfType(result, typeof(ActionResultV3.ActionResult));
         Assert.IsTrue(result.ToString().Contains(shouldReturn));
@@ -71,7 +71,7 @@ async Task SetupAsync()
         var context = await _em!.GetTestingContext<GeneratorContextNoInherVaccineV5.GeneratorContext>(autoDetectFromScript: retrievedScript);
         object resultBeforeUpgrade = await _facade.ExecuteScriptById(id, context);
         ActionResultV3.ActionResult result = (ActionResultV3.ActionResult)EmberMethods.UpgradeActionResult(resultBeforeUpgrade);
-        string shouldReturn = _ActionResultVersionSpecific + "Pediatric tests added V3";
+        string shouldReturn = _actionResultVersionSpecific + "Pediatric tests added V3";
         Assert.IsInstanceOfType(result, typeof(ActionResultSF));
         Assert.IsInstanceOfType(result, typeof(ActionResultV3.ActionResult));
         Assert.IsTrue(result.ToString().Contains(shouldReturn));
@@ -85,7 +85,7 @@ async Task SetupAsync()
         CustomerScript retrievedScript = await _facade.GetScript(id);
         var context = await _em!.GetTestingContext<GeneratorContextNoInherVaccineV5.GeneratorContext>(autoDetectFromScript: retrievedScript);
         object result = await _facade.ExecuteScriptById(id, context);
-        string shouldReturn = _ActionResultVersionSpecific + "Polio Vaccine added";
+        string shouldReturn = _actionResultVersionSpecific + "Polio Vaccine added";
         Assert.IsInstanceOfType(result, typeof(ActionResultSF));
         Assert.IsInstanceOfType(result, typeof(ActionResultV3.ActionResult));
         Assert.IsTrue(result.ToString()!.Contains(shouldReturn));

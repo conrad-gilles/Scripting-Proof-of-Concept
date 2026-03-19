@@ -81,7 +81,7 @@ public class CrudDemos
         await Create();
 
         var services = new ServiceCollection();
-        Sandbox.ScriptingServiceCollectionExtensions.AddSandboxData
+        Sandbox.SandboxServiceCollectionExtensions.AddSandboxData
         (services, labOrder, patient, logger, testDataAccess, vaccine);
         using var provider = services.BuildServiceProvider();
         ActiveGeneratorContext ctx = (ActiveGeneratorContext)ActiveContextFactory.Create(provider);

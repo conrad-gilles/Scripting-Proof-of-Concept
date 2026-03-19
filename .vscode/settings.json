@@ -10,6 +10,24 @@
     "editor.formatOnSave": true
 },
 
+   // Tells VS Code not to watch these folders for file changes
+    "files.watcherExclude": {
+        "**/bin/**": true,
+        "**/obj/**": true
+    },
+    
+    // Hides these folders from the file explorer sidebar
+    "files.exclude": {
+        "**/bin/**": true,
+        "**/obj/**": true
+    },
+    
+    // Prevents the global search (Ctrl+Shift+F) from scanning inside compiled files
+    "search.exclude": {
+        "**/bin/**": true,
+        "**/obj/**": true
+    }
+
 // //should prevent testing console from automatically opening when using c# dev kit test ui
 // "testing.openTesting": "neverOpen",
 // "testing.automaticallyOpenTestResults": "neverOpen",

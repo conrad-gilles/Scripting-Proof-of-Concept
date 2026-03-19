@@ -28,7 +28,7 @@ public class FaultyScriptsTests
 
             var obj = TestHelper.ScriptObjects();
             var services = new ServiceCollection();
-            Sandbox.ScriptingServiceCollectionExtensions.AddSandboxData
+            Sandbox.SandboxServiceCollectionExtensions.AddSandboxData
             (services, obj.labOrder, obj.patient, obj.logger, obj.testDataAccess, obj.vaccine);
             using var provider = services.BuildServiceProvider();
             ActiveGeneratorContext ctx = (ActiveGeneratorContext)ActiveContextFactory.Create(provider);

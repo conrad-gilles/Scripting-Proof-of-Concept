@@ -11,10 +11,9 @@ public class SanboxTests
 {
     private ISccriptManagerDeleteAfter? _facade;
     private EmberMethods? _em;
-    private (LabOrder labOrder, Patient patient, ConsoleLogger logger, DataAccess testDataAccess, Vaccine vaccine) _obj;
+    private ObjectsRecord? _obj;
     // DataV1.MockData? data;
     private DataV2.DataV2? _data;
-    private string? _ActionResultVersionSpecific;
     private string? _sourceCodeActionV1 = TestHelper.GetSC().sourceCodeActionV1;
     private string? _sourceCodeActionV2 = TestHelper.GetSC().sourceCodeActionV2;
     private string? _sourceCodeActionV3 = TestHelper.GetSC().sourceCodeActionV3;
@@ -29,7 +28,6 @@ public class SanboxTests
         _facade = EmberMethods.GetNewScriptManagerInstance();
         _em = new EmberMethods(_facade!);
         await _facade.DeleteAllData();
-        _ActionResultVersionSpecific = "[Message contains either failure or succes: ] ";
         _obj = TestHelper.ScriptObjects();
         // data = new DataV1.MockData(labOrder: obj.labOrder, patient: obj.patient, consoleLogger: obj.logger,
         // dataAccess: obj.testDataAccess, vaccine: obj.vaccine);

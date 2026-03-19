@@ -75,7 +75,7 @@ public class TestHelper
         };
     }
 
-    internal static (LabOrder labOrder, Patient patient, ConsoleLogger logger, DataAccess testDataAccess, Vaccine vaccine) ScriptObjects()
+    internal static ObjectsRecord ScriptObjects()
     {
         LabOrder labOrder = new LabOrder("1", "Pediatrics");
         Patient patient = new Patient("1", "TestFirst", "TestLast", new DateTime(2010, 6, 1, 7, 47, 0), "M");   //mfu
@@ -83,7 +83,15 @@ public class TestHelper
         DataAccess testDataAccess = new DataAccess();
         Vaccine vaccine = new Vaccine("Polio", 1, DateTime.UtcNow);
 
-        return (labOrder, patient, logger, testDataAccess, vaccine);
+        // return (labOrder, patient, logger, testDataAccess, vaccine);
+        return new ObjectsRecord
+        {
+            labOrder = labOrder,
+            logger = logger,
+            patient = patient,
+            testDataAccess = testDataAccess,
+            vaccine = vaccine
+        };
     }
 }
 
@@ -96,4 +104,12 @@ public record TestHelperRecord
     public required string sourceCodeVaccineAction { get; init; }
     public required List<string> sourceCodes { get; init; }
     public required string sourceCodeWhileTrue { get; init; }
+}
+internal record ObjectsRecord
+{
+    public required LabOrder labOrder { get; init; }
+    public required Patient patient { get; init; }
+    public required ConsoleLogger logger { get; init; }
+    public required DataAccess testDataAccess { get; init; }
+    public required Vaccine vaccine { get; init; }
 }

@@ -11,7 +11,7 @@ public class EmberInternalFacadeTests
     private ISccriptManagerDeleteAfter? _scriptManager;
     private EmberInternalFacade? _internalScriptManager;
     private EmberMethods? _em;
-    private (LabOrder labOrder, Patient patient, ConsoleLogger logger, DataAccess testDataAccess, Vaccine vaccine) _obj;
+    private ObjectsRecord? _obj;
     private DataV1.MockData? _data;
     private string? _sourceCodeActionV1 = TestHelper.GetSC().sourceCodeActionV1;
     private string? _sourceCodeActionV2 = TestHelper.GetSC().sourceCodeActionV2;
@@ -116,7 +116,7 @@ public class EmberInternalFacadeTests
 
         var objs = TestHelper.ScriptObjects();
         var services = new ServiceCollection();
-        Sandbox.ScriptingServiceCollectionExtensions.AddSandboxData
+        Sandbox.SandboxServiceCollectionExtensions.AddSandboxData
         (services, _obj.labOrder, _obj.patient, _obj.logger, _obj.testDataAccess, _obj.vaccine);
         using var provider = services.BuildServiceProvider();
         ActiveGeneratorContext ctx = (ActiveGeneratorContext)ActiveContextFactory.Create(provider);

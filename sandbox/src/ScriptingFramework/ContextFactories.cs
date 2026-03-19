@@ -102,7 +102,7 @@ namespace ReadOnlyContextV1
 }
 namespace Sandbox
 {
-    internal static class ScriptingServiceCollectionExtensions
+    internal static class SandboxServiceCollectionExtensions
     {
         internal static IServiceCollection AddSandboxData
         (this IServiceCollection services, LabOrder labOrder, Patient patient, ConsoleLogger logger, DataAccess testDataAccess, Vaccine vaccine)
