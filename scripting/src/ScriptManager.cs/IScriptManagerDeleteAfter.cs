@@ -154,7 +154,7 @@ public interface ISccriptManagerDeleteAfter : IScriptManagerExtended
   /// <param name="scriptId"></param>
   /// <param name="targetApiVersion"></param>
   /// <returns></returns>
-  Task<bool> CheckVersionCompatibility(Guid scriptId, int targetApiVersion);
+  Task<bool> CheckVersionCompatibility(Guid scriptId, int? targetApiVersion = null);
 
   /// <summary>
   /// Registers a new Ember instance in the system

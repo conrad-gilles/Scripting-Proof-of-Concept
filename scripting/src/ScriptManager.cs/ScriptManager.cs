@@ -451,19 +451,30 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
     }
 
     // Validates if script can run on target version
-    public async Task<bool> CheckVersionCompatibility(Guid scriptId, int targetApiVersion)
+    public async Task<bool> CheckVersionCompatibility(Guid scriptId, int? targetApiVersion = null)
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName} with scriptId: {ScriptId}.", nameof(CheckVersionCompatibility), nameof(ScriptManagerFacade), scriptId);
 
         CustomerScript script = await _db.GetCustomerScript(scriptId);
-        // int minV = script.MinApiVersion;
-        int minV = targetApiVersion;
-        var ls = await GetActiveApiVersions();
-        if (ls.Contains(minV))
+        if (targetApiVersion == null)
         {
+            targetApiVersion = GetRunningApiVersion();
+        }
+        // var ls = await GetActiveApiVersions();
+        // if (ls.Contains((int)targetApiVersion))
+        // {
+        //     return true;
+        // }
+        try
+        {
+            await _db.GetCompiledScripCache(scriptId, (int)targetApiVersion);
             return true;
         }
-        return false;
+        catch
+        {
+            return false;
+        }
+        // return false;
     }
 
     // Registers a new Ember instance in the system
