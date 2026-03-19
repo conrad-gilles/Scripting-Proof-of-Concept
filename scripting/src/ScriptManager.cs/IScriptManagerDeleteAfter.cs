@@ -40,13 +40,6 @@ public interface ISccriptManagerDeleteAfter : IScriptManagerExtended
   Task RecompileCache(Guid scriptId, int apiVersion);
 
   /// <summary>
-  /// Performs syntax and interface validation without saving
-  /// </summary>
-  /// <param name="sourceCode"></param>
-  /// <returns></returns>
-  string ValidateScript(string sourceCode);
-
-  /// <summary>
   /// Retrieves compilation error details
   /// </summary>
   /// <param name="scriptId"></param>

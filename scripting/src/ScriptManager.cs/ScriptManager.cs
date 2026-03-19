@@ -186,27 +186,6 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
         await _db.RecompileCache(scriptId, apiVersion);
     }
 
-    /// Performs syntax and interface validation without saving
-    public string ValidateScript(string sourceCode)
-    {
-        _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(ValidateScript), nameof(ScriptManagerFacade));
-        try
-        {
-            var validation = _compiler.BasicValidationBeforeCompiling(sourceCode);
-            string className = validation.ClassName;    //figure out if i should do something with this
-            string baseTypeName = validation.BaseTypeName;
-            int versionInt = validation.Version;
-
-            return "Success: ClassName: " + className + ", BaseTypeName: " + baseTypeName + ", VersionInt: " + versionInt;
-        }
-        catch (Exception e)
-        {
-            return "Error: " + e.ToString();
-            // throw new FacadeException(e.ToString(), e);
-        }
-
-    }
-
     // Retrieves compilation error details
     public async Task<string> GetCompilationErrors(Guid scriptId, int? apiVersion = null)
     {

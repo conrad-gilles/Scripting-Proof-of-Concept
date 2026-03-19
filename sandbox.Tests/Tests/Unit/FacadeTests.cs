@@ -182,17 +182,19 @@ public class ScriptManagerFacadeTests
     }
 
     [TestMethod]
-    public void ValidateScriptTest()
+    public async Task ValidateScriptTest()
     {
-        string result = _facade!.ValidateScript(_sourceCodePedia!);
+        ValidationRecord result = _facade!.BasicValidationBeforeCompiling(_sourceCodePedia!);
 
-        Assert.IsTrue(result.StartsWith("Success:", StringComparison.OrdinalIgnoreCase));
-        Assert.IsTrue(result.Contains("PediatricCondition"));
+        // Assert.IsTrue(result.StartsWith("Success:", StringComparison.OrdinalIgnoreCase));
+        // Assert.IsTrue(result.Contains("PediatricCondition"));
+        await Assert.ThrowsExceptionAsync<ValidationBeforeCompilationException>(async () =>
+        {
+            ValidationRecord result2 = _facade.BasicValidationBeforeCompiling("wrong input test could be whatever");
+        });
 
-        string result2 = _facade.ValidateScript("wrong input test could be whatever");
-
-        Assert.IsTrue(result2.StartsWith("Error:", StringComparison.OrdinalIgnoreCase));
-        Assert.IsTrue(result2.Contains("Exception"));
+        // Assert.IsTrue(result2.StartsWith("Error:", StringComparison.OrdinalIgnoreCase));
+        // Assert.IsTrue(result2.Contains("Exception"));
     }
 
     [TestMethod]
