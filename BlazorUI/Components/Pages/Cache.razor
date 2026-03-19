@@ -15,7 +15,7 @@
         </button>
     </div>
 
-    @if (caches == null || !caches.Any())
+    @if (_caches == null || !_caches.Any())
     {
         <div class="empty-state">
             <i class="bi bi-database"></i>
@@ -38,7 +38,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (var cache in caches)
+                        @foreach (var cache in _caches)
                         {
                             <tr>
                                 <td class="ps-4">
@@ -75,7 +75,7 @@
 </div>
 
 @code {
-    private List<CompiledScripts> caches = [];
+    private List<CompiledScripts> _caches = [];
 
     protected override async Task OnInitializedAsync()
     {
@@ -85,7 +85,7 @@
     private async Task LoadCaches()
     {
         // Fetch all caches from the database
-        caches = await ScriptManager.GetAllCompiledScriptCaches();
+        _caches = await ScriptManager.GetAllCompiledScriptCaches();
         StateHasChanged();
     }
 

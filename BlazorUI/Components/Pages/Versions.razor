@@ -11,14 +11,14 @@
         <p class="text-muted m-0">Manage API versions and compatibility</p>
     </div>
 
-    @if (isLoading)
+    @if (_isLoading)
     {
         <div class="text-center py-5">
             <div class="spinner-border text-primary" role="status"></div>
             <p class="mt-2">Loading API versions...</p>
         </div>
     }
-    else if (ApiVersionsData == null || !ApiVersionsData.Any())
+    else if (_apiVersionsData == null || !_apiVersionsData.Any())
     {
         <div class="empty-state">
             <i class="bi bi-layers"></i>
@@ -30,7 +30,7 @@
     {
         <div class="api-versions-container">
             @* Order by API version descending so the newest is at the top *@
-            @foreach (var versionGroup in ApiVersionsData.OrderByDescending(v => v.Key))
+            @foreach (var versionGroup in _apiVersionsData.OrderByDescending(v => v.Key))
             {
                 <div class="card mb-4 shadow-sm">
                     <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
@@ -90,8 +90,8 @@
 </div>
 
 @code {
-    private bool isLoading = true;
-    private Dictionary<int, List<CompiledScripts>>? ApiVersionsData;
+    private bool _isLoading = true;
+    private Dictionary<int, List<CompiledScripts>>? _apiVersionsData;
 
     protected override async Task OnInitializedAsync()
     {
@@ -100,11 +100,11 @@
 
     private async Task LoadData()
     {
-        isLoading = true;
+        _isLoading = true;
         try
         {
             // Fetch the dictionary from the backend
-            ApiVersionsData = await ScriptManager.GetCachesForEachApiVersion();
+            _apiVersionsData = await ScriptManager.GetCachesForEachApiVersion();
         }
         catch (Exception ex)
         {
@@ -112,7 +112,7 @@
         }
         finally
         {
-            isLoading = false;
+            _isLoading = false;
             StateHasChanged();
         }
     }

@@ -19,7 +19,7 @@
     <div class="col-lg-3 col-md-6 mb-3">
         <div class="stat-card">
             <i class="bi bi-file-code-fill"></i>
-            <h3>@totalScripts</h3>
+            <h3>@_totalScripts</h3>
             <p>Total Scripts</p>
         </div>
     </div>
@@ -27,7 +27,7 @@
         <div class="stat-card success">
             <i class="bi bi-check-circle-fill"></i>
             <h3>
-                @compiledScripts
+                @_compiledScripts
             </h3>
             <p>Compiled Scripts</p>
         </div>
@@ -35,7 +35,7 @@
     <div class="col-lg-3 col-md-6 mb-3">
         <div class="stat-card warning">
             <i class="bi bi-exclamation-triangle-fill"></i>
-            <h3>@pendingScripts</h3>
+            <h3>@_pendingScripts</h3>
             <p>Pending Compilation</p>
         </div>
     </div>
@@ -73,7 +73,7 @@ block in Home.razor -->
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var script in RecentScripts)
+                    @foreach (var script in _recentScripts)
                     {
                         <tr>
                             <td class="ps-4">
@@ -113,7 +113,7 @@ block in Home.razor -->
                             </td>
                         </tr>
                     }
-                    @if (!RecentScripts.Any())
+                    @if (!_recentScripts.Any())
                     {
                         <tr>
                             <td colspan="6" class="text-center text-muted py-3">
@@ -140,7 +140,7 @@ block in Home.razor -->
                         <span class="status-dot active"></span>
                         <strong>Instance-01 Todo</strong>
                     </div>
-                    <span class="badge bg-primary">vWhatever (API v@(currentEmberVersionApi))</span>
+                    <span class="badge bg-primary">vWhatever (API v@(_currentEmberVersionApi))</span>
                 </div>
                 <div class="progress">
                     <div class="progress-bar bg-success" style="width: 85%"></div>
@@ -161,8 +161,8 @@ block in Home.razor -->
                     Create New Script
                 </a>
                 <button class="btn btn-outline-primary w-100 mb-2" @onclick="HandleCompileAllScripts"
-                        disabled="@isWorking">
-                    @if (isWorking)
+                        disabled="@_isWorking">
+                    @if (_isWorking)
                     {
                         <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                         <span>Compiling...</span>
@@ -194,17 +194,17 @@ block in Home.razor -->
 
 
 @code {
-    private bool isLoading = true;
-    private bool isWorking = false;
-    private int totalScripts = 0;
-    private int compiledScripts = 0;
-    private int pendingScripts = 0;
+    private bool _isLoading = true;
+    private bool _isWorking = false;
+    private int _totalScripts = 0;
+    private int _compiledScripts = 0;
+    private int _pendingScripts = 0;
     @* private int totalExecutions = 0; *@
 
-    private int currentEmberVersionApi = 0; //todo weird imp
+    private int _currentEmberVersionApi = 0; //todo weird imp
 
-    private List<CustomerScript> CustomerScripts = [];
-    private List<CustomerScript> RecentScripts = []; // ADD THIS LINE
+    private List<CustomerScript> _customerScripts = [];
+    private List<CustomerScript> _recentScripts = []; // ADD THIS LINE
 
     // This lifecycle method runs when the page loads
     protected override async Task OnInitializedAsync()
@@ -216,18 +216,18 @@ block in Home.razor -->
     {
 
         await LoadDashBoardData();
-        totalScripts++;
+        _totalScripts++;
         StateHasChanged();
     }
     private async Task LoadDashBoardData()
     {
         EmberMethods em = new EmberMethods(ScriptManager);
-        currentEmberVersionApi = ScriptManager.GetRunningApiVersion();
-        CustomerScripts = await ScriptManager.ListScripts(includeCaches: true);
-        totalScripts = CustomerScripts.Count();
-        compiledScripts = 0;
+        _currentEmberVersionApi = ScriptManager.GetRunningApiVersion();
+        _customerScripts = await ScriptManager.ListScripts(includeCaches: true);
+        _totalScripts = _customerScripts.Count();
+        _compiledScripts = 0;
 
-        foreach (var script in CustomerScripts)
+        foreach (var script in _customerScripts)
         {
             List<int> versions = [];
             foreach (var cache in script.CompiledCaches)
@@ -236,13 +236,13 @@ block in Home.razor -->
             }
             if (versions.Contains(ScriptManager.GetRunningApiVersion()) == false)
             {
-                pendingScripts++;
+                _pendingScripts++;
             }
         }
 
         // ADD THESE LINES to populate the Recent Scripts table:
         // Order by ModifiedAt (or CreatedAt if ModifiedAt is null), descending, and take the top 5.
-        RecentScripts = CustomerScripts
+        _recentScripts = _customerScripts
             .OrderByDescending(s => s.ModifiedAt ?? s.CreatedAt ?? DateTime.MinValue)
             .Take(3)
             .ToList();
@@ -259,7 +259,7 @@ block in Home.razor -->
     {
         try
         {
-            isWorking = true; //might have to call StateChange
+            _isWorking = true; //might have to call StateChange
             StateHasChanged();
             EmberMethods rm = new EmberMethods(ScriptManager);
             @* string path = @"C:\Users\Gilles\Desktop\UNI\Semester 6\Code\Codebase\Scripting-Proof-of-Concept\sandbox\src\Scripts"; *@
@@ -273,7 +273,7 @@ block in Home.razor -->
             @* await rm.CompileAllScriptsInFolderAndSaveToDB(path, "Gilles", EmberMethods.GetEmberApiVersion()); *@
             await rm.CompileAllScriptsInFolderAndSaveToDB(userName: "Gilles", currentApiVersion: EmberMethods.GetEmberApiVersion());
 
-            isWorking = false;
+            _isWorking = false;
             StateHasChanged();
 
             await LoadDashBoardData();

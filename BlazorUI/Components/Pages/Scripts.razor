@@ -13,20 +13,20 @@
 
 <PageTitle>Scripts</PageTitle>
 <div class="page-container">
-    @if (!isEditing)
+    @if (!_isEditing)
     {
         <div class="top-bar d-flex justify-content-between align-items-center mb-3">
             <h2 class="mb-0">All Scripts</h2>
 
             <div class="d-flex align-items-center gap-3">
-                @if (currentApiVersion > 0)
+                @if (_currentApiVersion > 0)
                 {
                     <div class="d-flex align-items-center gap-2">
                         <label for="versionSelect" class="form-label mb-0 fw-bold text-nowrap">Compile and Execute API
                             Version:</label>
                             <select id="versionSelect" class="form-select w-auto" style="min-width: 70px;"
-                                    @bind="selectedApiVersion" @bind:after="OnVersionChanged">
-                                @for (int i = currentApiVersion; i >= 1; i--)
+                                    @bind="_selectedApiVersion" @bind:after="OnVersionChanged">
+                                @for (int i = _currentApiVersion; i >= 1; i--)
                                 {
                                     <option value="@i">V@(i)</option>
                                 }
@@ -41,14 +41,14 @@
 
             <div class="card">
                 <div class="card-body">
-                    @if (isLoading)
+                    @if (_isLoading)
                     {
                         <div class="text-center py-5">
                             <div class="spinner-border text-primary" role="status"></div>
                             <p class="mt-2">Loading scripts...</p>
                         </div>
                     }
-                    else if (ScriptsList == null || !ScriptsList.Any())
+                    else if (_scriptsList == null || !_scriptsList.Any())
                     {
                         <div class="empty-state">
                             <i class="bi bi-file-code"></i>
@@ -71,7 +71,7 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach (var script in ScriptsList)
+                                    @foreach (var script in _scriptsList)
                                     {
                                         <tr>
                                             <td><i class="bi bi-file-code text-primary"></i> @script.ScriptName</td>
@@ -161,12 +161,12 @@
     </div>
 
 @code {
-    private List<CustomerScript> ScriptsList = new();
-    private bool isLoading = true;
+    private List<CustomerScript> _scriptsList = new();
+    private bool _isLoading = true;
 
-    private bool isEditing = false;
-    private int currentApiVersion = 0;
-    private int selectedApiVersion = 0;
+    private bool _isEditing = false;
+    private int _currentApiVersion = 0;
+    private int _selectedApiVersion = 0;
 
     // Component References
     private MonacoEditor _editor = default!;
@@ -176,20 +176,17 @@
     private int _minApiVersion = 6;
     private string _scriptCode = string.Empty;
     private Guid _currentScriptId;
-
-    public string DefaultScript = GetTemplate();
-
     protected override async Task OnInitializedAsync()
     {
-        currentApiVersion = ScriptManager.GetRunningApiVersion();
-        selectedApiVersion = currentApiVersion;
+        _currentApiVersion = ScriptManager.GetRunningApiVersion();
+        _selectedApiVersion = _currentApiVersion;
         await LoadScripts();
     }
 
     // We instantiate the Helper object when the MonacoEditor reference actually exists.
     protected override void OnAfterRender(bool firstRender)
     {
-        if (isEditing && _editorHelper == null && _editor != null)
+        if (_isEditing && _editorHelper == null && _editor != null)
         {
             _editorHelper = new MonacoEditorHelper(ScriptManager, _editor, Console)
             {
@@ -202,7 +199,7 @@
 
     private void CancelEditing()
     {
-        isEditing = false;
+        _isEditing = false;
         _editorHelper = null!;
     }
 
@@ -222,26 +219,26 @@
         services2.AddDbContextFactory<EFModeling.EntityProperties.FluentAPI.Required.MyContext>();
 
         ScriptingServiceCollectionExtensions.AddEmberScripting(services2, EmberMethods.GetReferences(),
-            EmberMethods.GetEmberApiVersion(testingDiffrentVersion: selectedApiVersion));
+            EmberMethods.GetEmberApiVersion(testingDiffrentVersion: _selectedApiVersion));
 
         var provider2 = services2.BuildServiceProvider();
 
         ScriptManager = provider2.GetRequiredService<ISccriptManagerDeleteAfter>();
-        Console.Log($"User selected API Version: {selectedApiVersion}");
+        Console.Log($"User selected API Version: {_selectedApiVersion}");
 
         await LoadScripts();
     }
 
     private async Task LoadScripts()
     {
-        isLoading = true;
+        _isLoading = true;
         try
         {
-            ScriptsList = await ScriptManager.ListScripts(null!, includeCaches: false);
+            _scriptsList = await ScriptManager.ListScripts(null!, includeCaches: false);
         }
         finally
         {
-            isLoading = false;
+            _isLoading = false;
             StateHasChanged();
         }
     }
@@ -323,7 +320,7 @@ resultObj.GetType().ToString());
                 _scriptName = script.ScriptName!;
                 _scriptCode = script.SourceCode ?? string.Empty;
 
-                isEditing = true;
+                _isEditing = true;
                 StateHasChanged();
                 await LoadScripts();
             }
