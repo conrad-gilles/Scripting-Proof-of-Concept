@@ -254,7 +254,7 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
 
     public INamedTypeSymbol GetBaseType(string script)
     {
-        return _compiler.GetBaseType(script);
+        return _compiler.GetBaseType(script).BaseType!;
     }
 
     #endregion

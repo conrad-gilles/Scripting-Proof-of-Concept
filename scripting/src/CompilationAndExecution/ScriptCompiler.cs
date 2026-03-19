@@ -27,6 +27,7 @@ internal class ScriptCompiler
     public ScriptCompiler(List<MetadataReference> referencesRO, ILogger<ScriptCompiler> logger)
     {
         _referencesRO = referencesRO;
+        _referencesRO!.AddRange(_standardRefrencesForAllScripts);
         _logger = logger;
     }
     public byte[] RunCompilation(string script, int? apiVersion = null, ValidationRecord? metaData = null) //references param there to enable later on users to define custom references
@@ -38,7 +39,7 @@ internal class ScriptCompiler
         }
         try
         {
-            _referencesRO!.AddRange(_standardRefrencesForAllScripts);
+            // _referencesRO!.AddRange(_standardRefrencesForAllScripts);
 
             List<MetadataReference>? references = [];
 
@@ -96,8 +97,11 @@ internal class ScriptCompiler
 
     }
 
-    public INamedTypeSymbol GetBaseType(string script)
+    public GetBaseTypeReturn GetBaseType(string script)
     {
+        //Gets base class name like IGeneratorScript and so on
+        // Source - https://stackoverflow.com/a/33095466
+
         SyntaxTree tree = CSharpSyntaxTree.ParseText(script);   //being called twice also in RunCompilation() might be better for performance to remove twice but also you want to be able to compile without having to parse always
         var mscorlib = MetadataReference.CreateFromFile(typeof(object).Assembly.Location);
         var compilation = CSharpCompilation.Create("MyCompilation",
@@ -111,8 +115,15 @@ internal class ScriptCompiler
         }
         var myClass = classesInTree.Last();
         var myClassSymbol = model.GetDeclaredSymbol(myClass) as ITypeSymbol;
-        var baseType = myClassSymbol!.BaseType!;
-        return baseType;
+
+        return new GetBaseTypeReturn
+        {
+            BaseType = myClassSymbol!.BaseType!,
+            Model = model,
+            MyClass = myClass,
+            MyClassSymbol = myClassSymbol,
+            Tree = tree
+        };
     }
     public ValidationRecord BasicValidationBeforeCompiling(string script)//record
     {
@@ -122,31 +133,16 @@ internal class ScriptCompiler
             //Does basic validation such as correct interface usage, or if only one class is in the script file.
             //Also extracts class name, type of the scrip(ex. Action) and verison of interface.
 
-            //Gets base class name like IGeneratorScript and so on
-            // Source - https://stackoverflow.com/a/33095466
-
-            SyntaxTree tree = CSharpSyntaxTree.ParseText(script);   //being called twice also in RunCompilation() might be better for performance to remove twice but also you want to be able to compile without having to parse always
-            var mscorlib = MetadataReference.CreateFromFile(typeof(object).Assembly.Location);
-            var compilation = CSharpCompilation.Create("MyCompilation",
-                syntaxTrees: new[] { tree }, references: new[] { mscorlib });   // i might be able to use this method to init the refrences also above?
-            var model = compilation.GetSemanticModel(tree);
-            var classesInTree = tree.GetRoot().DescendantNodes().OfType<ClassDeclarationSyntax>();
-            if (classesInTree.Count() > 1)
-            {
-                _logger.LogError("More Than one class found in Script string.");
-                throw new MoreThanOneClassFoundInScriptException("More Than one class found in Script string. in if (classesInTree.Count() > 1)"); //this might throw even if there is one class in script if compiler adds classes or something like that, so if it does maybe change this if statement
-            }
-            var myClass = classesInTree.Last();
-            var myClassSymbol = model.GetDeclaredSymbol(myClass) as ITypeSymbol;
-            var baseTypeName = myClassSymbol!.BaseType!.Name;
-            var className = myClassSymbol.ToString();
-            var parentSymbol = myClassSymbol!.Interfaces.FirstOrDefault() ?? myClassSymbol.BaseType;
+            var record = GetBaseType(script);
+            var baseTypeName = record.MyClassSymbol!.BaseType!.Name;
+            var className = record.MyClassSymbol.ToString();
+            var parentSymbol = record.MyClassSymbol!.Interfaces.FirstOrDefault() ?? record.MyClassSymbol.BaseType;
             int? versionInt = null;
             string implementedIntrf = parentSymbol.Name;
 
             string? contextParameterTypeName = null;
 
-            var executeMethod = myClass.DescendantNodes()
+            var executeMethod = record.MyClass!.DescendantNodes()
                                        .OfType<MethodDeclarationSyntax>()
                                        .FirstOrDefault(m => m.Identifier.Text == "ExecuteAsync" || m.Identifier.Text == "EvaluateAsync");
 
@@ -198,7 +194,7 @@ internal class ScriptCompiler
             _logger.LogTrace("BaseClass Name = " + baseTypeName);
             _logger.LogTrace("Version Int = " + versionInt);
 
-            ValidateNamespaceUsage(tree, model);
+            ValidateNamespaceUsage(record.Tree!, record.Model!);
             ValidationRecord returnedRecord = new ValidationRecord
             {
                 ClassName = className,
@@ -342,4 +338,13 @@ public record ValidationRecord
     public required string ClassName { get; init; }
     public required string BaseTypeName { get; init; }
     public required int Version { get; init; }
+}
+
+public record GetBaseTypeReturn
+{
+    public required Microsoft.CodeAnalysis.INamedTypeSymbol? BaseType { get; init; }
+    public required Microsoft.CodeAnalysis.ITypeSymbol? MyClassSymbol { get; init; }
+    public required Microsoft.CodeAnalysis.CSharp.Syntax.ClassDeclarationSyntax? MyClass { get; init; }
+    public required SyntaxTree Tree { get; init; }
+    public required Microsoft.CodeAnalysis.SemanticModel? Model { get; init; }
 }
