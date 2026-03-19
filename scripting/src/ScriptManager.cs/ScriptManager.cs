@@ -479,12 +479,17 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
     #region Duplicate Detection & Cleanup
 
     // Identifies duplicate scripts based on source code equivalence
-    public async Task<(List<Guid> scriptGUIDs, Dictionary<Guid, int> cacheGUIDs)> DetectDuplicates()
+    public async Task<DuplicateRecord> DetectDuplicates()
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(DetectDuplicates), nameof(ScriptManagerFacade));
 
         var dupes = await _db.DetectDuplicates();
-        return (scriptGUIDs: dupes.scriptGUIDs, cacheGUIDs: dupes.cacheGUIDs);
+        return new DuplicateRecord
+        {
+            cacheGUIDs = dupes.cachesToDelete,
+            scriptGUIDs = dupes.duplicateGuids
+        };
+        // return (scriptGUIDs: dupes.scriptGUIDs, cacheGUIDs: dupes.cacheGUIDs);
     }
 
     // Removes duplicate scripts and orphaned caches
@@ -568,8 +573,3 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
 }
 
 
-public record ScriptNameType
-{
-    public required string Name { get; init; }
-    public required ScriptTypes Type { get; init; }
-}

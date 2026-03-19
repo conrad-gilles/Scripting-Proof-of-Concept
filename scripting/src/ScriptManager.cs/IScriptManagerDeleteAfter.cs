@@ -173,7 +173,7 @@ public interface ISccriptManagerDeleteAfter : IScriptManagerExtended
   /// Identifies duplicate scripts based on source code equivalence
   /// </summary>
   /// <returns></returns>
-  Task<(List<Guid> scriptGUIDs, Dictionary<Guid, int> cacheGUIDs)> DetectDuplicates();
+  Task<DuplicateRecord> DetectDuplicates();
 
   /// <summary>
   /// Removes duplicate scripts and orphaned caches

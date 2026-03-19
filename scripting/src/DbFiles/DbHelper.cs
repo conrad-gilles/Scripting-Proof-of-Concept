@@ -555,7 +555,7 @@ internal class DbHelper
         // }
         // return false;   //but name is duplicate! only source code is unique, also this could be an issue if the name of the script is not taken from the source code as it could lead to a script having a diffrent name but the same source code as another this would lead to this algorithm not finginh the duplicate script
     }
-    public async Task<(List<Guid> scriptGUIDs, Dictionary<Guid, int> cacheGUIDs)> DetectDuplicates()
+    public async Task<DuplicateListDbH> DetectDuplicates()
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(DetectDuplicates), nameof(DbHelper));
 
@@ -609,7 +609,12 @@ internal class DbHelper
 
             }
         }
-        return (scriptGUIDs: duplicateGuids, cacheGUIDs: cachesToDelete);
+        // return (scriptGUIDs: duplicateGuids, cacheGUIDs: cachesToDelete);
+        return new DuplicateListDbH
+        {
+            duplicateGuids = duplicateGuids,
+            cachesToDelete = cachesToDelete
+        };
     }
     public async Task<List<int>> GetActiveApiVersions()
     {
@@ -635,8 +640,8 @@ internal class DbHelper
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(RemoveDuplicates), nameof(DbHelper));
 
-        duplicateGuids = (await DetectDuplicates()).scriptGUIDs;
-        cachesWithoutScript = (await DetectDuplicates()).cacheGUIDs;
+        duplicateGuids = (await DetectDuplicates()).duplicateGuids;
+        cachesWithoutScript = (await DetectDuplicates()).cachesToDelete;
 
         for (int i = 0; i < duplicateGuids.Count(); i++)
         {
@@ -743,3 +748,4 @@ internal class DbHelper
         return returnedDict;
     }
 }
+

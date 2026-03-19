@@ -8,8 +8,7 @@ public class TestHelper
     static List<string>? sourceCodes;
     static string? sourceCodeWhileTrue;
 
-    public static (string sourceCodePedia, string sourceCodeActionV1, string sourceCodeActionV2, string sourceCodeActionV3, string sourceCodeVaccineAction, List<string> sourceCodes, string sourceCodeWhileTrue)
-    GetSC(bool includeCondInList = true)
+    public static TestHelperRecord GetSC(bool includeCondInList = true)
     {
         sourceCodeActionV1 = EmberMethods.CreateStringFromCsFile(
                    Path.GetFullPath(Path.Combine(
@@ -63,7 +62,17 @@ public class TestHelper
             sourceCodes!.Add(sourceCodePedia);
         }
 
-        return (sourceCodePedia, sourceCodeActionV1, sourceCodeActionV2, sourceCodeActionV3, sourceCodeVaccineAction, sourceCodes, sourceCodeWhileTrue);
+        // return (sourceCodePedia, sourceCodeActionV1, sourceCodeActionV2, sourceCodeActionV3, sourceCodeVaccineAction, sourceCodes, sourceCodeWhileTrue);
+        return new TestHelperRecord
+        {
+            sourceCodeActionV1 = sourceCodeActionV1,
+            sourceCodeActionV2 = sourceCodeActionV2,
+            sourceCodeActionV3 = sourceCodeActionV3,
+            sourceCodePedia = sourceCodePedia,
+            sourceCodes = sourceCodes,
+            sourceCodeVaccineAction = sourceCodeVaccineAction,
+            sourceCodeWhileTrue = sourceCodeWhileTrue
+        };
     }
 
     internal static (LabOrder labOrder, Patient patient, ConsoleLogger logger, DataAccess testDataAccess, Vaccine vaccine) ScriptObjects()
@@ -76,4 +85,15 @@ public class TestHelper
 
         return (labOrder, patient, logger, testDataAccess, vaccine);
     }
+}
+
+public record TestHelperRecord
+{
+    public required string sourceCodePedia { get; init; }
+    public required string sourceCodeActionV1 { get; init; }
+    public required string sourceCodeActionV2 { get; init; }
+    public required string sourceCodeActionV3 { get; init; }
+    public required string sourceCodeVaccineAction { get; init; }
+    public required List<string> sourceCodes { get; init; }
+    public required string sourceCodeWhileTrue { get; init; }
 }
