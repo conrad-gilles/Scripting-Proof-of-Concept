@@ -31,7 +31,7 @@ public class EmberInternalFacadeTests
         _ScriptManager.DeleteAllData();
         _em = new EmberMethods(_ScriptManager!);
         ActionResultVersionSpecific = "[Message contains either failure or succes: ] ";
-        _obj = _em.ScriptObjects();
+        _obj = TestHelper.ScriptObjects();
         _data = new DataV1.MockData(labOrder: _obj.labOrder, patient: _obj.patient, consoleLogger: _obj.logger,
         dataAccess: _obj.testDataAccess, vaccine: _obj.vaccine);
     }
@@ -117,7 +117,7 @@ public class EmberInternalFacadeTests
         ScriptNameType scriptTuple;
         scriptTuple = await _ScriptManager!.CreateScriptUsingNameType(_sourceCodeActionV1!);
 
-        var objs = _em!.ScriptObjects();
+        var objs = TestHelper.ScriptObjects();
         var services = new ServiceCollection();
         Sandbox.ScriptingServiceCollectionExtensions.AddSandboxData
         (services, _obj.labOrder, _obj.patient, _obj.logger, _obj.testDataAccess, _obj.vaccine);

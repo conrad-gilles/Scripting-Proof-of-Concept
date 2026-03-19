@@ -19,8 +19,6 @@ public class ContextFactory
             apiV = _scriptManager.GetRunningApiVersion();
         }
 
-        var obj = ScriptObjects();
-
         // MockData data = new MockData(labOrder: obj.labOrder, patient: obj.patient, consoleLogger: obj.logger,
         // dataAccess: obj.testDataAccess, vaccine: obj.vaccine);
         Ember.Scripting.GeneratorContextSF ctx = CreateUsingData((int)apiV, data);
@@ -53,7 +51,6 @@ public class ContextFactory
         }
         recentType = contextVersionMap[(int)apiV];
         Type desiredType = contextVersionMap[vali.Version];
-        var objs = ScriptObjects();
         // Ember.Scripting.GeneratorContextSF context = CreateContextForApiV(data);
         Ember.Scripting.GeneratorContextSF context = ctx;
         int iterations = 0;
@@ -97,14 +94,4 @@ public class ContextFactory
         return ctx;
     }
 
-    internal (LabOrder labOrder, Patient patient, ConsoleLogger logger, DataAccess testDataAccess, Vaccine vaccine) ScriptObjects()
-    {
-        LabOrder labOrder = new LabOrder("1", "Pediatrics");
-        Patient patient = new Patient("1", "TestFirst", "TestLast", new DateTime(2010, 6, 1, 7, 47, 0), "M");   //mfu
-        ConsoleLogger logger = new ConsoleLogger();
-        DataAccess testDataAccess = new DataAccess();
-        Vaccine vaccine = new Vaccine("Polio", 1, DateTime.UtcNow);
-
-        return (labOrder, patient, logger, testDataAccess, vaccine);
-    }
 }

@@ -33,7 +33,7 @@ public class EmberVersioningTests
         _em = new EmberMethods(_facade);
         await _facade.DeleteAllData();
         _ActionResultVersionSpecific = "[Message contains either failure or succes: ] ";  //change this if action result version changes it will thraow cause of message contains
-        var obj = _em!.ScriptObjects();
+        var obj = TestHelper.ScriptObjects();
         _data = new DataV2.DataV2(labOrder: obj.labOrder, patient: obj.patient, consoleLogger: obj.logger,
                                 dataAccess: obj.testDataAccess, vaccine: obj.vaccine);
     }
@@ -262,7 +262,7 @@ public class EmberVersioningTests
             ctx = ContextFactory.CreateUsingData(desiredContextVersion, _data!);
         });
         ContextFactory sf = new ContextFactory(_facade);
-        var obj = sf.ScriptObjects();
+        var obj = TestHelper.ScriptObjects();
 
         _data = new DataV2.DataV2(labOrder: obj.labOrder, patient: obj.patient, consoleLogger: obj.logger,
                                 dataAccess: obj.testDataAccess, vaccine: obj.vaccine);

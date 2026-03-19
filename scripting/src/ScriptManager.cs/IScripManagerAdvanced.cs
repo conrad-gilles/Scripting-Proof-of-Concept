@@ -18,7 +18,7 @@ public interface IScriptManagerExtended : IScriptManager
     Task<ScriptNameType> CreateScriptUsingNameType(string sourceCode, string userName = "Default", int? apiVersion = null, DateTime? createdAt = null, bool checkForDuplicates = false);
 
     /// <summary>
-    /// Updates existing script source code and recompiles for all compatible API versions
+    /// Updates existing script source code
     /// </summary>
     /// <param name="scriptId"></param>
     /// <param name="newSourceCode"></param>

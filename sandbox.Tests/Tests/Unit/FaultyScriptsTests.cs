@@ -26,7 +26,7 @@ public class FaultyScriptsTests
             string sourceCode = TestHelper.GetSC().sourceCodeWhileTrue;
             ScriptNameType scriptRecord = await ScriptManager!.CreateScriptUsingNameType(sourceCode!);
 
-            var obj = em.ScriptObjects();
+            var obj = TestHelper.ScriptObjects();
             var services = new ServiceCollection();
             Sandbox.ScriptingServiceCollectionExtensions.AddSandboxData
             (services, obj.labOrder, obj.patient, obj.logger, obj.testDataAccess, obj.vaccine);

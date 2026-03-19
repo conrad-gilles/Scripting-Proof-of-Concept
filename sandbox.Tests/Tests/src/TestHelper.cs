@@ -65,4 +65,15 @@ public class TestHelper
 
         return (sourceCodePedia, sourceCodeActionV1, sourceCodeActionV2, sourceCodeActionV3, sourceCodeVaccineAction, sourceCodes, sourceCodeWhileTrue);
     }
+
+    internal static (LabOrder labOrder, Patient patient, ConsoleLogger logger, DataAccess testDataAccess, Vaccine vaccine) ScriptObjects()
+    {
+        LabOrder labOrder = new LabOrder("1", "Pediatrics");
+        Patient patient = new Patient("1", "TestFirst", "TestLast", new DateTime(2010, 6, 1, 7, 47, 0), "M");   //mfu
+        ConsoleLogger logger = new ConsoleLogger();
+        DataAccess testDataAccess = new DataAccess();
+        Vaccine vaccine = new Vaccine("Polio", 1, DateTime.UtcNow);
+
+        return (labOrder, patient, logger, testDataAccess, vaccine);
+    }
 }

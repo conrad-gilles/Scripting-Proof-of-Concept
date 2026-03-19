@@ -234,7 +234,7 @@ public class ScriptManagerFacadeTests
     public async Task GetCompilationErrorsTestNegative()
     {
         Guid id2 = Guid.NewGuid();
-        await _facade!.SaveScriptWithoutCompiling(id2, "wrong input test could be whatever");
+        await _facade!.CreateScriptWithoutCompiling(id2, "wrong input test could be whatever");
         // string result2 = await facade.GetCompilationErrors(id2);
         string result2 = await _facade.GetCompilationErrors(id2);
         Console.WriteLine("Start of Result:");
@@ -252,7 +252,7 @@ public class ScriptManagerFacadeTests
         Assert.IsTrue(result2.Contains(desiredOutput));
 
         Guid id3 = Guid.NewGuid();
-        await _facade.SaveScriptWithoutCompiling(id3, "public class Test : IFakeInterface{}");
+        await _facade.CreateScriptWithoutCompiling(id3, "public class Test : IFakeInterface{}");
         // string result2 = await facade.GetCompilationErrors(id2);
         string result3 = await _facade.GetCompilationErrors(id3);
         Console.WriteLine("Start of Result:");

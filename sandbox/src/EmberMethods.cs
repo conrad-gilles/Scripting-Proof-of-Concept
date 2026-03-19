@@ -260,7 +260,6 @@ public class EmberMethods
         {
             ContextFactory sf = new ContextFactory(_facade);
             Ember.Scripting.GeneratorContextSF ctx;
-            var objs = sf.ScriptObjects();
             if (autoDetectFromScript == null)
             {
                 var dict = ContextVersionScanner.GetClassDictionary();
@@ -355,8 +354,7 @@ public class EmberMethods
         }
 
     }
-    internal (LabOrder labOrder, Patient patient, ConsoleLogger logger, DataAccess testDataAccess,
-    Vaccine vaccine) ScriptObjects()
+    internal ActiveDataClass GetTestData()
     {
         LabOrder labOrder = new LabOrder("1", "Pediatrics");
         Patient patient = new Patient("1", "TestFirst", "TestLast", new DateTime(2010, 6, 1, 7, 47, 0), "M");   //mfu
@@ -364,13 +362,7 @@ public class EmberMethods
         DataAccess testDataAccess = new DataAccess();
         Vaccine vaccine = new Vaccine("Polio", 1, DateTime.UtcNow);
 
-        return (labOrder, patient, logger, testDataAccess, vaccine);
-    }
-
-    internal ActiveDataClass GetTestData()
-    {
-        var obj = ScriptObjects();
-        return new ActiveDataClass(labOrder: obj.labOrder, patient: obj.patient, consoleLogger: obj.logger,
-          dataAccess: obj.testDataAccess, vaccine: obj.vaccine);
+        return new ActiveDataClass(labOrder: labOrder, patient: patient, consoleLogger: logger,
+          dataAccess: testDataAccess, vaccine: vaccine);
     }
 }

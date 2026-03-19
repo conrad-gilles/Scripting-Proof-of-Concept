@@ -121,6 +121,13 @@ public class FacadeException : Exception
     public FacadeException(string message, Exception innerException) : base(message, innerException) { }
 }
 
+public class SaveScriptWithoutCompilingException : Exception
+{
+    public SaveScriptWithoutCompilingException() : base() { }
+    public SaveScriptWithoutCompilingException(string message) : base(message) { }
+    public SaveScriptWithoutCompilingException(string message, Exception innerException) : base(message, innerException) { }
+}
+
 public class ExceptionHelper    //for future to traverse exception chain
 {
     public static Exception GetExceptionFromChain(Exception ex, int i)

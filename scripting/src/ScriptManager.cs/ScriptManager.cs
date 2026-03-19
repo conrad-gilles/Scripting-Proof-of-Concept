@@ -83,7 +83,7 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
         };
     }
 
-    // Updates existing script source code and recompiles for all compatible API versions
+    // Updates existing script source code
     public async Task UpdateScript(Guid scriptId, string newSourceCode, string? userName = null, int? apiVersion = null)
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName} with scriptId: {ScriptId}.", nameof(UpdateScript), nameof(ScriptManagerFacade), scriptId);
@@ -171,6 +171,13 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
         _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(SaveScriptWithoutCompiling), nameof(ScriptManagerFacade));
         // Guid id = Guid.NewGuid();
         await _db.SaveScriptWithoutCompiling(id, sourceCode);
+    }
+
+    public async Task CreateScriptWithoutCompiling(Guid id, string sourceCode, string? userName = null)
+    {
+        _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(CreateScriptWithoutCompiling), nameof(ScriptManagerFacade));
+        // Guid id = Guid.NewGuid();
+        await _db.CreateScriptWithoutCompiling(id, sourceCode, userName);
     }
 
     // Recompiles script for all active API versions

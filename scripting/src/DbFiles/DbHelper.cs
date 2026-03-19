@@ -148,7 +148,7 @@ internal class DbHelper
 
             await DeleteScriptCache(scriptId, i);
             _logger.LogInformation("Deleted: " + i);
-            Console.WriteLine("Deleted: " + i);
+            // Console.WriteLine("Deleted: " + i);
 
 
 
@@ -177,7 +177,7 @@ internal class DbHelper
                 {
                     await CreateAndInsertCompiledCache(script, itemN.ApiVersion);
                     _logger.LogInformation("Mock recompilation of old V" + itemN.ApiVersion);
-                    Console.WriteLine("Mock recompilation of old V" + itemN.ApiVersion);
+                    // Console.WriteLine("Mock recompilation of old V" + itemN.ApiVersion);
                 }
                 catch (Exception e) { _logger.LogError("Compilation of old version failed" + e.ToString()); }
 
@@ -186,7 +186,7 @@ internal class DbHelper
             {
                 await CreateAndInsertCompiledCache(script);
                 _logger.LogInformation("Real recompilation of new V" + itemN.ApiVersion + " , normal if twice");
-                Console.WriteLine("Real recompilation of new V" + itemN.ApiVersion + " , normal if twice");
+                // Console.WriteLine("Real recompilation of new V" + itemN.ApiVersion + " , normal if twice");
                 break;
             }
         }
@@ -225,7 +225,7 @@ internal class DbHelper
                 {
                     await DeleteScriptCache(itemN.ScriptId, currentApiVersion);
                     _logger.LogInformation("Deleted an old Script Cache!");
-                    Console.WriteLine("Deleted an old Script Cache!");
+                    // Console.WriteLine("Deleted an old Script Cache!");
                 }
             }
 
@@ -298,7 +298,7 @@ internal class DbHelper
             if (await db.ScriptCompiledCaches.AnyAsync(c => c.ScriptId == script.Id && c.ApiVersion == apiV))
             {
                 _logger.LogInformation("Skipping insert of: " + getTupleFromVal.ClassName + " because it already exists already exists.");
-                Console.WriteLine("Skipping insert of: " + getTupleFromVal.ClassName + " because it already exists already exists.");
+                // Console.WriteLine("Skipping insert of: " + getTupleFromVal.ClassName + " because it already exists already exists.");
                 throw new DbHelperException(nameof(CreateAndInsertCompiledCache) + " failed in " + nameof(DbHelper) + "more details: " + "Skipping insert of: " + getTupleFromVal.ClassName + " because it already exists already exists."); ;
                 // return;
             }
@@ -347,9 +347,9 @@ internal class DbHelper
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.ToString());
+                // Console.WriteLine(e.ToString());
                 _logger.LogError(e.ToString());
-                Console.WriteLine("Could not execute DeleteScriptCache");
+                // Console.WriteLine("Could not execute DeleteScriptCache");
                 _logger.LogInformation("Could not execute DeleteScriptCache");
             }
         }
@@ -486,20 +486,40 @@ internal class DbHelper
             }
             else
             {
-                CustomerScript testScript = new CustomerScript
-                {
-                    Id = id,
-                    ScriptName = null,
-                    ScriptType = null,
-                    SourceCode = sourceCode,
-                    MinApiVersion = GetRecentApiVersion(),
-                    CreatedAt = DateTime.UtcNow,
-                    ModifiedAt = DateTime.UtcNow,
-                    CreatedBy = null
-                };
-                db.CustomerScripts.Add(testScript);
+                // CustomerScript testScript = new CustomerScript
+                // {
+                //     Id = id,
+                //     ScriptName = null,
+                //     ScriptType = null,
+                //     SourceCode = sourceCode,
+                //     MinApiVersion = GetRecentApiVersion(),
+                //     CreatedAt = DateTime.UtcNow,
+                //     ModifiedAt = DateTime.UtcNow,
+                //     CreatedBy = null
+                // };
+                // db.CustomerScripts.Add(testScript);
+                throw new SaveScriptWithoutCompilingException(message: "Script did not exist, therefore could not save.");
 
             }
+            await db.SaveChangesAsync();
+        }
+    }
+    public async Task CreateScriptWithoutCompiling(Guid id, string sourceCode, string? userName = null)
+    {
+        using (var db = await _contextFactory.CreateDbContextAsync())
+        {
+            CustomerScript testScript = new CustomerScript
+            {
+                Id = id,
+                ScriptName = null,
+                ScriptType = null,
+                SourceCode = sourceCode,
+                MinApiVersion = GetRecentApiVersion(),
+                CreatedAt = DateTime.UtcNow,
+                ModifiedAt = DateTime.UtcNow,
+                CreatedBy = userName
+            };
+            db.CustomerScripts.Add(testScript);
             await db.SaveChangesAsync();
         }
     }

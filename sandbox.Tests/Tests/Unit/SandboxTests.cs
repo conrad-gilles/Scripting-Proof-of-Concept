@@ -30,7 +30,7 @@ public class SanboxTests
         _em = new EmberMethods(_facade!);
         await _facade.DeleteAllData();
         _ActionResultVersionSpecific = "[Message contains either failure or succes: ] ";
-        _obj = _em.ScriptObjects();
+        _obj = TestHelper.ScriptObjects();
         // data = new DataV1.MockData(labOrder: obj.labOrder, patient: obj.patient, consoleLogger: obj.logger,
         // dataAccess: obj.testDataAccess, vaccine: obj.vaccine);
         _data = new DataV2.DataV2(labOrder: _obj.labOrder, patient: _obj.patient, consoleLogger: _obj.logger,

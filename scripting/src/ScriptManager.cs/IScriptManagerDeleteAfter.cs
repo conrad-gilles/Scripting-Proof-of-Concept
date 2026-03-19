@@ -30,6 +30,8 @@ public interface ISccriptManagerDeleteAfter : IScriptManagerExtended
   /// <returns></returns>
   Task SaveScriptWithoutCompiling(Guid id, string sourceCode);
 
+  Task CreateScriptWithoutCompiling(Guid id, string sourceCode, string? userName = null);
+
   /// <summary>
   /// Recompiles script for all active API versions
   /// </summary>

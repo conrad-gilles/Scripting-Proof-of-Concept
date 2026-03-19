@@ -1,5 +1,6 @@
 # Todo
 
+- SaveScriptWithoudCompiling now throwserror so maybe create a function to create a script without compiling?
 - write buggy scripts containing maybe stuff like while true...
 - monaco editor when right clicking bugs and is super dark not ui friendly
 - store v1 of action scripts maybe in hitory not in diffrent file
