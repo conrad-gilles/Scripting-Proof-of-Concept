@@ -9,14 +9,14 @@ namespace Ember.Scripting;
 
 internal class ScriptExecutor
 {
-    private readonly static int _scriptTimeout = 5000;   // ms of how much time scripts get to execute
+    private readonly static int _scriptTimeout = 1000;   // ms of how much time scripts get to execute
     private readonly ILogger<ScriptExecutor> _logger;
     public ScriptExecutor(ILogger<ScriptExecutor> logger)
     {
         _logger = logger;
     }
 
-    public T RunScriptExecution<T>(byte[] compiledScript, GeneratorContextSF genContext)
+    public async Task<T> RunScriptExecution<T>(byte[] compiledScript, GeneratorContextSF genContext)
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(RunScriptExecution), nameof(ScriptExecutor));
         try
@@ -60,12 +60,12 @@ internal class ScriptExecutor
             // if (typeof(IGeneratorConditionScript).IsAssignableFrom(type))
             if (typeof(IGeneratorConditionScript).IsAssignableFrom(type))    //checks if type implements the generator specific interface  //check if runs
             {
-                var result = RunConditionScript(type, scriptInstance, genContext);
+                var result = await RunConditionScript(type, scriptInstance, genContext);
                 return (T)(object)result;
             }
             else if (typeof(IGeneratorActionScript).IsAssignableFrom(type))
             {
-                var result = RunActionScript(type, scriptInstance, genContext);
+                var result = await RunActionScript(type, scriptInstance, genContext);
                 return (T)(object)result;
             }
             else
@@ -82,20 +82,28 @@ internal class ScriptExecutor
         }
 
     }
-    public bool RunConditionScript(Type type, object scriptInstance, GeneratorContextSF genContext)
+    public async Task<bool> RunConditionScript(Type type, object scriptInstance, GeneratorContextSF genContext)
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(RunConditionScript), nameof(ScriptExecutor));
         try
         {
             MethodInfo method = type.GetMethod("EvaluateAsync")!;
+            using var cts = new CancellationTokenSource(_scriptTimeout);
+            ScriptEnvironment.CurrentToken.Value = cts.Token;
 
             var resultTask = (Task)method.Invoke(scriptInstance, new object[] { genContext })!;
 
-            if (!resultTask.Wait(_scriptTimeout))
+            try
             {
-                resultTask.Dispose();
-                // resultTask.
-                throw new ScriptTimeoutException("Condition script exceeded time limit.");
+                await resultTask.WaitAsync(cts.Token);
+            }
+            catch (OperationCanceledException)
+            {
+                throw new ScriptTimeoutException(nameof(RunConditionScript) + " script exceeded time limit and was safely terminated.");
+            }
+            finally
+            {
+                ScriptEnvironment.CurrentToken.Value = CancellationToken.None;
             }
 
             var resultProperty = resultTask.GetType().GetProperty("Result");
@@ -111,18 +119,29 @@ internal class ScriptExecutor
         }
 
     }
-    public ActionResultSF RunActionScript(Type type, object scriptInstance, GeneratorContextSF genContext)
+    public async Task<ActionResultSF> RunActionScript(Type type, object scriptInstance, GeneratorContextSF genContext)
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(RunActionScript), nameof(ScriptExecutor));
         try
         {
             MethodInfo method = type.GetMethod("ExecuteAsync")!;
 
+            using var cts = new CancellationTokenSource(_scriptTimeout);
+            ScriptEnvironment.CurrentToken.Value = cts.Token;
+
             var resultTask = (Task)method.Invoke(scriptInstance, new object[] { genContext })!;
 
-            if (!resultTask.Wait(_scriptTimeout))
+            try
             {
-                throw new ScriptTimeoutException("Action script exceeded time limit.");
+                await resultTask.WaitAsync(cts.Token);
+            }
+            catch (OperationCanceledException)
+            {
+                throw new ScriptTimeoutException(nameof(RunConditionScript) + " script exceeded time limit and was safely terminated.");
+            }
+            finally
+            {
+                ScriptEnvironment.CurrentToken.Value = CancellationToken.None;
             }
 
             var resultProperty = resultTask.GetType().GetProperty("Result");
@@ -140,4 +159,10 @@ internal class ScriptExecutor
         }
 
     }
+}
+
+
+public static class ScriptEnvironment
+{
+    public static readonly AsyncLocal<CancellationToken> CurrentToken = new();
 }

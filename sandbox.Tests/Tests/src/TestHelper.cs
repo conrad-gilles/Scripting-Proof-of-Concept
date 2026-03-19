@@ -6,8 +6,9 @@ public class TestHelper
     static string? sourceCodeVaccineAction;
     static string? sourceCodePedia;
     static List<string>? sourceCodes;
+    static string? sourceCodeWhileTrue;
 
-    public static (string sourceCodePedia, string sourceCodeActionV1, string sourceCodeActionV2, string sourceCodeActionV3, string sourceCodeVaccineAction, List<string> sourceCodes)
+    public static (string sourceCodePedia, string sourceCodeActionV1, string sourceCodeActionV2, string sourceCodeActionV3, string sourceCodeVaccineAction, List<string> sourceCodes, string sourceCodeWhileTrue)
     GetSC(bool includeCondInList = true)
     {
         sourceCodeActionV1 = EmberMethods.CreateStringFromCsFile(
@@ -45,6 +46,13 @@ public class TestHelper
                    "sandbox", "src", "Scripts", "ConditionScripts", "PediatricCondition.cs"
                ))
            );
+        sourceCodeWhileTrue = EmberMethods.CreateStringFromCsFile(
+      Path.GetFullPath(Path.Combine(
+      AppDomain.CurrentDomain.BaseDirectory,
+      "..", "..", "..", "..",
+      "sandbox", "src", "Scripts", "ActionScripts", "WhileTrueScript.cs"
+  ))
+  );
         sourceCodes = [];
         sourceCodes!.Add(sourceCodeActionV1);
         sourceCodes!.Add(sourceCodeActionV2);
@@ -55,6 +63,6 @@ public class TestHelper
             sourceCodes!.Add(sourceCodePedia);
         }
 
-        return (sourceCodePedia, sourceCodeActionV1, sourceCodeActionV2, sourceCodeActionV3, sourceCodeVaccineAction, sourceCodes);
+        return (sourceCodePedia, sourceCodeActionV1, sourceCodeActionV2, sourceCodeActionV3, sourceCodeVaccineAction, sourceCodes, sourceCodeWhileTrue);
     }
 }

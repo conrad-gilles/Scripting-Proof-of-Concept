@@ -287,7 +287,7 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
 
         //possibly add a null check for compiledScript
         // ScriptExecutor executor = new ScriptExecutor();
-        ActionResultSF result = (ActionResultSF)_executor.RunScriptExecution<object>(compiledScript!, context);  //todo maybe better handling than casting although the error will be thrown in the class itself
+        ActionResultSF result = (ActionResultSF)await _executor.RunScriptExecution<object>(compiledScript!, context);  //todo maybe better handling than casting although the error will be thrown in the class itself
         return result;
     }
 
@@ -317,7 +317,7 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
 
         //possibly add a null check for compiledScript
         // ScriptExecutor executor = new ScriptExecutor();
-        bool result = (bool)_executor.RunScriptExecution<object>(compiledScript!, context);  //todo maybe better handling than casting although the error will be thrown in the class itself
+        bool result = (bool)await _executor.RunScriptExecution<object>(compiledScript!, context);  //todo maybe better handling than casting although the error will be thrown in the class itself
         return result;
     }
 
@@ -346,7 +346,7 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
 
         //possibly add a null check for compiledScript
         // ScriptExecutor executor = new ScriptExecutor();
-        object result = _executor.RunScriptExecution<object>(compiledScript!, context);  //returns either bool or action result todo maybe add checks if thats the case but normally should be
+        object result = await _executor.RunScriptExecution<object>(compiledScript!, context);  //returns either bool or action result todo maybe add checks if thats the case but normally should be
         return result;
     }
 
@@ -375,7 +375,7 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
 
         //possibly add a null check for compiledScript
         // ScriptExecutor executor = new ScriptExecutor();
-        object result = _executor.RunScriptExecution<object>(compiledScript!, context);  //returns either bool or action result todo maybe add checks if thats the case but normally should be
+        object result = await _executor.RunScriptExecution<object>(compiledScript!, context);  //returns either bool or action result todo maybe add checks if thats the case but normally should be
         return result;
     }
 

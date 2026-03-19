@@ -17,6 +17,12 @@ internal class ScriptCompiler
                         MetadataReference.CreateFromFile(Assembly.Load("System.Runtime").Location),
                         MetadataReference.CreateFromFile(typeof(Task<>).Assembly.Location),
                         MetadataReference.CreateFromFile(typeof(DateTime).Assembly.Location),
+
+                        MetadataReference.CreateFromFile(typeof(System.Threading.AsyncLocal<>).Assembly.Location),
+                        MetadataReference.CreateFromFile(typeof(System.Threading.CancellationToken).Assembly.Location),
+                        MetadataReference.CreateFromFile(Assembly.Load("System.Threading").Location),
+                        MetadataReference.CreateFromFile(Assembly.Load("System.Threading.Tasks").Location),
+                        MetadataReference.CreateFromFile(Assembly.Load("netstandard").Location)
                         ];
     public ScriptCompiler(List<MetadataReference> referencesRO, ILogger<ScriptCompiler> logger)
     {

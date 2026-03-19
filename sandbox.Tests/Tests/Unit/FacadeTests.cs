@@ -109,7 +109,7 @@ public class ScriptManagerFacadeTests
         await _em!.CompileAllScriptsInFolderAndSaveToDB(scriptFolderPath, "Gilles", EmberMethods.GetEmberApiVersion());
         List<CustomerScript> scripts = await _facade!.ListScripts(includeCaches: true);
         Assert.IsNotNull(scripts);
-        Assert.IsTrue(scripts.Count == 5);
+        Assert.IsTrue(scripts.Count == 6);
 
         CustomerScriptFilter filters = new CustomerScriptFilter(scriptName: "VaccineScript");   //todo fix this oine thorws errors
         List<CustomerScript> scriptsFiltered = await _facade.ListScripts(includeCaches: true, filters: filters);
