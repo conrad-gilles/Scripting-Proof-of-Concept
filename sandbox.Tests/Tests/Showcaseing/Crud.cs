@@ -73,18 +73,25 @@ public class CrudDemos
     public async Task Execute()
     {
         LabOrder labOrder = new LabOrder("1", "Pediatrics");
-        Patient patient = new Patient("1", "TestFirst", "TestLast", new DateTime(2010, 6, 1, 7, 47, 0), "M");   //mfu
+        Vaccine vaccine = new Vaccine("Polio", 1, DateTime.UtcNow);
+
         ConsoleLogger logger = new ConsoleLogger();
         DataAccess testDataAccess = new DataAccess();
-        Vaccine vaccine = new Vaccine("Polio", 1, DateTime.UtcNow);
 
         await Create();
 
         var services = new ServiceCollection();
-        Sandbox.SandboxServiceCollectionExtensions.AddSandboxData
-        (services, labOrder, patient, logger, testDataAccess, vaccine);
+
+        Sandbox.SandboxServiceCollectionExtensions.AddSandboxServices
+        (services, logger, testDataAccess);
+
         using var provider = services.BuildServiceProvider();
-        ActiveGeneratorContext ctx = (ActiveGeneratorContext)ActiveContextFactory.Create(provider);
-        ActiveActionResult ar = await InternalScriptManager!.ExecuteScriptByNameAndType("AddPediatricTestsV2", ScriptTypes.GeneratorActionScript, ctx);
+
+        ActiveContextFactory factory = provider.GetRequiredService<ActiveContextFactory>();
+
+        ActiveGeneratorContext ctx = factory.Create(labOrder, vaccine);
+
+        ActiveActionResult ar = await InternalScriptManager!.ExecuteScriptByNameAndType
+        ("AddPediatricTestsV2", ScriptTypes.GeneratorActionScript, ctx);
     }
 }

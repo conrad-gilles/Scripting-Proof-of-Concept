@@ -116,10 +116,13 @@ public class EmberInternalFacadeTests
 
         var objs = TestHelper.ScriptObjects();
         var services = new ServiceCollection();
-        Sandbox.SandboxServiceCollectionExtensions.AddSandboxData
-        (services, _obj.labOrder, _obj.patient, _obj.logger, _obj.testDataAccess, _obj.vaccine);
+        Sandbox.SandboxServiceCollectionExtensions.AddSandboxServices
+        (services, _obj!.logger, _obj.testDataAccess);
         using var provider = services.BuildServiceProvider();
-        ActiveGeneratorContext ctx = (ActiveGeneratorContext)ActiveContextFactory.Create(provider);
+
+        ActiveContextFactory factory = provider.GetRequiredService<ActiveContextFactory>();
+        ActiveGeneratorContext ctx = factory.Create(_obj.labOrder, _obj.vaccine);
+
         ActiveActionResult ar = await _internalScriptManager!.ExecuteScriptByNameAndType(scriptTuple.Name, scriptTuple.Type, ctx);
 
         Console.WriteLine("Name: " + scriptTuple.Name + ", ScriptType: " + scriptTuple.Type);

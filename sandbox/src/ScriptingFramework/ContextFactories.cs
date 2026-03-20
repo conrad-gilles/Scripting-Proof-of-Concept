@@ -2,117 +2,96 @@ using Ember.Scripting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
+
 namespace GeneratorContextNoInherVaccineV5
 {
-    public class ContextFactory : Ember.Scripting.IContextFactory
+    public class ContextFactory : IGeneratorContextFactory
     {
-        public static GeneratorContextSF Create(ILabOrderInterfaceV4NoInheritence labOrder, IVaccineInterface vaccine)
+        public ActiveGeneratorContext Create(ILabOrderInterfaceV4NoInheritence labOrder, IVaccineInterface vaccine)
         {
-            return new GeneratorContext(labOrder, vaccine);
+            return new ActiveGeneratorContext(labOrder, vaccine);
         }
+    }
 
-        public static GeneratorContextSF Create(IServiceProvider serviceProvider)
-        {
-            var labOrder = serviceProvider.GetRequiredService<LabOrder>();
-            var vaccine = serviceProvider.GetRequiredService<Vaccine>();
-
-            return new GeneratorContext(labOrder, vaccine);
-        }
+    public interface IGeneratorContextFactory
+    {
+        public ActiveGeneratorContext Create(ILabOrderInterfaceV4NoInheritence labOrder, IVaccineInterface vaccine);
     }
 }
 namespace GeneratorContextV4
 {
-    public class ContextFactory : Ember.Scripting.IContextFactory
+    public class ContextFactory(IConsoleLoggerInterface logger, IDataAccessInterface data) : IGeneratorContextFactory
     {
-        public static GeneratorContextSF Create(ILabOrderInterfaceV3 labOrder, IPatientInterface patient, IConsoleLoggerInterface logger, IDataAccessInterface data)
+        public GeneratorContextV4.GeneratorContext Create(ILabOrderInterfaceV3 labOrder, IPatientInterface patient, IVaccineInterface vaccine)
         {
-            return new GeneratorContext(labOrder, patient, logger, data);
+            return new GeneratorContextV4.GeneratorContext(labOrder, patient, logger, data);
         }
+    }
 
-        public static GeneratorContextSF Create(IServiceProvider serviceProvider)
-        {
-            var labOrder = serviceProvider.GetRequiredService<LabOrder>();
-            var patient = serviceProvider.GetRequiredService<Patient>();
-            var logger = serviceProvider.GetRequiredService<ConsoleLogger>();
-            var data = serviceProvider.GetRequiredService<DataAccess>();
-
-            return new GeneratorContext(labOrder, patient, logger, data);
-        }
+    public interface IGeneratorContextFactory
+    {
+        public GeneratorContextV4.GeneratorContext Create(ILabOrderInterfaceV3 labOrder, IPatientInterface patient, IVaccineInterface vaccine);
     }
 }
 namespace GeneratorContextV3
 {
-    public class ContextFactory : Ember.Scripting.IContextFactory
+    public class ContextFactory(IConsoleLoggerInterface logger, IDataAccessInterface data) : IGeneratorContextFactory
     {
-        public static GeneratorContextSF Create(ILabOrderInterfaceV2 labOrder, IPatientInterface patient, IConsoleLoggerInterface logger, IDataAccessInterface data)
+        public GeneratorContextV3.GeneratorContext Create(ILabOrderInterfaceV2 labOrder, IPatientInterface patient)
         {
-            return new GeneratorContext(labOrder, patient, logger, data);
+            return new GeneratorContextV3.GeneratorContext(labOrder, patient, logger, data);
         }
+    }
 
-        public static GeneratorContextSF Create(IServiceProvider serviceProvider)
-        {
-            var labOrder = serviceProvider.GetRequiredService<LabOrder>();
-            var patient = serviceProvider.GetRequiredService<Patient>();
-            var logger = serviceProvider.GetRequiredService<ConsoleLogger>();
-            var data = serviceProvider.GetRequiredService<DataAccess>();
-
-            return new GeneratorContext(labOrder, patient, logger, data);
-        }
+    public interface IGeneratorContextFactory
+    {
+        public GeneratorContextV3.GeneratorContext Create(ILabOrderInterfaceV2 labOrder, IPatientInterface patient);
     }
 }
 namespace RWContextV2
 {
-    public class ContextFactory : Ember.Scripting.IContextFactory
+    public class ContextFactory(IConsoleLoggerInterface logger, IDataAccessInterface data) : IGeneratorContextFactory
     {
-        public static GeneratorContextSF Create(ILabOrderRWInterface labOrder, IPatientInterface patient, IConsoleLoggerInterface logger, IDataAccessInterface data)
+        public RWContextV2.GeneratorContext Create(ILabOrderRWInterface labOrder, IPatientInterface patient)
         {
-            return new GeneratorContext(labOrder, patient, logger, data);
+            return new RWContextV2.GeneratorContext(labOrder, patient, logger, data);
         }
+    }
 
-        public static GeneratorContextSF Create(IServiceProvider serviceProvider)
-        {
-            var labOrder = serviceProvider.GetRequiredService<LabOrder>();
-            var patient = serviceProvider.GetRequiredService<Patient>();
-            var logger = serviceProvider.GetRequiredService<ConsoleLogger>();
-            var data = serviceProvider.GetRequiredService<DataAccess>();
-
-            return new GeneratorContext(labOrder, patient, logger, data);
-        }
+    public interface IGeneratorContextFactory
+    {
+        public RWContextV2.GeneratorContext Create(ILabOrderRWInterface labOrder, IPatientInterface patient);
     }
 }
 namespace ReadOnlyContextV1
 {
-    public class ContextFactory : Ember.Scripting.IContextFactory
+    public class ContextFactory(IConsoleLoggerInterface logger, IDataAccessInterface data) : IGeneratorContextFactory
     {
-        public static GeneratorContextSF Create(ILabOrderInterface labOrder, IPatientInterface patient, IConsoleLoggerInterface logger, IDataAccessInterface data)
+        public ReadOnlyContextV1.GeneratorContext Create(ILabOrderInterface labOrder, IPatientInterface patient)
         {
-            return new GeneratorContext(labOrder, patient, logger, data);
-        }
-
-        public static GeneratorContextSF Create(IServiceProvider serviceProvider)
-        {
-            var labOrder = serviceProvider.GetRequiredService<LabOrder>();
-            var patient = serviceProvider.GetRequiredService<Patient>();
-            var logger = serviceProvider.GetRequiredService<ConsoleLogger>();
-            var data = serviceProvider.GetRequiredService<DataAccess>();
-
-            return new GeneratorContext(labOrder, patient, logger, data);
+            return new ReadOnlyContextV1.GeneratorContext(labOrder, patient, logger, data);
         }
     }
+
+    public interface IGeneratorContextFactory
+    {
+        public ReadOnlyContextV1.GeneratorContext Create(ILabOrderInterface labOrder, IPatientInterface patient);
+    }
 }
+
 namespace Sandbox
 {
     internal static class SandboxServiceCollectionExtensions
     {
-        internal static IServiceCollection AddSandboxData
-        (this IServiceCollection services, LabOrder labOrder, Patient patient, ConsoleLogger logger, DataAccess testDataAccess, Vaccine vaccine)
+        internal static IServiceCollection AddSandboxServices
+               (this IServiceCollection services, ConsoleLogger logger, DataAccess testDataAccess)
         {
-            services.AddSingleton(labOrder);
-            services.AddSingleton(patient);
+            // Register services
             services.AddSingleton(logger);
             services.AddSingleton(testDataAccess);
-            services.AddSingleton(vaccine);
 
+            // Register the factory
+            services.AddTransient<GeneratorContextNoInherVaccineV5.IGeneratorContextFactory, GeneratorContextNoInherVaccineV5.ContextFactory>();
             return services;
         }
     }

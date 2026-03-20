@@ -28,10 +28,13 @@ public class FaultyScriptsTests
 
             var obj = TestHelper.ScriptObjects();
             var services = new ServiceCollection();
-            Sandbox.SandboxServiceCollectionExtensions.AddSandboxData
-            (services, obj.labOrder, obj.patient, obj.logger, obj.testDataAccess, obj.vaccine);
+            Sandbox.SandboxServiceCollectionExtensions.AddSandboxServices
+            // (services, obj.labOrder, obj.patient, obj.logger, obj.testDataAccess, obj.vaccine);
+            (services, obj.logger, obj.testDataAccess);
+
             using var provider = services.BuildServiceProvider();
-            ActiveGeneratorContext ctx = (ActiveGeneratorContext)ActiveContextFactory.Create(provider);
+            ActiveContextFactory factory = provider.GetRequiredService<ActiveContextFactory>();
+            ActiveGeneratorContext ctx = factory.Create(obj.labOrder, obj.vaccine);
             ActiveActionResult ar = await InternalScriptManager!.ExecuteScriptByNameAndType("WhileTrueScript", ScriptTypes.GeneratorActionScript, ctx);
 
             Console.WriteLine("Name: " + scriptRecord.Name + ", ScriptType: " + scriptRecord.Type);
