@@ -1,5 +1,12 @@
 # Todo
 
+- remove all occurences of data
+- rename GeneratorContexts to PatientContexts or something like that?
+- maybe for the future allow for multiple functions in the script, or what i proposed allow for multiple static classes with the standard methods
+- only 1 factory that creates the most recent context get rid of the others or maybe put them in a Testing namespace?
+- put all GenCOntext in a namespace like maybe Ember.Scripting.GeneratorContextsV5 etc
+- make GeneratorContextSF mayeb an interface?
+
 - write test for checkversioncompatibility
 - SaveScriptWithoudCompiling now throwserror so maybe create a function to create a script without compiling?
 - write buggy scripts containing maybe stuff like while true...

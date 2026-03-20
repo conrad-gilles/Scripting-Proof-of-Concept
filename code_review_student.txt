@@ -1,0 +1,228 @@
+========== General Comments
+
+1) What is the use of the EmberInstances class/table?
+Is this because it was listed in the confluence page?
+  -> I don't see a reason for this db table or class.
+
+Answer:
+I added it because of the confluence page, but i havent written any real logic to support it yet, so removing it is no issue at all,
+I thing the thought behind it was having some form of record/table to store information about running ember instances in the environment (Test (T), Acceptance (A), and Production (P))?
+Although if you asked me it would make more sense to just retrieve this data as the program is running by calling a method from the instance itself maybe?
+2) What is the use of
+   public DbSet<DataProtectionKey> DataProtectionKeys { get; set; } = null!;
+   
+   In MyContext?
+
+Answer:
+I added it for blazor app should enhance performance (when running the app in a docker container) will probably remove or fix it in the future since it is not working currently.
+   
+3) General naming conventions, private props, private fields, etc...
+
+Answer: 
+I tried to rename all to fit the conventions.
+
+4) Maybe we should rename CompiledScriptCache to simply CompiledScripts because Cache implies a Cache, which it is not.
+   
+Answer:
+Renamed both the c# class and the table in the postgresql.
+
+5) In general do not use tuples for return types. Use records or classes to encapsulate the data.
+
+Answer:
+Changed all to records
+6) Remove subsequent empty lines.
+Todo
+
+7) _camelCase for all private fields — eliminates the biggest source of visual confusion 
+
+8) camelCase for all method parameters. You sometimes used Pascal case.
+
+9) The classes like ScriptManger, ScriptExecutor should never contain methods that are only there for testing. (example: ValidateScript and GetCompilationErrors in ScriptManger.cs)
+
+
+todo
+10) Better naming of Classes etc. I got confused quickly as some classes/interfaces are name the same or similar.
+
+todo
+11) In .Net projects you do not add another src folder inside the projects. For example: Scripting/src is wrong. All you namespaces/fodlers simply live in the root of the project.
+
+
+=========== ScriptExecutor.cs
+
+1) Task is not killed if it exceeds the timeout
+
+   You do resultTask.Wait(ScriptTimeout).
+   But then you need to kill the task if it exceeds the timeout.
+   See: https://learn.microsoft.com/en-us/dotnet/api/system.threading.cancellationtokensource?view=net-10.0
+   
+   Also use WaitAsync and not Wait (as this can deadlock in async contexts)
+
+Answer: 
+Fixed this using the cancellationtokensource but the creator of the script always has to add the line to check if it was cancelled 
+to each body of a loop in his scrip, maybe in the future i can add a function that adds if automatically if it wasnt there, I also made the methods async and added the WaitAsync.
+
+=========== ScriptCompiler.cs
+
+1) Everytime RunCompilation is called you add StandardRefrencesForAllScripts to ReferencesRO.
+   So if I call it 100 times it will contain the same references 100 times.
+   
+   Answer:
+   I put the AddRange(StandardRefrencesForAllScripts) into the constructor which is only being called via DI.
+2) Duplicate code
+
+   Duplicate code between BasicValidationBeforeCompiling and GetBaseType
+   ScriptCompiler.cs:93-109 and 111-211   
+Answer:
+I got rid of it by having GetBaseType return a more complex record, it works but a bit overcomplex still.
+   
+3) GetReferencesForOldVersion it should get the references from a folder.
+
+Question: So instead of from current runtime from folder containing the dlls?
+
+4) What purpose does ValidateScript offer. We do have BasicValidationBeforeCompiling. Is it only for testing?
+
+   If so, you can use Assert.ThrowsException https://learn.microsoft.com/en-us/dotnet/api/microsoft.visualstudio.testtools.unittesting.assert.throwsexception?view=mstest-net-3.11
+   
+   We should not have methods in our classes that server only unit tests.
+   
+Answer:
+I got rid of it and replaced all occurences of it with BasicValidationBeforeCompiling.
+
+=========== DbHelper.cs
+
+1) CreateAndInsertCustomerScript:
+    - alsoCompAndSave parameter is never used
+	- checkForDuplicates is always set to true in line 281.
+	  So an outside caller can never skip the duplicate check.
+   Another question is: does it even make sense the ever skip the duplicate check? Not really, or do you have a use case?
+   
+Answer:
+Got rid of the unused Parameter.
+I only used the checkForDuplicates flag for testing, in real world scenario you would always check i believe.
+
+2) RemoveDuplicates has a bug. You loop over duplicateGuids and then check if duplicateGuids contains the element at index i; this is always true of course. So you basically delete everyting.
+
+   Do we even need such a method?
+
+Answer:
+If we decide that we always must check for duplicates when inserting or updating, this function would be unncessecary.
+Also it is hard to test since you would have to circumvent the duplicate check when inserting.
+
+I didnt try to fix the bug yet since i cant really test it right now, if we decide to keep the function i will of course fix and test it.
+   
+3) Do not use  using (var db = new MyContext())
+   Use dependency injection and DbContextFactory. See: https://learn.microsoft.com/en-us/ef/core/dbcontext-configuration/#use-a-dbcontext-factory
+
+Answer:
+Done, but i kept the connection string hardcoded in the MyContext class for simplicity.
+
+4) In method GetScriptId do not use magic strings. Use nameof(IGeneratorActionScript)
+Answer: Done
+   
+5) SaveScriptWithoutCompiling throw an exception in case the script cannot be found instead of creating
+   a new instance in the else case.   
+Answer:
+Done, and created a new method below it for CreateScriptWithoutCompiling.
+
+6) You still have a bunch of Console.WriteLine statements that need to be removed.
+Answer:
+I commented them all out in the DbHelper class
+
+========== ScriptManager.cs
+
+1) CheckVersionCompatibility simply checks all script versions.
+   This is because it internally calls GetActiveApiVersions which calls GetAllCompiledScriptCaches.
+   It does not check if the current script is compatible with the targetApiVersion.
+
+Question: Should it check if a cache of the current ember api version is inside the db? If yes compile so it is compatible?
+2) Maybe I am missing something but UpdateScript does not actually compile the script it just updates the source code.
+
+Answer:
+I removed the part in the description that says it also recompiles.
+
+3) In method CreateScriptUsingNameType do not use magic strings. Use nameof(IGeneratorActionScript).
+
+4) Create a mock service that provides you the user name for GetUserName.
+
+5) What is the use case for GetActiveApiVersions?
+
+6) In CleanupOrphanedCaches you call AutomaticCompilationOnVersionUpdate. Seems like the wrong method no?
+
+Also is AutomaticCompilationOnVersionUpdate even needed? We will never recompile all our script simply because ember has a new api version. Or I am missing something - which is very likely - so let me know.
+
+7) GetCompilationErrors is a method that is only used for testing. It should therefore not be part of the ScriptManager.
+
+
+========== ContextFactories.cs
+
+A factory should be registered via DI.
+So the create method does not need passed a IServiceProvider serviceProvider. The factory class can simply get the relevant services from via the Constructor.
+
+Example:
+
+    public class ContextFactory(ConsoleLogger consoleLogger, DataAccess dataAccess) : Ember.Scripting.IContextFactory
+    {
+        public static GeneratorContextSF Create(LabOrder labOrder, Patient patient)
+        {
+            return new GeneratorContext(labOrder, patient, logger, data);
+        }
+    }
+	
+You also mixed DI-services with actual parameters.
+For example LabOrder and Patient are POCOs not services. They are parameters that need to be provided by the developer when they use the factory. On the other hand ConsoleLogger and DataAccess are services that need to be resolved from DI via the constructor.
+
+There is no need for a IContextFactory interface.
+This is because each factory, like GeneratorContextFactory defines its own parameters that are different from the factory of another context. So the interface cannot generically express parameters they expect.
+
+You can have an interface per factory like IGeneratorContextFactory. As this allows for unit test mocking etc...
+
+So:
+
+    public interface IGeneratorContextFactory()
+    {
+        public static GeneratorContextSF Create(LabOrder labOrder, Patient patient);
+    }
+
+
+====================== Restructoring of file structure proposal
+
+The scripting library structing is a bit off at this point.
+
+- Rename DbFiles -> Persistence
+  - MyContext -> ScriptDbContext
+  - DbHelper -> ScriptRepository
+
+- CompilationAndExecution/ should be separated into Compilation/ and Execution/
+  They share no code and they have different concerns/purposes.
+
+- Extract ValidationRecord into its own file inside Compilation folder. 
+  Same story with ValidationRecord.
+
+- Folder ScriptManager.cs/ should be renamed to simply ScriptManager/.
+
+So somethin like this
+
+scripting/
+├─ Compilation/
+│  ├─ IScriptCompiler.cs
+│  ├─ ScriptCompiler.cs
+│  ├─ ValidationRecord.cs
+│  ├─ CompilationExceptions.cs
+├─ Execution/
+│  ├─ IScriptExecutor.cs
+│  ├─ ScriptExecutor.cs 
+│  ├─ ExecutionExceptions.cs
+├─ Versioning/
+│  ├─ VersionAttributes.cs
+│  ├─ ContextVersionScanner.cs
+│  ├─ ActionResultVersionScanner.cs
+│  ├─ ScriptVersionScanner.cs 
+├─ Persistence/
+│  ├─ IScriptRepository.cs
+│  ├─ ScriptRepository.cs
+│  ├─ ScriptDbContext.cs
+│  ├─ CustomerScript.cs
+│  ├─ CustomerScriptFilter.cs
+│  ├─ ScriptCompiledCache.cs  // Maybe rename to CompiledScript.cs
+│  ├─ EmberInstance.cs
+│  ├─ PersistenceExceptions.cs

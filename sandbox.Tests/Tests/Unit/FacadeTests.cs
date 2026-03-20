@@ -431,6 +431,10 @@ public class ScriptManagerFacadeTests
         bool hasRecent = await _facade.CheckVersionCompatibility(id, currentVersion);
 
         Assert.IsTrue(hasRecent);
+
+        hasRecent = await _facade.CheckVersionCompatibility(id, currentVersion - 1);
+
+        Assert.IsFalse(hasRecent);
     }
 
     [TestMethod]

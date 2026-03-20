@@ -295,7 +295,7 @@ public class EmberMethods
         {
             Console.WriteLine("GetTestingContext failed");
             Console.WriteLine(e.ToString());
-            throw new Exception();
+            throw new Exception("GetTestingContext failed", e);
         }
 
     }

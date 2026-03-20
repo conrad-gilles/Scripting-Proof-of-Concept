@@ -343,5 +343,20 @@ namespace GeneratorContextNoInherVaccineV5
     }
 }
 
+// namespace GeneratorContextV6
+// {
+//     [MetaDataGeneratorClass(version: -1)]
+//     public class GeneratorContext : GeneratorContextNoInherVaccineV5.GeneratorContext //into diffrent namespaces blocks later folders
+//     {
+//         public void DoIt()
+//         {
+
+//         }
+//         public GeneratorContext(ILabOrderInterfaceV4NoInheritence labOrder, IVaccineInterface vaccine) : base(labOrder, vaccine)
+//         {
+//         }
+//     }
+// }
+
 
 //context not always backwards comp, make sure right context passed factory
