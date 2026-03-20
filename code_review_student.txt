@@ -196,7 +196,7 @@ So:
         public static GeneratorContextSF Create(LabOrder labOrder, Patient patient);
     }
 
-
+Answer: Done but unsure if it is exactly how you want it.
 ====================== Restructoring of file structure proposal
 
 The scripting library structing is a bit off at this point.
