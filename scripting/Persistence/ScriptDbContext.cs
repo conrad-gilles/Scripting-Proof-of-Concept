@@ -35,9 +35,20 @@ public class ScriptDbContext : DbContext //, IDataProtectionKeyContext
             string? connectionString = null;
             // connectionString = Environment.GetEnvironmentVariable("DATABASE_URL")!;
 
-            if (string.IsNullOrEmpty(connectionString))
+            bool useContainer = false;
+            if (useContainer)
             {
-                connectionString = "Host=localhost;Port=5432;Database=script_registry;Username=admin;Password=your_secure_password";
+                if (string.IsNullOrEmpty(connectionString)) //using PostgreSQL container
+                {
+                    connectionString = "Host=localhost;Port=5432;Database=script_registry;Username=admin;Password=your_secure_password";
+                }
+            }
+            else
+            {
+                if (string.IsNullOrEmpty(connectionString)) //using Neon.tech db, in a real application ofc you would never hardcode this but pass as environment variable like above
+                {
+                    connectionString = "Host=ep-lingering-boat-agx7ywj8.c-2.eu-central-1.aws.neon.tech;Database=scriptsDB;Username=neondb_owner;Password=npg_XcDBEPxH7m9o;SSL Mode=Require;Trust Server Certificate=true;";
+                }
             }
 
             optionsBuilder.UseNpgsql(connectionString);

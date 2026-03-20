@@ -1,5 +1,9 @@
 # Todo
 
+- remove all occurences of throw new Exception in scripting project
+- create new exception classes for them and add them to the respective files
+- get rid of the generic DBhelper exception etc and either replace them with specific one or remove them if its just catch->throw
+- 
 - remove all occurences of data
 - rename GeneratorContexts to PatientContexts or something like that?
 - maybe for the future allow for multiple functions in the script, or what i proposed allow for multiple static classes with the standard methods
