@@ -66,10 +66,12 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
         ScriptTypes sType;
         switch (script.ScriptType)
         {
-            case "IGeneratorActionScript":
+            // case "IGeneratorActionScript":
+            case nameof(IGeneratorActionScript):
                 sType = ScriptTypes.GeneratorActionScript;
                 break;
-            case "IGeneratorConditionScript":
+            // case "IGeneratorConditionScript":
+            case nameof(IGeneratorConditionScript):
                 sType = ScriptTypes.GeneratorConditionScript;
                 break;
             default:
@@ -431,7 +433,7 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(GetActiveApiVersions), nameof(ScriptManagerFacade));
 
-        return await _db.GetActiveApiVersions(); //shit implementation not really functional in rl
+        return await _db.GetActiveApiVersions();
     }
 
     public int GetRunningApiVersion() //todo implement
@@ -517,8 +519,10 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(CleanupOrphanedCaches), nameof(ScriptManagerFacade));
 
-        int currentApiVersion = GetRunningApiVersion();
-        await _db.AutomaticCompilationOnVersionUpdate(currentApiVersion);    //this also does this maybe implement real funcion later
+        // int currentApiVersion = GetRunningApiVersion();
+        // await _db.AutomaticCompilationOnVersionUpdate(currentApiVersion);    //this also does this maybe implement real funcion later
+
+        //Todo make implementation
     }
 
     #endregion

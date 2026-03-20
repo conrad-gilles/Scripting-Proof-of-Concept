@@ -135,23 +135,36 @@ I commented them all out in the DbHelper class
    It does not check if the current script is compatible with the targetApiVersion.
 
 Question: Should it check if a cache of the current ember api version is inside the db? If yes compile so it is compatible?
+          Or by compatibility do you mean the current active context is downgradeable to execute the script?
 2) Maybe I am missing something but UpdateScript does not actually compile the script it just updates the source code.
 
 Answer:
-I removed the part in the description that says it also recompiles.
+I removed the part in the description that says it also recompiles. Or should I instead make it also compile after updating?
 
 3) In method CreateScriptUsingNameType do not use magic strings. Use nameof(IGeneratorActionScript).
+Answer: Done
 
 4) Create a mock service that provides you the user name for GetUserName.
 
+Question: So inject the username by DI, if yes what if user changes can you reinject?
+
 5) What is the use case for GetActiveApiVersions?
+
+Answer: No real use case right now but could be informational in the future? But maybe i should just remove it for now.
 
 6) In CleanupOrphanedCaches you call AutomaticCompilationOnVersionUpdate. Seems like the wrong method no?
 
 Also is AutomaticCompilationOnVersionUpdate even needed? We will never recompile all our script simply because ember has a new api version. Or I am missing something - which is very likely - so let me know.
 
+Answer: Yes i have not written an implementation for it yet, should I write one? I dont know if it is worth investing time because normally when you delete a script all associated caches should get deleted too.
+
+I believe the Idea behind AutomaticCompilationOnVersionUpdate was that if there are major changes in Ember (for example LabOrder get renamed to LOrder) the already compiled scripts (who will not be refactored) will fail when this recompilation happens, and not when they should be executed and then fail.
+(This would cause JIT compilation in a situation that might be time critical.)
+This also brings up the question if one should maybe implement a way of automatically refactoring the scripts somehow? 
 7) GetCompilationErrors is a method that is only used for testing. It should therefore not be part of the ScriptManager.
 
+Question: Should i keep it in the ScriptManager class and remove it from the interface, currently i am not using it anywhere except tests, but my idea was using it in the UI to pass the errors to the Monaco Editor,
+so that it sees which row which column the errors are to have red underlines and other visual aids when writin the scripts.
 
 ========== ContextFactories.cs
 
