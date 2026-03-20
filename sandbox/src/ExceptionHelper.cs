@@ -1,60 +1,8 @@
 using System;
 using System.Collections.Generic;
 
-namespace Ember.Scripting;
+namespace Sandbox;
 
-public class NoFileWithThisClassNameFoundException : Exception
-{
-    public NoFileWithThisClassNameFoundException() : base() { }
-    public NoFileWithThisClassNameFoundException(string message) : base(message) { }
-    public NoFileWithThisClassNameFoundException(string message, Exception innerException) : base(message, innerException) { }
-}
-
-
-
-
-
-public class GetScriptPathFromFolderException : Exception
-{
-    public GetScriptPathFromFolderException() : base() { }
-    public GetScriptPathFromFolderException(string message) : base(message) { }
-    public GetScriptPathFromFolderException(string message, Exception innerException) : base(message, innerException) { }
-}
-
-public class CreateStringFromCsFileException : Exception
-{
-    public CreateStringFromCsFileException() : base() { }
-    public CreateStringFromCsFileException(string message) : base(message) { }
-    public CreateStringFromCsFileException(string message, Exception innerException) : base(message, innerException) { }
-}
-
-
-
-
-
-
-
-
-
-public class DbHelperException : Exception
-{
-    public DbHelperException() : base() { }
-    public DbHelperException(string message) : base(message) { }
-    public DbHelperException(string message, Exception innerException) : base(message, innerException) { }
-}
-public class FacadeException : Exception
-{
-    public FacadeException() : base() { }
-    public FacadeException(string message) : base(message) { }
-    public FacadeException(string message, Exception innerException) : base(message, innerException) { }
-}
-
-public class SaveScriptWithoutCompilingException : Exception
-{
-    public SaveScriptWithoutCompilingException() : base() { }
-    public SaveScriptWithoutCompilingException(string message) : base(message) { }
-    public SaveScriptWithoutCompilingException(string message, Exception innerException) : base(message, innerException) { }
-}
 
 public class ExceptionHelper    //for future to traverse exception chain
 {

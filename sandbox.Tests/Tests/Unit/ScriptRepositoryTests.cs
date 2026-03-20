@@ -4,11 +4,12 @@ using Ember.Scripting;
 using Serilog;
 using Microsoft.Extensions.DependencyInjection;
 using sandbox.Tests;
+using Sandbox;
 
 namespace FirstTests;
 
 [TestClass]
-public class DbHelperTests
+public class ScriptRepositoryTests
 {
     private ISccriptManagerDeleteAfter? _facade;
     private string? _sourceCodePedia = TestHelper.GetSC().sourceCodePedia;
@@ -49,7 +50,7 @@ public class DbHelperTests
         Assert.IsTrue(getCache != null && (getCache.ApiVersion == EmberMethods.GetEmberApiVersion()));
         Assert.IsTrue(after.CompiledCaches.Any(c => c.AssemblyBytes != null && c.AssemblyBytes.Length >= 1));
 
-        var e = await Assert.ThrowsExceptionAsync<Ember.Scripting.DbHelperException>(async () =>
+        var e = await Assert.ThrowsExceptionAsync<Ember.Scripting.ScriptRepositoryException>(async () =>
          {
              await _facade.CompileScript(id, EmberMethods.GetEmberApiVersion());
              var after3 = await _facade.GetScript(id, includeCaches: true);
@@ -82,7 +83,7 @@ public class DbHelperTests
             CustomerScript script2 = await _facade.GetScript(id2);
 
             Assert.IsTrue(script1.Equals(script2));
-            var e = await Assert.ThrowsExceptionAsync<Ember.Scripting.DbHelperException>(async () =>
+            var e = await Assert.ThrowsExceptionAsync<Ember.Scripting.ScriptRepositoryException>(async () =>
             {
                 Guid id3 = await _facade!.CreateScript(_sourceCodePedia!, checkForDuplicates: true);
             });

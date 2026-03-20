@@ -88,7 +88,7 @@ public class EmberInternalFacadeTests
         Assert.IsTrue(scriptTuple.Type == ScriptTypes.GeneratorActionScript);
         Assert.IsTrue(ar.ToString().Contains("[Message contains either failure or succes: ] Pediatric tests added"));
 
-        Exception e = await Assert.ThrowsExceptionAsync<Ember.Scripting.DbHelperException>(async () =>
+        Exception e = await Assert.ThrowsExceptionAsync<Ember.Scripting.ScriptRepositoryException>(async () =>
          {
              scriptTuple = await _scriptManager!.CreateScriptUsingNameType(_sourceCodeActionV1!);
          });

@@ -140,7 +140,7 @@ internal class ScriptRepository
         {
             if (item > highestV)
             {
-                throw new DbHelperException(nameof(ClearScriptCache) + " failed in " + nameof(ScriptRepository) + " because for some reason the passed Recent Version is not the highest in the db.");
+                throw new ScriptRepositoryException(nameof(ClearScriptCache) + " failed in " + nameof(ScriptRepository) + " because for some reason the passed Recent Version is not the highest in the db.");
             }
         }
         for (int i = 0; i <= currentApiVersion; i++)    //checks above if current APi is highest
@@ -277,7 +277,7 @@ internal class ScriptRepository
             }
             else
             {
-                throw new DbHelperException(nameof(CreateAndInsertCustomerScript) + " failed in " + nameof(ScriptRepository) + " because a duplicate script was already in the database!");
+                throw new ScriptRepositoryException(nameof(CreateAndInsertCustomerScript) + " failed in " + nameof(ScriptRepository) + " because a duplicate script was already in the database!");
             }
         }
     }
@@ -299,7 +299,7 @@ internal class ScriptRepository
             {
                 _logger.LogInformation("Skipping insert of: " + getTupleFromVal.ClassName + " because it already exists already exists.");
                 // Console.WriteLine("Skipping insert of: " + getTupleFromVal.ClassName + " because it already exists already exists.");
-                throw new DbHelperException(nameof(CreateAndInsertCompiledCache) + " failed in " + nameof(ScriptRepository) + "more details: " + "Skipping insert of: " + getTupleFromVal.ClassName + " because it already exists already exists."); ;
+                throw new ScriptRepositoryException(nameof(CreateAndInsertCompiledCache) + " failed in " + nameof(ScriptRepository) + "more details: " + "Skipping insert of: " + getTupleFromVal.ClassName + " because it already exists already exists."); ;
                 // return;
             }
             else
@@ -379,7 +379,7 @@ internal class ScriptRepository
             else
             {
                 _logger.LogDebug("Somethign went wrong retrieving your script, we could not find it.");
-                throw new DbHelperException("Could not find the script what needs to be updated.");
+                throw new ScriptRepositoryException("Could not find the script what needs to be updated.");
             }
 
             await db.SaveChangesAsync();
@@ -445,7 +445,7 @@ internal class ScriptRepository
                 sScriptType = nameof(IGeneratorConditionScript);
                 break;
             default:
-                throw new DbHelperException(message: "Could not convert Script type enum to string");
+                throw new ScriptRepositoryException(message: "Could not convert Script type enum to string");
         }
         using (var db = await _contextFactory.CreateDbContextAsync())
         {
@@ -604,7 +604,7 @@ internal class ScriptRepository
                 catch (Exception e)
                 {
                     _logger.LogError("Could not add cache to DB." + e.ToString());
-                    throw new DbHelperException("Could not add cache to DB.", e);
+                    throw new ScriptRepositoryException("Could not add cache to DB.", e);
                 }
 
             }
@@ -663,7 +663,7 @@ internal class ScriptRepository
             catch (Exception e)
             {
                 _logger.LogError("Failed to delete Script Cache." + e.ToString());
-                throw new DbHelperException("Failed to delete Script Cache.");
+                throw new ScriptRepositoryException("Failed to delete Script Cache.");
             }
         }
     }
