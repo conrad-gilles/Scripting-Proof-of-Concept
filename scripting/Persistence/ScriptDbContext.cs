@@ -35,7 +35,7 @@ public class ScriptDbContext : DbContext //, IDataProtectionKeyContext
             string? connectionString = null;
             // connectionString = Environment.GetEnvironmentVariable("DATABASE_URL")!;
 
-            bool useContainer = false;
+            bool useContainer = true;
             if (useContainer)
             {
                 if (string.IsNullOrEmpty(connectionString)) //using PostgreSQL container

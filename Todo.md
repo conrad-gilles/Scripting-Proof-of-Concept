@@ -1,4 +1,5 @@
 # Todo
+- always have the README.md snippets up to date
 
 - remove all occurences of throw new Exception in scripting project
 - create new exception classes for them and add them to the respective files
