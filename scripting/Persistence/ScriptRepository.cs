@@ -8,14 +8,14 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 namespace Ember.Scripting;
 
-internal class DbHelper
+internal class ScriptRepository
 {
     private readonly List<MetadataReference> _references;
     private readonly ScriptCompiler _compiler;
-    private readonly ILogger<DbHelper> _logger;
+    private readonly ILogger<ScriptRepository> _logger;
     private readonly int _recentApiVersion;
-    private readonly IDbContextFactory<MyContext> _contextFactory;
-    public DbHelper(ScriptCompiler compiler, List<MetadataReference> references, ILogger<DbHelper> logger, int recentApiVersion, IDbContextFactory<MyContext> contextFactory)
+    private readonly IDbContextFactory<ScriptDbContext> _contextFactory;
+    public ScriptRepository(ScriptCompiler compiler, List<MetadataReference> references, ILogger<ScriptRepository> logger, int recentApiVersion, IDbContextFactory<ScriptDbContext> contextFactory)
     {
         _references = references;
         _compiler = compiler;
@@ -26,7 +26,7 @@ internal class DbHelper
     public async Task DeleteAllData()
     {
 
-        _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(DeleteAllData), nameof(DbHelper));
+        _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(DeleteAllData), nameof(ScriptRepository));
 
         using (var db = await _contextFactory.CreateDbContextAsync())
         {
@@ -39,7 +39,7 @@ internal class DbHelper
     public async Task<List<CustomerScript>> GetAllCustomerScripts(bool includeCaches = false, CustomerScriptFilter? filters = null)
     {
 
-        _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(GetAllCustomerScripts), nameof(DbHelper));
+        _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(GetAllCustomerScripts), nameof(ScriptRepository));
 
         if (filters != null)
         {
@@ -105,7 +105,7 @@ internal class DbHelper
     public async Task<List<CompiledScripts>> GetAllCompiledScriptCaches(bool includeScripts = true)
     {
 
-        _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(GetAllCompiledScriptCaches), nameof(DbHelper));
+        _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(GetAllCompiledScriptCaches), nameof(ScriptRepository));
         if (!includeScripts)
         {
             using (var db = await _contextFactory.CreateDbContextAsync())
@@ -127,12 +127,12 @@ internal class DbHelper
     }
     public int GetRecentApiVersion()
     {
-        _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(GetRecentApiVersion), nameof(DbHelper));
+        _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(GetRecentApiVersion), nameof(ScriptRepository));
         return _recentApiVersion;
     }
     public async Task ClearScriptCache(Guid scriptId)
     {
-        _logger.LogTrace("Entered {MethodName} in {ClassName} with scriptId: {ScriptId}.", nameof(ClearScriptCache), nameof(DbHelper), scriptId);
+        _logger.LogTrace("Entered {MethodName} in {ClassName} with scriptId: {ScriptId}.", nameof(ClearScriptCache), nameof(ScriptRepository), scriptId);
 
         int currentApiVersion = GetRecentApiVersion();
         int highestV = currentApiVersion;
@@ -140,7 +140,7 @@ internal class DbHelper
         {
             if (item > highestV)
             {
-                throw new DbHelperException(nameof(ClearScriptCache) + " failed in " + nameof(DbHelper) + " because for some reason the passed Recent Version is not the highest in the db.");
+                throw new DbHelperException(nameof(ClearScriptCache) + " failed in " + nameof(ScriptRepository) + " because for some reason the passed Recent Version is not the highest in the db.");
             }
         }
         for (int i = 0; i <= currentApiVersion; i++)    //checks above if current APi is highest
@@ -157,7 +157,7 @@ internal class DbHelper
     }
     public async Task RecompileScript(Guid scriptId, bool deleteAlso = false)
     {
-        _logger.LogTrace("Entered {MethodName} in {ClassName} with scriptId: {ScriptId}.", nameof(RecompileScript), nameof(DbHelper), scriptId);
+        _logger.LogTrace("Entered {MethodName} in {ClassName} with scriptId: {ScriptId}.", nameof(RecompileScript), nameof(ScriptRepository), scriptId);
 
         int currentApiVersion = GetRecentApiVersion();
         CustomerScript script = await GetCustomerScript(scriptId, includeCaches: true);
@@ -201,7 +201,7 @@ internal class DbHelper
     }
     public async Task AutomaticCompilationOnVersionUpdate(int currentApiVersion)
     {
-        _logger.LogTrace("Entered {MethodName} in {ClassName} with currentApiVersion: {ApiVersion}.", nameof(AutomaticCompilationOnVersionUpdate), nameof(DbHelper), currentApiVersion);
+        _logger.LogTrace("Entered {MethodName} in {ClassName} with currentApiVersion: {ApiVersion}.", nameof(AutomaticCompilationOnVersionUpdate), nameof(ScriptRepository), currentApiVersion);
 
         foreach (var item in await GetAllCustomerScripts(includeCaches: true))
         {
@@ -238,7 +238,7 @@ internal class DbHelper
     public async Task<CustomerScript> CreateAndInsertCustomerScript(string scriptString, Guid randomGUID, string createdBy, int? oldApiV = null, DateTime? createdAt = null, bool checkForDuplicates = true)
     //todo make sure compiling happens after verification of isDuplicate
     {
-        _logger.LogTrace("Entered {MethodName} in {ClassName} with ID: {ScriptId}.", nameof(CreateAndInsertCustomerScript), nameof(DbHelper), randomGUID);
+        _logger.LogTrace("Entered {MethodName} in {ClassName} with ID: {ScriptId}.", nameof(CreateAndInsertCustomerScript), nameof(ScriptRepository), randomGUID);
 
         using (var db = await _contextFactory.CreateDbContextAsync())
         {
@@ -277,13 +277,13 @@ internal class DbHelper
             }
             else
             {
-                throw new DbHelperException(nameof(CreateAndInsertCustomerScript) + " failed in " + nameof(DbHelper) + " because a duplicate script was already in the database!");
+                throw new DbHelperException(nameof(CreateAndInsertCustomerScript) + " failed in " + nameof(ScriptRepository) + " because a duplicate script was already in the database!");
             }
         }
     }
     public async Task CreateAndInsertCompiledCache(CustomerScript script, int? apiV = null)
     {
-        _logger.LogTrace("Entered {MethodName} in {ClassName} with ID: {ScriptId}.", nameof(CreateAndInsertCompiledCache), nameof(DbHelper), script.Id);
+        _logger.LogTrace("Entered {MethodName} in {ClassName} with ID: {ScriptId}.", nameof(CreateAndInsertCompiledCache), nameof(ScriptRepository), script.Id);
 
         using (var db = await _contextFactory.CreateDbContextAsync())
         {
@@ -299,7 +299,7 @@ internal class DbHelper
             {
                 _logger.LogInformation("Skipping insert of: " + getTupleFromVal.ClassName + " because it already exists already exists.");
                 // Console.WriteLine("Skipping insert of: " + getTupleFromVal.ClassName + " because it already exists already exists.");
-                throw new DbHelperException(nameof(CreateAndInsertCompiledCache) + " failed in " + nameof(DbHelper) + "more details: " + "Skipping insert of: " + getTupleFromVal.ClassName + " because it already exists already exists."); ;
+                throw new DbHelperException(nameof(CreateAndInsertCompiledCache) + " failed in " + nameof(ScriptRepository) + "more details: " + "Skipping insert of: " + getTupleFromVal.ClassName + " because it already exists already exists."); ;
                 // return;
             }
             else
@@ -324,7 +324,7 @@ internal class DbHelper
     }
     public async Task DeleteCustomerScript(Guid id)
     {
-        _logger.LogTrace("Entered {MethodName} in {ClassName} with ID: {ScriptId}.", nameof(DeleteCustomerScript), nameof(DbHelper), id);
+        _logger.LogTrace("Entered {MethodName} in {ClassName} with ID: {ScriptId}.", nameof(DeleteCustomerScript), nameof(ScriptRepository), id);
 
         using (var db = await _contextFactory.CreateDbContextAsync())
         {
@@ -335,7 +335,7 @@ internal class DbHelper
     }
     public async Task DeleteScriptCache(Guid id, int apiVersion)
     {
-        _logger.LogTrace("Entered {MethodName} in {ClassName} with ID: {ScriptId} and ApiVersion: {ApiVersion}.", nameof(DeleteScriptCache), nameof(DbHelper), id, apiVersion);
+        _logger.LogTrace("Entered {MethodName} in {ClassName} with ID: {ScriptId} and ApiVersion: {ApiVersion}.", nameof(DeleteScriptCache), nameof(ScriptRepository), id, apiVersion);
 
         using (var db = await _contextFactory.CreateDbContextAsync())
         {
@@ -356,7 +356,7 @@ internal class DbHelper
     }
     public async Task UpdateScript(Guid scriptId, string newSourceCode, string? userName = null, int? apiVersion = null)
     {
-        _logger.LogTrace("Entered {MethodName} in {ClassName} with scriptId: {ScriptId}.", nameof(UpdateScript), nameof(DbHelper), scriptId);
+        _logger.LogTrace("Entered {MethodName} in {ClassName} with scriptId: {ScriptId}.", nameof(UpdateScript), nameof(ScriptRepository), scriptId);
         if (userName == null)
         {
             userName = "Default";
@@ -387,7 +387,7 @@ internal class DbHelper
     }
     public async Task InsertScriptCompiledCache(CompiledScripts scriptCompiledCache)
     {
-        _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(InsertScriptCompiledCache), nameof(DbHelper));
+        _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(InsertScriptCompiledCache), nameof(ScriptRepository));
 
         using (var db = await _contextFactory.CreateDbContextAsync())
         {
@@ -400,7 +400,7 @@ internal class DbHelper
 
     public async Task<CompiledScripts> GetCompiledScripCache(Guid id, int apiVersion)
     {
-        _logger.LogTrace("Entered {MethodName} in {ClassName} with ID: {ScriptId}.", nameof(GetCompiledScripCache), nameof(DbHelper), id);
+        _logger.LogTrace("Entered {MethodName} in {ClassName} with ID: {ScriptId}.", nameof(GetCompiledScripCache), nameof(ScriptRepository), id);
 
         using (var db = await _contextFactory.CreateDbContextAsync())
         {
@@ -410,7 +410,7 @@ internal class DbHelper
     }
     public async Task<CustomerScript> GetCustomerScript(Guid id, bool includeCaches = false)
     {
-        _logger.LogTrace("Entered {MethodName} in {ClassName} with ID: {ScriptId}.", nameof(GetCustomerScript), nameof(DbHelper), id);
+        _logger.LogTrace("Entered {MethodName} in {ClassName} with ID: {ScriptId}.", nameof(GetCustomerScript), nameof(ScriptRepository), id);
 
         if (includeCaches == true)
         {
@@ -433,7 +433,7 @@ internal class DbHelper
 
     public async Task<Guid> GetScriptId(string scriptName, ScriptTypes scriptType)
     {
-        _logger.LogTrace("Entered {MethodName} in {ClassName} with Name: {ScriptId}.", nameof(GetCustomerScript), nameof(DbHelper), scriptName);
+        _logger.LogTrace("Entered {MethodName} in {ClassName} with Name: {ScriptId}.", nameof(GetCustomerScript), nameof(ScriptRepository), scriptName);
         string sScriptType;
         switch (scriptType)
         {
@@ -455,7 +455,7 @@ internal class DbHelper
     }
     public async Task CompileAllStoredScripts(int currentApiVersion)
     {
-        _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(CompileAllStoredScripts), nameof(DbHelper));
+        _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(CompileAllStoredScripts), nameof(ScriptRepository));
 
         using (var db = await _contextFactory.CreateDbContextAsync())
         {
@@ -525,7 +525,7 @@ internal class DbHelper
     }
     public async Task DeleteAllCachedScripts()
     {
-        _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(DeleteAllCachedScripts), nameof(DbHelper));
+        _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(DeleteAllCachedScripts), nameof(ScriptRepository));
 
         using (var db = await _contextFactory.CreateDbContextAsync())
         {
@@ -534,7 +534,7 @@ internal class DbHelper
     }
     public async Task<bool> IsDuplicateScript(CustomerScript script)    //todo make more efficient using ef core
     {
-        _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(IsDuplicateScript), nameof(DbHelper));
+        _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(IsDuplicateScript), nameof(ScriptRepository));
         // CustomerScriptFilter filter = new CustomerScriptFilter(scriptName: script.ScriptName, sourceCode: script.SourceCode);
         CustomerScriptFilter filter = new CustomerScriptFilter(scriptName: script.ScriptName, scriptType: script.ScriptType);
         List<CustomerScript> allScripts = await GetAllCustomerScripts(filters: filter);
@@ -557,7 +557,7 @@ internal class DbHelper
     }
     public async Task<DuplicateListDbH> DetectDuplicates()
     {
-        _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(DetectDuplicates), nameof(DbHelper));
+        _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(DetectDuplicates), nameof(ScriptRepository));
 
         List<CustomerScript> allScripts = await GetAllCustomerScripts(includeCaches: true);
         List<Guid> duplicateGuids = [];
@@ -618,7 +618,7 @@ internal class DbHelper
     }
     public async Task<List<int>> GetActiveApiVersions()
     {
-        _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(GetActiveApiVersions), nameof(DbHelper));
+        _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(GetActiveApiVersions), nameof(ScriptRepository));
 
         var caches = await GetAllCompiledScriptCaches();
         List<int> ls = [];
@@ -638,7 +638,7 @@ internal class DbHelper
     }
     public async Task RemoveDuplicates(List<Guid>? duplicateGuids = null, Dictionary<Guid, int>? cachesWithoutScript = null)
     {
-        _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(RemoveDuplicates), nameof(DbHelper));
+        _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(RemoveDuplicates), nameof(ScriptRepository));
 
         duplicateGuids = (await DetectDuplicates()).duplicateGuids;
         cachesWithoutScript = (await DetectDuplicates()).cachesToDelete;
@@ -670,7 +670,7 @@ internal class DbHelper
     //Ai generated
     public async Task HealthCheck() //todo verify
     {
-        _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(HealthCheck), nameof(DbHelper));
+        _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(HealthCheck), nameof(ScriptRepository));
 
         // ScriptCompiler compiler = new ScriptCompiler(References);
 
@@ -723,7 +723,7 @@ internal class DbHelper
 
     public async Task<Dictionary<int, List<CompiledScripts>>> GetCachesForEachApiVersion()
     {
-        _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(GetActiveApiVersions), nameof(DbHelper));
+        _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(GetActiveApiVersions), nameof(ScriptRepository));
 
         var caches = await GetAllCompiledScriptCaches();
         Dictionary<int, List<CompiledScripts>> returnedDict = [];

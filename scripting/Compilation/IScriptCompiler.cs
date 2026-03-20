@@ -1,0 +1,2 @@
+//todo
+namespace Ember.Scripting;

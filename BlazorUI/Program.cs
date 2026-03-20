@@ -17,10 +17,10 @@ var references = EmberMethods.GetReferences();
 int version = EmberMethods.GetEmberApiVersion();
 // string connectionString = "Host=localhost;Port=5432;Database=script_registry;Username=admin;Password=your_secure_password";
 
-builder.Services.AddDbContextFactory<EFModeling.EntityProperties.FluentAPI.Required.MyContext>();
+builder.Services.AddDbContextFactory<EFModeling.EntityProperties.FluentAPI.Required.ScriptDbContext>();
 
 builder.Services.AddEmberScripting(references, version);
-builder.Services.AddDbContext<EFModeling.EntityProperties.FluentAPI.Required.MyContext>();
+builder.Services.AddDbContext<EFModeling.EntityProperties.FluentAPI.Required.ScriptDbContext>();
 
 // builder.Services.AddDataProtection().PersistKeysToDbContext<EFModeling.EntityProperties.FluentAPI.Required.MyContext>();
 
@@ -30,7 +30,7 @@ var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
 {
-    var db = scope.ServiceProvider.GetRequiredService<EFModeling.EntityProperties.FluentAPI.Required.MyContext>();
+    var db = scope.ServiceProvider.GetRequiredService<EFModeling.EntityProperties.FluentAPI.Required.ScriptDbContext>();
 
     // This will look for the Migrations folder and apply them to Neon automatically
     // db.Database.Migrate();

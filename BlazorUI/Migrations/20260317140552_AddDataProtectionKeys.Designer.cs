@@ -11,7 +11,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace BlazorUI.Migrations
 {
-    [DbContext(typeof(MyContext))]
+    [DbContext(typeof(ScriptDbContext))]
     [Migration("20260317140552_AddDataProtectionKeys")]
     partial class AddDataProtectionKeys
     {

@@ -16,7 +16,7 @@ public class CrudDemos
     public async Task SetupAsync()
     {
         //this block is ecessary at least once in the code everytime you modify the init.sql else the db wont be initialized somehow
-        using (var db = new EFModeling.EntityProperties.FluentAPI.Required.MyContext())
+        using (var db = new EFModeling.EntityProperties.FluentAPI.Required.ScriptDbContext())
         {
             await db.Database.EnsureDeletedAsync();
             await db.Database.EnsureCreatedAsync();
@@ -36,7 +36,7 @@ public class CrudDemos
         {
             builder.AddSerilog(dispose: true);
         });
-        services.AddDbContextFactory<EFModeling.EntityProperties.FluentAPI.Required.MyContext>();
+        services.AddDbContextFactory<EFModeling.EntityProperties.FluentAPI.Required.ScriptDbContext>();
         ScriptingServiceCollectionExtensions.AddEmberScripting(services, EmberMethods.GetReferences(), EmberMethods.GetEmberApiVersion());
 
         var provider = services.BuildServiceProvider();

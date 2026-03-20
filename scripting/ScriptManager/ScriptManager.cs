@@ -9,14 +9,14 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
 {
     /// <inheritdoc cref="IScriptManager.CreateScript(string, string?, string, int)">
 
-    private readonly DbHelper _db;
+    private readonly ScriptRepository _db;
     private readonly ScriptCompiler _compiler;
     private readonly ScriptExecutor _executor;
     private readonly List<MetadataReference> _references;
     private readonly ILogger<ScriptManagerFacade> _logger;
     private readonly int _recentApiVersion;
 
-    internal ScriptManagerFacade(DbHelper db, ScriptCompiler compiler, ScriptExecutor executor, List<MetadataReference> references, ILogger<ScriptManagerFacade> logger, int recentApiVersion)
+    internal ScriptManagerFacade(ScriptRepository db, ScriptCompiler compiler, ScriptExecutor executor, List<MetadataReference> references, ILogger<ScriptManagerFacade> logger, int recentApiVersion)
     {
         _references = references;
         _db = db;

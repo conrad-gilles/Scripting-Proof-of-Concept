@@ -20,18 +20,18 @@ public static class ScriptingServiceCollectionExtensions
         services.AddTransient<ScriptExecutor>();
 
         // 3. Register DbHelper using a factory so we can keep its constructor internal
-        services.AddTransient<DbHelper>(sp => new DbHelper(
+        services.AddTransient<ScriptRepository>(sp => new ScriptRepository(
             sp.GetRequiredService<ScriptCompiler>(),
             sp.GetRequiredService<List<MetadataReference>>(),
-            sp.GetRequiredService<ILogger<DbHelper>>(),
+            sp.GetRequiredService<ILogger<ScriptRepository>>(),
             maxSupportedApiVersion,
-            sp.GetRequiredService<IDbContextFactory<MyContext>>()
+            sp.GetRequiredService<IDbContextFactory<ScriptDbContext>>()
         ));
 
         // 4. Register the Facade using a factory to hide the internal parameters
         // Step A: Register the concrete class using the factory so it can use the internal constructor
         services.AddTransient<ScriptManagerFacade>(sp => new ScriptManagerFacade(
-            sp.GetRequiredService<DbHelper>(),
+            sp.GetRequiredService<ScriptRepository>(),
             sp.GetRequiredService<ScriptCompiler>(),
             sp.GetRequiredService<ScriptExecutor>(),
             sp.GetRequiredService<List<MetadataReference>>(),

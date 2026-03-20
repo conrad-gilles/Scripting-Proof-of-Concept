@@ -10,40 +10,9 @@ public class NoFileWithThisClassNameFoundException : Exception
     public NoFileWithThisClassNameFoundException(string message, Exception innerException) : base(message, innerException) { }
 }
 
-public class CompilationFailedException : Exception
-{
-    string? CompilerErrors { get; }
 
-    public CompilationFailedException() : base() { }
-    public CompilationFailedException(string message) : base(message) { }
-    public CompilationFailedException(string message, Exception innerException) : base(message, innerException) { }
 
-    public CompilationFailedException(string message, string compilerErrors) : base(message)
-    {
-        CompilerErrors = compilerErrors;
-    }
-}
 
-public class ScriptExecutionException : Exception
-{
-    public ScriptExecutionException() : base() { }
-    public ScriptExecutionException(string message) : base(message) { }
-    public ScriptExecutionException(string message, Exception innerException) : base(message, innerException) { }
-}
-
-public class ActionScriptExecutionException : ScriptExecutionException
-{
-    public ActionScriptExecutionException() : base() { }
-    public ActionScriptExecutionException(string message) : base(message) { }
-    public ActionScriptExecutionException(string message, Exception innerException) : base(message, innerException) { }
-}
-
-public class ConditionScriptExecutionException : ScriptExecutionException
-{
-    public ConditionScriptExecutionException() : base() { }
-    public ConditionScriptExecutionException(string message) : base(message) { }
-    public ConditionScriptExecutionException(string message, Exception innerException) : base(message, innerException) { }
-}
 
 public class GetScriptPathFromFolderException : Exception
 {
@@ -59,54 +28,13 @@ public class CreateStringFromCsFileException : Exception
     public CreateStringFromCsFileException(string message, Exception innerException) : base(message, innerException) { }
 }
 
-public class NoClassFoundInScriptFileException : Exception
-{
-    public NoClassFoundInScriptFileException() : base() { }
-    public NoClassFoundInScriptFileException(string message) : base(message) { }
-    public NoClassFoundInScriptFileException(string message, Exception innerException) : base(message, innerException) { }
-}
 
-public class MoreThanOneClassFoundInScriptException : Exception
-{
-    public MoreThanOneClassFoundInScriptException() : base() { }
-    public MoreThanOneClassFoundInScriptException(string message) : base(message) { }
-    public MoreThanOneClassFoundInScriptException(string message, Exception innerException) : base(message, innerException) { }
-}
 
-public class ValidationBeforeCompilationException : Exception
-{
-    public ValidationBeforeCompilationException() : base() { }
-    public ValidationBeforeCompilationException(string message) : base(message) { }
-    public ValidationBeforeCompilationException(string message, Exception innerException) : base(message, innerException) { }
-}
 
-public class ClassNameOrBaseNameNullException : Exception
-{
-    public ClassNameOrBaseNameNullException() : base() { }
-    public ClassNameOrBaseNameNullException(string message) : base(message) { }
-    public ClassNameOrBaseNameNullException(string message, Exception innerException) : base(message, innerException) { }
-}
 
-public class ForbiddenNamespaceException : Exception
-{
-    public string? AttemptedNamespace { get; }
 
-    public ForbiddenNamespaceException() : base() { }
-    public ForbiddenNamespaceException(string message) : base(message) { }
-    public ForbiddenNamespaceException(string message, Exception innerException) : base(message, innerException) { }
 
-    public ForbiddenNamespaceException(string message, string attemptedNamespace) : base(message)
-    {
-        AttemptedNamespace = attemptedNamespace;
-    }
-}
 
-public class ScriptTimeoutException : Exception
-{
-    public ScriptTimeoutException() : base() { }
-    public ScriptTimeoutException(string message) : base(message) { }
-    public ScriptTimeoutException(string message, Exception innerException) : base(message, innerException) { }
-}
 
 public class DbHelperException : Exception
 {

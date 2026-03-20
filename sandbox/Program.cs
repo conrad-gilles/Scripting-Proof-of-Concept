@@ -24,7 +24,7 @@ int currentApiVersion;
 try
 {
 
-    using (var db = new MyContext())
+    using (var db = new ScriptDbContext())
     {
         await db.Database.EnsureDeletedAsync();
         await db.Database.EnsureCreatedAsync();
@@ -41,7 +41,7 @@ try
         builder.AddSerilog(dispose: true);
     });
 
-    services.AddDbContextFactory<EFModeling.EntityProperties.FluentAPI.Required.MyContext>();
+    services.AddDbContextFactory<EFModeling.EntityProperties.FluentAPI.Required.ScriptDbContext>();
 
     ScriptingServiceCollectionExtensions.AddEmberScripting(services, EmberMethods.GetReferences(), EmberMethods.GetEmberApiVersion());
 

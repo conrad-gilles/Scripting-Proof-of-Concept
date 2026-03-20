@@ -4,12 +4,12 @@ using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
 
 namespace EFModeling.EntityProperties.FluentAPI.Required;
 
-public class MyContext : DbContext //, IDataProtectionKeyContext
+public class ScriptDbContext : DbContext //, IDataProtectionKeyContext
 {
-    public MyContext(DbContextOptions<MyContext> options) : base(options)
+    public ScriptDbContext(DbContextOptions<ScriptDbContext> options) : base(options)
     {
     }
-    public MyContext()
+    public ScriptDbContext()
     {
     }
 
