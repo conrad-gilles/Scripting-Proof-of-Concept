@@ -175,7 +175,7 @@ internal class ScriptCompiler
                 {
                     if (versionInt != null)
                     {
-                        throw new Exception("Context name occured more than once for some reason that should not happen.");
+                        throw new ValidationBeforeCompilationException("Context name occured more than once for some reason that should not happen.");
                     }
                     versionInt = ctx.Key;
                 }
@@ -291,7 +291,7 @@ internal class ScriptCompiler
         if (!Directory.Exists(versionPath))
         {
             _logger.LogError("Could not find references.");
-            throw new Exception($"References for version {version} not found at {versionPath}");
+            throw new ReferencesForVersionNotFound($"References for version {version} not found at {versionPath}");
         }
 
         List<string> dllsToLoad =

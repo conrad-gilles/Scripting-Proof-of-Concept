@@ -33,7 +33,7 @@ public class FaultyScriptsTests
             (services, obj.logger, obj.testDataAccess);
 
             using var provider = services.BuildServiceProvider();
-            ActiveContextFactory factory = provider.GetRequiredService<ActiveContextFactory>();
+            ActiveContextFactory.IGeneratorContextFactory factory = provider.GetRequiredService<ActiveContextFactory.IGeneratorContextFactory>();
             ActiveGeneratorContext ctx = factory.Create(obj.labOrder, obj.vaccine);
             ActiveActionResult ar = await InternalScriptManager!.ExecuteScriptByNameAndType("WhileTrueScript", ScriptTypes.GeneratorActionScript, ctx);
 

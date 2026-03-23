@@ -48,3 +48,10 @@ public class ForbiddenNamespaceException : Exception
         AttemptedNamespace = attemptedNamespace;
     }
 }
+
+public class ReferencesForVersionNotFound : Exception
+{
+    public ReferencesForVersionNotFound() : base() { }
+    public ReferencesForVersionNotFound(string message) : base(message) { }
+    public ReferencesForVersionNotFound(string message, Exception innerException) : base(message, innerException) { }
+}

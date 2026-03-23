@@ -75,7 +75,7 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
                 sType = ScriptTypes.GeneratorConditionScript;
                 break;
             default:
-                throw new Exception(message: "Could not assign baseTypeName");
+                throw new CouldNotAssignBaseTypeException(message: "Could not assign baseTypeName");
         }
         // return (Name: script.ScriptName!, ScriptType: sType);
         return new ScriptNameType

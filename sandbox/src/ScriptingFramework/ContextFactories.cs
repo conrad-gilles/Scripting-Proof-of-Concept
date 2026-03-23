@@ -91,7 +91,7 @@ namespace Sandbox
             services.AddSingleton(testDataAccess);
 
             // Register the factory
-            services.AddTransient<GeneratorContextNoInherVaccineV5.IGeneratorContextFactory, GeneratorContextNoInherVaccineV5.ContextFactory>();
+            services.AddTransient<ActiveContextFactory.IGeneratorContextFactory, ActiveContextFactory.ContextFactory>();
             return services;
         }
     }

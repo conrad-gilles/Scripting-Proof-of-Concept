@@ -31,7 +31,7 @@ public static class ScriptVersionScanner
 
             if (metaDataAttribute == null)
             {
-                throw new Exception(message: "MetdaDataAttribute was mull, which means version would have been null.");
+                throw new MetaDataAttribueNullException(message: nameof(metaDataAttribute) + " was mull, which means version would have been null.");
             }
             if (metaDataAttribute.Type == IGeneratorScriptType.AbstractBaseInSF
             || metaDataAttribute.Type == IGeneratorScriptType.Generic
@@ -52,11 +52,11 @@ public static class ScriptVersionScanner
 
             if (contextVersionMap.Values.Contains(currentType))
             {
-                throw new Exception("Type was more than once in the assembly probably with more than 1 Version property");
+                throw new TypeMoreThanOnceInAssemblyException("Type was more than once in the assembly probably with more than 1 Version property");
             }
             if (contextVersionMap.ContainsKey(version))
             {
-                throw new Exception("Api version int more than once in the assembly should not happen.");
+                throw new VersionIntMoreThanOnceInAssemblyException("Api version int more than once in the assembly should not happen.");
             }
 
             // Console.WriteLine("Version: " + version + ", CurrentType: " + currentType.Name + " , Type: " + metaDataAttribute.Type + " , ReturnType: " + metaDataAttribute.ReturnType);

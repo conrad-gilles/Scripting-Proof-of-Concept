@@ -87,7 +87,7 @@ public class CrudDemos
 
         using var provider = services.BuildServiceProvider();
 
-        ActiveContextFactory factory = provider.GetRequiredService<ActiveContextFactory>();
+        ActiveContextFactory.IGeneratorContextFactory factory = provider.GetRequiredService<ActiveContextFactory.IGeneratorContextFactory>();
 
         ActiveGeneratorContext ctx = factory.Create(labOrder, vaccine);
 
