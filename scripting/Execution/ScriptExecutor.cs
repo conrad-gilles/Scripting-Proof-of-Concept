@@ -50,7 +50,7 @@ internal class ScriptExecutor
             else if (typeArray.Length > 1)
             {
                 _logger.LogInformation("more than one class found in script");
-                throw new MoreThanOneClassFoundInScriptException("more than one class found in script");   //to implement more than one name you would need to pass name of class into this class
+                throw new MoreThanOneClassFoundInScriptExecutionException("more than one class found in script");   //to implement more than one name you would need to pass name of class into this class
             }
 
             Type type = typeArray[0];

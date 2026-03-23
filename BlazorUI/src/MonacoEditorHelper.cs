@@ -144,7 +144,7 @@ namespace BlazorUI.Helpers
                     // UPDATE EXISTING SCRIPT
 
                     // 1. First, save the updated source code to the database
-                    await _scriptManager.UpdateScript(CurrentScriptId, code);
+                    await _scriptManager.UpdateScriptAndCompile(CurrentScriptId, code);
 
                     // 2. Get the current running API version needed for the recompilation
                     int currentApiVersion = _scriptManager.GetRunningApiVersion();

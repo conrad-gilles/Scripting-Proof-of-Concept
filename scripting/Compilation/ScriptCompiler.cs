@@ -37,64 +37,55 @@ internal class ScriptCompiler
         {
             _logger.LogTrace("Trying to compile script:" + metaData.ClassName);
         }
-        try
+        // _referencesRO!.AddRange(_standardRefrencesForAllScripts);
+
+        List<MetadataReference>? references = [];
+
+        //Takes C# source string and turns it into a "Roslyn parsed syntax tree representation" of a normal C# file
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(script);
+        if (_referencesRO != null)
         {
-            // _referencesRO!.AddRange(_standardRefrencesForAllScripts);
-
-            List<MetadataReference>? references = [];
-
-            //Takes C# source string and turns it into a "Roslyn parsed syntax tree representation" of a normal C# file
-            SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(script);
-            if (_referencesRO != null)
-            {
-                _logger.LogInformation("References 2 added references in {MethodName}.", nameof(RunCompilation));
-                references = _referencesRO;
-            }
-            if (apiVersion != null)
-            {
-                _logger.LogInformation("Added custom references in {MethodName}.", nameof(RunCompilation));  //if this works remove the if references is null if stat above
-                references = GetReferencesForOldVersion((int)apiVersion);
-            }
-            //this initiates the process of the compilation (does not produce bytes yet), it binds the source code with the refrences and the config options
-            CSharpCompilation compilation = CSharpCompilation.Create(
-                "MyDynamicAssembly",
-                syntaxTrees: new[] { syntaxTree },
-                references: references,
-                options: new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary)
-            );
-
-            //actual build phase, success emits raw bytes of a .dll file
-            using var ms = new MemoryStream();
-            var emitResult = compilation.Emit(ms);  //this line is the line that uses a lot of resources and time
-
-            //The following if statement was AI Generated
-            if (!emitResult.Success)
-            {
-
-                string? errors = string.Join(Environment.NewLine, emitResult.Diagnostics
-                .Where(d => d.IsWarningAsError || d.Severity == Microsoft.CodeAnalysis.DiagnosticSeverity.Error)
-                // .Select(d => $"{d.Id}: {d.GetMessage()}"));
-                .Select(d => $"Line {d.Location.GetLineSpan().StartLinePosition.Line + 1}, Col {d.Location.GetLineSpan().StartLinePosition.Character + 1}: {d.Id} - {d.GetMessage()}"));
-
-
-                foreach (var diag in emitResult.Diagnostics)
-                {
-                    _logger.LogInformation(diag.ToString());
-                }
-                ;   //Iterates through the list of compiler messages
-                _logger.LogError("Error in ScriptCompiler RunCompilation method compilation probably failed in if (!emitResult.Success)");
-                throw new CompilationFailedException("Error in ScriptCompiler RunCompilation method compilation probably failed in if (!emitResult.Success) errors: " + errors);
-            }
-
-            byte[] assemblyBytes = ms.ToArray();
-            return assemblyBytes;
+            _logger.LogInformation("References 2 added references in {MethodName}.", nameof(RunCompilation));
+            references = _referencesRO;
         }
-        catch (Exception e)
+        if (apiVersion != null)
         {
-            _logger.LogError(e.ToString());
-            throw new CompilationFailedException("RunCompilation failed exception caught.", e);
+            _logger.LogInformation("Added custom references in {MethodName}.", nameof(RunCompilation));  //if this works remove the if references is null if stat above
+            references = GetReferencesForOldVersion((int)apiVersion);
+        }
+        //this initiates the process of the compilation (does not produce bytes yet), it binds the source code with the refrences and the config options
+        CSharpCompilation compilation = CSharpCompilation.Create(
+            "MyDynamicAssembly",
+            syntaxTrees: new[] { syntaxTree },
+            references: references,
+            options: new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary)
+        );
+
+        //actual build phase, success emits raw bytes of a .dll file
+        using var ms = new MemoryStream();
+        var emitResult = compilation.Emit(ms);  //this line is the line that uses a lot of resources and time
+
+        //The following if statement was AI Generated
+        if (!emitResult.Success)
+        {
+
+            string? errors = string.Join(Environment.NewLine, emitResult.Diagnostics
+            .Where(d => d.IsWarningAsError || d.Severity == Microsoft.CodeAnalysis.DiagnosticSeverity.Error)
+            // .Select(d => $"{d.Id}: {d.GetMessage()}"));
+            .Select(d => $"Line {d.Location.GetLineSpan().StartLinePosition.Line + 1}, Col {d.Location.GetLineSpan().StartLinePosition.Character + 1}: {d.Id} - {d.GetMessage()}"));
+
+
+            foreach (var diag in emitResult.Diagnostics)
+            {
+                _logger.LogInformation(diag.ToString());
+            }
+            ;   //Iterates through the list of compiler messages
+            _logger.LogError("Error in ScriptCompiler RunCompilation method compilation probably failed in if (!emitResult.Success)");
+            throw new CompilationFailedException("Error in ScriptCompiler RunCompilation method compilation probably failed in if (!emitResult.Success) errors: " + errors);
         }
 
+        byte[] assemblyBytes = ms.ToArray();
+        return assemblyBytes;
     }
 
     public GetBaseTypeReturn GetBaseType(string script)
@@ -175,7 +166,7 @@ internal class ScriptCompiler
                 {
                     if (versionInt != null)
                     {
-                        throw new ValidationBeforeCompilationException("Context name occured more than once for some reason that should not happen.");
+                        throw new ContextNameOccuredMoreThanOnceException("Context name occured more than once for some reason that should not happen.");
                     }
                     versionInt = ctx.Key;
                 }
@@ -183,7 +174,7 @@ internal class ScriptCompiler
 
             if (versionInt == null)
             {
-                throw new ValidationBeforeCompilationException("Version Int was not assigned probably because the foeach loop faliled maybe because the Context name of the script was not in the dictionary.");
+                throw new VersionIntNotAssignedException("Version Int was not assigned probably because the foeach loop faliled maybe because the Context name of the script was not in the dictionary.");
             }
             if (baseTypeName == null || className == null)
             {

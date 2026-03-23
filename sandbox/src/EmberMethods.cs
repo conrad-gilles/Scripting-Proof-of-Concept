@@ -102,27 +102,40 @@ public class EmberMethods
         }
 
         string[] files = Directory.GetFiles(folderPath, "*.cs", SearchOption.AllDirectories);  //todo check for infinite loop  https://msdn.microsoft.com/en-us/library/ms143316(v=vs.110).aspx
+
+        string successfullyInserted = "";
+        string failedInserted = "";
         for (int i = 0; i < files.Length; i++)
         {
-
+            // var db = new DbHelper(UsefulMethods.GetReferences());
+            string scriptString = CreateStringFromCsFile(files[i]);
+            var vali = _facade.BasicValidationBeforeCompiling(scriptString);
             try
             {
-                // var db = new DbHelper(UsefulMethods.GetReferences());
-                string scriptString = CreateStringFromCsFile(files[i]);
+
                 Guid id = Guid.NewGuid();
                 Guid randomTestScript2Id = await _facade.CreateScript(scriptString);
+                successfullyInserted = successfullyInserted + ", " + vali.ClassName;
                 // Console.WriteLine(randomTestScript2.ScriptName + "Added script N" + i + ". to both tables.");
 
             }
-            catch (CompilationFailedException e)    //so if one fails not all get cancelled
+            // catch (CompilationFailedException e)    //so if one fails not all get cancelled
+            // {
+            //     Console.WriteLine(e.ToString());
+            // }
+            // catch (ValidationBeforeCompilationException e)
+            // {
+            //     Console.WriteLine(e.ToString());
+            // }
+            catch
             {
-                Console.WriteLine(e.ToString());
-            }
-            catch (ValidationBeforeCompilationException e)
-            {
-                Console.WriteLine(e.ToString());
+                failedInserted = failedInserted + ", " + vali.ClassName;
             }
 
+        }
+        if (failedInserted != "")
+        {
+            throw new ScriptRepositoryException(message: "Could not insert scripts : " + failedInserted + ", Successfully inserted script: " + successfullyInserted);
         }
     }
 

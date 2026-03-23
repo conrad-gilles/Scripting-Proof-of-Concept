@@ -8,6 +8,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "sandbox.Tests", "sandbox.Te
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlazorUI", "BlazorUI\BlazorUI.csproj", "{55EFBF05-0FB8-47FA-A983-4BA51DC4116C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ember", "Ember\Ember.csproj", "{8E7C14D3-C4A7-4752-8A39-AEABB9FAB672}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -66,6 +68,18 @@ Global
 		{55EFBF05-0FB8-47FA-A983-4BA51DC4116C}.Release|x64.Build.0 = Release|Any CPU
 		{55EFBF05-0FB8-47FA-A983-4BA51DC4116C}.Release|x86.ActiveCfg = Release|Any CPU
 		{55EFBF05-0FB8-47FA-A983-4BA51DC4116C}.Release|x86.Build.0 = Release|Any CPU
+		{8E7C14D3-C4A7-4752-8A39-AEABB9FAB672}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8E7C14D3-C4A7-4752-8A39-AEABB9FAB672}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8E7C14D3-C4A7-4752-8A39-AEABB9FAB672}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{8E7C14D3-C4A7-4752-8A39-AEABB9FAB672}.Debug|x64.Build.0 = Debug|Any CPU
+		{8E7C14D3-C4A7-4752-8A39-AEABB9FAB672}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{8E7C14D3-C4A7-4752-8A39-AEABB9FAB672}.Debug|x86.Build.0 = Debug|Any CPU
+		{8E7C14D3-C4A7-4752-8A39-AEABB9FAB672}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8E7C14D3-C4A7-4752-8A39-AEABB9FAB672}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8E7C14D3-C4A7-4752-8A39-AEABB9FAB672}.Release|x64.ActiveCfg = Release|Any CPU
+		{8E7C14D3-C4A7-4752-8A39-AEABB9FAB672}.Release|x64.Build.0 = Release|Any CPU
+		{8E7C14D3-C4A7-4752-8A39-AEABB9FAB672}.Release|x86.ActiveCfg = Release|Any CPU
+		{8E7C14D3-C4A7-4752-8A39-AEABB9FAB672}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

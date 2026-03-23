@@ -1,7 +1,10 @@
 # Todo
 - always have the README.md snippets up to date
 
+- maybe make a SecurityTest.cs and write test to check if malicious scripts pass
+
 - remove all occurences of throw new Exception
+- ideally 4 references for every specific exception (3 for constructors 1 for atualusage)
 - create new exception classes for them and add them to the respective files
 - get rid of the generic DBhelper exception etc and either replace them with specific one or remove them if its just catch->throw
 - 
@@ -11,6 +14,7 @@
 - only 1 factory that creates the most recent context get rid of the others or maybe put them in a Testing namespace?
 - put all GenCOntext in a namespace like maybe Ember.Scripting.GeneratorContextsV5 etc
 - make GeneratorContextSF mayeb an interface?
+- make new project next to sandbox to put in what will actually go in ember
 
 - write test for checkversioncompatibility
 - SaveScriptWithoudCompiling now throwserror so maybe create a function to create a script without compiling?

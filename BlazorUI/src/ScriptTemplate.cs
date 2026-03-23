@@ -1,30 +1,15 @@
-using System;   //todo this is possible to default in compiler
+using System;
 using System.Threading.Tasks;
-using System.Collections.Generic;   //todo same for them
+using System.Collections.Generic;
 using Ember.Scripting;
 
-public class AddPediatricTestsV4 : GeneratorScriptsV3.IGeneratorActionScript
+public class ScriptTemplate : GeneratorScriptsV3.IGeneratorActionScript
 {
-    // public async Task<ActionResult> ExecuteAsync(IGeneratorContext context)
     public async Task<ActionResultV3.ActionResult> ExecuteAsync(IGeneratorContext_V4.IGeneratorContext context)
     {
-        context.Logger2.Info("Adding pediatric standard tests");
+        //Write your code here
 
-        // Check if test already exists (might be auto-added by business rule)
-        if (!context.LabOrder.HasTest("PED-BASIC"))
-        {
-            context.LabOrder.AddTest("PED-BASIC");
-        }
-
-        context.LabOrder.SetCustomField("ProcessedByGenerator", true);
-
-        double versionExample = context.LabOrder.RandomNewDouble;    //example of newer version
-        Console.WriteLine(versionExample);
-
-        string exampleV3 = context.LabOrder.RandomNewFunctionInV3("Gilles");
-        Console.WriteLine("Return also works if here:" + exampleV3);
-
-        return ActionResultV3.ActionResult.Success("Pediatric tests added V3");
-        // return null; //just for compiler
+        //Return your ActionResult here:
+        return ActionResultV3.ActionResult.Failure("Insert your message here");
     }
 }

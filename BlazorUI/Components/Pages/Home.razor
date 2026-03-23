@@ -2,6 +2,9 @@
 @rendermode InteractiveServer
 @using Ember.Scripting
 @using BlazorUI.TotalExecutions
+@using Microsoft.EntityFrameworkCore
+@inject IDbContextFactory<EFModeling.EntityProperties.FluentAPI.Required.ScriptDbContext> DbFactory
+
 @inject ISccriptManagerDeleteAfter ScriptManager
 <PageTitle>Dashboard</PageTitle>
 <PageTitle>Dashboard</PageTitle>
@@ -128,7 +131,7 @@ block in Home.razor -->
     </div>
 </div>
 <div class="row mt-4">
-    <div class="col-md-6">
+    @* <div class="col-md-6">
         <div class="card">
             <div class="card-header">
                 <i class="bi bi-server"></i>
@@ -148,49 +151,136 @@ block in Home.razor -->
                 <small class="text-muted">Last heartbeat: 30 seconds ago Todo</small>
             </div>
         </div>
-    </div>
-    <div class="col-md-6">
-        <div class="card">
-            <div class="card-header">
-                <i class="bi bi-activity"></i>
-                Quick Actions
-            </div>
-            <div class="card-body">
-                <a href="/create" class="btn btn-primary w-100 mb-2">
-                    <i class="bi bi-plus-circle"></i>
-                    Create New Script
-                </a>
-                <button class="btn btn-outline-primary w-100 mb-2" @onclick="HandleCompileAllScripts"
-                        disabled="@_isWorking">
-                    @if (_isWorking)
-                    {
-                        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                        <span>Compiling...</span>
-                    }
-                    else
-                    {
-                        <i class="bi bi-hammer"></i>
-                        <span>Compile All Scripts</span>
-                    }
-                </button>
-                <button class="btn btn-outline-primary w-100 mb-2" @onclick="HandleCompileAllScriptsFromFolder">
-                    <i class="bi bi-hammer"></i>
-                    <span>Compile Default Scripts From Folder</span>
+    </div> *@
 
-                </button>
-                <button class="btn btn-outline-danger w-100 mb-2" @onclick="HandleClearAllCaches">
-                    <i class="bi bi-trash"></i>
-                    Clear All Caches
-                </button>
-                <button class="btn btn-outline-danger w-100 mb-2" @onclick="HandleDeleteAllScripts">
-                    <i class="bi bi-trash"></i>
-                    Delete All Scripts
-                </button>
+    @if (emberInstances == null)
+    {
+        <div class="col-12 mt-4">
+            <p class="text-muted">Loading instances...</p>
+        </div>
+    }
+    else if (!emberInstances.Any())
+    {
+        <div class="col-md-6 mt-4">
+            <div class="card">
+                <div class="card-header">
+                    <i class="bi bi-server"></i>
+                    Ember Instances
+                </div>
+                <div class="card-body">
+                    <p class="text-muted mb-0">No Ember instances registered.</p>
+                </div>
             </div>
         </div>
-    </div>
-</div>
+    }
+    else
+    {
+        <div class="row mt-4">
+            @foreach (var instance in emberInstances)
+            {
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100">
+                        <div class="card-header">
+                            <i class="bi bi-server"></i>
+                            Ember Instance
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <div>
+                                    @{
+                                        // Consider instance active if the heartbeat is within the last 2 minutes
+                                        bool isActive = (DateTime.UtcNow - instance.LastHeartbeat.ToUniversalTime()).TotalMinutes <
+                                2;
+                                        string dotClass = isActive ? "active" : "bg-danger";
+                                    }
+                                    <span class="status-dot @dotClass"></span>
+                                    <strong>@(string.IsNullOrEmpty(instance.InstanceName) ? (instance.Hostname ??
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                instance.InstanceId.ToString().Substring(0, 8)) : instance.InstanceName)</strong>
+                                    </div>
+                                    <span class="badge bg-primary">v@(instance.EmberVersion ?? "Unknown") (API
+                                        v@(instance.SdkVersion))</span>
+                                    </div>
+                                    <div class="progress mb-3">
+                                        <div class="progress-bar @(isActive ? "bg-success" : "bg-secondary")" style="width: 100%"></div>
+                                    </div>
+                                    <small class="text-muted">Last heartbeat: @GetTimeAgo(instance.LastHeartbeat)</small>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
 
+
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="bi bi-activity"></i>
+                        Quick Actions
+                    </div>
+                    <div class="card-body">
+                        <a href="/create" class="btn btn-primary w-100 mb-2">
+                            <i class="bi bi-plus-circle"></i>
+                            Create New Script
+                        </a>
+                        <button class="btn btn-outline-primary w-100 mb-2" @onclick="HandleCompileAllScripts"
+                                disabled="@_isWorking">
+                            @if (_isWorking)
+                            {
+                                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                <span>Compiling...</span>
+                            }
+                            else
+                            {
+                                <i class="bi bi-hammer"></i>
+                                <span>Compile All Scripts</span>
+                            }
+                        </button>
+                        <button class="btn btn-outline-primary w-100 mb-2" @onclick="HandleCompileAllScriptsFromFolder">
+                            <i class="bi bi-hammer"></i>
+                            <span>Compile Default Scripts From Folder</span>
+
+                        </button>
+                        <button class="btn btn-outline-danger w-100 mb-2" @onclick="HandleClearAllCaches">
+                            <i class="bi bi-trash"></i>
+                            Clear All Caches
+                        </button>
+                        <button class="btn btn-outline-danger w-100 mb-2" @onclick="HandleDeleteAllScripts">
+                            <i class="bi bi-trash"></i>
+                            Delete All Scripts
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Error Popup Modal -->
+        @if (_showErrorPopup)
+        {
+            <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5); z-index: 1050;">
+                <div class="modal-dialog modal-lg modal-dialog-centered">
+                    <div class="modal-content border-danger">
+                        <div class="modal-header bg-danger text-white">
+                            <h5 class="modal-title">
+                                <i class="bi bi-exclamation-triangle-fill me-2"></i> Script Repository Error
+                            </h5>
+                            <button type="button" class="btn-close btn-close-white" aria-label="Close"
+                                    @onclick="CloseErrorPopup"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p class="text-danger fw-bold">@_errorMessage</p>
+                            <div class="bg-dark text-light p-3 rounded"
+                                 style="max-height: 400px; overflow-y: auto; white-space: pre-wrap; font-family: monospace; font-size: 0.85rem;">
+                                @_errorDetails
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" @onclick="CloseErrorPopup">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
 
 
 @code {
@@ -203,15 +293,42 @@ block in Home.razor -->
 
     private int _currentEmberVersionApi = 0; //todo weird imp
 
+    private bool _showErrorPopup = false;
+    private string _errorMessage = string.Empty;
+    private string _errorDetails = string.Empty;
+
     private List<CustomerScript> _customerScripts = [];
     private List<CustomerScript> _recentScripts = []; // ADD THIS LINE
+    private List<EmberInstance>? emberInstances;
 
     // This lifecycle method runs when the page loads
     protected override async Task OnInitializedAsync()
     {
         await LoadDashBoardData();
+        await LoadEmberInstances();
     }
-
+    private async Task LoadEmberInstances()
+    {
+        using var context = await DbFactory.CreateDbContextAsync();
+        // Order by the most recently active instances
+        emberInstances = await context.EmberInstances
+            .OrderByDescending(e => e.LastHeartbeat)
+            .ToListAsync();
+    }
+    // Helper method for the "Last heartbeat: X ago" text
+    private string GetTimeAgo(DateTime dateTime)
+    {
+        var timeSpan = DateTime.UtcNow - dateTime.ToUniversalTime();
+    
+        if (timeSpan.TotalSeconds < 60)
+            return $"{(int)timeSpan.TotalSeconds} seconds ago";
+        if (timeSpan.TotalMinutes < 60)
+            return $"{(int)timeSpan.TotalMinutes} minutes ago";
+        if (timeSpan.TotalHours < 24)
+            return $"{(int)timeSpan.TotalHours} hours ago";
+        
+        return $"{(int)timeSpan.TotalDays} days ago";
+    }
     private async Task TestUpdate()
     {
 
@@ -226,6 +343,7 @@ block in Home.razor -->
         _customerScripts = await ScriptManager.ListScripts(includeCaches: true);
         _totalScripts = _customerScripts.Count();
         _compiledScripts = 0;
+        _pendingScripts = 0;
 
         foreach (var script in _customerScripts)
         {
@@ -239,7 +357,7 @@ block in Home.razor -->
                 _pendingScripts++;
             }
         }
-
+        _compiledScripts = _totalScripts - _pendingScripts;
         // ADD THESE LINES to populate the Recent Scripts table:
         // Order by ModifiedAt (or CreatedAt if ModifiedAt is null), descending, and take the top 5.
         _recentScripts = _customerScripts
@@ -262,7 +380,8 @@ block in Home.razor -->
             _isWorking = true; //might have to call StateChange
             StateHasChanged();
             EmberMethods rm = new EmberMethods(ScriptManager);
-            @* string path = @"C:\Users\Gilles\Desktop\UNI\Semester 6\Code\Codebase\Scripting-Proof-of-Concept\sandbox\src\Scripts"; *@
+            @* string path = @"C:\Users\Gilles\Desktop\UNI\Semester 6\Code\Codebase\Scripting-Proof-of-Concept\sandbox\src\Scripts";
+*@
 
             string path = Path.GetFullPath(Path.Combine(
                 AppDomain.CurrentDomain.BaseDirectory,
@@ -278,11 +397,29 @@ block in Home.razor -->
 
             await LoadDashBoardData();
         }
+        catch (Ember.Scripting.ScriptRepositoryException e)
+        {
+            _isWorking = false;
+            _errorMessage = e.Message;
+            _errorDetails = e.ToString();
+            _showErrorPopup = true;
+            StateHasChanged();
+            await LoadDashBoardData();
+        }
         catch (Exception e)
         {
+            _isWorking = false;
             Console.WriteLine(e.ToString());
+            await LoadDashBoardData();
         }
 
+    }
+
+    private void CloseErrorPopup()
+    {
+        _showErrorPopup = false;
+        _errorMessage = string.Empty;
+        _errorDetails = string.Empty;
     }
 
     private async Task HandleClearAllCaches()

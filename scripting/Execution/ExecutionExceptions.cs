@@ -38,3 +38,9 @@ public class ScriptTimeoutException : ExecutionException
     public ScriptTimeoutException(string message) : base(message) { }
     public ScriptTimeoutException(string message, Exception innerException) : base(message, innerException) { }
 }
+public class MoreThanOneClassFoundInScriptExecutionException : ExecutionException
+{
+    public MoreThanOneClassFoundInScriptExecutionException() : base() { }
+    public MoreThanOneClassFoundInScriptExecutionException(string message) : base(message) { }
+    public MoreThanOneClassFoundInScriptExecutionException(string message, Exception innerException) : base(message, innerException) { }
+}

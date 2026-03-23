@@ -242,7 +242,7 @@ public class ScriptManagerFacadeTests
         Console.WriteLine("End of Result.");
 
         string desiredOutput = """
-        ---> Ember.Scripting.CompilationFailedException: Error in ScriptCompiler RunCompilation method compilation probably failed in if (!emitResult.Success) errors: Line 1, Col 13: CS1003 - Syntax error, ',' expected
+        Error in ScriptCompiler RunCompilation method compilation probably failed in if (!emitResult.Success) errors: Line 1, Col 13: CS1003 - Syntax error, ',' expected
         Line 1, Col 35: CS1002 - ; expected
         Line 1, Col 1: CS8805 - Program using top-level statements must be an executable.
         Line 1, Col 1: CS0246 - The type or namespace name 'wrong' could not be found (are you missing a using directive or an assembly reference?)
@@ -259,7 +259,7 @@ public class ScriptManagerFacadeTests
         Console.WriteLine(result3);
         Console.WriteLine("End of Result.");
         string desiredOutput3 = """
-        ---> Ember.Scripting.CompilationFailedException: Error in ScriptCompiler RunCompilation method compilation probably failed in if (!emitResult.Success) errors: Line 1, Col 21: CS0246 - The type or namespace name 'IFakeInterface' could not be found (are you missing a using directive or an assembly reference?)
+        Error in ScriptCompiler RunCompilation method compilation probably failed in if (!emitResult.Success) errors: Line 1, Col 21: CS0246 - The type or namespace name 'IFakeInterface' could not be found (are you missing a using directive or an assembly reference?)
         """;
 
         Assert.IsTrue(result3.Contains(desiredOutput3));

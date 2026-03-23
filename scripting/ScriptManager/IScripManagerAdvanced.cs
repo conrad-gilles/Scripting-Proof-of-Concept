@@ -27,7 +27,11 @@ public interface IScriptManagerExtended : IScriptManager
     /// <returns></returns>
     Task UpdateScript(Guid scriptId, string newSourceCode, string? userName = null, int? apiVersion = null);
 
+    Task UpdateScriptAndCompile(Guid scriptId, string newSourceCode, string? userName = null, int? apiVersion = null);
+
     Task UpdateScriptNT(string name, ScriptTypes scriptType, string newSourceCode, string? userName = null, int? apiVersion = null);
+
+    Task UpdateScriptAndCompileNT(string name, ScriptTypes scriptType, string newSourceCode, string? userName = null, int? apiVersion = null);
 
     /// <summary>
     /// Removes script and all associated compiled caches

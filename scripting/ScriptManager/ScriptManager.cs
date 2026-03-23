@@ -101,6 +101,18 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
         await UpdateScript(scriptId, newSourceCode, userName, apiVersion);
     }
 
+    public async Task UpdateScriptAndCompile(Guid scriptId, string newSourceCode, string? userName = null, int? apiVersion = null)
+    {
+        await CompileScript(scriptId, apiVersion);
+        await UpdateScript(scriptId, newSourceCode, userName, apiVersion);
+    }
+
+    public async Task UpdateScriptAndCompileNT(string name, ScriptTypes scriptType, string newSourceCode, string? userName = null, int? apiVersion = null)
+    {
+        Guid scriptId = await GetScriptId(name, scriptType);
+        await UpdateScriptAndCompile(scriptId, newSourceCode, userName, apiVersion);
+    }
+
     // Removes script and all associated compiled caches
     public async Task DeleteScript(Guid scriptId)
     {

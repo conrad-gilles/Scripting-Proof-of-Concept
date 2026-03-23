@@ -35,6 +35,19 @@ public class ValidationBeforeCompilationException : CompilationException
     public ValidationBeforeCompilationException(string message, Exception innerException) : base(message, innerException) { }
 }
 
+public class ContextNameOccuredMoreThanOnceException : ValidationBeforeCompilationException
+{
+    public ContextNameOccuredMoreThanOnceException() : base() { }
+    public ContextNameOccuredMoreThanOnceException(string message) : base(message) { }
+    public ContextNameOccuredMoreThanOnceException(string message, Exception innerException) : base(message, innerException) { }
+}
+public class VersionIntNotAssignedException : ValidationBeforeCompilationException
+{
+    public VersionIntNotAssignedException() : base() { }
+    public VersionIntNotAssignedException(string message) : base(message) { }
+    public VersionIntNotAssignedException(string message, Exception innerException) : base(message, innerException) { }
+}
+
 public class ClassNameOrBaseNameNullException : CompilationException
 {
     public ClassNameOrBaseNameNullException() : base() { }
