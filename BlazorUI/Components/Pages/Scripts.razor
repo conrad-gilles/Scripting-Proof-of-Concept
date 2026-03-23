@@ -131,15 +131,18 @@
                     <h2 class="mb-0">Edit Script: @_scriptName</h2>
 
                     <div class="d-flex gap-2">
-                        <button class="btn btn-outline-info" @onclick="() => _editorHelper?.HandleValidate()!"
+                        <button class="btn btn-outline-info"
+                                @onclick="() => _editorHelper?.HandleValidate(_currentScriptId, _selectedApiVersion)!"
                                 disabled="@(_editorHelper?.IsBusy ?? false)">
                             <i class="bi bi-check-circle"></i> Validate
                         </button>
-                        <button class="btn btn-outline-warning" @onclick="() => _editorHelper?.HandleCompile()!"
+                        <button class="btn btn-outline-warning"
+                                @onclick="() => _editorHelper?.HandleCompile(_currentScriptId, _selectedApiVersion)!"
                                 disabled="@(_editorHelper?.IsBusy ?? false)">
                             <i class="bi bi-hammer"></i> Compile
                         </button>
-                        <button class="btn btn-success" @onclick="() => _editorHelper?.HandleSave()!"
+                        <button class="btn btn-success"
+                                @onclick="() => _editorHelper?.HandleSave(_currentScriptId, _selectedApiVersion)!"
                                 disabled="@(_editorHelper?.IsBusy ?? false)">
                             <i class="bi bi-save"></i> Save
                         </button>

@@ -250,11 +250,24 @@ internal class ScriptRepository
             // ScriptCompiler compiler = new ScriptCompiler(References);
             var getTupleFromVal = _compiler.BasicValidationBeforeCompiling(scriptString);
 
+            string scriptType;
+            switch (getTupleFromVal.BaseTypeName)
+            {
+                case ScriptTypes.GeneratorActionScript:
+                    scriptType = nameof(IGeneratorActionScript);
+                    break;
+                case ScriptTypes.GeneratorConditionScript:
+                    scriptType = nameof(IGeneratorConditionScript);
+                    break;
+                default:
+                    throw new Exception("No valid type");
+            }
+
             CustomerScript randomTestScript2 = new CustomerScript
             {
                 Id = randomGUID,
                 ScriptName = getTupleFromVal.ClassName,
-                ScriptType = getTupleFromVal.BaseTypeName,
+                ScriptType = scriptType,
                 SourceCode = scriptString,
                 MinApiVersion = getTupleFromVal.Version,
                 CreatedAt = createdAt,

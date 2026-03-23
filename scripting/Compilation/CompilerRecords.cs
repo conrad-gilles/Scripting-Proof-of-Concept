@@ -1,9 +1,11 @@
 using Microsoft.CodeAnalysis;
 
+namespace Ember.Scripting;
+
 public record ValidationRecord
 {
     public required string ClassName { get; init; }
-    public required string BaseTypeName { get; init; }
+    public required ScriptTypes BaseTypeName { get; init; }
     public required int Version { get; init; }
 }
 

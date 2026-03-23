@@ -1,5 +1,5 @@
-using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Scripting;
+using Microsoft.CodeAnalysis;
 using Microsoft.EntityFrameworkCore.Infrastructure.Internal;
 using Microsoft.Extensions.Logging;
 
@@ -101,10 +101,17 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
         await UpdateScript(scriptId, newSourceCode, userName, apiVersion);
     }
 
+    //todo unsafe check if it compiles first before updating, compiling first doesnt work because it would compile old version
     public async Task UpdateScriptAndCompile(Guid scriptId, string newSourceCode, string? userName = null, int? apiVersion = null)
     {
-        await CompileScript(scriptId, apiVersion);
+        if (apiVersion == null)
+        {
+            apiVersion = GetRunningApiVersion();
+        }
+        await ThrowCompilationErrors(newSourceCode, apiVersion, null);  //if this throws update never gets executed, if it doesnt then it is safe to update before compilation, issue still unefficient will make one soon that more efficient
         await UpdateScript(scriptId, newSourceCode, userName, apiVersion);
+        // await CompileScript(scriptId, apiVersion);
+        await RecompileCache((Guid)scriptId, (int)apiVersion);
     }
 
     public async Task UpdateScriptAndCompileNT(string name, ScriptTypes scriptType, string newSourceCode, string? userName = null, int? apiVersion = null)
@@ -167,8 +174,11 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
         {
             targetApiVersion = GetRunningApiVersion();
         }
+        Console.WriteLine("Hit line 176");
         CustomerScript script = await _db.GetCustomerScript(scriptId);
+        Console.WriteLine("Hit line 178");
         await _db.CreateAndInsertCompiledCache(script, apiV: targetApiVersion);
+        Console.WriteLine("Hit line 180");
     }
 
     // Compiles all compatible scripts for a new API version
@@ -245,6 +255,12 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
             return "Failed to compile script:" + scriptId + " " + e.ToString();
             // throw new FacadeException(e.ToString(), e);
         }
+    }
+
+    public async Task<bool> ThrowCompilationErrors(string script, int? apiVersion = null, ValidationRecord? metaData = null)
+    {
+        _compiler.RunCompilation(script);
+        return true;
     }
 
     public ValidationRecord BasicValidationBeforeCompiling(string script)

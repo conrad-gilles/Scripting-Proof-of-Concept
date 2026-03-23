@@ -49,6 +49,8 @@ public interface ISccriptManagerDeleteAfter : IScriptManagerExtended
   /// <returns></returns>
   Task<string> GetCompilationErrors(Guid scriptId, int? apiVersion = null);
 
+  Task<bool> ThrowCompilationErrors(string script, int? apiVersion = null, ValidationRecord? metaData = null);
+
   /// <summary>
   /// Gets the tuple from a script containing Class Name, base type name and the last integer of the declared version in the name
   /// </summary>

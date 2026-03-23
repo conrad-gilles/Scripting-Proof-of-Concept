@@ -186,10 +186,22 @@ internal class ScriptCompiler
             _logger.LogTrace("Version Int = " + versionInt);
 
             ValidateNamespaceUsage(record.Tree!, record.Model!);
+            ScriptTypes scriptType;
+            switch (baseTypeName)
+            {
+                case nameof(IGeneratorActionScript):
+                    scriptType = ScriptTypes.GeneratorActionScript;
+                    break;
+                case nameof(IGeneratorConditionScript):
+                    scriptType = ScriptTypes.GeneratorConditionScript;
+                    break;
+                default:
+                    throw new Exception(nameof(baseTypeName) + " was not a valid option!");
+            }
             ValidationRecord returnedRecord = new ValidationRecord
             {
                 ClassName = className,
-                BaseTypeName = baseTypeName,
+                BaseTypeName = scriptType,
                 Version = (int)versionInt
             };
             return returnedRecord;
