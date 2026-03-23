@@ -1,7 +1,7 @@
 # Todo
 - always have the README.md snippets up to date
 
-- remove all occurences of throw new Exception in scripting project
+- remove all occurences of throw new Exception
 - create new exception classes for them and add them to the respective files
 - get rid of the generic DBhelper exception etc and either replace them with specific one or remove them if its just catch->throw
 - 

@@ -1,6 +1,12 @@
 namespace Ember.Scripting;
 
-public class ScriptExecutionException : Exception
+public abstract class ExecutionException : ScriptingFrameworkException
+{
+    public ExecutionException() : base() { }
+    public ExecutionException(string message) : base(message) { }
+    public ExecutionException(string message, Exception innerException) : base(message, innerException) { }
+}
+public class ScriptExecutionException : ExecutionException
 {
     public ScriptExecutionException() : base() { }
     public ScriptExecutionException(string message) : base(message) { }
@@ -20,13 +26,13 @@ public class ConditionScriptExecutionException : ScriptExecutionException
     public ConditionScriptExecutionException(string message) : base(message) { }
     public ConditionScriptExecutionException(string message, Exception innerException) : base(message, innerException) { }
 }
-public class NoClassFoundInScriptFileException : Exception
+public class NoClassFoundInScriptFileException : ExecutionException
 {
     public NoClassFoundInScriptFileException() : base() { }
     public NoClassFoundInScriptFileException(string message) : base(message) { }
     public NoClassFoundInScriptFileException(string message, Exception innerException) : base(message, innerException) { }
 }
-public class ScriptTimeoutException : Exception
+public class ScriptTimeoutException : ExecutionException
 {
     public ScriptTimeoutException() : base() { }
     public ScriptTimeoutException(string message) : base(message) { }

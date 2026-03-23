@@ -1,6 +1,13 @@
 namespace Ember.Scripting;
 
-public class CompilationFailedException : Exception
+public abstract class CompilationException : ScriptingFrameworkException
+{
+    public CompilationException() : base() { }
+    public CompilationException(string message) : base(message) { }
+    public CompilationException(string message, Exception innerException) : base(message, innerException) { }
+
+}
+public class CompilationFailedException : CompilationException
 {
     string? CompilerErrors { get; }
 
@@ -14,28 +21,28 @@ public class CompilationFailedException : Exception
     }
 }
 
-public class MoreThanOneClassFoundInScriptException : Exception
+public class MoreThanOneClassFoundInScriptException : CompilationException
 {
     public MoreThanOneClassFoundInScriptException() : base() { }
     public MoreThanOneClassFoundInScriptException(string message) : base(message) { }
     public MoreThanOneClassFoundInScriptException(string message, Exception innerException) : base(message, innerException) { }
 }
 
-public class ValidationBeforeCompilationException : Exception
+public class ValidationBeforeCompilationException : CompilationException
 {
     public ValidationBeforeCompilationException() : base() { }
     public ValidationBeforeCompilationException(string message) : base(message) { }
     public ValidationBeforeCompilationException(string message, Exception innerException) : base(message, innerException) { }
 }
 
-public class ClassNameOrBaseNameNullException : Exception
+public class ClassNameOrBaseNameNullException : CompilationException
 {
     public ClassNameOrBaseNameNullException() : base() { }
     public ClassNameOrBaseNameNullException(string message) : base(message) { }
     public ClassNameOrBaseNameNullException(string message, Exception innerException) : base(message, innerException) { }
 }
 
-public class ForbiddenNamespaceException : Exception
+public class ForbiddenNamespaceException : CompilationException
 {
     public string? AttemptedNamespace { get; }
 
@@ -49,7 +56,7 @@ public class ForbiddenNamespaceException : Exception
     }
 }
 
-public class ReferencesForVersionNotFound : Exception
+public class ReferencesForVersionNotFound : CompilationException
 {
     public ReferencesForVersionNotFound() : base() { }
     public ReferencesForVersionNotFound(string message) : base(message) { }

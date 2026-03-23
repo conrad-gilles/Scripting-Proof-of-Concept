@@ -1,6 +1,12 @@
 namespace Ember.Scripting;
 
-public class ScriptRepositoryException : Exception
+public abstract class PersistenceException : ScriptingFrameworkException
+{
+    public PersistenceException() : base() { }
+    public PersistenceException(string message) : base(message) { }
+    public PersistenceException(string message, Exception innerException) : base(message, innerException) { }
+}
+public class ScriptRepositoryException : PersistenceException
 {
     public ScriptRepositoryException() : base() { }
     public ScriptRepositoryException(string message) : base(message) { }
@@ -8,7 +14,7 @@ public class ScriptRepositoryException : Exception
 }
 
 
-public class SaveScriptWithoutCompilingException : Exception
+public class SaveScriptWithoutCompilingException : PersistenceException
 {
     public SaveScriptWithoutCompilingException() : base() { }
     public SaveScriptWithoutCompilingException(string message) : base(message) { }
