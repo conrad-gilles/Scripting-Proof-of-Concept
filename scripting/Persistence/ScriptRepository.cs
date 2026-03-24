@@ -304,7 +304,7 @@ internal class ScriptRepository
                     scriptType = nameof(IGeneratorConditionScript);
                     break;
                 default:
-                    throw new Exception("No valid type");
+                    throw new CouldNotMatchBaseTypeInPersistence("No valid type");
             }
 
             CustomerScript script = new CustomerScript

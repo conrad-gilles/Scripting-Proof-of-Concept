@@ -6,5 +6,13 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\scripting\scripting.csproj" />
+    <ProjectReference Include="..\sandbox\sandbox.csproj" />
+  </ItemGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="sandbox.Tests" />
+    <InternalsVisibleTo Include="BlazorUI" />
+  </ItemGroup>
 </Project>

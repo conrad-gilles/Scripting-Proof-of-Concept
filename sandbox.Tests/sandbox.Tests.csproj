@@ -19,6 +19,8 @@
   <ItemGroup>
     <ProjectReference Include="..\sandbox\sandbox.csproj" />
     <ProjectReference Include="..\scripting\scripting.csproj" />
+    <ProjectReference Include="..\Ember\Ember.csproj" />
+    <ProjectReference Include="..\BlazorUI\BlazorUI.csproj" />
   </ItemGroup>
 
   <ItemGroup>

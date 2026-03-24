@@ -1,19 +1,15 @@
 # Todo
 
+### Always check those
 - maybe assign scripts diffrent types which allow for longer execution times maybe add also something similar for critical...
-
 - always have the README.md snippets up to date
-
-- maybe make a SecurityTest.cs and write test to check if malicious scripts pass
-
-- remove all occurences of throw new Exception
+- remove all occurences of throw new Exception 
 - ideally 4 references for every specific exception (3 for constructors 1 for atualusage)
 - create new exception classes for them and add them to the respective files
 - get rid of the generic DBhelper exception etc and either replace them with specific one or remove them if its just catch->throw
-- 
-- remove all occurences of data
-- rename GeneratorContexts to PatientContexts or something like that?
-- maybe for the future allow for multiple functions in the script, or what i proposed allow for multiple static classes with the standard methods
+
+### Main Todos
+
 - only 1 factory that creates the most recent context get rid of the others or maybe put them in a Testing namespace?
 - put all GenCOntext in a namespace like maybe Ember.Scripting.GeneratorContextsV5 etc
 - make GeneratorContextSF mayeb an interface?
@@ -49,27 +45,11 @@
 - fix basic val still doesnt check if implements correct class  probably with is null? is typeof ?
 - in ui when compile all scripts with 1 corrupt one more than 1 dont cpompile because it aborts the process
 - make sure azure works
-
-# Developers in Ember simply do this:
- 
-- var context = await RoutingDecisionSpecialCaseScriptFactory.CreateContext(...);
-- var result = await ScriptManager.ExecuteScript(Scripts.RoutingDecisionSpecialCaseScript, context);
- 
-### This has the following implications:
-  - The context is always of the newest version
-  - Customers may not have upgraded yet, so Script context must be downgradable
-    Similar idea to how results are upgradable
-### So if we have ember with API Version 6 running:
-  - Ember passes V6 context to ScriptManager
-  - ScriptManager checks what version is running
-  - ScriptManager downgrades the context until it is of the version defined at the customer
-  - ScriptManager executes the script and provides the correctly versioned context
-  - ScriptManager upgrades the result returned from the Script to the version of the API Version (so V6)
-
-### How Context should be instantiated and execute called
-- GeneratorContext ctx=GeneratorContextFactory.Create("Laborder");
-- ActionResult result= await facade.executescript< GeneratorContex,ActionResult >(ctx);
-- ActionResult result= await facade.executescript< GeneratorActionScript >(ctx);
+-  
+### Ask about:
+- remove all occurences of data
+- rename GeneratorContexts to PatientContexts or something like that?
+- maybe for the future allow for multiple functions in the script, or what i proposed allow for multiple static classes with the standard methods
 
 ### Redefine IGeneratorActionScript so it takes maybe generics
 - somethign like this

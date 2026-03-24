@@ -17,7 +17,7 @@ public record ValidationRecord
             case ScriptTypes.GeneratorConditionScript:
                 return nameof(IGeneratorConditionScript);
             default:
-                throw new Exception("Could not match the BaseTypeNAme to a String this should never happen!");
+                throw new CouldNotMatchBaseTypeInCompiler("Could not match the BaseTypeNAme to a String this should never happen!");
         }
     }
 }

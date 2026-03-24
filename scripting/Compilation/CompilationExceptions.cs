@@ -75,3 +75,10 @@ public class ReferencesForVersionNotFound : CompilationException
     public ReferencesForVersionNotFound(string message) : base(message) { }
     public ReferencesForVersionNotFound(string message, Exception innerException) : base(message, innerException) { }
 }
+
+public class CouldNotMatchBaseTypeInCompiler : CompilationException
+{
+    public CouldNotMatchBaseTypeInCompiler() : base() { }
+    public CouldNotMatchBaseTypeInCompiler(string message) : base(message) { }
+    public CouldNotMatchBaseTypeInCompiler(string message, Exception innerException) : base(message, innerException) { }
+}

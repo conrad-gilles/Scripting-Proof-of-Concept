@@ -196,7 +196,7 @@ internal class ScriptCompiler
                     scriptType = ScriptTypes.GeneratorConditionScript;
                     break;
                 default:
-                    throw new Exception(nameof(baseTypeName) + " was not a valid option!");
+                    throw new CouldNotMatchBaseTypeInCompiler(nameof(baseTypeName) + " was not a valid option!");
             }
             ValidationRecord returnedRecord = new ValidationRecord
             {

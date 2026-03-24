@@ -27,3 +27,10 @@ public class CompilationOfUpdatedScriptException : PersistenceException
     public CompilationOfUpdatedScriptException(string message) : base(message) { }
     public CompilationOfUpdatedScriptException(string message, Exception innerException) : base(message, innerException) { }
 }
+
+public class CouldNotMatchBaseTypeInPersistence : PersistenceException
+{
+    public CouldNotMatchBaseTypeInPersistence() : base() { }
+    public CouldNotMatchBaseTypeInPersistence(string message) : base(message) { }
+    public CouldNotMatchBaseTypeInPersistence(string message, Exception innerException) : base(message, innerException) { }
+}
