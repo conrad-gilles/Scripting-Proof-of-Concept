@@ -153,7 +153,7 @@ async Task MainProgramSwitch(IServiceProvider provider)
                         // Console.WriteLine("Copy paste your new version now:");
                         // string userInput2 = Console.ReadLine();
 
-                        await facade.UpdateScriptSC(idEdit, str, userName);
+                        await facade.UpdateScriptSC(idEdit, str, userName: userName);
                         break;
 
                     case "DeleteScript":

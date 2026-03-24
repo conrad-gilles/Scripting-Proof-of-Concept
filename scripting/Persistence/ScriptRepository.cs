@@ -411,9 +411,9 @@ internal class ScriptRepository
             }
         }
     }
-    public async Task UpdateScript(Guid scriptId, string newSourceCode, string? userName = null, int? apiVersion = null)
+    public async Task UpdateScript(CustomerScript script, string newSourceCode, bool allowFaultySave = false, string? userName = null, int? apiVersion = null)
     {
-        _logger.LogTrace("Entered {MethodName} in {ClassName} with scriptId: {ScriptId}.", nameof(UpdateScript), nameof(ScriptRepository), scriptId);
+        _logger.LogTrace("Entered {MethodName} in {ClassName} with scriptId: {ScriptId}.", nameof(UpdateScript), nameof(ScriptRepository), script.Id);
         if (userName == null)
         {
             userName = "Default";
@@ -421,24 +421,39 @@ internal class ScriptRepository
 
         using (var db = await _contextFactory.CreateDbContextAsync())
         {
-            CustomerScript? existingScript = await db.CustomerScripts.FindAsync(scriptId);
+            CustomerScript? existingScript = await db.CustomerScripts.FindAsync(script.Id);
 
-            if (existingScript != null)
-            {
-                existingScript.SourceCode = newSourceCode;
-                existingScript.ModifiedAt = DateTime.UtcNow;
-
-                if (userName != null)
-                {
-                    existingScript.CreatedBy = userName;
-                }
-            }
-            else
+            if (existingScript == null)
             {
                 _logger.LogDebug("Somethign went wrong retrieving your script, we could not find it.");
                 throw new ScriptRepositoryException("Could not find the script what needs to be updated.");
             }
 
+            if (allowFaultySave == false)
+            {
+                ValidationRecord validationRecord = _compiler.BasicValidationBeforeCompiling(newSourceCode);
+
+                if (script.ScriptName != validationRecord.ClassName)
+                {
+                    existingScript.ScriptName = validationRecord.ClassName;
+                }
+                if (script.MinApiVersion != validationRecord.Version)
+                {
+                    existingScript.MinApiVersion = validationRecord.Version;
+                }
+                if (script.GetScriptType() != validationRecord.BaseTypeName)
+                {
+                    existingScript.ScriptType = validationRecord.BaseTypeAsString();
+                }
+            }
+
+            existingScript.SourceCode = newSourceCode;
+            existingScript.ModifiedAt = DateTime.UtcNow;
+
+            if (userName != null)
+            {
+                existingScript.CreatedBy = userName;
+            }
             await db.SaveChangesAsync();
         }
     }
@@ -451,6 +466,7 @@ internal class ScriptRepository
         {
             apiVersion = GetRecentApiVersion();
         }
+
         using (var db = await _contextFactory.CreateDbContextAsync())
         {
             try
@@ -462,32 +478,28 @@ internal class ScriptRepository
                 {
                     await DeleteScriptCache(scriptId, (int)apiVersion);
                 }
-                else
+                byte[] compilation;
+                compilation = _compiler.RunCompilation(newSourceCode, metaData: validationRecord);
+
+                CompiledScripts cache = new CompiledScripts
                 {
-                    byte[] compilation;
-                    compilation = _compiler.RunCompilation(newSourceCode, metaData: validationRecord);
-
-                    CompiledScripts cache = new CompiledScripts
-                    {
-                        ScriptId = script.Id,
-                        ApiVersion = (int)apiVersion,
-                        AssemblyBytes = compilation,
-                        CompilationDate = DateTime.UtcNow,
-                        CompilationSuccess = true,
-                        CompilationErrors = "",
-                        OldSourceCode = script.SourceCode
-                    };
-                    await InsertScriptCompiledCache(cache);
-                    await db.SaveChangesAsync();
-
-                }
+                    ScriptId = script.Id,
+                    ApiVersion = (int)apiVersion,
+                    AssemblyBytes = compilation,
+                    CompilationDate = DateTime.UtcNow,
+                    CompilationSuccess = true,
+                    CompilationErrors = "",
+                    OldSourceCode = script.SourceCode
+                };
+                await InsertScriptCompiledCache(cache);
+                await db.SaveChangesAsync();
+                await UpdateScript(script, newSourceCode, userName: userName, apiVersion: apiVersion);
             }
             catch (Exception e)
             {
                 throw new CompilationOfUpdatedScriptException(message: "Failed to compile the updated script. Script source code was not updated.", e);
             }
         }
-        await UpdateScript(scriptId, newSourceCode, userName: userName, apiVersion: apiVersion);
     }
     public async Task InsertScriptCompiledCache(CompiledScripts scriptCompiledCache)
     {

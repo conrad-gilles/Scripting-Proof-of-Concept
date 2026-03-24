@@ -36,11 +36,11 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
     }
 
     // Updates existing script source code
-    public async Task UpdateScriptSC(Guid scriptId, string newSourceCode, string? userName = null, int? apiVersion = null)
+    public async Task UpdateScriptSC(Guid scriptId, string newSourceCode, bool allowFaultySave = false, string? userName = null, int? apiVersion = null)
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName} with scriptId: {ScriptId}.", nameof(UpdateScriptSC), nameof(ScriptManagerFacade), scriptId);
-
-        await _db.UpdateScript(scriptId, newSourceCode, userName, apiVersion);
+        CustomerScript script = await GetScript(scriptId);
+        await _db.UpdateScript(script, newSourceCode, allowFaultySave, userName: userName, apiVersion: apiVersion);
     }
 
     public async Task UpdateScriptNT(string name, ScriptTypes scriptType, string newSourceCode, string? userName = null, int? apiVersion = null)
@@ -48,7 +48,7 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
         _logger.LogTrace("Entered {MethodName} in {ClassName} with Name: {name}.", nameof(UpdateScriptNT), nameof(ScriptManagerFacade), name);
 
         Guid scriptId = await GetScriptId(name, scriptType);
-        await UpdateScriptSC(scriptId, newSourceCode, userName, apiVersion);
+        await UpdateScriptSC(scriptId, newSourceCode, userName: userName, apiVersion: apiVersion);
     }
 
     //todo unsafe check if it compiles first before updating, compiling first doesnt work because it would compile old version

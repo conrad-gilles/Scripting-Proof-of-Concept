@@ -76,6 +76,12 @@ public class ScriptManagerFacadeTests
 
 
         CustomerScript retrievedScript = await _facade.GetScript(script.Id);
+
+        Console.WriteLine("retrievedScript.SourceCode: ");
+        Console.WriteLine(retrievedScript.SourceCode);
+        Console.WriteLine("newSourceCode: ");
+        Console.WriteLine(newSourceCode);
+
         Assert.AreEqual(retrievedScript.SourceCode, newSourceCode);
 
         script = await _facade!.CreateScript(_sourceCodeActionV1!);
@@ -100,6 +106,17 @@ public class ScriptManagerFacadeTests
         Console.WriteLine(retrievedScript.SourceCode);
 
         Assert.AreEqual(script.SourceCode, retrievedScript.SourceCode);
+
+        await _facade.UpdateScriptAndCompile(script.Id, TestHelper.GetSC().sourceCodeWhileTrue);
+        retrievedScript = await _facade.GetScript(script.Id);
+        Console.WriteLine(nameof(retrievedScript.ScriptName) + ": " + retrievedScript.ScriptName);
+        Console.WriteLine(nameof(WhileTrueScript) + ": too compare");
+        Assert.IsTrue(retrievedScript.ScriptName == nameof(WhileTrueScript));
+
+        await _facade.UpdateScriptAndCompile(script.Id, TestHelper.GetSC().sourceCodePedia);
+        retrievedScript = await _facade.GetScript(script.Id);
+        Assert.IsTrue(retrievedScript.ScriptName == nameof(PediatricCondition));
+        Assert.IsTrue(retrievedScript.GetScriptType() == ScriptTypes.GeneratorConditionScript);
     }
 
     [TestMethod]
