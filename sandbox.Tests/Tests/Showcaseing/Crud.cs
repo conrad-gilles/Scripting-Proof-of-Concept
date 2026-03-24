@@ -26,7 +26,7 @@ public class CrudDemos
 
     public static ISccriptManagerDeleteAfter InitScriptManager()
     {
-        ISccriptManagerDeleteAfter facade;
+        ISccriptManagerDeleteAfter scriptManager;
         ServiceCollection services = new ServiceCollection();
 
         LoggerForScripting logger = new LoggerForScripting();
@@ -41,7 +41,7 @@ public class CrudDemos
 
         var provider = services.BuildServiceProvider();
 
-        return facade = provider.GetRequiredService<ISccriptManagerDeleteAfter>();
+        return scriptManager = provider.GetRequiredService<ISccriptManagerDeleteAfter>();
     }
     [TestMethod]
     public async Task Create()

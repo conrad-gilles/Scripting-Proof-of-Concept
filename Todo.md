@@ -2,7 +2,6 @@
 
 - maybe assign scripts diffrent types which allow for longer execution times maybe add also something similar for critical...
 
-- fix the update methods that also compile because unsafe check if it compiles first before updating, compiling first doesnt work because it would compile old version
 - always have the README.md snippets up to date
 
 - maybe make a SecurityTest.cs and write test to check if malicious scripts pass
