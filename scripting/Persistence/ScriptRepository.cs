@@ -199,6 +199,45 @@ internal class ScriptRepository
         CustomerScript script = await GetCustomerScript(scriptId);
         await CreateAndInsertCompiledCache(script, apiVersion);
     }
+    public async Task<string> GetCompilationErrors(Guid scriptId, int? apiVersion = null)
+    {
+        _logger.LogTrace("Entered {MethodName} in {ClassName} with scriptId: {ScriptId}.", nameof(GetCompilationErrors), nameof(ScriptRepository), scriptId);
+
+        try
+        {
+            ValidationRecord? metaData = null;
+            CustomerScript script;
+            string sourceCode;
+
+            if (apiVersion == null)
+            {
+                script = await GetCustomerScript(scriptId);
+                sourceCode = script.SourceCode!;
+            }
+            else
+            {
+                CompiledScripts cache = await GetCompiledScripCache(scriptId, (int)apiVersion);
+                sourceCode = cache.OldSourceCode!;
+            }
+            try
+            {
+                metaData = _compiler.BasicValidationBeforeCompiling(sourceCode);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError("Validation in GetCompilationErrors failed but will still try to compile." + e.ToString());
+            }
+
+            _compiler.RunCompilation(sourceCode, metaData: metaData);
+
+            return "Successful Compilation!";
+        }
+        catch (Exception e)
+        {
+            return "Failed to compile script:" + scriptId + " " + e.ToString();
+            // throw new FacadeException(e.ToString(), e);
+        }
+    }
     public async Task AutomaticCompilationOnVersionUpdate(int currentApiVersion)
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName} with currentApiVersion: {ApiVersion}.", nameof(AutomaticCompilationOnVersionUpdate), nameof(ScriptRepository), currentApiVersion);
@@ -518,7 +557,7 @@ internal class ScriptRepository
             return script.Id;
         }
     }
-    public async Task CompileAllStoredScripts(int currentApiVersion)
+    public async Task CompileAllStoredScripts()
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(CompileAllStoredScripts), nameof(ScriptRepository));
 

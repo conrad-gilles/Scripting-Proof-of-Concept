@@ -49,7 +49,7 @@ public interface ISccriptManagerDeleteAfter : IScriptManagerExtended
   /// <returns></returns>
   Task<string> GetCompilationErrors(Guid scriptId, int? apiVersion = null);
 
-  Task<bool> ThrowCompilationErrors(string script, int? apiVersion = null, ValidationRecord? metaData = null);
+  Task<bool> ThrowCompilationErrors(string script);
 
   /// <summary>
   /// Gets the tuple from a script containing Class Name, base type name and the last integer of the declared version in the name
@@ -59,29 +59,6 @@ public interface ISccriptManagerDeleteAfter : IScriptManagerExtended
   ValidationRecord BasicValidationBeforeCompiling(string script);
 
   INamedTypeSymbol GetBaseType(string script);
-
-  #endregion
-
-  #region Execution Operations
-
-  /// <summary>
-  /// Executes a Generator Action script with provided context, realisitcally not needed
-  /// </summary>
-  /// <param name="scriptId"></param>
-  /// <param name="context"></param>
-  /// <param name="apiVersion"></param>
-  /// <returns></returns>
-  Task<ActionResultSF> ExecuteActionScript(Guid scriptId, GeneratorContextSF context, int? apiVersion = null);
-
-  /// <summary>
-  /// Executes a Generator Condition script and returns boolean result, realisitcally not needed
-  /// </summary>
-  /// <param name="scriptId"></param>
-  /// <param name="context"></param>
-  /// <param name="apiVersion"></param>
-  /// <returns></returns>
-  Task<bool> ExecuteConditionScript(Guid scriptId, GeneratorContextSF context, int? apiVersion = null);
-
 
   #endregion
 

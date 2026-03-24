@@ -312,7 +312,7 @@ public class ScriptManagerFacadeTests
         Guid id = (await _facade!.CreateScript(_sourceCodeActionV1!)).Id;
         var testingContext = await _em!.GetTestingContext<GeneratorContextV4.GeneratorContext>();
 
-        ActionResultSF result = await _facade.ExecuteActionScript(id, testingContext);
+        ActionResultSF result = (ActionResultSF)await _facade.ExecuteScriptById(id, testingContext);
 
         Assert.IsNotNull(result);
         // Assert.IsTrue(result.IsSuccess);
@@ -323,7 +323,7 @@ public class ScriptManagerFacadeTests
         Guid id2 = (await _facade.CreateScript(_sourceCodePedia!)).Id;
         await Assert.ThrowsExceptionAsync<System.InvalidCastException>(async () =>
         {
-            ActionResultSF result2 = await _facade.ExecuteActionScript(id2, testingContext);
+            ActionResultSF result2 = (ActionResultSF)await _facade.ExecuteScriptById(id2, testingContext);
         });
 
     }
@@ -334,7 +334,7 @@ public class ScriptManagerFacadeTests
         Guid id = (await _facade!.CreateScript(_sourceCodePedia!)).Id;
         var testingContext = await _em!.GetTestingContext<GeneratorContextV4.GeneratorContext>();
 
-        bool result = await _facade.ExecuteConditionScript(id, testingContext);
+        bool result = (bool)await _facade.ExecuteScriptById(id, testingContext);
 
         Assert.IsNotNull(result);
         Assert.IsTrue(result.GetType().ToString() == "System.Boolean");
@@ -342,7 +342,7 @@ public class ScriptManagerFacadeTests
         Guid id2 = (await _facade.CreateScript(_sourceCodeActionV1!)).Id;
         await Assert.ThrowsExceptionAsync<System.InvalidCastException>(async () =>
         {
-            bool result2 = await _facade.ExecuteConditionScript(id2, testingContext);
+            bool result2 = (bool)await _facade.ExecuteScriptById(id2, testingContext);
         });
     }
 

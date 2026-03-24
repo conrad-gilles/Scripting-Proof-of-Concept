@@ -212,13 +212,13 @@ async Task MainProgramSwitch(IServiceProvider provider)
 
                     case "ExecuteActionScript":
                         scriptId = await em.GetIdInConsoleAsync(fromSrc: true);
-                        ActionResultSF result = await facade.ExecuteActionScript(scriptId, await em.GetTestingContext<GeneratorContextV4.GeneratorContext>());
+                        ActionResultSF result = (ActionResultSF)await facade.ExecuteScriptById(scriptId, await em.GetTestingContext<GeneratorContextV4.GeneratorContext>());
                         Console.WriteLine(result.ToString());   //you could do whatever with it
                         break;
 
                     case "ExecuteConditionScript":
                         scriptId = await em.GetIdInConsoleAsync(fromSrc: true);
-                        bool resultCond = await facade.ExecuteConditionScript(scriptId, await em.GetTestingContext<GeneratorContextV4.GeneratorContext>());
+                        bool resultCond = (bool)await facade.ExecuteScriptById(scriptId, await em.GetTestingContext<GeneratorContextV4.GeneratorContext>());
                         Console.WriteLine(resultCond);
                         break;
 
