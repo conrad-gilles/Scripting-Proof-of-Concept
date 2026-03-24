@@ -171,18 +171,15 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
 
     #region Execution Operations
 
-    // Generic execution that detects script type automatically
+    // Generic execution 
     public async Task<object> ExecuteScriptById(Guid scriptId, GeneratorContextSF context, int? apiVersion = null)
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName} with scriptId: {ScriptId}.", nameof(ExecuteScriptById), nameof(ScriptManagerFacade), scriptId);
-        if (apiVersion == null)
-        {
-            apiVersion = GetRunningApiVersion();
-        }
+
         byte[]? compiledScript = null;
         try
         {
-            var temp = await _db.GetCompiledScripCache(scriptId, (int)apiVersion);
+            var temp = await _db.GetCompiledScripCache(scriptId, apiVersion);
             compiledScript = temp.AssemblyBytes;
         }
         catch (Exception e)
@@ -190,12 +187,8 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
             _logger.LogError("Retrieval failed jit comp launched:" + e.ToString());
             await CompileScript(scriptId, GetRunningApiVersion());
             //try again, if fails again we catch error outside
-            var temp = await _db.GetCompiledScripCache(scriptId, (int)apiVersion);
-            compiledScript = temp.AssemblyBytes;
+            compiledScript = (await _db.GetCompiledScripCache(scriptId, apiVersion)).AssemblyBytes;
         }
-
-        //possibly add a null check for compiledScript
-        // ScriptExecutor executor = new ScriptExecutor();
         object result = await _executor.RunScriptExecution<object>(compiledScript!, context);  //returns either bool or action result todo maybe add checks if thats the case but normally should be
         return result;
     }
@@ -204,29 +197,7 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName} with scriptName: {ScriptId}.", nameof(ExecuteScriptByNameAndType), nameof(ScriptManagerFacade), name);
         Guid scriptId = await _db.GetScriptId(name, scriptType);
-        if (apiVersion == null)
-        {
-            apiVersion = GetRunningApiVersion();
-        }
-        byte[]? compiledScript = null;
-        try
-        {
-            var temp = await _db.GetCompiledScripCache(scriptId, (int)apiVersion);
-            compiledScript = temp.AssemblyBytes;
-        }
-        catch (Exception e)
-        {
-            _logger.LogError("Retrieval failed jit comp launched:" + e.ToString());
-            await CompileScript(scriptId, GetRunningApiVersion());
-            //try again, if fails again we catch error outside
-            var temp = await _db.GetCompiledScripCache(scriptId, (int)apiVersion);
-            compiledScript = temp.AssemblyBytes;
-        }
-
-        //possibly add a null check for compiledScript
-        // ScriptExecutor executor = new ScriptExecutor();
-        object result = await _executor.RunScriptExecution<object>(compiledScript!, context);  //returns either bool or action result todo maybe add checks if thats the case but normally should be
-        return result;
+        return await ExecuteScriptById(scriptId, context, apiVersion);
     }
 
     #endregion
@@ -234,17 +205,10 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
     #region Cache Management
 
     // Retrieves compiled assembly bytes from cache
-    // public async Task<byte[]> GetCompiledCache(Guid scriptId, int? currentApiVersion = null)
     public async Task<CompiledScripts> GetCompiledCache(Guid scriptId, int? currentApiVersion = null)
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName} with scriptId: {ScriptId}.", nameof(GetCompiledCache), nameof(ScriptManagerFacade), scriptId);
-        if (currentApiVersion == null)
-        {
-            currentApiVersion = GetRunningApiVersion();
-        }
-        var temp = await _db.GetCompiledScripCache(scriptId, (int)currentApiVersion);
-
-        return temp;
+        return await _db.GetCompiledScripCache(scriptId, currentApiVersion);
     }
 
     // Removes all compiled versions of a script
@@ -262,6 +226,7 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
 
     public async Task<List<CompiledScripts>> GetAllCompiledScriptCaches()
     {
+        _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(GetAllCompiledScriptCaches), nameof(ScriptManagerFacade));
         return await _db.GetAllCompiledScriptCaches();
     }
 
@@ -269,7 +234,6 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
     public async Task ClearAllCaches()
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(ClearAllCaches), nameof(ScriptManagerFacade));
-
         await _db.DeleteAllCachedScripts();
     }
 
@@ -277,13 +241,13 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
     public async Task PrecompileForApiVersion()
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(PrecompileForApiVersion), nameof(ScriptManagerFacade));
-
         int currentApiVersion = GetRunningApiVersion();
         await _db.AutomaticCompilationOnVersionUpdate(currentApiVersion);
     }
 
     public async Task DeleteAllData()
     {
+        _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(DeleteAllData), nameof(ScriptManagerFacade));
         await _db.DeleteAllData();
     }
     #endregion
@@ -294,14 +258,12 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
     public async Task<List<int>> GetActiveApiVersions() //todo implement
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(GetActiveApiVersions), nameof(ScriptManagerFacade));
-
         return await _db.GetActiveApiVersions();
     }
 
     public int GetRunningApiVersion() //todo implement
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(GetRunningApiVersion), nameof(ScriptManagerFacade));
-
         return _db.GetRecentApiVersion();
     }
 
@@ -309,43 +271,28 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
     public async Task<int> GetScriptCompatibility(Guid scriptId)
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName} with scriptId: {ScriptId}.", nameof(GetScriptCompatibility), nameof(ScriptManagerFacade), scriptId);
-
-        CustomerScript script = await _db.GetCustomerScript(scriptId);
-        return script.MinApiVersion;
+        return (await _db.GetCustomerScript(scriptId)).MinApiVersion;
     }
 
     // Validates if script can run on target version
     public async Task<bool> CheckVersionCompatibility(Guid scriptId, int? targetApiVersion = null)
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName} with scriptId: {ScriptId}.", nameof(CheckVersionCompatibility), nameof(ScriptManagerFacade), scriptId);
-
-        CustomerScript script = await _db.GetCustomerScript(scriptId);
-        if (targetApiVersion == null)
-        {
-            targetApiVersion = GetRunningApiVersion();
-        }
-        // var ls = await GetActiveApiVersions();
-        // if (ls.Contains((int)targetApiVersion))
-        // {
-        //     return true;
-        // }
         try
         {
-            await _db.GetCompiledScripCache(scriptId, (int)targetApiVersion);
+            await _db.GetCompiledScripCache(scriptId, targetApiVersion);
             return true;
         }
         catch
         {
             return false;
         }
-        // return false;
     }
 
     // Registers a new Ember instance in the system
     public void RegisterEmberInstance(Guid instanceId, string emberVersion, int apiVersion)
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName} with instanceId: {InstanceId}.", nameof(RegisterEmberInstance), nameof(ScriptManagerFacade), instanceId);
-
         // TODO
     }
 
@@ -364,16 +311,13 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
             cacheGUIDs = dupes.cachesToDelete,
             scriptGUIDs = dupes.duplicateGuids
         };
-        // return (scriptGUIDs: dupes.scriptGUIDs, cacheGUIDs: dupes.cacheGUIDs);
     }
 
     // Removes duplicate scripts and orphaned caches
     public async Task RemoveDuplicates()
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(RemoveDuplicates), nameof(ScriptManagerFacade));
-
-        int currentApiVersion = GetRunningApiVersion();
-        await _db.RemoveDuplicates();   //automatically get dupes from function in dbhelper dont have to pass therefore
+        await _db.RemoveDuplicates();
     }
 
     // Removes caches without associated scripts
@@ -395,7 +339,6 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
     public void GetScriptExecutionHistory(Guid scriptId)
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName} with scriptId: {ScriptId}.", nameof(GetScriptExecutionHistory), nameof(ScriptManagerFacade), scriptId);
-
         // TODO
     }
 
@@ -403,7 +346,6 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
     public void GetCompilationStatistics()
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(GetCompilationStatistics), nameof(ScriptManagerFacade));
-
         // TODO
     }
 
@@ -411,7 +353,6 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
     public async Task HealthCheck()
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(HealthCheck), nameof(ScriptManagerFacade));
-
         // TODO
         await _db.HealthCheck();
     }
@@ -439,14 +380,10 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
     public string GetUserName()
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(GetUserName), nameof(ScriptManagerFacade));
-
-        // return UsefulMethods.GetUserName();
         return "Gilles";
     }
 
     #endregion
-
-
 }
 
 

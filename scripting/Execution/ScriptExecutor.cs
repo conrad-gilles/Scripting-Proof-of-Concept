@@ -82,6 +82,7 @@ internal class ScriptExecutor
         }
 
     }
+
     public async Task<bool> RunConditionScript(Type type, object scriptInstance, GeneratorContextSF genContext)
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(RunConditionScript), nameof(ScriptExecutor));

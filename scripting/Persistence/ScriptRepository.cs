@@ -502,10 +502,14 @@ internal class ScriptRepository
         }
     }
 
-    public async Task<CompiledScripts> GetCompiledScripCache(Guid id, int apiVersion)
+    public async Task<CompiledScripts> GetCompiledScripCache(Guid id, int? apiVersion = null)
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName} with ID: {ScriptId}.", nameof(GetCompiledScripCache), nameof(ScriptRepository), id);
 
+        if (apiVersion == null)
+        {
+            apiVersion = GetRecentApiVersion();
+        }
         using (var db = await _contextFactory.CreateDbContextAsync())
         {
             var cache = await db.ScriptCompiledCaches.SingleAsync(b => b.ScriptId == id && b.ApiVersion == apiVersion);
