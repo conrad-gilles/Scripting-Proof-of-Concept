@@ -185,7 +185,7 @@ public class SanboxTests
         _facade = EmberMethods.GetNewScriptManagerInstance();
 
         valResult = _facade.BasicValidationBeforeCompiling(_sourceCodeActionV1!);
-        id = await _facade.CreateScript(_sourceCodeActionV1!);
+        id = (await _facade.CreateScript(_sourceCodeActionV1!)).Id;
 
         sf = new ContextFactory(_facade);
 
@@ -193,7 +193,7 @@ public class SanboxTests
         await _facade.ExecuteScriptById(id, sf.CreateContextForApiV(_data!, valResult.Version));
         valResult = _facade.BasicValidationBeforeCompiling(_sourceCodeActionV2!);
 
-        id = await _facade.CreateScript(_sourceCodeActionV2!);
+        id = (await _facade.CreateScript(_sourceCodeActionV2!)).Id;
         Console.WriteLine("Class dict start i: " + ContextVersionScanner.GetClassDictionary().Keys.Min() + ", Calss dict max: " + ContextVersionScanner.GetClassDictionary().Keys.Max());
         for (int i = 1; i < ContextVersionScanner.GetClassDictionary().Count(); i++)
         {
@@ -210,7 +210,7 @@ public class SanboxTests
         }
 
         valResult = _facade.BasicValidationBeforeCompiling(_sourceCodeVaccineAction!);
-        id = await _facade.CreateScript(_sourceCodeVaccineAction!);
+        id = (await _facade.CreateScript(_sourceCodeVaccineAction!)).Id;
         for (int i = 1; i < ContextVersionScanner.GetClassDictionary().Count(); i++)
         {
             _facade = EmberMethods.GetNewScriptManagerInstance(i);
@@ -219,7 +219,7 @@ public class SanboxTests
         }
 
         valResult = _facade.BasicValidationBeforeCompiling(_sourceCodePedia!);
-        id = await _facade.CreateScript(_sourceCodePedia!);
+        id = (await _facade.CreateScript(_sourceCodePedia!)).Id;
         for (int i = 1; i < ContextVersionScanner.GetClassDictionary().Count(); i++)
         {
             _facade = EmberMethods.GetNewScriptManagerInstance(i);
@@ -232,7 +232,7 @@ public class SanboxTests
     public async Task CreateContextByDowngradeTest()
     {
 
-        ActiveGeneratorContext data = new ActiveGeneratorContext(labOrder: _obj.labOrder, vaccine: _obj.vaccine);
+        ActiveGeneratorContext data = new ActiveGeneratorContext(labOrder: _obj!.labOrder, vaccine: _obj.vaccine);
 
         Guid id;
         ContextFactory sf;
@@ -244,7 +244,7 @@ public class SanboxTests
         src = _sourceCodeVaccineAction!;
         _facade = EmberMethods.GetNewScriptManagerInstance();
         valResult = _facade.BasicValidationBeforeCompiling(src!);
-        id = await _facade.CreateScript(src!);
+        id = (await _facade.CreateScript(src!)).Id;
 
         sf = new ContextFactory(_facade);
         GeneratorContextSF ctx = await sf.CreateByDowngrade(id, data!);
@@ -257,7 +257,7 @@ public class SanboxTests
 
         src = _sourceCodeActionV3!;
         valResult = _facade.BasicValidationBeforeCompiling(src!);
-        id = await _facade.CreateScript(src!);
+        id = (await _facade.CreateScript(src!)).Id;
 
         sf = new ContextFactory(_facade);
         ctx = await sf.CreateByDowngrade(id!, data!);
@@ -270,7 +270,7 @@ public class SanboxTests
 
         src = _sourceCodeActionV1!;
         valResult = _facade.BasicValidationBeforeCompiling(src!);
-        id = await _facade.CreateScript(src!);
+        id = (await _facade.CreateScript(src!)).Id;
 
         sf = new ContextFactory(_facade);
         ctx = await sf.CreateByDowngrade(id!, data!);
@@ -283,7 +283,7 @@ public class SanboxTests
 
         src = _sourceCodePedia!;
         valResult = _facade.BasicValidationBeforeCompiling(src!);
-        id = await _facade.CreateScript(src!);
+        id = (await _facade.CreateScript(src!)).Id;
 
         sf = new ContextFactory(_facade);
         ctx = await sf.CreateByDowngrade(id!, data!);

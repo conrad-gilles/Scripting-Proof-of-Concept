@@ -114,7 +114,7 @@ public class EmberMethods
             {
 
                 Guid id = Guid.NewGuid();
-                Guid randomTestScript2Id = await _facade.CreateScript(scriptString);
+                Guid randomTestScript2Id = (await _facade.CreateScript(scriptString)).Id;
                 successfullyInserted = successfullyInserted + ", " + vali.ClassName;
                 // Console.WriteLine(randomTestScript2.ScriptName + "Added script N" + i + ". to both tables.");
 

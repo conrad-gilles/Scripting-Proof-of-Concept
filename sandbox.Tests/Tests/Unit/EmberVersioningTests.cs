@@ -72,7 +72,7 @@ public class EmberVersioningTests
         List<Guid> ids = [];
         foreach (var item in _sourceCodes!)
         {
-            Guid id = await facade!.CreateScript(item!);
+            Guid id = (await facade!.CreateScript(item!)).Id;
             ids.Add(id);
         }
         return ids;
@@ -159,7 +159,7 @@ public class EmberVersioningTests
     public async Task OldSourceCodeVersionsTest()
     {
         _facade = EmberMethods.GetNewScriptManagerInstance(1);
-        Guid id = await _facade!.CreateScript(_sourceCodeActionV1!);
+        Guid id = (await _facade!.CreateScript(_sourceCodeActionV1!)).Id;
 
         _facade = EmberMethods.GetNewScriptManagerInstance(2);
         await _facade.UpdateScript(id, _sourceCodeActionV2!);
@@ -251,7 +251,7 @@ public class EmberVersioningTests
         _data = new DataV2.DataV2();
         Ember.Scripting.GeneratorContextSF ctx;
         Guid id;
-        id = await _facade!.CreateScript(_sourceCodeActionV2!);
+        id = (await _facade!.CreateScript(_sourceCodeActionV2!)).Id;
         var vali = _facade.BasicValidationBeforeCompiling(_sourceCodeActionV2!);
         int desiredContextVersion = vali.Version;
 
@@ -289,7 +289,7 @@ public class EmberVersioningTests
     {
         Ember.Scripting.GeneratorContextSF ctx;
         Guid id;
-        id = await _facade!.CreateScript(_sourceCodeActionV2!);
+        id = (await _facade!.CreateScript(_sourceCodeActionV2!)).Id;
         var vali = _facade.BasicValidationBeforeCompiling(_sourceCodeActionV2!);
         int desiredContextVersion = vali.Version;
 

@@ -45,7 +45,7 @@ public class EmberInternalFacadeTests
 
         EmberInternalFacade InternalScriptManager = new EmberInternalFacade(_scriptManager);
 
-        id = await _scriptManager.CreateScript(_sourceCodeActionV2!);
+        id = (await _scriptManager.CreateScript(_sourceCodeActionV2!)).Id;
 
         // DataV1.MockData data = new DataV1.MockData(labOrder: obj.labOrder, patient: obj.patient, consoleLogger: obj.logger,
         //                 dataAccess: obj.testDataAccess, vaccine: obj.vaccine);
@@ -74,36 +74,36 @@ public class EmberInternalFacadeTests
     [TestMethod]
     public async Task TestingQueryAndExecutionByNameAndType()
     {
-        ScriptNameType scriptTuple;
-        scriptTuple = await _scriptManager!.CreateScriptUsingNameType(_sourceCodeActionV1!);
+        CustomerScript script;
+        script = await _scriptManager!.CreateScript(_sourceCodeActionV1!);
 
-        var ctx = _internalScriptManager!.CreateContext(_obj.labOrder, _obj.vaccine);
-        ActiveActionResult ar = await _internalScriptManager.ExecuteScriptByNameAndType(scriptTuple.Name, scriptTuple.Type, ctx);
+        var ctx = _internalScriptManager!.CreateContext(_obj!.labOrder, _obj.vaccine);
+        ActiveActionResult ar = await _internalScriptManager.ExecuteScriptByNameAndType(script.ScriptName!, script.GetScriptType(), ctx);
 
-        Console.WriteLine("Name: " + scriptTuple.Name + ", ScriptType: " + scriptTuple.Type);
+        Console.WriteLine("Name: " + script.ScriptName + ", ScriptType: " + script.GetScriptType());
         Console.WriteLine("Type name: " + ar.GetType().FullName);
         Console.WriteLine("Returned result: " + ar);
 
-        Assert.IsTrue(scriptTuple.Name == "AddPediatricTestsV2");
-        Assert.IsTrue(scriptTuple.Type == ScriptTypes.GeneratorActionScript);
+        Assert.IsTrue(script.ScriptName == "AddPediatricTestsV2");
+        Assert.IsTrue(script.GetScriptType() == ScriptTypes.GeneratorActionScript);
         Assert.IsTrue(ar.ToString().Contains("[Message contains either failure or succes: ] Pediatric tests added"));
 
         Exception e = await Assert.ThrowsExceptionAsync<Ember.Scripting.ScriptRepositoryException>(async () =>
          {
-             scriptTuple = await _scriptManager!.CreateScriptUsingNameType(_sourceCodeActionV1!);
+             script = await _scriptManager!.CreateScript(_sourceCodeActionV1!);
          });
         Console.WriteLine(e.ToString());
 
-        scriptTuple = await _scriptManager!.CreateScriptUsingNameType(_sourceCodeActionV3!);
+        script = await _scriptManager!.CreateScript(_sourceCodeActionV3!);
         ctx = _internalScriptManager!.CreateContext(_obj.labOrder, _obj.vaccine);
-        ar = await _internalScriptManager.ExecuteScriptByNameAndType(scriptTuple.Name, scriptTuple.Type, ctx);
+        ar = await _internalScriptManager.ExecuteScriptByNameAndType(script.ScriptName!, script.GetScriptType(), ctx);
 
-        Console.WriteLine("Name: " + scriptTuple.Name + ", ScriptType: " + scriptTuple.Type);
+        Console.WriteLine("Name: " + script.ScriptName + ", ScriptType: " + script.GetScriptType());
         Console.WriteLine("Type name: " + ar.GetType().FullName);
         Console.WriteLine("Returned result: " + ar);
 
-        Assert.IsTrue(scriptTuple.Name == "AddPediatricTestsV4");
-        Assert.IsTrue(scriptTuple.Type == ScriptTypes.GeneratorActionScript);
+        Assert.IsTrue(script.ScriptName == "AddPediatricTestsV4");
+        Assert.IsTrue(script.GetScriptType() == ScriptTypes.GeneratorActionScript);
         Assert.IsTrue(ar.ToString().Contains("[Message contains either failure or succes: ] Pediatric tests added V3"));
         // Assert.IsTrue(false);
     }
@@ -111,8 +111,8 @@ public class EmberInternalFacadeTests
     [TestMethod]
     public async Task TestContextFactoryDI()
     {
-        ScriptNameType scriptTuple;
-        scriptTuple = await _scriptManager!.CreateScriptUsingNameType(_sourceCodeActionV1!);
+        CustomerScript scrip;
+        scrip = await _scriptManager!.CreateScript(_sourceCodeActionV1!);
 
         var objs = TestHelper.ScriptObjects();
         var services = new ServiceCollection();
@@ -123,14 +123,14 @@ public class EmberInternalFacadeTests
         ActiveContextFactory.IGeneratorContextFactory factory = provider.GetRequiredService<ActiveContextFactory.IGeneratorContextFactory>();
         ActiveGeneratorContext ctx = factory.Create(_obj.labOrder, _obj.vaccine);
 
-        ActiveActionResult ar = await _internalScriptManager!.ExecuteScriptByNameAndType(scriptTuple.Name, scriptTuple.Type, ctx);
+        ActiveActionResult ar = await _internalScriptManager!.ExecuteScriptByNameAndType(scrip.ScriptName!, scrip.GetScriptType(), ctx);
 
-        Console.WriteLine("Name: " + scriptTuple.Name + ", ScriptType: " + scriptTuple.Type);
+        Console.WriteLine("Name: " + scrip.ScriptName! + ", ScriptType: " + scrip.GetScriptType());
         Console.WriteLine("Type name: " + ar.GetType().FullName);
         Console.WriteLine("Returned result: " + ar);
 
-        Assert.IsTrue(scriptTuple.Name == "AddPediatricTestsV2");
-        Assert.IsTrue(scriptTuple.Type == ScriptTypes.GeneratorActionScript);
+        Assert.IsTrue(scrip.ScriptName == "AddPediatricTestsV2");
+        Assert.IsTrue(scrip.GetScriptType() == ScriptTypes.GeneratorActionScript);
         Assert.IsTrue(ar.ToString().Contains("[Message contains either failure or succes: ] Pediatric tests added"));
 
         // Assert.IsTrue(false);

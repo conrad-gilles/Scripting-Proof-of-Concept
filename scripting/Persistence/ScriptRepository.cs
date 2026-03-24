@@ -235,23 +235,28 @@ internal class ScriptRepository
             }
         }
     }
-    public async Task<CustomerScript> CreateAndInsertCustomerScript(string scriptString, Guid randomGUID, string createdBy, int? oldApiV = null, DateTime? createdAt = null, bool checkForDuplicates = true)
+    public async Task<CustomerScript> CreateAndInsertCustomerScript(string scriptString, Guid? randomGUID = null, string? createdBy = null, int? oldApiV = null, DateTime? createdAt = null, bool checkForDuplicates = true)
     //todo make sure compiling happens after verification of isDuplicate
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName} with ID: {ScriptId}.", nameof(CreateAndInsertCustomerScript), nameof(ScriptRepository), randomGUID);
-
+        if (oldApiV == null)
+        {
+            oldApiV = GetRecentApiVersion();
+        }
+        if (randomGUID == null)
+        {
+            randomGUID = Guid.NewGuid();
+        }
         using (var db = await _contextFactory.CreateDbContextAsync())
         {
-            int currentApiVersion = GetRecentApiVersion();
             if (createdAt == null)
             {
                 createdAt = DateTime.UtcNow;
             }
-            // ScriptCompiler compiler = new ScriptCompiler(References);
-            var getTupleFromVal = _compiler.BasicValidationBeforeCompiling(scriptString);
+            var validationRecord = _compiler.BasicValidationBeforeCompiling(scriptString);
 
             string scriptType;
-            switch (getTupleFromVal.BaseTypeName)
+            switch (validationRecord.BaseTypeName)
             {
                 case ScriptTypes.GeneratorActionScript:
                     scriptType = nameof(IGeneratorActionScript);
@@ -263,13 +268,13 @@ internal class ScriptRepository
                     throw new Exception("No valid type");
             }
 
-            CustomerScript randomTestScript2 = new CustomerScript
+            CustomerScript script = new CustomerScript
             {
-                Id = randomGUID,
-                ScriptName = getTupleFromVal.ClassName,
+                Id = (Guid)randomGUID,
+                ScriptName = validationRecord.ClassName,
                 ScriptType = scriptType,
                 SourceCode = scriptString,
-                MinApiVersion = getTupleFromVal.Version,
+                MinApiVersion = validationRecord.Version,
                 CreatedAt = createdAt,
                 ModifiedAt = DateTime.UtcNow,
                 CreatedBy = createdBy
@@ -277,16 +282,16 @@ internal class ScriptRepository
             checkForDuplicates = true;
             if (checkForDuplicates)
             {
-                checkForDuplicates = await IsDuplicateScript(randomTestScript2);  //uncomment this if you dont want to check for duplicate existing in db when inserting
+                checkForDuplicates = await IsDuplicateScript(script);  //uncomment this if you dont want to check for duplicate existing in db when inserting
             }
 
             if (checkForDuplicates == false)
             {
-                db.CustomerScripts.Add(randomTestScript2);
+                db.CustomerScripts.Add(script);
                 await db.SaveChangesAsync();
 
-                await CreateAndInsertCompiledCache(randomTestScript2, oldApiV);
-                return randomTestScript2;
+                await CreateAndInsertCompiledCache(script, oldApiV);
+                return script;
             }
             else
             {

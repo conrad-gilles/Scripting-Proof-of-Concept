@@ -28,61 +28,13 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
 
     #region Script Lifecycle
 
-    public async Task<Guid> CreateScript(string sourceCode, string userName = "Default", int? apiVersion = null, DateTime? createdAt = null, bool checkForDuplicates = false)    //maybe minApiVersion is better?
+    public async Task<CustomerScript> CreateScript(string sourceCode, string userName = "Default", int? apiVersion = null, DateTime? createdAt = null, bool checkForDuplicates = true)    //maybe minApiVersion is better?
     {
         _logger.LogDebug("Entered {MethodName} in {ClassName} apiVersion: {apiVersion}.", nameof(CreateScript), nameof(ScriptManagerFacade), apiVersion);
 
-        int currentApiVersion = GetRunningApiVersion();
-        Guid id = Guid.NewGuid();
+        CustomerScript script = await _db.CreateAndInsertCustomerScript(sourceCode, createdBy: userName, oldApiV: apiVersion, createdAt: createdAt, checkForDuplicates: checkForDuplicates);
+        return script;
 
-        if (apiVersion == null)
-        {
-            await _db.CreateAndInsertCustomerScript(sourceCode, id, userName, createdAt: createdAt, checkForDuplicates: checkForDuplicates);
-        }
-        else
-        {
-            await _db.CreateAndInsertCustomerScript(sourceCode, id, userName, (int)apiVersion, createdAt: createdAt, checkForDuplicates: checkForDuplicates);
-        }
-        return id;
-
-    }
-
-    public async Task<ScriptNameType> CreateScriptUsingNameType(string sourceCode, string userName = "Default", int? apiVersion = null, DateTime? createdAt = null, bool checkForDuplicates = false)
-    {
-        _logger.LogDebug("Entered {MethodName} in {ClassName} apiVersion: {apiVersion}.", nameof(CreateScriptUsingNameType), nameof(ScriptManagerFacade), apiVersion);
-
-        int currentApiVersion = GetRunningApiVersion();
-        Guid id = Guid.NewGuid();
-        CustomerScript? script = null;
-
-        if (apiVersion == null)
-        {
-            script = await _db.CreateAndInsertCustomerScript(sourceCode, id, userName, createdAt: createdAt, checkForDuplicates: checkForDuplicates);
-        }
-        else
-        {
-            script = await _db.CreateAndInsertCustomerScript(sourceCode, id, userName, (int)apiVersion, createdAt: createdAt, checkForDuplicates: checkForDuplicates);
-        }
-        ScriptTypes sType;
-        switch (script.ScriptType)
-        {
-            // case "IGeneratorActionScript":
-            case nameof(IGeneratorActionScript):
-                sType = ScriptTypes.GeneratorActionScript;
-                break;
-            // case "IGeneratorConditionScript":
-            case nameof(IGeneratorConditionScript):
-                sType = ScriptTypes.GeneratorConditionScript;
-                break;
-            default:
-                throw new CouldNotAssignBaseTypeException(message: "Could not assign baseTypeName");
-        }
-        // return (Name: script.ScriptName!, ScriptType: sType);
-        return new ScriptNameType
-        {
-            Name = script.ScriptName!,
-            Type = sType
-        };
     }
 
     // Updates existing script source code

@@ -73,3 +73,63 @@
 ### Redefine IGeneratorActionScript so it takes maybe generics
 - somethign like this
 - public interface IGeneratorActionScript< Tcontext,TActionResult >
+
+## Code Review 1 todo:
+6) Remove subsequent empty lines.
+7) _camelCase for all private fields — eliminates the biggest source of visual confusion 
+8) camelCase for all method parameters. You sometimes used Pascal case.
+9) The classes like ScriptManger, ScriptExecutor should never contain methods that are only there for testing. (example: ValidateScript and GetCompilationErrors in ScriptManger.cs)
+
+2) Duplicate code
+
+   Duplicate code between BasicValidationBeforeCompiling and GetBaseType
+   ScriptCompiler.cs:93-109 and 111-211   
+Answer:
+I got rid of it by having GetBaseType return a more complex record, it works but a bit overcomplex still. 
+3) GetReferencesForOldVersion it should get the references from a folder.
+
+Question: So instead of from current runtime from folder containing the dlls?
+2) RemoveDuplicates has a bug. You loop over duplicateGuids and then check if duplicateGuids contains the element at index i; this is always true of course. So you basically delete everyting.
+
+   Do we even need such a method?
+
+Answer:
+If we decide that we always must check for duplicates when inserting or updating, this function would be unncessecary.
+Also it is hard to test since you would have to circumvent the duplicate check when inserting.
+
+I didnt try to fix the bug yet since i cant really test it right now, if we decide to keep the function i will of course fix and test it.
+   
+3) Do not use  using (var db = new MyContext())
+   Use dependency injection and DbContextFactory. See: https://learn.microsoft.com/en-us/ef/core/dbcontext-configuration/#use-a-dbcontext-factory
+
+Answer:
+Done, but i kept the connection string hardcoded in the MyContext class for simplicity.
+6) You still have a bunch of Console.WriteLine statements that need to be removed.
+Answer:
+I commented them all out in the DbHelper class
+1) CheckVersionCompatibility simply checks all script versions.
+   This is because it internally calls GetActiveApiVersions which calls GetAllCompiledScriptCaches.
+   It does not check if the current script is compatible with the targetApiVersion.
+
+Question: Should it check if a cache of the current ember api version is inside the db? If yes compile so it is compatible?
+          Or by compatibility do you mean the current active context is downgradeable to execute the script?
+2) Maybe I am missing something but UpdateScript does not actually compile the script it just updates the source code.
+
+Answer:
+I removed the part in the description that says it also recompiles. Or should I instead make it also compile after updating?
+4) Create a mock service that provides you the user name for GetUserName.
+
+Question: So inject the username by DI, if yes what if user changes can you reinject?
+6) In CleanupOrphanedCaches you call AutomaticCompilationOnVersionUpdate. Seems like the wrong method no?
+
+Also is AutomaticCompilationOnVersionUpdate even needed? We will never recompile all our script simply because ember has a new api version. Or I am missing something - which is very likely - so let me know.
+
+Answer: Yes i have not written an implementation for it yet, should I write one? I dont know if it is worth investing time because normally when you delete a script all associated caches should get deleted too.
+
+I believe the Idea behind AutomaticCompilationOnVersionUpdate was that if there are major changes in Ember (for example LabOrder get renamed to LOrder) the already compiled scripts (who will not be refactored) will fail when this recompilation happens, and not when they should be executed and then fail.
+(This would cause JIT compilation in a situation that might be time critical.)
+This also brings up the question if one should maybe implement a way of automatically refactoring the scripts somehow? 
+7) GetCompilationErrors is a method that is only used for testing. It should therefore not be part of the ScriptManager.
+
+Question: Should i keep it in the ScriptManager class and remove it from the interface, currently i am not using it anywhere except tests, but my idea was using it in the UI to pass the errors to the Monaco Editor,
+so that it sees which row which column the errors are to have red underlines and other visual aids when writin the scripts.

@@ -68,7 +68,7 @@ namespace BlazorUI.Helpers
                 try
                 {
                     //first tries to insert and compile new script
-                    Guid newScript = await _scriptManager.CreateScript(code);
+                    Guid newScript = (await _scriptManager.CreateScript(code)).Id;
                     CurrentScriptId = newScript;
                     _console.Log("Compilation successful, script was created and inserted into the DB.");
                 }
@@ -113,32 +113,39 @@ namespace BlazorUI.Helpers
                 try
                 {
                     //first tries to insert and compile new script
-                    Guid newScript = await _scriptManager.CreateScript(code);
+                    Guid newScript = (await _scriptManager.CreateScript(code)).Id;
                     CurrentScriptId = newScript;
                     _console.Log("Compilation successful, script was created and inserted into the DB.");
                 }
                 catch
                 {
-                    try
-                    {
-                        await _scriptManager.UpdateScriptAndCompile((Guid)scriptId, code, apiVersion: selectedVersion);
-                        _console.Log("Script successfully updated and compiled.");
-                    }
-                    catch (Exception e)
-                    {
-                        await _scriptManager.UpdateScript((Guid)scriptId, code, apiVersion: selectedVersion);
-                        _console.Log("Script did not compile successfully but nevertheless it got saved, here are the compilation errors:");
-                        _console.Log(e.ToString());
-                    }
+                    await TryUpdating((Guid)scriptId, code, (int)selectedVersion!);
                 }
                 IsBusy = false;
             }
-            catch (System.Exception e)
+            catch (System.Exception)
             {
-                // //Rare edge case when in ScriptTemplate and compiling and it doesnt find the id because it is not in the variable because one switched tabs
-                // var vali = _scriptManager.BasicValidationBeforeCompiling(code);
-                // Guid retrievedId = await _scriptManager.GetScriptId(vali.ClassName, vali.BaseTypeName)
-                // // _console.Log("Something went wrong in line 139: " + e.ToString());
+                //Rare edge case when in ScriptTemplate and compiling and it doesnt find the id because it is not in the variable because one switched tabs
+                var vali = _scriptManager.BasicValidationBeforeCompiling(code);
+                Guid retrievedId = await _scriptManager.GetScriptId(vali.ClassName, vali.BaseTypeName);
+                await TryUpdating(retrievedId, code, (int)selectedVersion!);
+                // _console.Log("Something went wrong in line 139: " + e.ToString());
+                IsBusy = false;
+            }
+        }
+
+        public async Task TryUpdating(Guid scriptId, string code, int selectedVersion)
+        {
+            try
+            {
+                await _scriptManager.UpdateScriptAndCompile((Guid)scriptId, code, apiVersion: selectedVersion);
+                _console.Log("Script successfully updated and compiled.");
+            }
+            catch (Exception e)
+            {
+                await _scriptManager.UpdateScript((Guid)scriptId, code, apiVersion: selectedVersion);
+                _console.Log("Script did not compile successfully but nevertheless it got saved, here are the compilation errors:");
+                _console.Log(e.ToString());
             }
         }
 

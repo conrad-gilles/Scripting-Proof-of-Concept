@@ -13,10 +13,7 @@ public interface IScriptManagerExtended : IScriptManager
     /// <param name="apiVersion"></param>
     /// <param name="createdAt"></param>
     /// <returns></returns>
-    Task<Guid> CreateScript(string sourceCode, string userName = "Default", int? apiVersion = null, DateTime? createdAt = null, bool checkForDuplicates = false);
-
-    Task<ScriptNameType> CreateScriptUsingNameType(string sourceCode, string userName = "Default", int? apiVersion = null, DateTime? createdAt = null, bool checkForDuplicates = false);
-
+    Task<CustomerScript> CreateScript(string sourceCode, string userName = "Default", int? apiVersion = null, DateTime? createdAt = null, bool checkForDuplicates = false);
     /// <summary>
     /// Updates existing script source code
     /// </summary>

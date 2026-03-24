@@ -36,7 +36,7 @@ public class ScriptManagerFacadeTests
     [TestMethod]
     public async Task CreateScriptTest()
     {
-        Guid id = await _facade!.CreateScript(_sourceCodePedia!, "ConditionScriptTest");
+        Guid id = (await _facade!.CreateScript(_sourceCodePedia!, "ConditionScriptTest")).Id;
         CustomerScript retrievedScript = await _facade.GetScript(id);
 
         Assert.AreEqual(retrievedScript.SourceCode, _sourceCodePedia);
@@ -45,7 +45,7 @@ public class ScriptManagerFacadeTests
     public async Task CreateScriptWithOldTest()
     {
 
-        Guid id = await _facade!.CreateScript(_sourceCodePedia!, apiVersion: 2);
+        Guid id = (await _facade!.CreateScript(_sourceCodePedia!, apiVersion: 2)).Id;
         CustomerScript retrievedScript = await _facade.GetScript(id);
         var context = await _em!.GetTestingContext<GeneratorContextNoInherVaccineV5.GeneratorContext>(retrievedScript);
         await _facade.ExecuteScriptById(retrievedScript.Id, context);
@@ -56,7 +56,7 @@ public class ScriptManagerFacadeTests
     [TestMethod]
     public async Task UpdateScriptTest()
     {
-        Guid id = await _facade!.CreateScript(_sourceCodePedia!);
+        Guid id = (await _facade!.CreateScript(_sourceCodePedia!)).Id;
         string newSourceCode = _sourceCodePedia + System.Environment.NewLine + @"//new line added for testing";
         // newSourceCode = newSourceCode.Replace("@", "@" + System.Environment.NewLine);
         await _facade.UpdateScript(id, newSourceCode);
@@ -68,7 +68,7 @@ public class ScriptManagerFacadeTests
     [TestMethod]
     public async Task DeleteScriptTest()
     {
-        Guid id = await _facade!.CreateScript(_sourceCodePedia!);
+        Guid id = (await _facade!.CreateScript(_sourceCodePedia!)).Id;
         await _facade.DeleteScript(id);
 
 
@@ -81,7 +81,7 @@ public class ScriptManagerFacadeTests
     [TestMethod]
     public async Task GetScriptTest()
     {
-        Guid id = await _facade!.CreateScript(_sourceCodePedia!);
+        Guid id = (await _facade!.CreateScript(_sourceCodePedia!)).Id;
         CustomerScript script = await _facade.GetScript(id);
 
         Assert.IsNotNull(script);
@@ -93,8 +93,8 @@ public class ScriptManagerFacadeTests
     public async Task ListScriptsTest()
     {
         await _facade!.ClearAllCaches();
-        Guid id1 = await _facade.CreateScript(_sourceCodePedia!);
-        Guid id2 = await _facade.CreateScript(_sourceCodeActionV1!);
+        Guid id1 = (await _facade.CreateScript(_sourceCodePedia!)).Id;
+        Guid id2 = (await _facade.CreateScript(_sourceCodeActionV1!)).Id;
         List<CustomerScript> scripts = await _facade.ListScripts(includeCaches: true);
         Assert.IsNotNull(scripts);
         Assert.IsTrue(scripts.Count == 2);
@@ -135,7 +135,7 @@ public class ScriptManagerFacadeTests
     [TestMethod]
     public async Task CompileScriptTest()
     {
-        Guid id = await _facade!.CreateScript(_sourceCodePedia!);
+        Guid id = (await _facade!.CreateScript(_sourceCodePedia!)).Id;
 
         await _facade.ClearScriptCache(id);
         var before = await _facade.GetScript(id, includeCaches: true);
@@ -151,8 +151,8 @@ public class ScriptManagerFacadeTests
     [TestMethod]
     public async Task CompileAllScriptsTest()
     {
-        Guid id1 = await _facade!.CreateScript(_sourceCodePedia!);
-        Guid id2 = await _facade.CreateScript(_sourceCodeActionV1!);
+        Guid id1 = (await _facade!.CreateScript(_sourceCodePedia!)).Id;
+        Guid id2 = (await _facade.CreateScript(_sourceCodeActionV1!)).Id;
 
         await _facade.ClearAllCaches();
 
@@ -172,7 +172,7 @@ public class ScriptManagerFacadeTests
     [TestMethod]
     public async Task RecompileScriptTest()
     {
-        Guid id = await _facade!.CreateScript(_sourceCodePedia!);
+        Guid id = (await _facade!.CreateScript(_sourceCodePedia!)).Id;
 
         await _facade.RecompileAllCaches(id);
 
@@ -200,14 +200,14 @@ public class ScriptManagerFacadeTests
     [TestMethod]
     public async Task GetCompilationErrorsTest()
     {
-        Guid id = await _facade!.CreateScript(_sourceCodePedia!);
+        Guid id = (await _facade!.CreateScript(_sourceCodePedia!)).Id;
 
         string result = await _facade.GetCompilationErrors(id);
         Assert.IsTrue(result.Contains("Successful Compilation!"));
 
         await Assert.ThrowsExceptionAsync<ValidationBeforeCompilationException>(async () =>    //before was basicvalidation exception todo
         {
-            Guid id2 = await _facade.CreateScript("wrong input test could be whatever");
+            Guid id2 = (await _facade.CreateScript("wrong input test could be whatever")).Id;
             // string result2 = await facade.GetCompilationErrors(id2);
             string result2 = await _facade.GetCompilationErrors(id2);
         });
@@ -272,7 +272,7 @@ public class ScriptManagerFacadeTests
     [TestMethod]
     public async Task ExecuteActionScriptTest()
     {
-        Guid id = await _facade!.CreateScript(_sourceCodeActionV1!);
+        Guid id = (await _facade!.CreateScript(_sourceCodeActionV1!)).Id;
         var testingContext = await _em!.GetTestingContext<GeneratorContextV4.GeneratorContext>();
 
         ActionResultSF result = await _facade.ExecuteActionScript(id, testingContext);
@@ -283,7 +283,7 @@ public class ScriptManagerFacadeTests
         result = (ActionResultV3.ActionResult)EmberMethods.UpgradeActionResult(result);
         Assert.IsInstanceOfType(result, typeof(ActionResultV3.ActionResult));
 
-        Guid id2 = await _facade.CreateScript(_sourceCodePedia!);
+        Guid id2 = (await _facade.CreateScript(_sourceCodePedia!)).Id;
         await Assert.ThrowsExceptionAsync<System.InvalidCastException>(async () =>
         {
             ActionResultSF result2 = await _facade.ExecuteActionScript(id2, testingContext);
@@ -294,7 +294,7 @@ public class ScriptManagerFacadeTests
     [TestMethod]
     public async Task ExecuteConditionScriptTest()
     {
-        Guid id = await _facade!.CreateScript(_sourceCodePedia!);
+        Guid id = (await _facade!.CreateScript(_sourceCodePedia!)).Id;
         var testingContext = await _em!.GetTestingContext<GeneratorContextV4.GeneratorContext>();
 
         bool result = await _facade.ExecuteConditionScript(id, testingContext);
@@ -302,7 +302,7 @@ public class ScriptManagerFacadeTests
         Assert.IsNotNull(result);
         Assert.IsTrue(result.GetType().ToString() == "System.Boolean");
 
-        Guid id2 = await _facade.CreateScript(_sourceCodeActionV1!);
+        Guid id2 = (await _facade.CreateScript(_sourceCodeActionV1!)).Id;
         await Assert.ThrowsExceptionAsync<System.InvalidCastException>(async () =>
         {
             bool result2 = await _facade.ExecuteConditionScript(id2, testingContext);
@@ -314,12 +314,12 @@ public class ScriptManagerFacadeTests
     {
         var context = await _em!.GetTestingContext<GeneratorContextV4.GeneratorContext>();
 
-        Guid condId = await _facade!.CreateScript(_sourceCodePedia!);
+        Guid condId = (await _facade!.CreateScript(_sourceCodePedia!)).Id;
         object condResult = await _facade.ExecuteScriptById(condId, context);
         Assert.IsInstanceOfType(condResult, typeof(bool));
         Assert.AreEqual(true, (bool)condResult);
 
-        Guid actId = await _facade.CreateScript(_sourceCodeActionV1!);
+        Guid actId = (await _facade.CreateScript(_sourceCodeActionV1!)).Id;
         object actResult = await _facade.ExecuteScriptById(actId, context);
         Assert.IsInstanceOfType(actResult, typeof(ActionResultSF));
         // Assert.IsTrue(((ActionResultBaseClass)actResult).IsSuccess);
@@ -332,7 +332,7 @@ public class ScriptManagerFacadeTests
     [TestMethod]
     public async Task GetCompiledCacheTest()
     {
-        Guid id = await _facade!.CreateScript(_sourceCodePedia!);
+        Guid id = (await _facade!.CreateScript(_sourceCodePedia!)).Id;
 
         CompiledScripts cache = await _facade.GetCompiledCache(id);
         byte[] cacheAB = cache.AssemblyBytes!;
@@ -344,7 +344,7 @@ public class ScriptManagerFacadeTests
     [TestMethod]
     public async Task ClearScriptCacheTest()
     {
-        Guid id = await _facade!.CreateScript(_sourceCodePedia!);
+        Guid id = (await _facade!.CreateScript(_sourceCodePedia!)).Id;
 
         CompiledScripts cache = await _facade.GetCompiledCache(id);
         byte[] cacheAB = cache.AssemblyBytes!;
@@ -364,8 +364,8 @@ public class ScriptManagerFacadeTests
     [TestMethod]
     public async Task ClearAllCachesTest()
     {
-        Guid id = await _facade!.CreateScript(_sourceCodePedia!);
-        Guid id2 = await _facade.CreateScript(_sourceCodeActionV1!);
+        Guid id = (await _facade!.CreateScript(_sourceCodePedia!)).Id;
+        Guid id2 = (await _facade.CreateScript(_sourceCodeActionV1!)).Id;
 
         await _facade.ClearAllCaches();
 
@@ -376,7 +376,7 @@ public class ScriptManagerFacadeTests
     [TestMethod]
     public async Task PrecompileForApiVersionTest()
     {
-        Guid id = await _facade!.CreateScript(_sourceCodePedia!);
+        Guid id = (await _facade!.CreateScript(_sourceCodePedia!)).Id;
 
         await _facade.ClearAllCaches();
         var before = await _facade.GetScript(id, includeCaches: true);
@@ -395,7 +395,7 @@ public class ScriptManagerFacadeTests
     [TestMethod]
     public async Task GetActiveApiVersionsTest()
     {
-        Guid id = await _facade!.CreateScript(_sourceCodePedia!);
+        Guid id = (await _facade!.CreateScript(_sourceCodePedia!)).Id;
         int currentVersion = _facade.GetRunningApiVersion();
 
         List<int> versions = await _facade.GetActiveApiVersions();
@@ -425,7 +425,7 @@ public class ScriptManagerFacadeTests
     [TestMethod]
     public async Task CheckVersionCompatibilityTest()
     {
-        Guid id = await _facade!.CreateScript(_sourceCodePedia!);
+        Guid id = (await _facade!.CreateScript(_sourceCodePedia!)).Id;
         int currentVersion = _facade.GetRunningApiVersion();
 
         bool hasRecent = await _facade.CheckVersionCompatibility(id, currentVersion);
@@ -470,8 +470,8 @@ public class ScriptManagerFacadeTests
     {
         if (TestConfig.DuplicatesAllowed)
         {
-            Guid id = await _facade!.CreateScript(_sourceCodePedia!);
-            Guid id2 = await _facade.CreateScript(_sourceCodePedia!);
+            Guid id = (await _facade!.CreateScript(_sourceCodePedia!)).Id;
+            Guid id2 = (await _facade.CreateScript(_sourceCodePedia!)).Id;
 
             await _facade.RemoveDuplicates();
 
@@ -525,7 +525,7 @@ public class ScriptManagerFacadeTests
     [TestMethod]
     public async Task GetScriptMetadataTest()
     {
-        Guid id = await _facade!.CreateScript(_sourceCodePedia!);
+        Guid id = (await _facade!.CreateScript(_sourceCodePedia!)).Id;
 
         string metaData = await _facade.GetScriptMetadata(id);
 

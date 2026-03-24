@@ -38,6 +38,22 @@ public class CustomerScript
     {
         CompiledCaches = new List<CompiledScripts>();
     }
+    public ScriptTypes GetScriptType()
+    {
+        ScriptTypes sType;
+        switch (ScriptType)
+        {
+            case nameof(IGeneratorActionScript):
+                sType = ScriptTypes.GeneratorActionScript;
+                break;
+            case nameof(IGeneratorConditionScript):
+                sType = ScriptTypes.GeneratorConditionScript;
+                break;
+            default:
+                throw new CouldNotAssignBaseTypeException(message: "Could not assign baseTypeName");
+        }
+        return sType;
+    }
 
     public override string ToString()
     {

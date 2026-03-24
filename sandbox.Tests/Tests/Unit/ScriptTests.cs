@@ -36,7 +36,7 @@ async Task SetupAsync()
     {
         // await facade!.EnsureDeletedCreated();
         await _facade!.DeleteAllData();
-        Guid id = await _facade!.CreateScript(_sourceCodeActionV1!);
+        Guid id = (await _facade!.CreateScript(_sourceCodeActionV1!)).Id;
         CustomerScript retrievedScript = await _facade.GetScript(id);
         var context = await _em!.GetTestingContext<GeneratorContextNoInherVaccineV5.GeneratorContext>(autoDetectFromScript: retrievedScript);
         object resultBeforeUpgrade = await _facade.ExecuteScriptById(id, context);
@@ -51,7 +51,7 @@ async Task SetupAsync()
     [TestMethod]
     public async Task ActionV2Test()
     {
-        Guid id = await _facade!.CreateScript(_sourceCodeActionV2!);
+        Guid id = (await _facade!.CreateScript(_sourceCodeActionV2!)).Id;
         CustomerScript retrievedScript = await _facade.GetScript(id);
         var context = await _em!.GetTestingContext<GeneratorContextNoInherVaccineV5.GeneratorContext>(autoDetectFromScript: retrievedScript);
         object resultBeforeUpgrade = await _facade.ExecuteScriptById(id, context);
@@ -66,7 +66,7 @@ async Task SetupAsync()
     [TestMethod]
     public async Task ActionV3Test()
     {
-        Guid id = await _facade!.CreateScript(_sourceCodeActionV3!);
+        Guid id = (await _facade!.CreateScript(_sourceCodeActionV3!)).Id;
         CustomerScript retrievedScript = await _facade.GetScript(id);
         var context = await _em!.GetTestingContext<GeneratorContextNoInherVaccineV5.GeneratorContext>(autoDetectFromScript: retrievedScript);
         object resultBeforeUpgrade = await _facade.ExecuteScriptById(id, context);
@@ -81,7 +81,7 @@ async Task SetupAsync()
     [TestMethod]
     public async Task VaccineScriptTest()
     {
-        Guid id = await _facade!.CreateScript(_sourceCodeVaccineAction!);
+        Guid id = (await _facade!.CreateScript(_sourceCodeVaccineAction!)).Id;
         CustomerScript retrievedScript = await _facade.GetScript(id);
         var context = await _em!.GetTestingContext<GeneratorContextNoInherVaccineV5.GeneratorContext>(autoDetectFromScript: retrievedScript);
         object result = await _facade.ExecuteScriptById(id, context);
@@ -96,7 +96,7 @@ async Task SetupAsync()
     [TestMethod]
     public async Task ConditionTest()
     {
-        Guid id = await _facade!.CreateScript(_sourceCodePedia!);
+        Guid id = (await _facade!.CreateScript(_sourceCodePedia!)).Id;
         CustomerScript retrievedScript = await _facade.GetScript(id);
         var context = await _em!.GetTestingContext<GeneratorContextNoInherVaccineV5.GeneratorContext>(autoDetectFromScript: retrievedScript);
         object result = await _facade.ExecuteScriptById(id, context);
@@ -132,7 +132,7 @@ async Task SetupAsync()
         await _facade!.DeleteAllData();
         // await rm!.CompileAllScriptsInFolderAndSaveToDB(path, "Default", await facade.GetRecentApiVersion());
 
-        Guid id = await _facade!.CreateScript(_sourceCodePedia!);
+        Guid id = (await _facade!.CreateScript(_sourceCodePedia!)).Id;
         CustomerScript retrievedScript = await _facade.GetScript(id);
         DateTime? beforeUpdateCA = retrievedScript.CreatedAt;
         DateTime? beforeUpdateMA = retrievedScript.ModifiedAt;

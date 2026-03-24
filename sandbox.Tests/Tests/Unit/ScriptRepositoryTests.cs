@@ -35,7 +35,7 @@ public class ScriptRepositoryTests
     [TestMethod]
     public async Task CreateAndInsertCompiledCacheTest()
     {
-        Guid id = await _facade!.CreateScript(_sourceCodePedia!);
+        Guid id = (await _facade!.CreateScript(_sourceCodePedia!)).Id;
 
         await _facade.ClearScriptCache(id);
         var before = await _facade.GetScript(id, includeCaches: true);
@@ -76,16 +76,16 @@ public class ScriptRepositoryTests
     {
         if (TestConfig.DuplicatesAllowed)
         {
-            Guid id1 = await _facade!.CreateScript(_sourceCodePedia!);
+            Guid id1 = (await _facade!.CreateScript(_sourceCodePedia!)).Id;
             CustomerScript script1 = await _facade.GetScript(id1);
 
-            Guid id2 = await _facade!.CreateScript(_sourceCodePedia!);
+            Guid id2 = (await _facade!.CreateScript(_sourceCodePedia!)).Id;
             CustomerScript script2 = await _facade.GetScript(id2);
 
             Assert.IsTrue(script1.Equals(script2));
             var e = await Assert.ThrowsExceptionAsync<Ember.Scripting.ScriptRepositoryException>(async () =>
             {
-                Guid id3 = await _facade!.CreateScript(_sourceCodePedia!, checkForDuplicates: true);
+                Guid id3 = (await _facade!.CreateScript(_sourceCodePedia!, checkForDuplicates: true)).Id;
             });
 
             var allScripts = await _facade.ListScripts();

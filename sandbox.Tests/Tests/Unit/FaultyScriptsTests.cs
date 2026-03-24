@@ -24,7 +24,8 @@ public class FaultyScriptsTests
         await Assert.ThrowsExceptionAsync<Ember.Scripting.ScriptExecutionException>(async () =>
         {
             string sourceCode = TestHelper.GetSC().sourceCodeWhileTrue;
-            ScriptNameType scriptRecord = await ScriptManager!.CreateScriptUsingNameType(sourceCode!);
+            // ScriptNameType scriptRecord = await ScriptManager!.CreateScriptUsingNameType(sourceCode!);
+            CustomerScript script = await ScriptManager!.CreateScript(sourceCode!);
 
             var obj = TestHelper.ScriptObjects();
             var services = new ServiceCollection();
@@ -37,7 +38,7 @@ public class FaultyScriptsTests
             ActiveGeneratorContext ctx = factory.Create(obj.labOrder, obj.vaccine);
             ActiveActionResult ar = await InternalScriptManager!.ExecuteScriptByNameAndType("WhileTrueScript", ScriptTypes.GeneratorActionScript, ctx);
 
-            Console.WriteLine("Name: " + scriptRecord.Name + ", ScriptType: " + scriptRecord.Type);
+            Console.WriteLine("Name: " + script.ScriptName + ", ScriptType: " + script.ScriptType);
             Console.WriteLine("Type name: " + ar.GetType().FullName);
             Console.WriteLine("Returned result: " + ar);
         });

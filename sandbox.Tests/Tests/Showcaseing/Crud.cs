@@ -47,7 +47,10 @@ public class CrudDemos
     public async Task Create()
     {
         string sourceCode = TestHelper.GetSC().sourceCodeActionV1;
-        ScriptNameType scriptRecord = await ScriptManager!.CreateScriptUsingNameType(sourceCode!);
+        CustomerScript script = await ScriptManager!.CreateScript(sourceCode!);
+
+        Console.WriteLine("Name: " + script.ScriptName);
+        Console.WriteLine("Type: " + script.ScriptType);
     }
     [TestMethod]
     public async Task Read()
