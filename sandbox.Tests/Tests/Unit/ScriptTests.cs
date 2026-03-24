@@ -141,7 +141,7 @@ async Task SetupAsync()
         object result = await _facade.ExecuteScriptById(id, context);
 
         await Task.Delay(2000);
-        await _facade!.UpdateScript(retrievedScript.Id, "new source code doesnt matter if wrong shoudl save to db");
+        await _facade!.UpdateScriptSC(retrievedScript.Id, "new source code doesnt matter if wrong shoudl save to db");
 
         CustomerScript updatedScript = await _facade.GetScript(id);
         DateTime? afterUpdateCA = updatedScript.CreatedAt;

@@ -4,6 +4,7 @@ using Ember.Scripting;
 using Serilog;
 using Microsoft.Extensions.DependencyInjection;
 using sandbox.Tests;
+using Sandbox;
 
 namespace FirstTests;
 
@@ -56,13 +57,49 @@ public class ScriptManagerFacadeTests
     [TestMethod]
     public async Task UpdateScriptTest()
     {
-        Guid id = (await _facade!.CreateScript(_sourceCodePedia!)).Id;
+        CustomerScript script = await _facade!.CreateScript(_sourceCodePedia!);
         string newSourceCode = _sourceCodePedia + System.Environment.NewLine + @"//new line added for testing";
         // newSourceCode = newSourceCode.Replace("@", "@" + System.Environment.NewLine);
-        await _facade.UpdateScript(id, newSourceCode);
+        await _facade.UpdateScriptSC(script.Id, newSourceCode);
 
-        CustomerScript retrievedScript = await _facade.GetScript(id);
+        CustomerScript retrievedScript = await _facade.GetScript(script.Id);
         Assert.AreEqual(retrievedScript.SourceCode, newSourceCode);
+    }
+
+    [TestMethod]
+    public async Task UpdateAndCompileTest()
+    {
+        CustomerScript script = await _facade!.CreateScript(_sourceCodePedia!);
+        string newSourceCode = _sourceCodePedia + System.Environment.NewLine + @"//new line added for testing";
+        // newSourceCode = newSourceCode.Replace("@", "@" + System.Environment.NewLine);
+        await _facade.UpdateScriptAndCompile(script.Id, newSourceCode);
+
+
+        CustomerScript retrievedScript = await _facade.GetScript(script.Id);
+        Assert.AreEqual(retrievedScript.SourceCode, newSourceCode);
+
+        script = await _facade!.CreateScript(_sourceCodeActionV1!);
+        newSourceCode = _sourceCodeActionV1 + System.Environment.NewLine + @"public class WillCauseError{}";
+
+        Exception ex = await Assert.ThrowsExceptionAsync<CompilationOfUpdatedScriptException>(async () =>
+        {
+            await _facade.UpdateScriptAndCompile(script.Id, newSourceCode);
+
+        });
+
+        Exception innerEx = ExceptionHelper.GetExceptionFromChainReversed(ex, 1);
+        Console.WriteLine("Exception: " + innerEx);
+        Assert.IsTrue(innerEx.GetType() == typeof(Ember.Scripting.ValidationBeforeCompilationException));
+
+        //source code shoud be unchacnged
+        retrievedScript = await _facade.GetScript(script.Id);
+
+        Console.WriteLine("script.SourceCode: ");
+        Console.WriteLine(script.SourceCode);
+        Console.WriteLine("retrievedScript.SourceCode: ");
+        Console.WriteLine(retrievedScript.SourceCode);
+
+        Assert.AreEqual(script.SourceCode, retrievedScript.SourceCode);
     }
 
     [TestMethod]

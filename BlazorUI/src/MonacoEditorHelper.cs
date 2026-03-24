@@ -143,7 +143,7 @@ namespace BlazorUI.Helpers
             }
             catch (Exception e)
             {
-                await _scriptManager.UpdateScript((Guid)scriptId, code, apiVersion: selectedVersion);
+                await _scriptManager.UpdateScriptSC((Guid)scriptId, code, apiVersion: selectedVersion);
                 _console.Log("Script did not compile successfully but nevertheless it got saved, here are the compilation errors:");
                 _console.Log(e.ToString());
             }

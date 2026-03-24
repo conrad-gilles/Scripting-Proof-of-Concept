@@ -32,15 +32,13 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
     {
         _logger.LogDebug("Entered {MethodName} in {ClassName} apiVersion: {apiVersion}.", nameof(CreateScript), nameof(ScriptManagerFacade), apiVersion);
 
-        CustomerScript script = await _db.CreateAndInsertCustomerScript(sourceCode, createdBy: userName, oldApiV: apiVersion, createdAt: createdAt, checkForDuplicates: checkForDuplicates);
-        return script;
-
+        return await _db.CreateAndInsertCustomerScript(sourceCode, createdBy: userName, oldApiV: apiVersion, createdAt: createdAt, checkForDuplicates: checkForDuplicates);
     }
 
     // Updates existing script source code
-    public async Task UpdateScript(Guid scriptId, string newSourceCode, string? userName = null, int? apiVersion = null)
+    public async Task UpdateScriptSC(Guid scriptId, string newSourceCode, string? userName = null, int? apiVersion = null)
     {
-        _logger.LogTrace("Entered {MethodName} in {ClassName} with scriptId: {ScriptId}.", nameof(UpdateScript), nameof(ScriptManagerFacade), scriptId);
+        _logger.LogTrace("Entered {MethodName} in {ClassName} with scriptId: {ScriptId}.", nameof(UpdateScriptSC), nameof(ScriptManagerFacade), scriptId);
 
         await _db.UpdateScript(scriptId, newSourceCode, userName, apiVersion);
     }
@@ -50,20 +48,13 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
         _logger.LogTrace("Entered {MethodName} in {ClassName} with Name: {name}.", nameof(UpdateScriptNT), nameof(ScriptManagerFacade), name);
 
         Guid scriptId = await GetScriptId(name, scriptType);
-        await UpdateScript(scriptId, newSourceCode, userName, apiVersion);
+        await UpdateScriptSC(scriptId, newSourceCode, userName, apiVersion);
     }
 
     //todo unsafe check if it compiles first before updating, compiling first doesnt work because it would compile old version
     public async Task UpdateScriptAndCompile(Guid scriptId, string newSourceCode, string? userName = null, int? apiVersion = null)
     {
-        if (apiVersion == null)
-        {
-            apiVersion = GetRunningApiVersion();
-        }
-        await ThrowCompilationErrors(newSourceCode, apiVersion, null);  //if this throws update never gets executed, if it doesnt then it is safe to update before compilation, issue still unefficient will make one soon that more efficient
-        await UpdateScript(scriptId, newSourceCode, userName, apiVersion);
-        // await CompileScript(scriptId, apiVersion);
-        await RecompileCache((Guid)scriptId, (int)apiVersion);
+        await _db.UpdateScriptAndRecompile(scriptId, newSourceCode, userName, apiVersion);
     }
 
     public async Task UpdateScriptAndCompileNT(string name, ScriptTypes scriptType, string newSourceCode, string? userName = null, int? apiVersion = null)

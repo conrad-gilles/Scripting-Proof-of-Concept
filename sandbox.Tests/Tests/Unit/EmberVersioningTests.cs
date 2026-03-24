@@ -162,7 +162,7 @@ public class EmberVersioningTests
         Guid id = (await _facade!.CreateScript(_sourceCodeActionV1!)).Id;
 
         _facade = EmberMethods.GetNewScriptManagerInstance(2);
-        await _facade.UpdateScript(id, _sourceCodeActionV2!);
+        await _facade.UpdateScriptSC(id, _sourceCodeActionV2!);
         await _facade.CompileScript(id);
 
         string sourceCodeAV = (await _facade.GetCompiledCache(id)).OldSourceCode!;

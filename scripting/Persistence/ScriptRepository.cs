@@ -403,6 +403,53 @@ internal class ScriptRepository
             await db.SaveChangesAsync();
         }
     }
+    // Goal is to compile the updated script first before insertion to prevent having to undo a insertion of a non working script
+    public async Task UpdateScriptAndRecompile(Guid scriptId, string newSourceCode, string? userName = null, int? apiVersion = null)
+    {
+        _logger.LogTrace("Entered {MethodName} in {ClassName} with scriptId: {ScriptId}.", nameof(UpdateScriptAndRecompile), nameof(ScriptRepository), scriptId);
+
+        if (apiVersion == null)
+        {
+            apiVersion = GetRecentApiVersion();
+        }
+        using (var db = await _contextFactory.CreateDbContextAsync())
+        {
+            try
+            {
+                CustomerScript script = await GetCustomerScript(scriptId);
+                var validationRecord = _compiler.BasicValidationBeforeCompiling(newSourceCode);
+
+                if (await db.ScriptCompiledCaches.AnyAsync(c => c.ScriptId == script.Id && c.ApiVersion == apiVersion))
+                {
+                    await DeleteScriptCache(scriptId, (int)apiVersion);
+                }
+                else
+                {
+                    byte[] compilation;
+                    compilation = _compiler.RunCompilation(newSourceCode, metaData: validationRecord);
+
+                    CompiledScripts cache = new CompiledScripts
+                    {
+                        ScriptId = script.Id,
+                        ApiVersion = (int)apiVersion,
+                        AssemblyBytes = compilation,
+                        CompilationDate = DateTime.UtcNow,
+                        CompilationSuccess = true,
+                        CompilationErrors = "",
+                        OldSourceCode = script.SourceCode
+                    };
+                    await InsertScriptCompiledCache(cache);
+                    await db.SaveChangesAsync();
+
+                }
+            }
+            catch (Exception e)
+            {
+                throw new CompilationOfUpdatedScriptException(message: "Failed to compile the updated script. Script source code was not updated.", e);
+            }
+        }
+        await UpdateScript(scriptId, newSourceCode, userName: userName, apiVersion: apiVersion);
+    }
     public async Task InsertScriptCompiledCache(CompiledScripts scriptCompiledCache)
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(InsertScriptCompiledCache), nameof(ScriptRepository));

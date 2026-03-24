@@ -22,7 +22,7 @@ public interface IScriptManagerExtended : IScriptManager
     /// <param name="userName"></param>
     /// <param name="apiVersion"></param>
     /// <returns></returns>
-    Task UpdateScript(Guid scriptId, string newSourceCode, string? userName = null, int? apiVersion = null);
+    Task UpdateScriptSC(Guid scriptId, string newSourceCode, string? userName = null, int? apiVersion = null);
 
     Task UpdateScriptAndCompile(Guid scriptId, string newSourceCode, string? userName = null, int? apiVersion = null);
 

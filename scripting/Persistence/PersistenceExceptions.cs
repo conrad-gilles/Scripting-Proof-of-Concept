@@ -20,3 +20,10 @@ public class SaveScriptWithoutCompilingException : PersistenceException
     public SaveScriptWithoutCompilingException(string message) : base(message) { }
     public SaveScriptWithoutCompilingException(string message, Exception innerException) : base(message, innerException) { }
 }
+
+public class CompilationOfUpdatedScriptException : PersistenceException
+{
+    public CompilationOfUpdatedScriptException() : base() { }
+    public CompilationOfUpdatedScriptException(string message) : base(message) { }
+    public CompilationOfUpdatedScriptException(string message, Exception innerException) : base(message, innerException) { }
+}
