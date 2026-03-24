@@ -1,3 +1,7 @@
+using Ember.Scripting;
+using Microsoft.Extensions.DependencyInjection;
+using Serilog;
+
 public class TestHelper
 {
     static string? sourceCodeActionV1;
@@ -7,6 +11,9 @@ public class TestHelper
     static string? sourceCodePedia;
     static List<string>? sourceCodes;
     static string? sourceCodeWhileTrue;
+    static string? sourceCodeIllegalUsings;
+    static string? sourceCodeMissingUsing;
+    static string? sourceCodePreventUsage;
 
     public static TestHelperRecord GetSC(bool includeCondInList = true)
     {
@@ -49,9 +56,30 @@ public class TestHelper
       Path.GetFullPath(Path.Combine(
       AppDomain.CurrentDomain.BaseDirectory,
       "..", "..", "..", "..",
-      "sandbox", "src", "Scripts", "ActionScripts", "WhileTrueScript.cs"
+      "sandbox", "src", "Scripts", "FaultyScripts", "WhileTrueScript.cs"
   ))
   );
+        sourceCodeIllegalUsings = EmberMethods.CreateStringFromCsFile(
+            Path.GetFullPath(Path.Combine(
+            AppDomain.CurrentDomain.BaseDirectory,
+            "..", "..", "..", "..",
+            "sandbox", "src", "Scripts", "FaultyScripts", "IllegalUsingScript.cs"
+        ))
+        );
+        sourceCodeMissingUsing = EmberMethods.CreateStringFromCsFile(
+            Path.GetFullPath(Path.Combine(
+            AppDomain.CurrentDomain.BaseDirectory,
+            "..", "..", "..", "..",
+            "sandbox", "src", "Scripts", "FaultyScripts", "MissingUsingScript.cs"
+        ))
+        );
+        sourceCodePreventUsage = EmberMethods.CreateStringFromCsFile(
+            Path.GetFullPath(Path.Combine(
+            AppDomain.CurrentDomain.BaseDirectory,
+            "..", "..", "..", "..",
+            "sandbox", "src", "Scripts", "FaultyScripts", "PreventUsageScript.cs"
+        ))
+        );
         sourceCodes = [];
         sourceCodes!.Add(sourceCodeActionV1);
         sourceCodes!.Add(sourceCodeActionV2);
@@ -62,7 +90,6 @@ public class TestHelper
             sourceCodes!.Add(sourceCodePedia);
         }
 
-        // return (sourceCodePedia, sourceCodeActionV1, sourceCodeActionV2, sourceCodeActionV3, sourceCodeVaccineAction, sourceCodes, sourceCodeWhileTrue);
         return new TestHelperRecord
         {
             sourceCodeActionV1 = sourceCodeActionV1,
@@ -71,7 +98,10 @@ public class TestHelper
             sourceCodePedia = sourceCodePedia,
             sourceCodes = sourceCodes,
             sourceCodeVaccineAction = sourceCodeVaccineAction,
-            sourceCodeWhileTrue = sourceCodeWhileTrue
+            sourceCodeWhileTrue = sourceCodeWhileTrue,
+            sourceCodeIllegalUsings = sourceCodeIllegalUsings,
+            sourceCodeMissingUsing = sourceCodeMissingUsing,
+            sourceCodePreventUsage = sourceCodePreventUsage,
         };
     }
 
@@ -93,6 +123,25 @@ public class TestHelper
             vaccine = vaccine
         };
     }
+    public static ISccriptManagerDeleteAfter InitScriptManager()
+    {
+        ISccriptManagerDeleteAfter scriptManager;
+        ServiceCollection services = new ServiceCollection();
+
+        LoggerForScripting logger = new LoggerForScripting();
+
+        services = new ServiceCollection();
+        services.AddLogging(builder =>
+        {
+            builder.AddSerilog(dispose: true);
+        });
+        services.AddDbContextFactory<EFModeling.EntityProperties.FluentAPI.Required.ScriptDbContext>();
+        ScriptingServiceCollectionExtensions.AddEmberScripting(services, EmberMethods.GetReferences(), EmberMethods.GetEmberApiVersion());
+
+        var provider = services.BuildServiceProvider();
+
+        return scriptManager = provider.GetRequiredService<ISccriptManagerDeleteAfter>();
+    }
 }
 
 public record TestHelperRecord
@@ -104,6 +153,9 @@ public record TestHelperRecord
     public required string sourceCodeVaccineAction { get; init; }
     public required List<string> sourceCodes { get; init; }
     public required string sourceCodeWhileTrue { get; init; }
+    public required string sourceCodeIllegalUsings { get; init; }
+    public required string sourceCodeMissingUsing { get; init; }
+    public required string sourceCodePreventUsage { get; init; }
 }
 internal record ObjectsRecord
 {

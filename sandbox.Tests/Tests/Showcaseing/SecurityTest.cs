@@ -6,9 +6,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
 [TestClass]
-public class FaultyScriptsTests
+public class SecurityTests
 {
-    static ISccriptManagerDeleteAfter ScriptManager = EmberMethods.GetNewScriptManagerInstance();
+    static ISccriptManagerDeleteAfter ScriptManager = TestHelper.InitScriptManager();
     static EmberInternalFacade InternalScriptManager = new EmberInternalFacade(ScriptManager);
     static EmberMethods em = new EmberMethods(ScriptManager);
 
@@ -17,7 +17,33 @@ public class FaultyScriptsTests
     {
         await ScriptManager.DeleteAllData();
     }
-
+    [TestMethod]
+    public async Task IllegalUsingTest()
+    {
+        string sourceCode = TestHelper.GetSC().sourceCodeIllegalUsings;
+        Exception ex = await Assert.ThrowsExceptionAsync<Ember.Scripting.ValidationBeforeCompilationException>(async () =>
+        {
+            CustomerScript script = await ScriptManager.CreateScript(sourceCode);
+        });
+    }
+    [TestMethod]
+    public async Task MissingUsingTest()
+    {
+        string sourceCode = TestHelper.GetSC().sourceCodeMissingUsing;
+        Exception ex = await Assert.ThrowsExceptionAsync<Ember.Scripting.CompilationFailedException>(async () =>
+        {
+            CustomerScript script = await ScriptManager.CreateScript(sourceCode);
+        });
+    }
+    [TestMethod]
+    public async Task PreventUsageTest()
+    {
+        string sourceCode = TestHelper.GetSC().sourceCodePreventUsage;
+        Exception ex = await Assert.ThrowsExceptionAsync<Ember.Scripting.ValidationBeforeCompilationException>(async () =>
+        {
+            CustomerScript script = await ScriptManager.CreateScript(sourceCode);
+        });
+    }
     [TestMethod]
     public async Task WhileTrueScript()
     {
@@ -43,5 +69,4 @@ public class FaultyScriptsTests
             Console.WriteLine("Returned result: " + ar);
         });
     }
-
 }

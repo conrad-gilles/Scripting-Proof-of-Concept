@@ -156,14 +156,21 @@ public class ScriptManagerFacadeTests
     [TestMethod]
     public async Task ListScriptsTestWithFilter()
     {
-        string scriptFolderPath = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "..",
+        string scriptFolderPathFull = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "..",
                 "sandbox", "src", "Scripts"));
+        string scriptFolderPathAction = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "..",
+                "sandbox", "src", "Scripts", "ActionScripts"));
+        string scriptFolderPathCondition = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "..",
+        "sandbox", "src", "Scripts", "ConditionScripts"));
         // await facade!.EnsureDeletedCreated();
         await _facade!.DeleteAllData();
-        await _em!.CompileAllScriptsInFolderAndSaveToDB(scriptFolderPath, "Gilles", EmberMethods.GetEmberApiVersion());
+        // await _em!.CompileAllScriptsInFolderAndSaveToDB(scriptFolderPath, "Gilles", EmberMethods.GetEmberApiVersion());
+        await _em!.CompileAllScriptsInFolderAndSaveToDB(scriptFolderPathAction, "Gilles", EmberMethods.GetEmberApiVersion());
+        await _em!.CompileAllScriptsInFolderAndSaveToDB(scriptFolderPathCondition, "Gilles", EmberMethods.GetEmberApiVersion());
+
         List<CustomerScript> scripts = await _facade!.ListScripts(includeCaches: true);
         Assert.IsNotNull(scripts);
-        Assert.IsTrue(scripts.Count == 6);
+        Assert.IsTrue(scripts.Count == 5);
 
         CustomerScriptFilter filters = new CustomerScriptFilter(scriptName: "VaccineScript");   //todo fix this oine thorws errors
         List<CustomerScript> scriptsFiltered = await _facade.ListScripts(includeCaches: true, filters: filters);
