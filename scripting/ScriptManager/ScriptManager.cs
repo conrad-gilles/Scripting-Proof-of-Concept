@@ -15,8 +15,10 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
     private readonly List<MetadataReference> _references;
     private readonly ILogger<ScriptManagerFacade> _logger;
     private readonly int _recentApiVersion;
+    private readonly IUserSession _userSession;
 
-    internal ScriptManagerFacade(ScriptRepository db, ScriptCompiler compiler, ScriptExecutor executor, List<MetadataReference> references, ILogger<ScriptManagerFacade> logger, int recentApiVersion)
+    internal ScriptManagerFacade(ScriptRepository db, ScriptCompiler compiler, ScriptExecutor executor, List<MetadataReference> references,
+    ILogger<ScriptManagerFacade> logger, int recentApiVersion, IUserSession userSession)
     {
         _references = references;
         _db = db;
@@ -24,45 +26,45 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
         _executor = executor;
         _logger = logger;
         _recentApiVersion = recentApiVersion;
+        _userSession = userSession;
     }
 
     #region Script Lifecycle
 
-    public async Task<CustomerScript> CreateScript(string sourceCode, string userName = "Default", int? apiVersion = null, DateTime? createdAt = null, bool checkForDuplicates = true)    //maybe minApiVersion is better?
+    public async Task<CustomerScript> CreateScript(string sourceCode, int? apiVersion = null, DateTime? createdAt = null)    //maybe minApiVersion is better?
     {
         _logger.LogDebug("Entered {MethodName} in {ClassName} apiVersion: {apiVersion}.", nameof(CreateScript), nameof(ScriptManagerFacade), apiVersion);
-
-        return await _db.CreateAndInsertCustomerScript(sourceCode, createdBy: userName, oldApiV: apiVersion, createdAt: createdAt, checkForDuplicates: checkForDuplicates);
+        return await _db.CreateAndInsertCustomerScript(sourceCode, oldApiV: apiVersion, createdAt: createdAt);
     }
 
     // Updates existing script source code
-    public async Task UpdateScriptSC(Guid scriptId, string newSourceCode, bool allowFaultySave = false, string? userName = null, int? apiVersion = null)
+    public async Task UpdateScriptSC(Guid scriptId, string newSourceCode, bool allowFaultySave = false, int? apiVersion = null)
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName} with scriptId: {ScriptId}.", nameof(UpdateScriptSC), nameof(ScriptManagerFacade), scriptId);
         CustomerScript script = await GetScript(scriptId);
-        await _db.UpdateScript(script, newSourceCode, allowFaultySave, userName: userName, apiVersion: apiVersion);
+        await _db.UpdateScript(script, newSourceCode, allowFaultySave, apiVersion: apiVersion);
     }
 
-    public async Task UpdateScriptNT(string name, ScriptTypes scriptType, string newSourceCode, string? userName = null, int? apiVersion = null)
+    public async Task UpdateScriptNT(string name, ScriptTypes scriptType, string newSourceCode, int? apiVersion = null)
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName} with Name: {name}.", nameof(UpdateScriptNT), nameof(ScriptManagerFacade), name);
 
         Guid scriptId = await GetScriptId(name, scriptType);
-        await UpdateScriptSC(scriptId, newSourceCode, userName: userName, apiVersion: apiVersion);
+        await UpdateScriptSC(scriptId, newSourceCode, apiVersion: apiVersion);
     }
 
     //todo unsafe check if it compiles first before updating, compiling first doesnt work because it would compile old version
-    public async Task UpdateScriptAndCompile(Guid scriptId, string newSourceCode, string? userName = null, int? apiVersion = null)
+    public async Task UpdateScriptAndCompile(Guid scriptId, string newSourceCode, int? apiVersion = null)
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName} with ID: {scriptId}.", nameof(UpdateScriptAndCompile), nameof(ScriptManagerFacade), scriptId);
-        await _db.UpdateScriptAndRecompile(scriptId, newSourceCode, userName, apiVersion);
+        await _db.UpdateScriptAndRecompile(scriptId, newSourceCode, apiVersion);
     }
 
-    public async Task UpdateScriptAndCompileNT(string name, ScriptTypes scriptType, string newSourceCode, string? userName = null, int? apiVersion = null)
+    public async Task UpdateScriptAndCompileNT(string name, ScriptTypes scriptType, string newSourceCode, int? apiVersion = null)
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName} with Name: {name}.", nameof(UpdateScriptAndCompileNT), nameof(ScriptManagerFacade), name);
         Guid scriptId = await GetScriptId(name, scriptType);
-        await UpdateScriptAndCompile(scriptId, newSourceCode, userName, apiVersion);
+        await UpdateScriptAndCompile(scriptId, newSourceCode, apiVersion);
     }
 
     // Removes script and all associated compiled caches
@@ -125,10 +127,10 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
     //     await _db.SaveScriptWithoutCompiling(id, sourceCode);
     // }
 
-    public async Task CreateScriptWithoutCompiling(Guid id, string sourceCode, string? userName = null)
+    public async Task CreateScriptWithoutCompiling(Guid id, string sourceCode)
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(CreateScriptWithoutCompiling), nameof(ScriptManagerFacade));
-        await _db.CreateScriptWithoutCompiling(id, sourceCode, userName);
+        await _db.CreateScriptWithoutCompiling(id, sourceCode);
     }
 
     // Recompiles script for all active API versions
@@ -243,14 +245,6 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
         await _db.DeleteAllCachedScripts();
     }
 
-    // Background job to precompile all compatible scripts
-    public async Task PrecompileForApiVersion()
-    {
-        _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(PrecompileForApiVersion), nameof(ScriptManagerFacade));
-        int currentApiVersion = GetRunningApiVersion();
-        await _db.AutomaticCompilationOnVersionUpdate(currentApiVersion);
-    }
-
     public async Task DeleteAllData()
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(DeleteAllData), nameof(ScriptManagerFacade));
@@ -293,41 +287,6 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName} with instanceId: {InstanceId}.", nameof(RegisterEmberInstance), nameof(ScriptManagerFacade), instanceId);
         // TODO
-    }
-
-    #endregion
-
-    #region Duplicate Detection & Cleanup
-
-    // Identifies duplicate scripts based on source code equivalence
-    public async Task<DuplicateRecord> DetectDuplicates()
-    {
-        _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(DetectDuplicates), nameof(ScriptManagerFacade));
-
-        var dupes = await _db.DetectDuplicates();
-        return new DuplicateRecord
-        {
-            cacheGUIDs = dupes.cachesToDelete,
-            scriptGUIDs = dupes.duplicateGuids
-        };
-    }
-
-    // Removes duplicate scripts and orphaned caches
-    public async Task RemoveDuplicates()
-    {
-        _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(RemoveDuplicates), nameof(ScriptManagerFacade));
-        await _db.RemoveDuplicates();
-    }
-
-    // Removes caches without associated scripts
-    public async Task CleanupOrphanedCaches()
-    {
-        _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(CleanupOrphanedCaches), nameof(ScriptManagerFacade));
-
-        // int currentApiVersion = GetRunningApiVersion();
-        // await _db.AutomaticCompilationOnVersionUpdate(currentApiVersion);    //this also does this maybe implement real funcion later
-
-        //Todo make implementation
     }
 
     #endregion
@@ -376,10 +335,10 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
         return await _db.GetCachesForEachApiVersion();
     }
 
-    public string GetUserName()
+    public IUserSession GetUserName()
     {
-        _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(GetUserName), nameof(ScriptManagerFacade));
-        return "Gilles";
+        _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(_userSession.UserName), nameof(ScriptManagerFacade));
+        return _userSession;
     }
 
     #endregion

@@ -30,7 +30,7 @@ public interface ISccriptManagerDeleteAfter : IScriptManagerExtended
   /// <returns></returns>
   // Task SaveScriptWithoutCompiling(Guid id, string sourceCode);
 
-  Task CreateScriptWithoutCompiling(Guid id, string sourceCode, string? userName = null);
+  Task CreateScriptWithoutCompiling(Guid id, string sourceCode);
 
   /// <summary>
   /// Recompiles script for all active API versions
@@ -96,12 +96,6 @@ public interface ISccriptManagerDeleteAfter : IScriptManagerExtended
   Task ClearAllCaches();
 
   /// <summary>
-  /// Background job to precompile all compatible scripts
-  /// </summary>
-  /// <returns></returns>
-  Task PrecompileForApiVersion();
-
-  /// <summary>
   ///Deletes the entire Database
   /// </summary>
   /// <returns></returns>
@@ -141,28 +135,6 @@ public interface ISccriptManagerDeleteAfter : IScriptManagerExtended
 
   #endregion
 
-  #region Duplicate Detection & Cleanup
-
-  /// <summary>
-  /// Identifies duplicate scripts based on source code equivalence
-  /// </summary>
-  /// <returns></returns>
-  Task<DuplicateRecord> DetectDuplicates();
-
-  /// <summary>
-  /// Removes duplicate scripts and orphaned caches
-  /// </summary>
-  /// <returns></returns>
-  Task RemoveDuplicates();
-
-  /// <summary>
-  /// Removes caches without associated scripts
-  /// </summary>
-  /// <returns></returns>
-  Task CleanupOrphanedCaches();
-
-  #endregion
-
   #region Monitoring & Diagnostics
 
   /// <summary>
@@ -199,7 +171,7 @@ public interface ISccriptManagerDeleteAfter : IScriptManagerExtended
   /// <returns></returns>
   Task<Dictionary<int, List<CompiledScripts>>> GetCachesForEachApiVersion();
 
-  string GetUserName();
+  IUserSession GetUserName();
 
   #endregion
 }

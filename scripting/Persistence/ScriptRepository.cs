@@ -15,13 +15,16 @@ internal class ScriptRepository
     private readonly ILogger<ScriptRepository> _logger;
     private readonly int _recentApiVersion;
     private readonly IDbContextFactory<ScriptDbContext> _contextFactory;
-    public ScriptRepository(ScriptCompiler compiler, List<MetadataReference> references, ILogger<ScriptRepository> logger, int recentApiVersion, IDbContextFactory<ScriptDbContext> contextFactory)
+    private readonly IUserSession _userSession;
+    public ScriptRepository(ScriptCompiler compiler, List<MetadataReference> references, ILogger<ScriptRepository> logger, int recentApiVersion,
+    IDbContextFactory<ScriptDbContext> contextFactory, IUserSession userSession)
     {
         _references = references;
         _compiler = compiler;
         _logger = logger;
         _recentApiVersion = recentApiVersion;
         _contextFactory = contextFactory;
+        _userSession = userSession;
     }
     public async Task DeleteAllData()
     {
@@ -297,8 +300,7 @@ internal class ScriptRepository
             }
         }
     }
-    public async Task<CustomerScript> CreateAndInsertCustomerScript(string scriptString, Guid? randomGUID = null, string? createdBy = null, int? oldApiV = null, DateTime? createdAt = null, bool checkForDuplicates = true)
-    //todo make sure compiling happens after verification of isDuplicate
+    public async Task<CustomerScript> CreateAndInsertCustomerScript(string scriptString, Guid? randomGUID = null, int? oldApiV = null, DateTime? createdAt = null)
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName} with ID: {ScriptId}.", nameof(CreateAndInsertCustomerScript), nameof(ScriptRepository), randomGUID);
         if (oldApiV == null)
@@ -339,9 +341,9 @@ internal class ScriptRepository
                 MinApiVersion = validationRecord.Version,
                 CreatedAt = createdAt,
                 ModifiedAt = DateTime.UtcNow,
-                CreatedBy = createdBy
+                CreatedBy = _userSession.UserName
             };
-            checkForDuplicates = true;
+            bool checkForDuplicates = true; //never set this to false!
             if (checkForDuplicates)
             {
                 checkForDuplicates = await IsDuplicateScript(script);  //uncomment this if you dont want to check for duplicate existing in db when inserting
@@ -434,13 +436,9 @@ internal class ScriptRepository
             }
         }
     }
-    public async Task UpdateScript(CustomerScript script, string newSourceCode, bool allowFaultySave = false, string? userName = null, int? apiVersion = null)
+    public async Task UpdateScript(CustomerScript script, string newSourceCode, bool allowFaultySave = false, int? apiVersion = null)
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName} with scriptId: {ScriptId}.", nameof(UpdateScript), nameof(ScriptRepository), script.Id);
-        if (userName == null)
-        {
-            userName = "Default";
-        }
 
         using (var db = await _contextFactory.CreateDbContextAsync())
         {
@@ -473,15 +471,13 @@ internal class ScriptRepository
             existingScript.SourceCode = newSourceCode;
             existingScript.ModifiedAt = DateTime.UtcNow;
 
-            if (userName != null)
-            {
-                existingScript.CreatedBy = userName;
-            }
+            existingScript.CreatedBy = _userSession.UserName;
+
             await db.SaveChangesAsync();
         }
     }
     // Goal is to compile the updated script first before insertion to prevent having to undo a insertion of a non working script
-    public async Task UpdateScriptAndRecompile(Guid scriptId, string newSourceCode, string? userName = null, int? apiVersion = null)
+    public async Task UpdateScriptAndRecompile(Guid scriptId, string newSourceCode, int? apiVersion = null)
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName} with scriptId: {ScriptId}.", nameof(UpdateScriptAndRecompile), nameof(ScriptRepository), scriptId);
 
@@ -516,7 +512,7 @@ internal class ScriptRepository
                 };
                 await InsertScriptCompiledCache(cache);
                 await db.SaveChangesAsync();
-                await UpdateScript(script, newSourceCode, userName: userName, apiVersion: apiVersion);
+                await UpdateScript(script, newSourceCode, apiVersion: apiVersion);
             }
             catch (Exception e)
             {
@@ -611,7 +607,7 @@ internal class ScriptRepository
         }
     }
 
-    public async Task SaveScriptWithoutCompiling(Guid id, string sourceCode, string? userName = null)
+    public async Task SaveScriptWithoutCompiling(Guid id, string sourceCode)
     {
         using (var db = await _contextFactory.CreateDbContextAsync())
         {
@@ -622,10 +618,9 @@ internal class ScriptRepository
                 existingScript.SourceCode = sourceCode;
                 existingScript.ModifiedAt = DateTime.UtcNow;
 
-                if (userName != null)
-                {
-                    existingScript.CreatedBy = userName;
-                }
+
+                existingScript.CreatedBy = _userSession.UserName;
+
             }
             else
             {

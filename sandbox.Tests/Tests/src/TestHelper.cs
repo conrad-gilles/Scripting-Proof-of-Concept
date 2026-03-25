@@ -135,6 +135,8 @@ public class TestHelper
         {
             builder.AddSerilog(dispose: true);
         });
+        services.AddSingleton<IUserSession, Sandbox.SandBoxUserSession>();
+
         services.AddDbContextFactory<EFModeling.EntityProperties.FluentAPI.Required.ScriptDbContext>();
         ScriptingServiceCollectionExtensions.AddEmberScripting(services, EmberMethods.GetReferences(), EmberMethods.GetEmberApiVersion());
 

@@ -42,6 +42,7 @@ try
     });
 
     services.AddDbContextFactory<EFModeling.EntityProperties.FluentAPI.Required.ScriptDbContext>();
+    services.AddSingleton<IUserSession, SandBoxUserSession>();
 
     ScriptingServiceCollectionExtensions.AddEmberScripting(services, EmberMethods.GetReferences(), EmberMethods.GetEmberApiVersion());
 
@@ -69,7 +70,7 @@ async Task MainProgramSwitch(IServiceProvider provider)
         Dictionary<int, Guid> cacheDict = [];
         Guid scriptId = new Guid();
 
-        await facade.PrecompileForApiVersion();
+        // await facade.PrecompileForApiVersion();
 
         bool running = true;
         while (running)
@@ -119,9 +120,9 @@ async Task MainProgramSwitch(IServiceProvider provider)
                     case "ls source":
                         sourceDict = await em.ListAllStoredSourceCodes();
                         break;
-                    case "dupes":
-                        await facade.RemoveDuplicates();
-                        break;
+                    // case "dupes":
+                    //     await facade.RemoveDuplicates();
+                    //     break;
                     case "deleteCache":
                         await facade.ClearAllCaches();
                         break;
@@ -130,11 +131,11 @@ async Task MainProgramSwitch(IServiceProvider provider)
 
                     case "CreateScript":
                         string sourceCode = EmberMethods.CreateStringFromCsFile(Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "src", "Scripts", "ConditionScripts", "PediatricCondition.cs")));
-                        await facade.CreateScript(sourceCode, "Gilles");
+                        await facade.CreateScript(sourceCode);
                         break;
                     case "CreateScriptWithOld":
                         string sourceCodeOld = EmberMethods.CreateStringFromCsFile(Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "src", "Scripts", "ConditionScripts", "PediatricCondition.cs")));
-                        await facade.CreateScript(sourceCodeOld, "Gilles", 2);
+                        await facade.CreateScript(sourceCodeOld, 2);
                         break;
 
                     case "UpdateScript":
@@ -152,7 +153,7 @@ async Task MainProgramSwitch(IServiceProvider provider)
                         // Console.WriteLine("Copy paste your new version now:");
                         // string userInput2 = Console.ReadLine();
 
-                        await facade.UpdateScriptSC(idEdit, str, userName: userName);
+                        await facade.UpdateScriptSC(idEdit, str);
                         break;
 
                     case "DeleteScript":
@@ -259,9 +260,9 @@ async Task MainProgramSwitch(IServiceProvider provider)
                         await facade.ClearAllCaches();
                         break;
 
-                    case "PrecompileForApiVersion":
-                        await facade.PrecompileForApiVersion();
-                        break;
+                    // case "PrecompileForApiVersion":
+                    //     await facade.PrecompileForApiVersion();
+                    //     break;
 
                     #endregion
 
@@ -295,35 +296,35 @@ async Task MainProgramSwitch(IServiceProvider provider)
 
                     #endregion
 
-                    #region Duplicate Detection & Cleanup
+                    // #region Duplicate Detection & Cleanup
 
-                    case "DetectDuplicates":
-                        var dupes = await facade.DetectDuplicates();
-                        List<Guid> scriptGUIDs = dupes.scriptGUIDs;
-                        Dictionary<Guid, int> cacheGUIDs = dupes.cacheGUIDs;
-                        string rtrnStr1 = "Script Guids to remove: ";
-                        foreach (var item in scriptGUIDs)
-                        {
-                            rtrnStr1 = rtrnStr1 + " , " + item;
-                        }
-                        string rtrnStr2 = "Cache Guids to remove: ";
-                        foreach (var item in cacheGUIDs)
-                        {
-                            rtrnStr2 = rtrnStr2 + " , " + item;
-                        }
-                        Console.WriteLine(rtrnStr1);
-                        Console.WriteLine(rtrnStr2);
-                        break;
+                    // case "DetectDuplicates":
+                    //     var dupes = await facade.DetectDuplicates();
+                    //     List<Guid> scriptGUIDs = dupes.scriptGUIDs;
+                    //     Dictionary<Guid, int> cacheGUIDs = dupes.cacheGUIDs;
+                    //     string rtrnStr1 = "Script Guids to remove: ";
+                    //     foreach (var item in scriptGUIDs)
+                    //     {
+                    //         rtrnStr1 = rtrnStr1 + " , " + item;
+                    //     }
+                    //     string rtrnStr2 = "Cache Guids to remove: ";
+                    //     foreach (var item in cacheGUIDs)
+                    //     {
+                    //         rtrnStr2 = rtrnStr2 + " , " + item;
+                    //     }
+                    //     Console.WriteLine(rtrnStr1);
+                    //     Console.WriteLine(rtrnStr2);
+                    //     break;
 
-                    case "RemoveDuplicates":
-                        await facade.RemoveDuplicates();
-                        break;
+                    // case "RemoveDuplicates":
+                    //     await facade.RemoveDuplicates();
+                    //     break;
 
-                    case "CleanupOrphanedCaches":
-                        await facade.CleanupOrphanedCaches();
-                        break;
+                    // case "CleanupOrphanedCaches":
+                    //     await facade.CleanupOrphanedCaches();
+                    //     break;
 
-                    #endregion
+                    // #endregion
 
                     #region Monitoring & Diagnostics
 
@@ -345,7 +346,7 @@ async Task MainProgramSwitch(IServiceProvider provider)
                         Console.WriteLine(strr);
                         break;
                     case "GetUserName":
-                        string strrr = facade.GetUserName();
+                        string strrr = facade.GetUserName().UserName;
                         Console.WriteLine(strrr);
                         break;
 

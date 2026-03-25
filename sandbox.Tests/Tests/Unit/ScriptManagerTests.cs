@@ -37,7 +37,7 @@ public class ScriptManagerFacadeTests
     [TestMethod]
     public async Task CreateScriptTest()
     {
-        Guid id = (await _scriptManager!.CreateScript(_sourceCodePedia!, "ConditionScriptTest")).Id;
+        Guid id = (await _scriptManager!.CreateScript(_sourceCodePedia!)).Id;
         CustomerScript retrievedScript = await _scriptManager.GetScript(id);
 
         Assert.AreEqual(retrievedScript.SourceCode, _sourceCodePedia);
@@ -459,20 +459,20 @@ public class ScriptManagerFacadeTests
         Assert.AreEqual(0, caches.Count);
     }
 
-    [TestMethod]
-    public async Task PrecompileForApiVersionTest()
-    {
-        Guid id = (await _scriptManager!.CreateScript(_sourceCodePedia!)).Id;
+    // [TestMethod]
+    // public async Task PrecompileForApiVersionTest()
+    // {
+    //     Guid id = (await _scriptManager!.CreateScript(_sourceCodePedia!)).Id;
 
-        await _scriptManager.ClearAllCaches();
-        var before = await _scriptManager.GetScript(id, includeCaches: true);
-        Assert.AreEqual(0, before.CompiledCaches.Count);
+    //     await _scriptManager.ClearAllCaches();
+    //     var before = await _scriptManager.GetScript(id, includeCaches: true);
+    //     Assert.AreEqual(0, before.CompiledCaches.Count);
 
-        await _scriptManager.PrecompileForApiVersion();
+    //     await _scriptManager.PrecompileForApiVersion();
 
-        var after = await _scriptManager.GetScript(id, includeCaches: true);
-        Assert.IsTrue(after.CompiledCaches.Count >= 1);
-    }
+    //     var after = await _scriptManager.GetScript(id, includeCaches: true);
+    //     Assert.IsTrue(after.CompiledCaches.Count >= 1);
+    // }
 
     #endregion
 
@@ -551,21 +551,21 @@ public class ScriptManagerFacadeTests
     // }
 
 
-    [TestMethod]
-    public async Task RemoveDuplicatesTest()
-    {
-        if (TestConfig.DuplicatesAllowed)
-        {
-            Guid id = (await _scriptManager!.CreateScript(_sourceCodePedia!)).Id;
-            Guid id2 = (await _scriptManager.CreateScript(_sourceCodePedia!)).Id;
+    // [TestMethod]
+    // public async Task RemoveDuplicatesTest()
+    // {
+    //     if (TestConfig.DuplicatesAllowed)
+    //     {
+    //         Guid id = (await _scriptManager!.CreateScript(_sourceCodePedia!)).Id;
+    //         Guid id2 = (await _scriptManager.CreateScript(_sourceCodePedia!)).Id;
 
-            await _scriptManager.RemoveDuplicates();
+    //         await _scriptManager.RemoveDuplicates();
 
-            var scripts = await _scriptManager.ListScripts();
-            Assert.AreEqual(1, scripts.Count);
-        }
+    //         var scripts = await _scriptManager.ListScripts();
+    //         Assert.AreEqual(1, scripts.Count);
+    //     }
 
-    }
+    // }
 
     [TestMethod]
     public void CleanupOrphanedCachesTest()   //todo

@@ -9,26 +9,24 @@ public interface IScriptManagerExtended : IScriptManager
     /// </summary>
     /// <param name="sourceCode"></param>
     /// <param name="scriptType"></param>
-    /// <param name="userName"></param>
     /// <param name="apiVersion"></param>
     /// <param name="createdAt"></param>
     /// <returns></returns>
-    Task<CustomerScript> CreateScript(string sourceCode, string userName = "Default", int? apiVersion = null, DateTime? createdAt = null, bool checkForDuplicates = false);
+    Task<CustomerScript> CreateScript(string sourceCode, int? apiVersion = null, DateTime? createdAt = null);
     /// <summary>
     /// Updates existing script source code
     /// </summary>
     /// <param name="scriptId"></param>
     /// <param name="newSourceCode"></param>
-    /// <param name="userName"></param>
     /// <param name="apiVersion"></param>
     /// <returns></returns>
-    Task UpdateScriptSC(Guid scriptId, string newSourceCode, bool allowFaultySave = false, string? userName = null, int? apiVersion = null);
+    Task UpdateScriptSC(Guid scriptId, string newSourceCode, bool allowFaultySave = false, int? apiVersion = null);
 
-    Task UpdateScriptAndCompile(Guid scriptId, string newSourceCode, string? userName = null, int? apiVersion = null);
+    Task UpdateScriptAndCompile(Guid scriptId, string newSourceCode, int? apiVersion = null);
 
-    Task UpdateScriptNT(string name, ScriptTypes scriptType, string newSourceCode, string? userName = null, int? apiVersion = null);
+    Task UpdateScriptNT(string name, ScriptTypes scriptType, string newSourceCode, int? apiVersion = null);
 
-    Task UpdateScriptAndCompileNT(string name, ScriptTypes scriptType, string newSourceCode, string? userName = null, int? apiVersion = null);
+    Task UpdateScriptAndCompileNT(string name, ScriptTypes scriptType, string newSourceCode, int? apiVersion = null);
 
     /// <summary>
     /// Removes script and all associated compiled caches

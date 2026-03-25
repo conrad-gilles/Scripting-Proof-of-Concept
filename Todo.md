@@ -94,25 +94,14 @@ This also brings up the question if one should maybe implement a way of automati
 Question: Should i keep it in the ScriptManager class and remove it from the interface, currently i am not using it anywhere except tests, but my idea was using it in the UI to pass the errors to the Monaco Editor,
 so that it sees which row which column the errors are to have red underlines and other visual aids when writin the scripts.
 
-=========== ScriptManager.cs
- 
-  - GetCompilationErrors
-    Okay I get the idea. But in the UI you will probably trigger the compilation right?
-	If so, then why not catch the errors returned by the actual compilation and show that in the Monaco Editor.
-	Ah I see because the CompileScript method inserts it into db if it succeeded, which you probably don't want?
-  - GetActiveApiVersions
-    I see no use case for this no. Can be removed.
-  - Compilation on Version Update
-    All existing scripts must always stay compatible which is ensured by our backwards-compatible versioning strategy.
-	So I don't see the use for CleanupOrphanedCaches or AutomaticCompilationOnVersionUpdate.
-  - Mock Service for Username
+
+- Mock Service for Username
     No a simple mock service interface like IUserSession. And a mock implementation like SandBoxUserSession.
 	Which simply returns the static string or id of the user.
 	When we combine the library with Ember, Ember will provide an actual implementation of IUserSession (or similar).
-====== DbHelper.cs
- 
-  - RemoveDuplicates
-    I don't see the use case for this method. And since it has a bug, it is not worth investing time into it.
-  - CreateAndInsertCustomerScript
-    The bug is still there. checkForDuplicates is set to true in line 321 (current state (25/03/2026 09:00) of ScriptRepository.cs)
-	So the value of checkForDuplicates as a parameter is never used because you always set it to true in line 321 no matter what the caller of the method passed in as a value.
+
+Fixing the Roslyn Memory Leak
+Currently, your ScriptExecutor.cs uses Assembly.Load(compiledScript) to execute dynamic code. In .NET, assemblies loaded directly into the default Application Domain cannot be unloaded, meaning every time a customer script is executed, RAM is consumed permanently, eventually leading to an OutOfMemoryException server crash.
+
+Implementing Strategy D (Multi-Version Caching)
+Your RequirementsConfluence.txt document explicitly dictates "Strategy D: Compile on Save, Multi-Version by API Version". Your current ScriptRepository.cs methods only compile the script for a single recent API version. Instead, you need to discover all active Ember instances and pre-compile the script for every unique API version that is greater than or equal to the script's MinApiVersion

@@ -14,3 +14,8 @@ public enum ScriptTypes
 {
     GeneratorConditionScript, GeneratorActionScript
 }
+public interface IUserSession
+{
+    Guid Id { get; }
+    string UserName { get; }
+}

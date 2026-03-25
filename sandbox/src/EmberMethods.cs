@@ -46,6 +46,8 @@ public class EmberMethods
         {
             builder.AddSerilog(dispose: true);
         });
+        services2.AddSingleton<IUserSession, SandBoxUserSession>();
+
         services2.AddDbContextFactory<EFModeling.EntityProperties.FluentAPI.Required.ScriptDbContext>();
         ScriptingServiceCollectionExtensions.AddEmberScripting(services2, EmberMethods.GetReferences(), EmberMethods.GetEmberApiVersion(testingDiffrentVersion: apiVersion));
         var provider2 = services2.BuildServiceProvider();
@@ -160,7 +162,7 @@ public class EmberMethods
         // Console.WriteLine("Copy paste your new version now:");
         // string userInput2 = Console.ReadLine();
 
-        await _facade.CreateScript(str, userName, createdAt: (DateTime)creationDate!); //todo unsafe af
+        await _facade.CreateScript(str, createdAt: (DateTime)creationDate!); //todo unsafe af
 
 
     }

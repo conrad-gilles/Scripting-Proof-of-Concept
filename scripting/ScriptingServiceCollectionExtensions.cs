@@ -25,7 +25,8 @@ public static class ScriptingServiceCollectionExtensions
             sp.GetRequiredService<List<MetadataReference>>(),
             sp.GetRequiredService<ILogger<ScriptRepository>>(),
             maxSupportedApiVersion,
-            sp.GetRequiredService<IDbContextFactory<ScriptDbContext>>()
+            sp.GetRequiredService<IDbContextFactory<ScriptDbContext>>(),
+            sp.GetRequiredService<IUserSession>()
         ));
 
         // 4. Register the Facade using a factory to hide the internal parameters
@@ -36,7 +37,8 @@ public static class ScriptingServiceCollectionExtensions
             sp.GetRequiredService<ScriptExecutor>(),
             sp.GetRequiredService<List<MetadataReference>>(),
             sp.GetRequiredService<ILogger<ScriptManagerFacade>>(),
-            maxSupportedApiVersion
+            maxSupportedApiVersion,
+             sp.GetRequiredService<IUserSession>()
         ));
 
         // Step B: Point both interfaces to the exact same concrete registration above

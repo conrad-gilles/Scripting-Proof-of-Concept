@@ -85,7 +85,7 @@ public class ScriptRepositoryTests
             Assert.IsTrue(script1.Equals(script2));
             var e = await Assert.ThrowsExceptionAsync<Ember.Scripting.ScriptRepositoryException>(async () =>
             {
-                Guid id3 = (await _facade!.CreateScript(_sourceCodePedia!, checkForDuplicates: true)).Id;
+                Guid id3 = (await _facade!.CreateScript(_sourceCodePedia!)).Id;
             });
 
             var allScripts = await _facade.ListScripts();
