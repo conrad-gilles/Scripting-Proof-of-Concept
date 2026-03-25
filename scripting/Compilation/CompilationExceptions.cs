@@ -9,15 +9,16 @@ public abstract class CompilationException : ScriptingFrameworkException
 }
 public class CompilationFailedException : CompilationException
 {
-    string? CompilerErrors { get; }
+    public List<ScriptCompilationError> Errors = [];
 
     public CompilationFailedException() : base() { }
     public CompilationFailedException(string message) : base(message) { }
     public CompilationFailedException(string message, Exception innerException) : base(message, innerException) { }
 
-    public CompilationFailedException(string message, string compilerErrors) : base(message)
+    public CompilationFailedException(string message, List<ScriptCompilationError> errors)
+        : base(message)
     {
-        CompilerErrors = compilerErrors;
+        Errors = errors;
     }
 }
 

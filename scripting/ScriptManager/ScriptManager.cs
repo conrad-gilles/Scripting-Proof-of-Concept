@@ -119,11 +119,11 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
         await _db.CompileAllStoredScripts();
     }
 
-    public async Task SaveScriptWithoutCompiling(Guid id, string sourceCode)
-    {
-        _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(SaveScriptWithoutCompiling), nameof(ScriptManagerFacade));
-        await _db.SaveScriptWithoutCompiling(id, sourceCode);
-    }
+    // public async Task SaveScriptWithoutCompiling(Guid id, string sourceCode)
+    // {
+    //     _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(SaveScriptWithoutCompiling), nameof(ScriptManagerFacade));
+    //     await _db.SaveScriptWithoutCompiling(id, sourceCode);
+    // }
 
     public async Task CreateScriptWithoutCompiling(Guid id, string sourceCode, string? userName = null)
     {
@@ -149,6 +149,12 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName} with scriptId: {ScriptId}.", nameof(GetCompilationErrors), nameof(ScriptManagerFacade), scriptId);
         return await _db.GetCompilationErrors(scriptId, apiVersion);
+    }
+
+    public async Task<List<ScriptCompilationError>> GetCompilationErrors(string sourceCode, int? apiVersion = null)
+    {
+        _logger.LogTrace("Entered {MethodName} in {ClassName} with sourceCode: {sourceCode}.", nameof(GetCompilationErrors), nameof(ScriptManagerFacade), sourceCode);
+        return await _db.GetCompilationErrors(sourceCode, apiVersion);
     }
 
     public async Task<bool> ThrowCompilationErrors(string script)

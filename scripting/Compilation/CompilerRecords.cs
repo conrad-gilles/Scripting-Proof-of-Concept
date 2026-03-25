@@ -30,3 +30,12 @@ public record GetBaseTypeReturn
     public required SyntaxTree Tree { get; init; }
     public required Microsoft.CodeAnalysis.SemanticModel? Model { get; init; }
 }
+
+public record ScriptCompilationError(
+    string Id,
+    string Message,
+    int Line,
+    int Column,
+    int EndLine,
+    int EndColumn,
+    bool IsError);

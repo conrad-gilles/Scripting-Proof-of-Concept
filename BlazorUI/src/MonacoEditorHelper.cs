@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using BlazorUI.Components;
 using BlazorUI.Services;
 using Ember.Scripting;
+using Microsoft.JSInterop;
 
 namespace BlazorUI.Helpers
 {
@@ -46,6 +47,7 @@ namespace BlazorUI.Helpers
             var code = await _editor.GetValueAsync();
             CurrentScriptId = (Guid)scriptId;
             _console.Log("Validating script:");
+            await _editor.ClearErrorsAsync();
             try
             {
                 _scriptManager.BasicValidationBeforeCompiling(code);
@@ -54,6 +56,25 @@ namespace BlazorUI.Helpers
             catch (Exception e)
             {
                 _console.Log(e.ToString());
+            }
+            try
+            {
+                List<ScriptCompilationError> errors = await _scriptManager.GetCompilationErrors(code);
+                var monacoMarkers = errors.Select(e => new MonacoMarker
+                {
+                    Message = $"{e.Id} - {e.Message}",
+                    Severity = e.IsError ? 8 : 4, // 8 = Error, 4 = Warning
+                    StartLineNumber = e.Line,
+                    StartColumn = e.Column,
+                    EndLineNumber = e.EndLine,
+                    EndColumn = e.EndColumn
+                }).ToList<object>();
+
+                await _editor.SetErrorsAsync(monacoMarkers);
+            }
+            catch   //todo catch the scpecif error throw by success and the add general catch exception below
+            {
+
             }
         }
 

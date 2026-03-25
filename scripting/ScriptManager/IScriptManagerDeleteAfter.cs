@@ -28,7 +28,7 @@ public interface ISccriptManagerDeleteAfter : IScriptManagerExtended
   /// Saves a script source code to the DB even if it doesnt compile, later you could call GetCompilationErrors to get errors in it.
   /// </summary>
   /// <returns></returns>
-  Task SaveScriptWithoutCompiling(Guid id, string sourceCode);
+  // Task SaveScriptWithoutCompiling(Guid id, string sourceCode);
 
   Task CreateScriptWithoutCompiling(Guid id, string sourceCode, string? userName = null);
 
@@ -48,6 +48,7 @@ public interface ISccriptManagerDeleteAfter : IScriptManagerExtended
   /// <param name="apiVersion"></param>
   /// <returns></returns>
   Task<string> GetCompilationErrors(Guid scriptId, int? apiVersion = null);
+  Task<List<ScriptCompilationError>> GetCompilationErrors(string sourceCode, int? apiVersion = null);
 
   Task<bool> ThrowCompilationErrors(string script);
 

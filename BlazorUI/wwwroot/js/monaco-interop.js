@@ -33,20 +33,24 @@ window.monacoEditor = {
     },
 
     setErrors: function (errors) {
+        // 1. Change .instance to ._instance
         if (!window.monacoEditor._instance) return;
 
         const markers = errors.map(err => ({
-            severity: monaco.MarkerSeverity.Error,
-            startLineNumber: err.line,
-            startColumn: err.column,
-            endLineNumber: err.line,
-            endColumn: err.column + 5,
+            severity: err.severity,
+            startLineNumber: err.startLineNumber,
+            startColumn: err.startColumn,
+            endLineNumber: err.endLineNumber,
+            endColumn: err.endColumn,
             message: err.message
         }));
 
+        // 2. Change .instance to ._instance here as well
         const model = window.monacoEditor._instance.getModel();
         monaco.editor.setModelMarkers(model, "csharp", markers);
     },
+
+
 
     clearErrors: function () {
         if (!window.monacoEditor._instance) return;

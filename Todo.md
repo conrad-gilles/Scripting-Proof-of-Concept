@@ -10,45 +10,23 @@
 
 ### Main Todos
 
-- maybe add tests to check if GeneratorAction are still the actual names in the enum and the classes so they remain the same
-- only 1 factory that creates the most recent context get rid of the others or maybe put them in a Testing namespace?
+- get 100% test coverage
 - put all GenCOntext in a namespace like maybe Ember.Scripting.GeneratorContextsV5 etc
 - make GeneratorContextSF mayeb an interface?
-- make new project next to sandbox to put in what will actually go in ember
-
-- write test for checkversioncompatibility
-- SaveScriptWithoudCompiling now throwserror so maybe create a function to create a script without compiling?
-- write buggy scripts containing maybe stuff like while true...
-- monaco editor when right clicking bugs and is super dark not ui friendly
-- store v1 of action scripts maybe in hitory not in diffrent file
-- create factories and cleanup
-
 - public async Task<ActiveActionResult> ExecuteScriptByNameAndType(string Name, ScriptTypes scriptType, ActiveGeneratorContext ctx) //maybe make generic
-- make basicVal return record or class
-- add update cache method to db helper and then also to  scriptmanager
+- get rid of the enum and just use typeOf IGeneratorActionScript etc...
+- 
+- monaco editor when right clicking bugs and is super dark not ui friendly
+
 - improve isduplicate function in db helper to add semantic treee check to see if no script in db has same tree?: this would be unnessecary if - class name enforced as scriptname
 - hard coded connection string still need to fix
 - create composite primary key from name and type of script (condition action)
-- create diffrent data classes for each api version, then you need to pass this data in create below;
-- create() needs to somehow be type safe so it throws compile time error
-- maybe diffrent create factories for each context version
-- GeneratorContext ctx=GeneratorContextFactory.Create(data);    no id fro script;
-- ExecuteById(id,context)   executes script, calls a facade of facade, in ember that upgradesaction result, and also auto downgrades in previes ctx was not right one.  
 
-- define global using that is somethign like this: using Project = PC.MyCompany.Project;
-- this using will only be used by ember and not by customer scripts because those cant be auto refactored
-
-- make sure that when executing script, the passed context is the correct one, error should be at compile time not run time
-- remove hardcoded paths using ctrl alt f C:\Users\Gilles\Desktop\UNI\Semester 6\Code\Codebase\Scripting-Proof-of-Concept\sandbox\src\Scripts
-- pass data in context so when you execute script(id,context) it gives data to the script //maybe add it to facade instead but idk
-- this data needs to be standardized maybe using something like fluentvalidation idk
-- CreateContext() in ScriptFactory takes in a few arguments 
 - fix basic val still doesnt check if implements correct class  probably with is null? is typeof ?
 - in ui when compile all scripts with 1 corrupt one more than 1 dont cpompile because it aborts the process
-- make sure azure works
+- make sure render.com deploy works
 -  
 ### Ask about:
-- remove all occurences of data
 - rename GeneratorContexts to PatientContexts or something like that?
 - maybe for the future allow for multiple functions in the script, or what i proposed allow for multiple static classes with the standard methods
 
@@ -115,3 +93,26 @@ This also brings up the question if one should maybe implement a way of automati
 
 Question: Should i keep it in the ScriptManager class and remove it from the interface, currently i am not using it anywhere except tests, but my idea was using it in the UI to pass the errors to the Monaco Editor,
 so that it sees which row which column the errors are to have red underlines and other visual aids when writin the scripts.
+
+=========== ScriptManager.cs
+ 
+  - GetCompilationErrors
+    Okay I get the idea. But in the UI you will probably trigger the compilation right?
+	If so, then why not catch the errors returned by the actual compilation and show that in the Monaco Editor.
+	Ah I see because the CompileScript method inserts it into db if it succeeded, which you probably don't want?
+  - GetActiveApiVersions
+    I see no use case for this no. Can be removed.
+  - Compilation on Version Update
+    All existing scripts must always stay compatible which is ensured by our backwards-compatible versioning strategy.
+	So I don't see the use for CleanupOrphanedCaches or AutomaticCompilationOnVersionUpdate.
+  - Mock Service for Username
+    No a simple mock service interface like IUserSession. And a mock implementation like SandBoxUserSession.
+	Which simply returns the static string or id of the user.
+	When we combine the library with Ember, Ember will provide an actual implementation of IUserSession (or similar).
+====== DbHelper.cs
+ 
+  - RemoveDuplicates
+    I don't see the use case for this method. And since it has a bug, it is not worth investing time into it.
+  - CreateAndInsertCustomerScript
+    The bug is still there. checkForDuplicates is set to true in line 321 (current state (25/03/2026 09:00) of ScriptRepository.cs)
+	So the value of checkForDuplicates as a parameter is never used because you always set it to true in line 321 no matter what the caller of the method passed in as a value.

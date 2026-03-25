@@ -234,10 +234,33 @@ internal class ScriptRepository
         }
         catch (Exception e)
         {
-            return "Failed to compile script:" + scriptId + " " + e.ToString();
+            // return "Failed to compile script:" + scriptId + " " + e.ToString();
+            return e.ToString();
             // throw new FacadeException(e.ToString(), e);
         }
     }
+    public async Task<List<ScriptCompilationError>> GetCompilationErrors(string sourceCode, int? apiVersion = null)
+    {
+        ValidationRecord? metaData = null;
+        try
+        {
+            try
+            {
+                metaData = _compiler.BasicValidationBeforeCompiling(sourceCode);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError("Validation in GetCompilationErrors failed but will still try to compile." + e.ToString());
+            }
+            _compiler.RunCompilation(sourceCode, apiVersion: apiVersion);
+            throw new Exception("it should throw an error when a valid script is passed");
+        }
+        catch (CompilationFailedException e)
+        {
+            return e.Errors;
+        }
+    }
+
     public async Task AutomaticCompilationOnVersionUpdate(int currentApiVersion)
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName} with currentApiVersion: {ApiVersion}.", nameof(AutomaticCompilationOnVersionUpdate), nameof(ScriptRepository), currentApiVersion);
