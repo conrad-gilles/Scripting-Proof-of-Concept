@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using System.ComponentModel.DataAnnotations;
 using Sandbox;
+using Ember.Simulation;
 
 [TestClass]
 public class SanboxTests
@@ -38,23 +39,23 @@ public class SanboxTests
     [TestMethod]
     public async Task CreateContextTest()
     {
-        ContextFactory sf;
+        Sandbox.ContextManagementDemos sf;
         Ember.Scripting.GeneratorContextSF ctx;
 
         _facade = EmberMethods.GetNewScriptManagerInstance(1);
-        sf = new ContextFactory(_facade);
+        sf = new Sandbox.ContextManagementDemos(_facade);
         ctx = sf.CreateContextForApiV(_data!);
 
         Assert.IsTrue(ctx.GetType() == typeof(ReadOnlyContextV1.GeneratorContext));
 
         _facade = EmberMethods.GetNewScriptManagerInstance(2);
-        sf = new ContextFactory(_facade);
+        sf = new Sandbox.ContextManagementDemos(_facade);
         ctx = sf.CreateContextForApiV(_data!);
 
         Assert.IsTrue(ctx.GetType() == typeof(RWContextV2.GeneratorContext));
 
         _facade = EmberMethods.GetNewScriptManagerInstance(6);
-        sf = new ContextFactory(_facade);
+        sf = new Sandbox.ContextManagementDemos(_facade);
 
         Exception ex = await Assert.ThrowsExceptionAsync<Exception>(async () =>  //todo check this one
          {
@@ -82,9 +83,9 @@ public class SanboxTests
             {5, typeof(GeneratorContextNoInherVaccineV5.GeneratorContext)},
         };
 
-        ContextFactory sf;
+        ContextManagement sf;
         _facade = EmberMethods.GetNewScriptManagerInstance(1);
-        sf = new ContextFactory(_facade);
+        sf = new ContextManagement(_facade);
         Dictionary<int, Type> retrievedDict = ContextVersionScanner.GetClassDictionary();
         retrievedDict.Reverse();
         PrintDictToConsole(contextVersionMap);
@@ -179,7 +180,7 @@ public class SanboxTests
     public async Task CreateContextForApiTest()
     {
         Guid id;
-        ContextFactory sf;
+        Sandbox.ContextManagementDemos sf;
         ValidationRecord valResult;
 
         _facade = EmberMethods.GetNewScriptManagerInstance();
@@ -187,7 +188,7 @@ public class SanboxTests
         valResult = _facade.BasicValidationBeforeCompiling(_sourceCodeActionV1!);
         id = (await _facade.CreateScript(_sourceCodeActionV1!)).Id;
 
-        sf = new ContextFactory(_facade);
+        sf = new Sandbox.ContextManagementDemos(_facade);
 
 
         await _facade.ExecuteScriptById(id, sf.CreateContextForApiV(_data!, valResult.Version));
@@ -203,7 +204,7 @@ public class SanboxTests
             // valResult = facade.BasicValidationBeforeCompiling(sourceCodeActionV2!);
             // id = await facade.CreateScript(sourceCodeActionV2!);
 
-            sf = new ContextFactory(_facade);
+            sf = new Sandbox.ContextManagementDemos(_facade);
             // await facade.ExecuteScriptById(id, sf.CreateContextForApiV(data!, valResult.versionInt));
             Console.WriteLine("Running API version: " + _facade.GetRunningApiVersion());
             await _facade.ExecuteScriptById(id, sf.CreateContextForApiV(_data!, valResult.Version));
@@ -214,7 +215,7 @@ public class SanboxTests
         for (int i = 1; i < ContextVersionScanner.GetClassDictionary().Count(); i++)
         {
             _facade = EmberMethods.GetNewScriptManagerInstance(i);
-            sf = new ContextFactory(_facade);
+            sf = new Sandbox.ContextManagementDemos(_facade);
             await _facade.ExecuteScriptById(id, sf.CreateContextForApiV(_data!, valResult.Version));
         }
 
@@ -223,7 +224,7 @@ public class SanboxTests
         for (int i = 1; i < ContextVersionScanner.GetClassDictionary().Count(); i++)
         {
             _facade = EmberMethods.GetNewScriptManagerInstance(i);
-            sf = new ContextFactory(_facade);
+            sf = new Sandbox.ContextManagementDemos(_facade);
             await _facade.ExecuteScriptById(id, sf.CreateContextForApiV(_data!, valResult.Version));
         }
     }
@@ -235,7 +236,7 @@ public class SanboxTests
         ActiveGeneratorContext data = new ActiveGeneratorContext(labOrder: _obj!.labOrder, vaccine: _obj.vaccine);
 
         Guid id;
-        ContextFactory sf;
+        ContextManagement sf;
         ValidationRecord valResult;
         object result;
         ActionResultV3.ActionResult ar;
@@ -246,7 +247,7 @@ public class SanboxTests
         valResult = _facade.BasicValidationBeforeCompiling(src!);
         id = (await _facade.CreateScript(src!)).Id;
 
-        sf = new ContextFactory(_facade);
+        sf = new ContextManagement(_facade);
         GeneratorContextSF ctx = await sf.CreateByDowngrade(id, data!);
         Console.WriteLine("Type name: " + ctx.GetType().FullName);
 
@@ -259,7 +260,7 @@ public class SanboxTests
         valResult = _facade.BasicValidationBeforeCompiling(src!);
         id = (await _facade.CreateScript(src!)).Id;
 
-        sf = new ContextFactory(_facade);
+        sf = new ContextManagement(_facade);
         ctx = await sf.CreateByDowngrade(id!, data!);
         Console.WriteLine("Type name: " + ctx.GetType().FullName);
 
@@ -272,7 +273,7 @@ public class SanboxTests
         valResult = _facade.BasicValidationBeforeCompiling(src!);
         id = (await _facade.CreateScript(src!)).Id;
 
-        sf = new ContextFactory(_facade);
+        sf = new ContextManagement(_facade);
         ctx = await sf.CreateByDowngrade(id!, data!);
         Console.WriteLine("Type name: " + ctx.GetType().FullName);
 
@@ -285,7 +286,7 @@ public class SanboxTests
         valResult = _facade.BasicValidationBeforeCompiling(src!);
         id = (await _facade.CreateScript(src!)).Id;
 
-        sf = new ContextFactory(_facade);
+        sf = new ContextManagement(_facade);
         ctx = await sf.CreateByDowngrade(id!, data!);
         Console.WriteLine("Type name: " + ctx.GetType().FullName);
 

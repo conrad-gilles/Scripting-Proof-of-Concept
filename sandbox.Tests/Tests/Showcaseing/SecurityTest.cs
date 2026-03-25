@@ -4,6 +4,7 @@ using Ember.Scripting;
 using Serilog;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Ember.Simulation;
 
 [TestClass]
 public class SecurityTests
@@ -55,14 +56,14 @@ public class SecurityTests
 
             var obj = TestHelper.ScriptObjects();
             var services = new ServiceCollection();
-            Sandbox.SandboxServiceCollectionExtensions.AddSandboxServices
+            Ember.Simulation.SandboxServiceCollectionExtensions.AddSandboxServices
             // (services, obj.labOrder, obj.patient, obj.logger, obj.testDataAccess, obj.vaccine);
             (services, obj.logger, obj.testDataAccess);
 
             using var provider = services.BuildServiceProvider();
             ActiveContextFactory.IGeneratorContextFactory factory = provider.GetRequiredService<ActiveContextFactory.IGeneratorContextFactory>();
             ActiveGeneratorContext ctx = factory.Create(obj.labOrder, obj.vaccine);
-            ActiveActionResult ar = await InternalScriptManager!.ExecuteScriptByNameAndType("WhileTrueScript", ScriptTypes.GeneratorActionScript, ctx);
+            ActiveActionResult ar = await InternalScriptManager!.ExecuteScript("WhileTrueScript", ScriptTypes.GeneratorActionScript, ctx);
 
             Console.WriteLine("Name: " + script.ScriptName + ", ScriptType: " + script.ScriptType);
             Console.WriteLine("Type name: " + ar.GetType().FullName);

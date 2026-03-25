@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.VisualStudio.SolutionPersistence.Serializer.SlnV12;
 using System.Runtime.CompilerServices;
+using Ember.Simulation;
 
 [TestClass]
 public class EmberVersioningTests
@@ -259,15 +260,15 @@ public class EmberVersioningTests
 
         await Assert.ThrowsExceptionAsync<Exception>(async () =>
         {
-            ctx = ContextFactory.CreateUsingData(desiredContextVersion, _data!);
+            ctx = Sandbox.ContextManagementDemos.CreateUsingData(desiredContextVersion, _data!);
         });
-        ContextFactory sf = new ContextFactory(_facade);
+        ContextManagement sf = new ContextManagement(_facade);
         var obj = TestHelper.ScriptObjects();
 
         _data = new DataV2.DataV2(labOrder: obj.labOrder, patient: obj.patient, consoleLogger: obj.logger,
                                 dataAccess: obj.testDataAccess, vaccine: obj.vaccine);
 
-        ctx = ContextFactory.CreateUsingData(desiredContextVersion, _data!);
+        ctx = Sandbox.ContextManagementDemos.CreateUsingData(desiredContextVersion, _data!);
         var result1 = await _facade.ExecuteScriptById(id, ctx);
 
         var result = EmberMethods.UpgradeActionResult(result1);

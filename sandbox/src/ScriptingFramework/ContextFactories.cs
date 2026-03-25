@@ -3,21 +3,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 
-namespace GeneratorContextNoInherVaccineV5
-{
-    public class ContextFactory : IGeneratorContextFactory
-    {
-        public ActiveGeneratorContext Create(ILabOrderInterfaceV4NoInheritence labOrder, IVaccineInterface vaccine)
-        {
-            return new ActiveGeneratorContext(labOrder, vaccine);
-        }
-    }
-
-    public interface IGeneratorContextFactory
-    {
-        public ActiveGeneratorContext Create(ILabOrderInterfaceV4NoInheritence labOrder, IVaccineInterface vaccine);
-    }
-}
 namespace GeneratorContextV4
 {
     public class ContextFactory(IConsoleLoggerInterface logger, IDataAccessInterface data) : IGeneratorContextFactory
@@ -76,23 +61,5 @@ namespace ReadOnlyContextV1
     public interface IGeneratorContextFactory
     {
         public ReadOnlyContextV1.GeneratorContext Create(ILabOrderInterface labOrder, IPatientInterface patient);
-    }
-}
-
-namespace Sandbox
-{
-    internal static class SandboxServiceCollectionExtensions
-    {
-        internal static IServiceCollection AddSandboxServices
-               (this IServiceCollection services, ConsoleLogger logger, DataAccess testDataAccess)
-        {
-            // Register services
-            services.AddSingleton(logger);
-            services.AddSingleton(testDataAccess);
-
-            // Register the factory
-            services.AddTransient<ActiveContextFactory.IGeneratorContextFactory, ActiveContextFactory.ContextFactory>();
-            return services;
-        }
     }
 }

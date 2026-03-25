@@ -10,6 +10,7 @@
 
 ### Main Todos
 
+- maybe add tests to check if GeneratorAction are still the actual names in the enum and the classes so they remain the same
 - only 1 factory that creates the most recent context get rid of the others or maybe put them in a Testing namespace?
 - put all GenCOntext in a namespace like maybe Ember.Scripting.GeneratorContextsV5 etc
 - make GeneratorContextSF mayeb an interface?

@@ -1,4 +1,5 @@
 using Ember.Scripting;
+namespace Ember.Simulation;
 
 internal class EmberInternalFacade
 {
@@ -10,9 +11,9 @@ internal class EmberInternalFacade
     }
 
     // public async Task<ActiveActionResult> ExecuteScriptById(Guid id, ActiveDataClass data)
-    public async Task<ActiveActionResult> ExecuteScriptById(Guid id, ActiveGeneratorContext ctx)
+    public async Task<ActiveActionResult> ExecuteScript(Guid id, ActiveGeneratorContext ctx)
     {
-        var cf = new ContextFactory(ScriptManager);
+        var cf = new ContextManagement(ScriptManager);
         // GeneratorContextSF ctx = await cf.CreateByDowngrade(id, data);
         // ctx = await cf.CreateByDowngrade(id, ctx);
         GeneratorContextSF context = await cf.CreateByDowngrade(id, ctx);
@@ -21,10 +22,10 @@ internal class EmberInternalFacade
         return ar;
     }
 
-    public async Task<ActiveActionResult> ExecuteScriptByNameAndType(string name, ScriptTypes scriptType, ActiveGeneratorContext ctx) //maybe make generic
+    public async Task<ActiveActionResult> ExecuteScript(string name, ScriptTypes scriptType, ActiveGeneratorContext ctx) //maybe make generic
     {
         Guid id = await ScriptManager.GetScriptId(name, scriptType);
-        var cf = new ContextFactory(ScriptManager);
+        var cf = new ContextManagement(ScriptManager);
         GeneratorContextSF context = await cf.CreateByDowngrade(id, ctx);
         var result = await ScriptManager.ExecuteScriptById(id, context);
         ActiveActionResult ar = (ActiveActionResult)EmberMethods.UpgradeActionResult(result);

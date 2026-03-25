@@ -4,6 +4,7 @@ using Ember.Scripting;
 using Serilog;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Ember.Simulation;
 
 [TestClass]
 public class EmberInternalFacadeTests
@@ -58,7 +59,7 @@ public class EmberInternalFacadeTests
 
         var ctx = InternalScriptManager.CreateContext(_obj.labOrder, _obj.vaccine);
 
-        ar = await InternalScriptManager.ExecuteScriptById(id, ctx!);
+        ar = await InternalScriptManager.ExecuteScript(id, ctx!);
 
 
 
@@ -78,7 +79,7 @@ public class EmberInternalFacadeTests
         script = await _scriptManager!.CreateScript(_sourceCodeActionV1!);
 
         var ctx = _internalScriptManager!.CreateContext(_obj!.labOrder, _obj.vaccine);
-        ActiveActionResult ar = await _internalScriptManager.ExecuteScriptByNameAndType(script.ScriptName!, script.GetScriptType(), ctx);
+        ActiveActionResult ar = await _internalScriptManager.ExecuteScript(script.ScriptName!, script.GetScriptType(), ctx);
 
         Console.WriteLine("Name: " + script.ScriptName + ", ScriptType: " + script.GetScriptType());
         Console.WriteLine("Type name: " + ar.GetType().FullName);
@@ -96,7 +97,7 @@ public class EmberInternalFacadeTests
 
         script = await _scriptManager!.CreateScript(_sourceCodeActionV3!);
         ctx = _internalScriptManager!.CreateContext(_obj.labOrder, _obj.vaccine);
-        ar = await _internalScriptManager.ExecuteScriptByNameAndType(script.ScriptName!, script.GetScriptType(), ctx);
+        ar = await _internalScriptManager.ExecuteScript(script.ScriptName!, script.GetScriptType(), ctx);
 
         Console.WriteLine("Name: " + script.ScriptName + ", ScriptType: " + script.GetScriptType());
         Console.WriteLine("Type name: " + ar.GetType().FullName);
@@ -116,14 +117,14 @@ public class EmberInternalFacadeTests
 
         var objs = TestHelper.ScriptObjects();
         var services = new ServiceCollection();
-        Sandbox.SandboxServiceCollectionExtensions.AddSandboxServices
+        Ember.Simulation.SandboxServiceCollectionExtensions.AddSandboxServices
         (services, _obj!.logger, _obj.testDataAccess);
         using var provider = services.BuildServiceProvider();
 
         ActiveContextFactory.IGeneratorContextFactory factory = provider.GetRequiredService<ActiveContextFactory.IGeneratorContextFactory>();
         ActiveGeneratorContext ctx = factory.Create(_obj.labOrder, _obj.vaccine);
 
-        ActiveActionResult ar = await _internalScriptManager!.ExecuteScriptByNameAndType(scrip.ScriptName!, scrip.GetScriptType(), ctx);
+        ActiveActionResult ar = await _internalScriptManager!.ExecuteScript(scrip.ScriptName!, scrip.GetScriptType(), ctx);
 
         Console.WriteLine("Name: " + scrip.ScriptName! + ", ScriptType: " + scrip.GetScriptType());
         Console.WriteLine("Type name: " + ar.GetType().FullName);

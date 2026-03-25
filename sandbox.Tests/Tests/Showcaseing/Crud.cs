@@ -4,6 +4,7 @@ using Ember.Scripting;
 using Serilog;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Ember.Simulation;
 
 [TestClass]
 public class CrudDemos
@@ -15,12 +16,12 @@ public class CrudDemos
     [TestInitialize]
     public async Task SetupAsync()
     {
-        //this block is ecessary at least once in the code everytime you modify the init.sql else the db wont be initialized somehow
-        using (var db = new EFModeling.EntityProperties.FluentAPI.Required.ScriptDbContext())
-        {
-            await db.Database.EnsureDeletedAsync();
-            await db.Database.EnsureCreatedAsync();
-        }
+        // //this block is ecessary at least once in the code everytime you modify the init.sql else the db wont be initialized somehow
+        // using (var db = new EFModeling.EntityProperties.FluentAPI.Required.ScriptDbContext())
+        // {
+        //     await db.Database.EnsureDeletedAsync();
+        //     await db.Database.EnsureCreatedAsync();
+        // }
         await ScriptManager.DeleteAllData();
     }
 
@@ -86,7 +87,7 @@ public class CrudDemos
 
         var services = new ServiceCollection();
 
-        Sandbox.SandboxServiceCollectionExtensions.AddSandboxServices
+        Ember.Simulation.SandboxServiceCollectionExtensions.AddSandboxServices
         (services, logger, testDataAccess);
 
         using var provider = services.BuildServiceProvider();
@@ -95,7 +96,7 @@ public class CrudDemos
 
         ActiveGeneratorContext ctx = factory.Create(labOrder, vaccine);
 
-        ActiveActionResult ar = await InternalScriptManager!.ExecuteScriptByNameAndType
+        ActiveActionResult ar = await InternalScriptManager!.ExecuteScript
         ("AddPediatricTestsV2", ScriptTypes.GeneratorActionScript, ctx);
     }
 }

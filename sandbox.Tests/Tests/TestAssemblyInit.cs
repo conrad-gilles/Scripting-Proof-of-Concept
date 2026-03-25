@@ -1,33 +1,35 @@
+using Ember.Scripting;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 // Disable cross-class parallelism — tests run sequentially across all classes
 [assembly: Parallelize(Workers = 1, Scope = ExecutionScope.MethodLevel)]
 
-namespace sandbox.Tests
+namespace sandbox.Tests;
+
+public static class TestConfig
 {
-    public static class TestConfig
-    {
-        public static bool DuplicatesAllowed { get; set; } = false;
-    }
+    public static bool DuplicatesAllowed { get; set; } = false;
 }
 
 
-// namespace FirstTests;
+[TestClass]
+public static class TestAssemblyInit
+{
+    [AssemblyInitialize]
+    public static async Task Init(TestContext _)
+    {
+        //this block is ecessary at least once in the code everytime you modify the init.sql else the db wont be initialized somehow
+        using (var db = new EFModeling.EntityProperties.FluentAPI.Required.ScriptDbContext())
+        {
+            await db.Database.EnsureDeletedAsync();
+            await db.Database.EnsureCreatedAsync();
+        }
+    }
 
-// [TestClass]
-// public static class TestAssemblyInit
-// {
-//     [AssemblyInitialize]
-//     public static async Task Init(TestContext _)
-//     {
-//         var db = new DbHelper();
-//         await db.EnsureDeletedCreated(); // Create DB exactly once
-//     }
-
-//     [AssemblyCleanup]
-//     public static async Task Cleanup()
-//     {
-//         // Optional: leave DB around for post-run inspection,
-//         // or drop it here if you prefer a clean slate.
-//     }
-// }
+    [AssemblyCleanup]
+    public static async Task Cleanup()
+    {
+        ISccriptManagerDeleteAfter ScriptManager = TestHelper.InitScriptManager();
+        await ScriptManager.DeleteAllData();
+    }
+}

@@ -272,7 +272,7 @@ public class EmberMethods
         Serilog.Log.Verbose("Entered {MethodName} in {ClassName}.", nameof(GetTestingContext), nameof(EmberMethods));
         try
         {
-            ContextFactory sf = new ContextFactory(_facade);
+            Sandbox.ContextManagementDemos sf = new Sandbox.ContextManagementDemos(_facade);
             Ember.Scripting.GeneratorContextSF ctx;
             if (autoDetectFromScript == null)
             {
