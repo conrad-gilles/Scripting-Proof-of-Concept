@@ -34,3 +34,10 @@ public class CouldNotMatchBaseTypeInPersistence : PersistenceException
     public CouldNotMatchBaseTypeInPersistence(string message) : base(message) { }
     public CouldNotMatchBaseTypeInPersistence(string message, Exception innerException) : base(message, innerException) { }
 }
+
+public class NoErrorsInScriptException : PersistenceException
+{
+    public NoErrorsInScriptException() : base() { }
+    public NoErrorsInScriptException(string message) : base(message) { }
+    public NoErrorsInScriptException(string message, Exception innerException) : base(message, innerException) { }
+}

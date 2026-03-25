@@ -68,21 +68,6 @@ internal class ScriptCompiler
         //The following if statement was AI Generated
         if (!emitResult.Success)
         {
-
-            // string? errors = string.Join(Environment.NewLine, emitResult.Diagnostics
-            // .Where(d => d.IsWarningAsError || d.Severity == Microsoft.CodeAnalysis.DiagnosticSeverity.Error)
-            // // .Select(d => $"{d.Id}: {d.GetMessage()}"));
-            // .Select(d => $"Line {d.Location.GetLineSpan().StartLinePosition.Line + 1}, Col {d.Location.GetLineSpan().StartLinePosition.Character + 1}: {d.Id} - {d.GetMessage()}"));
-
-
-            // foreach (var diag in emitResult.Diagnostics)
-            // {
-            //     _logger.LogInformation(diag.ToString());
-            // }
-            // //Iterates through the list of compiler messages
-            // _logger.LogError("Error in ScriptCompiler RunCompilation method compilation probably failed in if (!emitResult.Success)");
-            // // throw new CompilationFailedException("Error in ScriptCompiler RunCompilation method compilation probably failed in if (!emitResult.Success) errors: " + errors);
-            // throw new CompilationFailedException(errors);
             var compilerErrors = emitResult.Diagnostics
     .Where(d => d.IsWarningAsError || d.Severity == Microsoft.CodeAnalysis.DiagnosticSeverity.Error)
     .Select(d =>

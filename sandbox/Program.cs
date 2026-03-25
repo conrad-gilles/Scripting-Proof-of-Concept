@@ -267,15 +267,15 @@ async Task MainProgramSwitch(IServiceProvider provider)
 
                     #region Version Management
 
-                    case "GetActiveApiVersions":
-                        var ls = await facade.GetActiveApiVersions();    //todo
-                        string vs = "";
-                        foreach (var item in ls)
-                        {
-                            vs = vs + " " + item;
-                        }
-                        Console.WriteLine("Active Api versions: " + vs);
-                        break;
+                    // case "GetActiveApiVersions":
+                    //     var ls = await facade.GetActiveApiVersions();    //todo
+                    //     string vs = "";
+                    //     foreach (var item in ls)
+                    //     {
+                    //         vs = vs + " " + item;
+                    //     }
+                    //     Console.WriteLine("Active Api versions: " + vs);
+                    //     break;
 
                     case "GetScriptCompatibility":
                         scriptId = await em.GetIdInConsoleAsync(fromSrc: true);

@@ -260,13 +260,6 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
 
     #region Version Management
 
-    // Returns list of currently active API versions from Ember instances
-    public async Task<List<int>> GetActiveApiVersions() //todo implement
-    {
-        _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(GetActiveApiVersions), nameof(ScriptManagerFacade));
-        return await _db.GetActiveApiVersions();
-    }
-
     public int GetRunningApiVersion() //todo implement
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(GetRunningApiVersion), nameof(ScriptManagerFacade));

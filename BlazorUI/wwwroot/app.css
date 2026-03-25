@@ -277,3 +277,16 @@ body {
 .monaco-editor .selected-text {
     background-color: #264f78 !important;
 }
+
+/* Fix Bootstrap 5 conflict with Monaco Editor hovers */
+.monaco-editor .fade:not(.show) {
+    opacity: 1 !important;
+}
+
+/* Ensure tooltips and suggestion boxes are solid and visible */
+.monaco-editor .monaco-hover, 
+.monaco-editor .suggest-widget {
+    opacity: 1 !important;
+    z-index: 9999 !important;
+}
+

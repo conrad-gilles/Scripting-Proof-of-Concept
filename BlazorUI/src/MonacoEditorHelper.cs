@@ -72,9 +72,14 @@ namespace BlazorUI.Helpers
 
                 await _editor.SetErrorsAsync(monacoMarkers);
             }
-            catch   //todo catch the scpecif error throw by success and the add general catch exception below
+            catch (NoErrorsInScriptException e)
             {
-
+                _console.Log(e.ToString());
+            }
+            catch (Exception e)
+            {
+                _console.Log("Failed to highlight compiler errors!");
+                _console.Log(e.ToString());
             }
         }
 

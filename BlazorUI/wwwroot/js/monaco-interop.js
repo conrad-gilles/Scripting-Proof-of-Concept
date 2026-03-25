@@ -1,21 +1,24 @@
 window.monacoEditor = {
-    _instance: null,
-    _typingTimer: null, // Timer for debouncing
+    // Store dictionaries of instances and timers keyed by EditorId
+    instances: {},
+    typingTimers: {},
 
     initialize: function (elementId, initialValue, language, dotNetHelper) {
-        if (window.monacoEditor._instance) {
-            window.monacoEditor._instance.dispose();
-            window.monacoEditor._instance = null;
+        // Clean up only the specific instance if it already exists
+        if (window.monacoEditor.instances[elementId]) {
+            window.monacoEditor.instances[elementId].dispose();
+            delete window.monacoEditor.instances[elementId];
         }
 
         require(['vs/editor/editor.main'], function () {
             const container = document.getElementById(elementId);
-            if (!container) return; // Guard: Blazor may have removed it already
+            if (!container) return; // Guard
 
-            window.monacoEditor._instance = monaco.editor.create(container, {
+            const instance = monaco.editor.create(container, {
                 value: initialValue || '',
                 language: language || 'csharp',
                 theme: 'vs-dark',
+                showUnused: false, // <-- Add this to stop text from fading out
                 automaticLayout: true,
                 fontSize: 14,
                 minimap: { enabled: false },
@@ -23,28 +26,28 @@ window.monacoEditor = {
                 wordWrap: 'on'
             });
 
-            // Force a layout pass so the editor measures itself correctly
-            window.monacoEditor._instance.layout();
-            window.monacoEditor._instance.onDidChangeModelContent(function () {
-                // Clear the previous timer if the user is still typing
-                clearTimeout(window.monacoEditor._typingTimer);
+            instance.layout();
 
-                // Set a new timer for 1 second (1000ms)
-                window.monacoEditor._typingTimer = setTimeout(function () {
-                    // Call the C# HandleCodeChange method
+            // Save the instance into the dictionary
+            window.monacoEditor.instances[elementId] = instance;
+
+            instance.onDidChangeModelContent(function () {
+                clearTimeout(window.monacoEditor.typingTimers[elementId]);
+
+                window.monacoEditor.typingTimers[elementId] = setTimeout(function () {
                     dotNetHelper.invokeMethodAsync('HandleCodeChange');
-                }, 500);
+                }, 600);
             });
         });
     },
 
-    getValue: function () {
-        return window.monacoEditor._instance?.getValue() ?? '';
+    getValue: function (elementId) {
+        return window.monacoEditor.instances[elementId]?.getValue() ?? '';
     },
 
-    setErrors: function (errors) {
-        // 1. Change .instance to ._instance
-        if (!window.monacoEditor._instance) return;
+    setErrors: function (elementId, errors) {
+        const instance = window.monacoEditor.instances[elementId];
+        if (!instance) return;
 
         const markers = errors.map(err => ({
             severity: err.severity,
@@ -55,25 +58,34 @@ window.monacoEditor = {
             message: err.message
         }));
 
-        // 2. Change .instance to ._instance here as well
-        const model = window.monacoEditor._instance.getModel();
-        monaco.editor.setModelMarkers(model, "csharp", markers);
+        monaco.editor.setModelMarkers(instance.getModel(), "csharp", markers);
     },
 
+    clearErrors: function (elementId) {
+        const instance = window.monacoEditor.instances[elementId];
+        if (!instance) return;
 
-
-    clearErrors: function () {
-        if (!window.monacoEditor._instance) return;
-        const model = window.monacoEditor._instance.getModel();
-        monaco.editor.setModelMarkers(model, "csharp", []);
+        monaco.editor.setModelMarkers(instance.getModel(), "csharp", []);
     },
 
-    setValue: function (value) {
-        window.monacoEditor._instance?.setValue(value);
+    setValue: function (elementId, value) {
+        window.monacoEditor.instances[elementId]?.setValue(value);
+    },
+    
+    layout: function (elementId) {
+        const instance = window.monacoEditor.instances[elementId];
+        if (instance) {
+            instance.layout();
+        }
     },
 
-    dispose: function () {
-        window.monacoEditor._instance?.dispose();
-        window.monacoEditor._instance = null;
+    dispose: function (elementId) {
+        // Only dispose the editor belonging to the component being destroyed
+        if (window.monacoEditor.instances[elementId]) {
+            window.monacoEditor.instances[elementId].dispose();
+            delete window.monacoEditor.instances[elementId];
+        }
+        clearTimeout(window.monacoEditor.typingTimers[elementId]);
+        delete window.monacoEditor.typingTimers[elementId];
     }
 };

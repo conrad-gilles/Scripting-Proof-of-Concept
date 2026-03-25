@@ -291,54 +291,64 @@ public class ScriptManagerFacadeTests
     }
 
 
-    [TestMethod]
-    public async Task GetCompilationErrorsTestNegative()
-    {
-        Guid id2 = Guid.NewGuid();
-        await _scriptManager!.CreateScriptWithoutCompiling(id2, "wrong input test could be whatever");
-        // string result2 = await facade.GetCompilationErrors(id2);
-        string result2 = await _scriptManager.GetCompilationErrors(id2);
-        Console.WriteLine("Start of Result:");
-        Console.WriteLine(result2);
-        Console.WriteLine("End of Result.");
+    // [TestMethod]
+    // public async Task GetCompilationErrorsTestNegative()
+    // {
+    //     Guid id2 = Guid.NewGuid();
+    //     await _scriptManager!.CreateScriptWithoutCompiling(id2, "wrong input test could be whatever");
+    //     // string result2 = await facade.GetCompilationErrors(id2);
+    //     string result2 = await _scriptManager.GetCompilationErrors(id2);
+    //     Console.WriteLine("Start of Result:");
+    //     Console.WriteLine(result2);
+    //     Console.WriteLine("End of Result.");
 
-        string desiredOutput = """
-        Error in ScriptCompiler RunCompilation method compilation probably failed in if (!emitResult.Success) errors: Line 1, Col 13: CS1003 - Syntax error, ',' expected
-        Line 1, Col 35: CS1002 - ; expected
-        Line 1, Col 1: CS8805 - Program using top-level statements must be an executable.
-        Line 1, Col 1: CS0246 - The type or namespace name 'wrong' could not be found (are you missing a using directive or an assembly reference?)
-        """;
+    //     string desiredOutput = """
+    //     Error in ScriptCompiler RunCompilation method compilation probably failed in if (!emitResult.Success) errors: Line 1, Col 13: CS1003 - Syntax error, ',' expected
+    //     Line 1, Col 35: CS1002 - ; expected
+    //     Line 1, Col 1: CS8805 - Program using top-level statements must be an executable.
+    //     Line 1, Col 1: CS0246 - The type or namespace name 'wrong' could not be found (are you missing a using directive or an assembly reference?)
+    //     """;
 
 
-        Assert.IsTrue(result2.Contains(desiredOutput));
+    //     Assert.IsTrue(result2.Contains(desiredOutput));
 
-        Guid id3 = Guid.NewGuid();
-        await _scriptManager.CreateScriptWithoutCompiling(id3, "public class Test : IFakeInterface{}");
-        // string result2 = await facade.GetCompilationErrors(id2);
-        string result3 = await _scriptManager.GetCompilationErrors(id3);
-        Console.WriteLine("Start of Result:");
-        Console.WriteLine(result3);
-        Console.WriteLine("End of Result.");
-        string desiredOutput3 = """
-        Error in ScriptCompiler RunCompilation method compilation probably failed in if (!emitResult.Success) errors: Line 1, Col 21: CS0246 - The type or namespace name 'IFakeInterface' could not be found (are you missing a using directive or an assembly reference?)
-        """;
+    //     Guid id3 = Guid.NewGuid();
+    //     await _scriptManager.CreateScriptWithoutCompiling(id3, "public class Test : IFakeInterface{}");
+    //     // string result2 = await facade.GetCompilationErrors(id2);
+    //     string result3 = await _scriptManager.GetCompilationErrors(id3);
+    //     Console.WriteLine("Start of Result:");
+    //     Console.WriteLine(result3);
+    //     Console.WriteLine("End of Result.");
+    //     string desiredOutput3 = """
+    //     Error in ScriptCompiler RunCompilation method compilation probably failed in if (!emitResult.Success) errors: Line 1, Col 21: CS0246 - The type or namespace name 'IFakeInterface' could not be found (are you missing a using directive or an assembly reference?)
+    //     """;
 
-        Assert.IsTrue(result3.Contains(desiredOutput3));
-    }
+    //     Assert.IsTrue(result3.Contains(desiredOutput3));
+    // }
 
     [TestMethod]
     public async Task GetCompilationErrorsCleaned()
     {
-        Guid id2 = Guid.NewGuid();
+        Guid id = Guid.NewGuid();
         string sourceCode = "wrong input test could be whatever";
-        List<ScriptCompilationError> result = await _scriptManager!.GetCompilationErrors(sourceCode);
+        List<ScriptCompilationError> result1 = await _scriptManager!.GetCompilationErrors(sourceCode);
 
-        foreach (var item in result)
+        var expectedErrorIds = new List<string> { "CS1003", "CS1002", "CS8805", "CS0246" };
+
+        List<string> result2 = [];
+        foreach (var item in result1)
         {
-            Console.WriteLine("Result: " + item);
+            result2.Add(item.Id);
         }
 
-        Assert.IsTrue(false);
+        CollectionAssert.IsSubsetOf(expectedErrorIds, result2);
+
+        id = Guid.NewGuid();
+        sourceCode = TestHelper.GetSC().sourceCodeActionV2;
+        Exception ex = await Assert.ThrowsExceptionAsync<NoErrorsInScriptException>(async () =>
+        {
+            result1 = await _scriptManager!.GetCompilationErrors(sourceCode);
+        });
     }
 
     #endregion
@@ -468,18 +478,18 @@ public class ScriptManagerFacadeTests
 
     #region Version Management
 
-    [TestMethod]
-    public async Task GetActiveApiVersionsTest()
-    {
-        Guid id = (await _scriptManager!.CreateScript(_sourceCodePedia!)).Id;
-        int currentVersion = _scriptManager.GetRunningApiVersion();
+    // [TestMethod]
+    // public async Task GetActiveApiVersionsTest()
+    // {
+    //     Guid id = (await _scriptManager!.CreateScript(_sourceCodePedia!)).Id;
+    //     int currentVersion = _scriptManager.GetRunningApiVersion();
 
-        List<int> versions = await _scriptManager.GetActiveApiVersions();
+    //     List<int> versions = await _scriptManager.GetActiveApiVersions();
 
-        Assert.IsNotNull(versions);
-        Assert.IsTrue(versions.Count >= 1);
-        Assert.IsTrue(versions.Contains(currentVersion));
-    }
+    //     Assert.IsNotNull(versions);
+    //     Assert.IsTrue(versions.Count >= 1);
+    //     Assert.IsTrue(versions.Contains(currentVersion));
+    // }
 
     [TestMethod]
     public void GetRecentApiVersionTest()

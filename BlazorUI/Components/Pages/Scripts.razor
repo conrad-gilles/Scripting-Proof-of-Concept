@@ -152,7 +152,10 @@
                     </div>
                 </div>
 
-                <MonacoEditor @ref="_editor" EditorId="edit-monaco-editor" InitialCode="@_scriptCode" />
+                @* <MonacoEditor @ref="_editor" EditorId="edit-monaco-editor" InitialCode="@_scriptCode" /> *@
+                <MonacoEditor @ref="_editor" EditorId="edit-monaco-editor" InitialCode="@_scriptCode"
+                              OnCodeChanged="() => _editorHelper?.HandleValidate(_currentScriptId, _selectedApiVersion)" />
+
 
                 <div
                     style="height: @(Console.IsExpanded ? "300px" : "40px"); transition: height 0.3s ease-in-out; flex-shrink: 0;">

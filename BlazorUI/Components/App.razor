@@ -1,5 +1,6 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -35,8 +36,9 @@
     <!-- Re-measure the Monaco editor after Blazor Server reconnects -->
     <script>
         Blazor.addEventListener('reconnect', function () {
-        if (window.monacoEditor && window.monacoEditor._instance) {
-        window.monacoEditor._instance.layout();
+        if (window.monacoEditor && window.monacoEditor.instances) {
+        // This loops through all active editor instances and resizes them
+        Object.values(window.monacoEditor.instances).forEach(e => e.layout());
         }
         });
     </script>

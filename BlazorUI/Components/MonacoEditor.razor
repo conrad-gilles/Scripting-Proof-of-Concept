@@ -10,7 +10,8 @@
 </div>
 
 @code {
-    [Parameter] public string EditorId { get; set; } = "monaco-editor-container";
+    // 1. Generate a unique ID for every editor instance
+    [Parameter] public string EditorId { get; set; } = $"monaco-editor-{Guid.NewGuid():N}";
     [Parameter] public string InitialCode { get; set; } = string.Empty;
     [Parameter] public EventCallback OnCodeChanged { get; set; }
 
@@ -36,34 +37,36 @@
         }
     }
 
+    // 2. Pass 'EditorId' into all JS invocations
     public async Task<string> GetValueAsync()
     {
         if (!_editorReady) return string.Empty;
-        return await JS.InvokeAsync<string>("monacoEditor.getValue");
+        return await JS.InvokeAsync<string>("monacoEditor.getValue", EditorId);
     }
 
     public async Task SetValueAsync(string value)
     {
-        if (_editorReady) await JS.InvokeVoidAsync("monacoEditor.setValue", value);
+        if (_editorReady) await JS.InvokeVoidAsync("monacoEditor.setValue", EditorId, value);
         else InitialCode = value;
     }
 
     public async Task ClearErrorsAsync()
     {
-        if (_editorReady) await JS.InvokeVoidAsync("monacoEditor.clearErrors");
+        if (_editorReady) await JS.InvokeVoidAsync("monacoEditor.clearErrors", EditorId);
     }
 
     public async Task SetErrorsAsync(List<object> errors)
     {
         if (_editorReady && errors.Any())
         {
-            await JS.InvokeVoidAsync("monacoEditor.setErrors", errors);
+            await JS.InvokeVoidAsync("monacoEditor.setErrors", EditorId, errors);
         }
     }
 
     public async ValueTask DisposeAsync()
     {
         _dotNetRef?.Dispose();
-        if (_editorReady) await JS.InvokeVoidAsync("monacoEditor.dispose");
+        if (_editorReady) await JS.InvokeVoidAsync("monacoEditor.dispose", EditorId);
     }
 }
+

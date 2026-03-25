@@ -113,12 +113,6 @@ public interface ISccriptManagerDeleteAfter : IScriptManagerExtended
 
   #region Version Management
 
-  /// <summary>
-  /// Returns list of currently active API versions from Ember instances
-  /// </summary>
-  /// <returns></returns>
-  Task<List<int>> GetActiveApiVersions();
-
   int GetRunningApiVersion();
 
   /// <summary>
