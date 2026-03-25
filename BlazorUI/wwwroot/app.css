@@ -281,12 +281,176 @@ body {
 /* Fix Bootstrap 5 conflict with Monaco Editor hovers */
 .monaco-editor .fade:not(.show) {
     opacity: 1 !important;
+    transition: none !important;
 }
 
-/* Ensure tooltips and suggestion boxes are solid and visible */
-.monaco-editor .monaco-hover, 
+/* Ensure tooltips are solid, on top, and never see-through */
+.monaco-editor .monaco-hover {
+    opacity: 1 !important;
+    z-index: 99999 !important;
+    background-color: #252526 !important; /* VS Code dark hover background */
+    border: 1px solid #454545 !important; /* Subtle border to separate from code */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4) !important;
+}
+
+/* Force the text inside the hover to be readable */
+.monaco-editor .monaco-hover .hover-contents {
+    background-color: #252526 !important;
+}
+
+/* Suggestion widget fixes */
 .monaco-editor .suggest-widget {
     opacity: 1 !important;
-    z-index: 9999 !important;
+    z-index: 99999 !important;
+    background-color: #252526 !important;
+}
+/* Force Monaco squiggly lines to be visible as thick bottom borders */
+.monaco-editor .squiggly-error {
+    background: none !important;
+    border-bottom: 2px dashed #f44747 !important; /* Standard VS Code Red */
 }
 
+.monaco-editor .squiggly-warning {
+    background: none !important;
+    border-bottom: 2px dashed #cca700 !important; /* Standard VS Code Yellow */
+}
+
+.monaco-editor .squiggly-info {
+    background: none !important;
+    border-bottom: 2px dashed #3794ff !important; /* Standard VS Code Blue */
+}
+
+.monaco-editor .squiggly-hint {
+    background: none !important;
+    border-bottom: 2px dashed #b3b4b3 !important; /* Standard VS Code Grey */
+}
+/* Fix Right-Click Context Menu Visibility and Colors */
+.monaco-editor .monaco-menu {
+    background-color: #252526 !important; /* Dark background */
+    border: 1px solid #454545 !important; /* Subtle border */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5) !important;
+    z-index: 999999 !important; /* Keep it above everything */
+}
+
+/* Fix text color inside the context menu */
+.monaco-editor .monaco-menu .monaco-action-bar.vertical .action-label {
+    color: #cccccc !important; /* Light grey text */
+}
+
+/* Fix the hover state inside the context menu */
+.monaco-editor .monaco-menu .monaco-action-bar.vertical .action-item:hover,
+.monaco-editor .monaco-menu .monaco-action-bar.vertical .action-item.focused {
+    background-color: #04395e !important; /* VS Code blue selection color */
+}
+
+/* Fix the text color when hovering in the menu */
+.monaco-editor .monaco-menu .monaco-action-bar.vertical .action-item:hover .action-label,
+.monaco-editor .monaco-menu .monaco-action-bar.vertical .action-item.focused .action-label {
+    color: #ffffff !important; /* White text on hover */
+}
+
+/* Ensure menu dividers are visible but subtle */
+.monaco-editor .monaco-menu .action-item.disabled .monaco-action-bar.vertical .action-label.separator {
+    border-bottom-color: #454545 !important;
+}
+/* Monaco base editor */
+.monaco-editor,
+.monaco-editor-background,
+.monaco-editor .inputarea.ime-input {
+    background-color: #1e1e1e !important;
+}
+
+/* Bootstrap/tab fade conflicts: apply globally, not only inside .monaco-editor */
+.context-view,
+.context-view.monaco-menu-container,
+.context-view .monaco-menu,
+.context-view .monaco-action-bar,
+.context-view .actions-container {
+    opacity: 1 !important;
+    transition: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+/* Real Monaco context menu container - Corrected Selectors */
+.context-view, 
+.monaco-menu-container,
+.context-view .monaco-menu {
+    opacity: 1 !important;
+    background-color: #252526 !important; 
+    backdrop-filter: none !important;
+}
+
+.context-view {
+    z-index: 2147483647 !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.5) !important;
+    border: 1px solid #454545 !important;
+}
+
+.monaco-menu .monaco-action-bar.vertical .action-label {
+    color: #cccccc !important;
+}
+
+.monaco-menu .monaco-action-bar.vertical .action-item:hover {
+    background-color: #04395e !important;
+}
+
+.monaco-menu .monaco-action-bar.vertical .action-item:hover .action-label {
+    color: #ffffff !important;
+}
+
+/* =========================================================
+   BRUTE-FORCE MONACO CONTEXT MENU OVERRIDE (LIGHT MODE)
+   Must be in global app.css / site.css
+   ========================================================= */
+
+/* 1. Force the main wrapper and menu containers to be solid white */
+body > .context-view, 
+.context-view.monaco-menu-container,
+.context-view .monaco-menu,
+.context-view .monaco-menu .monaco-action-bar {
+    background-color: #ffffff !important;
+    background: #ffffff !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+/* 2. Add a strong drop shadow and border so it doesn't blend into the page */
+.context-view.monaco-menu-container {
+    z-index: 2147483647 !important; /* Keep it on top of everything */
+    border: 1px solid #d2d2d2 !important;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2) !important;
+    border-radius: 4px !important;
+}
+
+/* 3. Force all text to be pure black */
+.context-view .monaco-menu .monaco-action-bar.vertical .action-label {
+    color: #000000 !important;
+    font-weight: 500 !important;
+}
+
+/* 4. Highlight state: When hovering over a menu option */
+.context-view .monaco-menu .monaco-action-bar.vertical .action-item:hover,
+.context-view .monaco-menu .monaco-action-bar.vertical .action-item.focused {
+    background-color: #e8f0fe !important; /* Light blue highlight */
+}
+
+/* Keep text black even when highlighted */
+.context-view .monaco-menu .monaco-action-bar.vertical .action-item:hover .action-label,
+.context-view .monaco-menu .monaco-action-bar.vertical .action-item.focused .action-label {
+    color: #000000 !important; 
+}
+
+/* 5. Force the separator lines between sections to be visible grey */
+.context-view .monaco-menu .action-item.disabled .monaco-action-bar.vertical .action-label.separator {
+    border-bottom: 1px solid #cccccc !important;
+    opacity: 1 !important;
+}
+
+/* 6. Prevent Monaco's disabled styling from hiding the menu container */
+.context-view[aria-hidden="true"],
+.context-view[style*="display: none"] {
+    display: none !important; /* Allow it to hide normally when closed */
+}

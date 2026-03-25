@@ -18,12 +18,14 @@ window.monacoEditor = {
                 value: initialValue || '',
                 language: language || 'csharp',
                 theme: 'vs-dark',
-                showUnused: false, // <-- Add this to stop text from fading out
+                showUnused: false,
                 automaticLayout: true,
                 fontSize: 14,
                 minimap: { enabled: false },
                 scrollBeyondLastLine: false,
-                wordWrap: 'on'
+                wordWrap: 'on',
+                // --- ADD THIS LINE ---
+                useShadowDOM: false 
             });
 
             instance.layout();
@@ -73,6 +75,20 @@ window.monacoEditor = {
     },
     
     layout: function (elementId) {
+        const instance = window.monacoEditor.instances[elementId];
+        if (instance) {
+            instance.layout();
+        }
+    },
+
+    // ---> ADD THE NEW FUNCTION HERE <---
+    refreshTheme: function (elementId) {
+        // Regenerates the dynamic <style> tags Blazor wiped out globally
+        if (typeof monaco !== 'undefined') {
+            monaco.editor.setTheme('vs-dark'); 
+        }
+        
+        // Forces the specific editor to recalculate its dimensions
         const instance = window.monacoEditor.instances[elementId];
         if (instance) {
             instance.layout();

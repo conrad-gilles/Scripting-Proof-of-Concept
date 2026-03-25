@@ -9,6 +9,7 @@
 @using Microsoft.EntityFrameworkCore
 @using Serilog
 @inject ConsoleService Console
+@inject IJSRuntime JSRuntime
 @inject ISccriptManagerDeleteAfter ScriptManager
 
 <PageTitle>Scripts</PageTitle>
@@ -190,7 +191,7 @@
     }
 
     // We instantiate the Helper object when the MonacoEditor reference actually exists.
-    protected override void OnAfterRender(bool firstRender)
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (_isEditing && _editorHelper == null && _editor != null)
         {
@@ -200,6 +201,13 @@
                 CurrentScriptId = _currentScriptId
             };
             StateHasChanged();
+        }
+
+        if (_isEditing)
+        {
+            // Tell Monaco to recalculate its theme/layout when the tab renders
+            // Using "edit-monaco-editor" because that's the EditorId you passed to the component
+            await JSRuntime.InvokeVoidAsync("window.monacoEditor.refreshTheme", "edit-monaco-editor");
         }
     }
 
