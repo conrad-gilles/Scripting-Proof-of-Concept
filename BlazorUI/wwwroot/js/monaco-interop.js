@@ -1,8 +1,8 @@
 window.monacoEditor = {
     _instance: null,
+    _typingTimer: null, // Timer for debouncing
 
-    initialize: function (elementId, initialValue, language) {
-        // Dispose stale instance before re-creating
+    initialize: function (elementId, initialValue, language, dotNetHelper) {
         if (window.monacoEditor._instance) {
             window.monacoEditor._instance.dispose();
             window.monacoEditor._instance = null;
@@ -25,6 +25,16 @@ window.monacoEditor = {
 
             // Force a layout pass so the editor measures itself correctly
             window.monacoEditor._instance.layout();
+            window.monacoEditor._instance.onDidChangeModelContent(function () {
+                // Clear the previous timer if the user is still typing
+                clearTimeout(window.monacoEditor._typingTimer);
+
+                // Set a new timer for 1 second (1000ms)
+                window.monacoEditor._typingTimer = setTimeout(function () {
+                    // Call the C# HandleCodeChange method
+                    dotNetHelper.invokeMethodAsync('HandleCodeChange');
+                }, 500);
+            });
         });
     },
 

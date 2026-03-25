@@ -36,7 +36,8 @@
     </div>
 
     <!-- We bind it to the _editor variable using @ref -->
-    <MonacoEditor @ref="_editor" InitialCode="@DefaultScript" />
+    <MonacoEditor @ref="_editor" InitialCode="@DefaultScript" OnCodeChanged="() => _editorHelper?.HandleValidate()" />
+
 
     <div style="height: @(Console.IsExpanded ? "300px" : "40px"); transition: height 0.3s ease-in-out; flex-shrink: 0;">
     </div>

@@ -5,65 +5,54 @@
 <div class="card border-0 flex-grow-1" style="min-height: 0;">
     <div class="card-body p-0"
          style="border-radius: 10px; overflow: hidden; background: #1e1e1e; color: #d4d4d4; text-align: left; height: 100%;">
-        <!-- Note: We make the ID dynamic in case you ever put TWO editors on one page -->
         <div id="@EditorId" style="height: 100%; width: 100%;"></div>
     </div>
 </div>
 
 @code {
-    [Parameter]
-    public string EditorId { get; set; } = "monaco-editor-container";
-
-    [Parameter]
-    public string InitialCode { get; set; } = string.Empty;
+    [Parameter] public string EditorId { get; set; } = "monaco-editor-container";
+    [Parameter] public string InitialCode { get; set; } = string.Empty;
+    [Parameter] public EventCallback OnCodeChanged { get; set; }
 
     private bool _editorReady = false;
+    private DotNetObjectReference<MonacoEditor>? _dotNetRef;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
-            await JS.InvokeVoidAsync(
-                "monacoEditor.initialize",
-                EditorId,
-                InitialCode,
-                "csharp"
-            );
+            _dotNetRef = DotNetObjectReference.Create(this);
+            await JS.InvokeVoidAsync("monacoEditor.initialize", EditorId, InitialCode, "csharp", _dotNetRef);
             _editorReady = true;
         }
     }
 
-    // Public method so the parent page can get the code
+    [JSInvokable]
+    public async Task HandleCodeChange()
+    {
+        if (OnCodeChanged.HasDelegate)
+        {
+            await OnCodeChanged.InvokeAsync();
+        }
+    }
+
     public async Task<string> GetValueAsync()
     {
         if (!_editorReady) return string.Empty;
         return await JS.InvokeAsync<string>("monacoEditor.getValue");
     }
 
-    // Add this to MonacoEditor.razor
     public async Task SetValueAsync(string value)
     {
-        if (_editorReady)
-        {
-            await JS.InvokeVoidAsync("monacoEditor.setValue", value);
-        }
-        else
-        {
-            // If the editor hasn't loaded yet, store it in InitialCode so it gets used when OnAfterRender runs
-            InitialCode = value;
-        }
+        if (_editorReady) await JS.InvokeVoidAsync("monacoEditor.setValue", value);
+        else InitialCode = value;
     }
 
-    // Public method to clear errors
     public async Task ClearErrorsAsync()
     {
-        if (_editorReady)
-        {
-            await JS.InvokeVoidAsync("monacoEditor.clearErrors");
-        }
+        if (_editorReady) await JS.InvokeVoidAsync("monacoEditor.clearErrors");
     }
 
-    // Public method to set errors
     public async Task SetErrorsAsync(List<object> errors)
     {
         if (_editorReady && errors.Any())
@@ -74,7 +63,7 @@
 
     public async ValueTask DisposeAsync()
     {
-        if (_editorReady)
-            await JS.InvokeVoidAsync("monacoEditor.dispose");
+        _dotNetRef?.Dispose();
+        if (_editorReady) await JS.InvokeVoidAsync("monacoEditor.dispose");
     }
 }
