@@ -8,6 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="bunit" Version="2.6.2" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.2" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
     <PackageReference Include="Moq" Version="4.20.72" />
@@ -19,13 +20,15 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\BlazorUI\BlazorUI.csproj" />
     <ProjectReference Include="..\sandbox\sandbox.csproj" />
     <ProjectReference Include="..\scripting\scripting.csproj" />
     <ProjectReference Include="..\Ember\Ember.csproj" />
-    <ProjectReference Include="..\BlazorUI\BlazorUI.csproj" />
+    <ProjectReference Include="..\sandbox.Tests\sandbox.Tests.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <Compile Include="..\Ember\GlobalUsings.cs" Link="GlobalUsings.cs" />
   </ItemGroup>
+
 </Project>
