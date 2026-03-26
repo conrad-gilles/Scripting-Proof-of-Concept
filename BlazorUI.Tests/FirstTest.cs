@@ -6,41 +6,29 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
 using EFModeling.EntityProperties.FluentAPI.Required;
 using Moq;
-// using Sandbox.Tests.Helpers;
+using Serilog;
+using Sandbox;
+
+// [assembly: Parallelize(Workers = 1, Scope = ExecutionScope.MethodLevel)]
 
 namespace BlazorUI.Tests;
 
 [TestClass]
 public class HelloWorldTest : BunitContext
 {
-    // REMOVE THIS LINE:
-    // ISccriptManagerDeleteAfter _scriptManager = TestHelper.InitScriptManager();
-
     [TestInitialize]
-    public void Setup()
+    public void SetupRealEnvironment()
     {
-        // 1. Setup Database Mock 
-        var options = new DbContextOptionsBuilder<ScriptDbContext>()
-            .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString()) // Use a unique DB name per test!
-            .Options;
+        Services.AddDbContextFactory<EFModeling.EntityProperties.FluentAPI.Required.ScriptDbContext>();
 
-        var mockDbFactory = new Mock<IDbContextFactory<ScriptDbContext>>();
-        mockDbFactory.Setup(f => f.CreateDbContextAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(() => new ScriptDbContext(options));
+        Services.AddLogging(builder => builder.AddSerilog(dispose: true));
+        Services.AddSingleton<IUserSession, SandBoxUserSession>();
 
-        Services.AddSingleton(mockDbFactory.Object);
-
-        // 2. Mock the ScriptManager entirely, instead of using the heavy TestHelper
-        // Since we are strictly testing UI rendering, we don't need the real Roslyn compiler!
-        var mockScriptManager = new Mock<ISccriptManagerDeleteAfter>();
-
-        mockScriptManager.Setup(m => m.ListScripts(It.IsAny<CustomerScriptFilter>(), true))
-            .ReturnsAsync(new System.Collections.Generic.List<CustomerScript>());
-
-        mockScriptManager.Setup(m => m.GetRunningApiVersion())
-            .Returns(1);
-
-        Services.AddSingleton<ISccriptManagerDeleteAfter>(mockScriptManager.Object);
+        ScriptingServiceCollectionExtensions.AddEmberScripting(
+            Services,
+            EmberMethods.GetReferences(),
+            EmberMethods.GetEmberApiVersion()
+        );
     }
 
     [TestMethod]
