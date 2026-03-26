@@ -19,7 +19,7 @@ namespace Ember.Simulation
             CustomerScript script = await _scriptManager.GetScript(id);
             if (script.SourceCode == null)
             {
-                throw new Exception();
+                throw new SourceCodeNullWhenDowngradeException();
             }
             var vali = _scriptManager.BasicValidationBeforeCompiling(script.SourceCode!);
             int? apiV = null;
@@ -32,7 +32,7 @@ namespace Ember.Simulation
 
             if (contextVersionMap.Keys.Contains((int)apiV) == false)
             {
-                throw new Exception("No Context class defined in " + nameof(contextVersionMap) + " for the passed API version.");
+                throw new NoContextClassDefinedForApiVException("No Context class defined in " + nameof(contextVersionMap) + " for the passed API version.");
                 // might be better to instead return latest version?
                 // recentType = contextVersionMap.Last().Value;
             }
@@ -54,12 +54,12 @@ namespace Ember.Simulation
                     }
                     catch (Exception e)
                     {
-                        throw new Exception("CreateContextByDowngrade failed in while.", e);
+                        throw new DowngradeFailedInEmberException("CreateContextByDowngrade failed in while.", e);
                     }
                 }
                 if (iterations > maxIterations)
                 {
-                    throw new Exception("Somethign went wrong trying to downgrade the context");
+                    throw new LoopExecutedTooManyTimesException("Somethign went wrong trying to downgrade the context");
                 }
                 iterations++;
             }

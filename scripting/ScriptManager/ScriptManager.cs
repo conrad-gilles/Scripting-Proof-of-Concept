@@ -111,7 +111,7 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
         _logger.LogTrace("Entered {MethodName} in {ClassName} with scriptId: {ScriptId} and targetApiVersion: {TargetApiVersion}.", nameof(CompileScript), nameof(ScriptManagerFacade), scriptId, targetApiVersion);
 
         CustomerScript script = await _db.GetCustomerScript(scriptId);
-        await _db.CreateAndInsertCompiledCache(script, apiV: targetApiVersion);
+        await _db.CreateAndInsertCompiledScript(script, apiV: targetApiVersion);
     }
 
     // Compiles all compatible scripts for a new API version

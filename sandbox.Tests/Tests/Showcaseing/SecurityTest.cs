@@ -48,7 +48,7 @@ public class SecurityTests
     [TestMethod]
     public async Task WhileTrueScript()
     {
-        await Assert.ThrowsExceptionAsync<Ember.Scripting.ScriptExecutionException>(async () =>
+        await Assert.ThrowsExceptionAsync<Ember.Scripting.ActionScriptExecutionException>(async () =>
         {
             string sourceCode = TestHelper.GetSC().sourceCodeWhileTrue;
             // ScriptNameType scriptRecord = await ScriptManager!.CreateScriptUsingNameType(sourceCode!);

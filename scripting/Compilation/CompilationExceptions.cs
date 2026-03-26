@@ -69,6 +69,19 @@ public class ForbiddenNamespaceException : CompilationException
         AttemptedNamespace = attemptedNamespace;
     }
 }
+public class ForbiddenTypeAccessException : ForbiddenNamespaceException
+{
+    public new string? AttemptedNamespace { get; }
+
+    public ForbiddenTypeAccessException() : base() { }
+    public ForbiddenTypeAccessException(string message) : base(message) { }
+    public ForbiddenTypeAccessException(string message, Exception innerException) : base(message, innerException) { }
+
+    public ForbiddenTypeAccessException(string message, string attemptedNamespace) : base(message)
+    {
+        AttemptedNamespace = attemptedNamespace;
+    }
+}
 
 public class ReferencesForVersionNotFound : CompilationException
 {
@@ -82,4 +95,10 @@ public class CouldNotMatchBaseTypeInCompiler : CompilationException
     public CouldNotMatchBaseTypeInCompiler() : base() { }
     public CouldNotMatchBaseTypeInCompiler(string message) : base(message) { }
     public CouldNotMatchBaseTypeInCompiler(string message, Exception innerException) : base(message, innerException) { }
+}
+public class CouldNotMatchBaseTypeInRecord : CompilationException
+{
+    public CouldNotMatchBaseTypeInRecord() : base() { }
+    public CouldNotMatchBaseTypeInRecord(string message) : base(message) { }
+    public CouldNotMatchBaseTypeInRecord(string message, Exception innerException) : base(message, innerException) { }
 }

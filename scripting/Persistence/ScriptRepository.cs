@@ -143,7 +143,7 @@ internal class ScriptRepository
         {
             if (item > highestV)
             {
-                throw new ScriptRepositoryException(nameof(ClearScriptCache) + " failed in " + nameof(ScriptRepository) + " because for some reason the passed Recent Version is not the highest in the db.");
+                throw new ClearScriptCacheException(nameof(ClearScriptCache) + " failed in " + nameof(ScriptRepository) + " because for some reason the passed Recent Version is not the highest in the db.");
             }
         }
         for (int i = 0; i <= currentApiVersion; i++)    //checks above if current APi is highest
@@ -152,9 +152,6 @@ internal class ScriptRepository
             await DeleteScriptCache(scriptId, i);
             _logger.LogInformation("Deleted: " + i);
             // Console.WriteLine("Deleted: " + i);
-
-
-
         }
 
     }
@@ -178,7 +175,7 @@ internal class ScriptRepository
             {
                 try
                 {
-                    await CreateAndInsertCompiledCache(script, itemN.ApiVersion);
+                    await CreateAndInsertCompiledScript(script, itemN.ApiVersion);
                     _logger.LogInformation("Mock recompilation of old V" + itemN.ApiVersion);
                     // Console.WriteLine("Mock recompilation of old V" + itemN.ApiVersion);
                 }
@@ -187,7 +184,7 @@ internal class ScriptRepository
             }
             if (itemN.ApiVersion == currentApiVersion)  //this is only temporary until the if statement above works
             {
-                await CreateAndInsertCompiledCache(script);
+                await CreateAndInsertCompiledScript(script);
                 _logger.LogInformation("Real recompilation of new V" + itemN.ApiVersion + " , normal if twice");
                 // Console.WriteLine("Real recompilation of new V" + itemN.ApiVersion + " , normal if twice");
                 break;
@@ -200,7 +197,7 @@ internal class ScriptRepository
     {
         await DeleteScriptCache(scriptId, apiVersion);
         CustomerScript script = await GetCustomerScript(scriptId);
-        await CreateAndInsertCompiledCache(script, apiVersion);
+        await CreateAndInsertCompiledScript(script, apiVersion);
     }
     public async Task<string> GetCompilationErrors(Guid scriptId, int? apiVersion = null)
     {
@@ -296,7 +293,7 @@ internal class ScriptRepository
 
             if (currentImplementation == false)
             {
-                await CreateAndInsertCompiledCache(item);
+                await CreateAndInsertCompiledScript(item);
             }
         }
     }
@@ -354,18 +351,18 @@ internal class ScriptRepository
                 db.CustomerScripts.Add(script);
                 await db.SaveChangesAsync();
 
-                await CreateAndInsertCompiledCache(script, oldApiV);
+                await CreateAndInsertCompiledScript(script, oldApiV);
                 return script;
             }
             else
             {
-                throw new ScriptRepositoryException(nameof(CreateAndInsertCustomerScript) + " failed in " + nameof(ScriptRepository) + " because a duplicate script was already in the database!");
+                throw new CreateAndInsertCustomerScriptException(nameof(CreateAndInsertCustomerScript) + " failed in " + nameof(ScriptRepository) + " because a duplicate script was already in the database!");
             }
         }
     }
-    public async Task CreateAndInsertCompiledCache(CustomerScript script, int? apiV = null)
+    public async Task CreateAndInsertCompiledScript(CustomerScript script, int? apiV = null)
     {
-        _logger.LogTrace("Entered {MethodName} in {ClassName} with ID: {ScriptId}.", nameof(CreateAndInsertCompiledCache), nameof(ScriptRepository), script.Id);
+        _logger.LogTrace("Entered {MethodName} in {ClassName} with ID: {ScriptId}.", nameof(CreateAndInsertCompiledScript), nameof(ScriptRepository), script.Id);
 
         using (var db = await _contextFactory.CreateDbContextAsync())
         {
@@ -381,7 +378,7 @@ internal class ScriptRepository
             {
                 _logger.LogInformation("Skipping insert of: " + getTupleFromVal.ClassName + " because it already exists already exists.");
                 // Console.WriteLine("Skipping insert of: " + getTupleFromVal.ClassName + " because it already exists already exists.");
-                throw new ScriptRepositoryException(nameof(CreateAndInsertCompiledCache) + " failed in " + nameof(ScriptRepository) + "more details: " + "Skipping insert of: " + getTupleFromVal.ClassName + " because it already exists already exists."); ;
+                throw new CreateAndInsertCompiledScriptException(nameof(CreateAndInsertCompiledScript) + " failed in " + nameof(ScriptRepository) + "more details: " + "Skipping insert of: " + getTupleFromVal.ClassName + " because it already exists already exists."); ;
                 // return;
             }
             else
@@ -447,7 +444,7 @@ internal class ScriptRepository
             if (existingScript == null)
             {
                 _logger.LogDebug("Somethign went wrong retrieving your script, we could not find it.");
-                throw new ScriptRepositoryException("Could not find the script what needs to be updated.");
+                throw new UpdateScriptException("Could not find the script what needs to be updated.");
             }
 
             if (allowFaultySave == false)
@@ -584,7 +581,7 @@ internal class ScriptRepository
                 sScriptType = nameof(IGeneratorConditionScript);
                 break;
             default:
-                throw new ScriptRepositoryException(message: "Could not convert Script type enum to string");
+                throw new GetScriptIdException(message: "Could not convert Script type enum to string");
         }
         using (var db = await _contextFactory.CreateDbContextAsync())
         {
@@ -601,7 +598,7 @@ internal class ScriptRepository
             List<CustomerScript> allScriptSC = await GetAllCustomerScripts();
             for (int i = 0; i < allScriptSC.Count(); i++)
             {
-                await CreateAndInsertCompiledCache(allScriptSC[i]);
+                await CreateAndInsertCompiledScript(allScriptSC[i]);
                 await db.SaveChangesAsync();
             }
         }
@@ -742,7 +739,7 @@ internal class ScriptRepository
                 catch (Exception e)
                 {
                     _logger.LogError("Could not add cache to DB." + e.ToString());
-                    throw new ScriptRepositoryException("Could not add cache to DB.", e);
+                    throw new DetectDuplicatesException("Could not add cache to DB.", e);
                 }
 
             }
@@ -801,7 +798,7 @@ internal class ScriptRepository
             catch (Exception e)
             {
                 _logger.LogError("Failed to delete Script Cache." + e.ToString());
-                throw new ScriptRepositoryException("Failed to delete Script Cache.");
+                throw new RemoveDuplicatesException("Failed to delete Script Cache.");
             }
         }
     }

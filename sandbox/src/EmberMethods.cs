@@ -137,7 +137,7 @@ public class EmberMethods
         }
         if (failedInserted != "")
         {
-            throw new ScriptRepositoryException(message: "Could not insert scripts : " + failedInserted + ", Successfully inserted script: " + successfullyInserted);
+            throw new CompileAllScriptsInFolderException(message: "Could not insert scripts : " + failedInserted + ", Successfully inserted script: " + successfullyInserted);
         }
     }
 

@@ -50,7 +50,7 @@ public class ScriptRepositoryTests
         Assert.IsTrue(getCache != null && (getCache.ApiVersion == EmberMethods.GetEmberApiVersion()));
         Assert.IsTrue(after.CompiledCaches.Any(c => c.AssemblyBytes != null && c.AssemblyBytes.Length >= 1));
 
-        var e = await Assert.ThrowsExceptionAsync<Ember.Scripting.ScriptRepositoryException>(async () =>
+        var e = await Assert.ThrowsExceptionAsync<Ember.Scripting.CreateAndInsertCompiledScriptException>(async () =>
          {
              await _facade.CompileScript(id, EmberMethods.GetEmberApiVersion());
              var after3 = await _facade.GetScript(id, includeCaches: true);
@@ -137,7 +137,7 @@ public class ScriptRepositoryTests
                     catch (Exception e)
                     {
 
-                        throw new ScriptExecutionException("random message2", e);
+                        throw new Ember.Scripting.CompiledScriptWasTooLargeException("random message2", e);
                     }
                 }
                 catch (Exception e)
@@ -173,7 +173,7 @@ public class ScriptRepositoryTests
 
             Exception exAtIndex2 = ExceptionHelper.GetExceptionFromChain(e, 2);
             Console.WriteLine(exAtIndex2.GetType().Name);
-            Assert.IsInstanceOfType(exAtIndex2, typeof(ScriptExecutionException));
+            Assert.IsInstanceOfType(exAtIndex2, typeof(CompiledScriptWasTooLargeException));
 
             Exception exAtIndex3 = ExceptionHelper.GetExceptionFromChain(e, 3);
             Console.WriteLine(exAtIndex3.GetType().Name);
@@ -211,7 +211,7 @@ public class ScriptRepositoryTests
 
             Exception exAtNegIndex2 = ExceptionHelper.GetExceptionFromChainReversed(e, 2);
             Console.WriteLine(exAtNegIndex2.GetType().Name);
-            Assert.IsInstanceOfType(exAtNegIndex2, typeof(ScriptExecutionException));
+            Assert.IsInstanceOfType(exAtNegIndex2, typeof(CompiledScriptWasTooLargeException));
 
             Exception exAtNegIndex3 = ExceptionHelper.GetExceptionFromChainReversed(e, 3);
             Console.WriteLine(exAtNegIndex3.GetType().Name);

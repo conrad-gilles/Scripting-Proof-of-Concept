@@ -279,7 +279,7 @@ internal class ScriptCompiler
                     if (nameSpaceEx != null && (illegal == nameSpaceEx || nameSpaceEx.StartsWith(illegal + ".")))
                     {
                         _logger.LogError("Script tried to use a illegal type.");
-                        throw new ForbiddenNamespaceException($"Usage of forbidden type: {symbol.ToDisplayString()}");
+                        throw new ForbiddenTypeAccessException($"Usage of forbidden type: {symbol.ToDisplayString()}");
                     }
                 }
             }

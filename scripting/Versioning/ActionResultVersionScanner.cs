@@ -29,17 +29,17 @@ public static class ActionResultVersionScanner
             var metaDataAttribute = typeInfo.GetCustomAttribute<MetaDataActionResult>();
             if (metaDataAttribute == null)
             {
-                throw new MetaDataAttribueNullException(message: "MetdaDataAttribute was mull, which means version would have been null.");
+                throw new ActionResultVSNullException(message: "MetdaDataAttribute was mull, which means version would have been null.");
             }
             int version = metaDataAttribute.Version;
 
             if (contextVersionMap.Values.Contains(currentType))
             {
-                throw new TypeMoreThanOnceInAssemblyException("Type was more than once in the assembly probably with more than 1 Version property");
+                throw new TypeMoreThanOnceInAssemblyARVSException("Type was more than once in the assembly probably with more than 1 Version property");
             }
             if (contextVersionMap.ContainsKey(version))
             {
-                throw new VersionIntMoreThanOnceInAssemblyException("Api version int more than once in the assembly should not happen.");
+                throw new VersionIntMoreThanOnceInAssemblyARVSException("Api version int more than once in the assembly should not happen.");
             }
             contextVersionMap.Add(version, currentType);
         }

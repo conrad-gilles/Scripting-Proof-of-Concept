@@ -1,15 +1,21 @@
 # Todo
 
 ### Always check those
-- maybe assign scripts diffrent types which allow for longer execution times maybe add also something similar for critical...
+
+- calling basicvalidation after .GetScript call is redundant and should be removed for performance just use script.Name etc
+
+- maybe switch globally in the whole application to always pass the CustomerScript object instead of the id or name
+
+- maybe assign scripts diffrent types which allow for longer execution times maybe add also something similar for critical... (maybe by adding an optional attribute above a script which declares the time )
 - always have the README.md snippets up to date
 - remove all occurences of throw new Exception 
 - ideally 4 references for every specific exception (3 for constructors 1 for atualusage)
 - create new exception classes for them and add them to the respective files
-- get rid of the generic DBhelper exception etc and either replace them with specific one or remove them if its just catch->throw
+- get rid of the generic DBhelper exception etc and either replace them with specific one or remove them if its just catch->throw 
 
 ### Main Todos
 
+- really deeply test basic validation more in depth every aspect of the script should be tested
 - get 100% test coverage
 - put all GenCOntext in a namespace like maybe Ember.Scripting.GeneratorContextsV5 etc
 - make GeneratorContextSF mayeb an interface?

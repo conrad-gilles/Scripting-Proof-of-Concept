@@ -7,23 +7,93 @@ public abstract class VersioningExceptions : ScriptingFrameworkException
     public VersioningExceptions(string message, Exception innerException) : base(message, innerException) { }
 
 }
-public class MetaDataAttribueNullException : VersioningExceptions
+public abstract class MetaDataAttribueNullException : VersioningExceptions
 {
     public MetaDataAttribueNullException() : base() { }
     public MetaDataAttribueNullException(string message) : base(message) { }
     public MetaDataAttribueNullException(string message, Exception innerException) : base(message, innerException) { }
 }
-
-public class TypeMoreThanOnceInAssemblyException : VersioningExceptions
+public class ActionResultVSNullException : MetaDataAttribueNullException
+{
+    public ActionResultVSNullException() : base() { }
+    public ActionResultVSNullException(string message) : base(message) { }
+    public ActionResultVSNullException(string message, Exception innerException) : base(message, innerException) { }
+}
+public class MetaDataAttribueNullSVSException : MetaDataAttribueNullException
+{
+    public MetaDataAttribueNullSVSException() : base() { }
+    public MetaDataAttribueNullSVSException(string message) : base(message) { }
+    public MetaDataAttribueNullSVSException(string message, Exception innerException) : base(message, innerException) { }
+}
+public class MetaDataAttribueNullCVSCException : MetaDataAttribueNullException
+{
+    public MetaDataAttribueNullCVSCException() : base() { }
+    public MetaDataAttribueNullCVSCException(string message) : base(message) { }
+    public MetaDataAttribueNullCVSCException(string message, Exception innerException) : base(message, innerException) { }
+}
+public class MetaDataAttribueNullCVSIException : MetaDataAttribueNullException
+{
+    public MetaDataAttribueNullCVSIException() : base() { }
+    public MetaDataAttribueNullCVSIException(string message) : base(message) { }
+    public MetaDataAttribueNullCVSIException(string message, Exception innerException) : base(message, innerException) { }
+}
+public abstract class TypeMoreThanOnceInAssemblyException : VersioningExceptions
 {
     public TypeMoreThanOnceInAssemblyException() : base() { }
     public TypeMoreThanOnceInAssemblyException(string message) : base(message) { }
     public TypeMoreThanOnceInAssemblyException(string message, Exception innerException) : base(message, innerException) { }
 }
-
-public class VersionIntMoreThanOnceInAssemblyException : VersioningExceptions
+public class TypeMoreThanOnceInAssemblyCVSCException : VersioningExceptions
+{
+    public TypeMoreThanOnceInAssemblyCVSCException() : base() { }
+    public TypeMoreThanOnceInAssemblyCVSCException(string message) : base(message) { }
+    public TypeMoreThanOnceInAssemblyCVSCException(string message, Exception innerException) : base(message, innerException) { }
+}
+public class TypeMoreThanOnceInAssemblyARVSException : TypeMoreThanOnceInAssemblyException
+{
+    public TypeMoreThanOnceInAssemblyARVSException() : base() { }
+    public TypeMoreThanOnceInAssemblyARVSException(string message) : base(message) { }
+    public TypeMoreThanOnceInAssemblyARVSException(string message, Exception innerException) : base(message, innerException) { }
+}
+public class TypeMoreThanOnceInAssemblySVSException : TypeMoreThanOnceInAssemblyException
+{
+    public TypeMoreThanOnceInAssemblySVSException() : base() { }
+    public TypeMoreThanOnceInAssemblySVSException(string message) : base(message) { }
+    public TypeMoreThanOnceInAssemblySVSException(string message, Exception innerException) : base(message, innerException) { }
+}
+public class TypeMoreThanOnceInAssemblyCVSIException : TypeMoreThanOnceInAssemblyException
+{
+    public TypeMoreThanOnceInAssemblyCVSIException() : base() { }
+    public TypeMoreThanOnceInAssemblyCVSIException(string message) : base(message) { }
+    public TypeMoreThanOnceInAssemblyCVSIException(string message, Exception innerException) : base(message, innerException) { }
+}
+public abstract class VersionIntMoreThanOnceInAssemblyException : VersioningExceptions
 {
     public VersionIntMoreThanOnceInAssemblyException() : base() { }
     public VersionIntMoreThanOnceInAssemblyException(string message) : base(message) { }
     public VersionIntMoreThanOnceInAssemblyException(string message, Exception innerException) : base(message, innerException) { }
+}
+public class VersionIntMoreThanOnceInAssemblyARVSException : VersionIntMoreThanOnceInAssemblyException
+{
+    public VersionIntMoreThanOnceInAssemblyARVSException() : base() { }
+    public VersionIntMoreThanOnceInAssemblyARVSException(string message) : base(message) { }
+    public VersionIntMoreThanOnceInAssemblyARVSException(string message, Exception innerException) : base(message, innerException) { }
+}
+public class VersionIntMoreThanOnceInAssemblyCVSCException : VersionIntMoreThanOnceInAssemblyException
+{
+    public VersionIntMoreThanOnceInAssemblyCVSCException() : base() { }
+    public VersionIntMoreThanOnceInAssemblyCVSCException(string message) : base(message) { }
+    public VersionIntMoreThanOnceInAssemblyCVSCException(string message, Exception innerException) : base(message, innerException) { }
+}
+public class VersionIntMoreThanOnceInAssemblySVSException : VersionIntMoreThanOnceInAssemblyException
+{
+    public VersionIntMoreThanOnceInAssemblySVSException() : base() { }
+    public VersionIntMoreThanOnceInAssemblySVSException(string message) : base(message) { }
+    public VersionIntMoreThanOnceInAssemblySVSException(string message, Exception innerException) : base(message, innerException) { }
+}
+public class VersionIntMoreThanOnceInAssemblyCVSIException : VersionIntMoreThanOnceInAssemblyException
+{
+    public VersionIntMoreThanOnceInAssemblyCVSIException() : base() { }
+    public VersionIntMoreThanOnceInAssemblyCVSIException(string message) : base(message) { }
+    public VersionIntMoreThanOnceInAssemblyCVSIException(string message, Exception innerException) : base(message, innerException) { }
 }

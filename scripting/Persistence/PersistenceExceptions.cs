@@ -6,14 +6,61 @@ public abstract class PersistenceException : ScriptingFrameworkException
     public PersistenceException(string message) : base(message) { }
     public PersistenceException(string message, Exception innerException) : base(message, innerException) { }
 }
-public class ScriptRepositoryException : PersistenceException
+public abstract class ScriptRepositoryException : PersistenceException
 {
     public ScriptRepositoryException() : base() { }
     public ScriptRepositoryException(string message) : base(message) { }
     public ScriptRepositoryException(string message, Exception innerException) : base(message, innerException) { }
 }
 
-
+public class ClearScriptCacheException : ScriptRepositoryException
+{
+    public ClearScriptCacheException() : base() { }
+    public ClearScriptCacheException(string message) : base(message) { }
+    public ClearScriptCacheException(string message, Exception innerException) : base(message, innerException) { }
+}
+public class CompileAllScriptsInFolderException : ScriptRepositoryException
+{
+    public CompileAllScriptsInFolderException() : base() { }
+    public CompileAllScriptsInFolderException(string message) : base(message) { }
+    public CompileAllScriptsInFolderException(string message, Exception innerException) : base(message, innerException) { }
+}
+public class CreateAndInsertCustomerScriptException : ScriptRepositoryException
+{
+    public CreateAndInsertCustomerScriptException() : base() { }
+    public CreateAndInsertCustomerScriptException(string message) : base(message) { }
+    public CreateAndInsertCustomerScriptException(string message, Exception innerException) : base(message, innerException) { }
+}
+public class CreateAndInsertCompiledScriptException : ScriptRepositoryException
+{
+    public CreateAndInsertCompiledScriptException() : base() { }
+    public CreateAndInsertCompiledScriptException(string message) : base(message) { }
+    public CreateAndInsertCompiledScriptException(string message, Exception innerException) : base(message, innerException) { }
+}
+public class UpdateScriptException : ScriptRepositoryException
+{
+    public UpdateScriptException() : base() { }
+    public UpdateScriptException(string message) : base(message) { }
+    public UpdateScriptException(string message, Exception innerException) : base(message, innerException) { }
+}
+public class GetScriptIdException : ScriptRepositoryException
+{
+    public GetScriptIdException() : base() { }
+    public GetScriptIdException(string message) : base(message) { }
+    public GetScriptIdException(string message, Exception innerException) : base(message, innerException) { }
+}
+public class DetectDuplicatesException : ScriptRepositoryException
+{
+    public DetectDuplicatesException() : base() { }
+    public DetectDuplicatesException(string message) : base(message) { }
+    public DetectDuplicatesException(string message, Exception innerException) : base(message, innerException) { }
+}
+public class RemoveDuplicatesException : ScriptRepositoryException
+{
+    public RemoveDuplicatesException() : base() { }
+    public RemoveDuplicatesException(string message) : base(message) { }
+    public RemoveDuplicatesException(string message, Exception innerException) : base(message, innerException) { }
+}
 public class SaveScriptWithoutCompilingException : PersistenceException
 {
     public SaveScriptWithoutCompilingException() : base() { }
