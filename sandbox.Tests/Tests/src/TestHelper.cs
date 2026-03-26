@@ -144,6 +144,8 @@ public class TestHelper
 
         return scriptManager = provider.GetRequiredService<ISccriptManagerDeleteAfter>();
     }
+
+
 }
 
 public record TestHelperRecord

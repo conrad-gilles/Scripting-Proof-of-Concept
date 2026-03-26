@@ -17,7 +17,8 @@ public static class ScriptVersionScanner
 
         //The following six lines were ai generated
         var subClasses = AppDomain.CurrentDomain.GetAssemblies()
-            .SelectMany(assembly => assembly.GetTypes())
+            // .SelectMany(assembly => assembly.GetTypes())
+            .SelectMany(assembly => VersionScannerHelper.GetLoadableTypes(assembly))
             .Where(t => t.IsInterface && t.GetCustomAttribute<MetaDataIGeneratorScript>() != null)
             .GroupBy(t => t.Namespace + "." + t.Name)
             .Select(g => g.First())

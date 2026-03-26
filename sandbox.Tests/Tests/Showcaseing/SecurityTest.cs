@@ -5,6 +5,7 @@ using Serilog;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Ember.Simulation;
+using Sandbox;
 
 [TestClass]
 public class SecurityTests
@@ -69,5 +70,49 @@ public class SecurityTests
             Console.WriteLine("Type name: " + ar.GetType().FullName);
             Console.WriteLine("Returned result: " + ar);
         });
+    }
+
+    [TestMethod]
+    public void BasicValidationBeforeCompilingTest()
+    {
+        string sourceCode = "";
+
+        Exception ex = Assert.ThrowsException<Ember.Scripting.ValidationBeforeCompilationException>(() =>
+        {
+            ScriptManager.BasicValidationBeforeCompiling(sourceCode);
+        });
+        ExceptionHelper.PrintExceptionListToConsole(ex);
+
+        sourceCode = "public class ShouldFail{}";
+        ex = Assert.ThrowsException<Ember.Scripting.ValidationBeforeCompilationException>(() =>
+       {
+           ScriptManager.BasicValidationBeforeCompiling(sourceCode);
+       });
+        Assert.IsTrue(ExceptionHelper.GetExceptionFromChainReversed(ex, 0).GetType() == typeof(VersionIntNotAssignedException));
+        ExceptionHelper.PrintExceptionListToConsole(ex);
+
+        sourceCode = TestHelper.GetSC().sourceCodeIllegalUsings;
+
+        ex = Assert.ThrowsException<Ember.Scripting.ValidationBeforeCompilationException>(() =>
+               {
+                   ScriptManager.BasicValidationBeforeCompiling(sourceCode);
+               });
+        ExceptionHelper.PrintExceptionListToConsole(ex);
+
+        sourceCode = TestHelper.GetSC().sourceCodePreventUsage;
+
+        ex = Assert.ThrowsException<Ember.Scripting.ValidationBeforeCompilationException>(() =>
+               {
+                   ScriptManager.BasicValidationBeforeCompiling(sourceCode);
+               });
+        ExceptionHelper.PrintExceptionListToConsole(ex);
+
+        // sourceCode = TestHelper.GetSC().sourceCodeMissingUsing;  //todo doesnt work in validation yet only fails when trying to compile
+
+        // ex = Assert.ThrowsException<Ember.Scripting.ValidationBeforeCompilationException>(() =>
+        //        {
+        //            ScriptManager.BasicValidationBeforeCompiling(sourceCode);
+        //        });
+        // ExceptionHelper.PrintExceptionListToConsole(ex);
     }
 }

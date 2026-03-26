@@ -56,12 +56,15 @@ public class ExceptionHelper    //for future to traverse exception chain
         return exceptions;
     }
 
-    public static void PrintExceptionListToConsole(Exception ex)
+    public static string PrintExceptionListToConsole(Exception ex)
     {
+        string returnedString = "";
         List<Exception> ls = GetExceptionList(ex);
         for (int i = 0; i < ls.Count(); i++)
         {
-            Console.WriteLine("Exception " + i + " :" + ls[i].Message);
+            Console.WriteLine("Exception " + i + " :" + ls[i].GetType().Name);
+            returnedString = returnedString + "Exception " + i + " :" + ls[i].Message;
         }
+        return returnedString;
     }
 }

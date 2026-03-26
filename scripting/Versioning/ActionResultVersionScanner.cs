@@ -46,3 +46,21 @@ public static class ActionResultVersionScanner
         return contextVersionMap;
     }
 }
+
+public static class VersionScannerHelper
+{
+    //Ai generated to fix a bug when running bUnit tests
+    public static IEnumerable<Type> GetLoadableTypes(Assembly assembly)
+    {
+        try
+        {
+            return assembly.GetTypes();
+        }
+        catch (System.Reflection.ReflectionTypeLoadException e)
+        {
+            // e.Types contains the types that were successfully loaded, 
+            // but it may also contain nulls for the ones that failed.
+            return e.Types.Where(t => t != null)!;
+        }
+    }
+}

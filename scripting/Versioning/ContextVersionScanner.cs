@@ -26,7 +26,8 @@ public static class ContextVersionScanner
         Dictionary<int, Type> contextVersionMap = new();
         //the following 4 lines were ai generated
         var subClasses = AppDomain.CurrentDomain.GetAssemblies()
-                   .SelectMany(assembly => assembly.GetTypes())
+                    //    .SelectMany(assembly => assembly.GetTypes())
+                    .SelectMany(assembly => VersionScannerHelper.GetLoadableTypes(assembly))
                    .Where(t => t.IsClass && !t.IsAbstract && t.IsSubclassOf(baseType))
                    .ToList();
 
@@ -61,10 +62,16 @@ public static class ContextVersionScanner
     {
         Dictionary<int, Type> contextVersionMap = new();
 
+        // var subClasses = AppDomain.CurrentDomain.GetAssemblies()
+        //     .SelectMany(assembly => assembly.GetTypes())
+        //     .Where(t => t.IsInterface && baseType.IsAssignableFrom(t) && t != baseType)
+        //     .ToList();
+
+        //AiGenerated Linq queries
         var subClasses = AppDomain.CurrentDomain.GetAssemblies()
-            .SelectMany(assembly => assembly.GetTypes())
-            .Where(t => t.IsInterface && baseType.IsAssignableFrom(t) && t != baseType)
-            .ToList();
+           .SelectMany(assembly => VersionScannerHelper.GetLoadableTypes(assembly))
+           .Where(t => t.IsInterface && baseType.IsAssignableFrom(t) && t != baseType)
+           .ToList();
 
         for (int i = 0; i < subClasses.Count(); i++)
         {
@@ -90,4 +97,6 @@ public static class ContextVersionScanner
 
         return contextVersionMap;
     }
+
+
 }
