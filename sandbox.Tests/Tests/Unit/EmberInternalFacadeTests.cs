@@ -83,12 +83,12 @@ public class EmberInternalFacadeTests
         // Type scriptType=script.GetScriptType();
         ActiveActionResult ar = await _internalScriptManager.ExecuteScript<IGeneratorActionScript>(script.ScriptName!, ctx);
 
-        Console.WriteLine("Name: " + script.ScriptName + ", ScriptType: " + script.GetScriptTypeEnum());
+        Console.WriteLine("Name: " + script.ScriptName + ", ScriptType: " + script.GetScriptType().Name);
         Console.WriteLine("Type name: " + ar.GetType().FullName);
         Console.WriteLine("Returned result: " + ar);
 
         Assert.IsTrue(script.ScriptName == "AddPediatricTestsV2");
-        Assert.IsTrue(script.GetScriptTypeEnum() == ScriptTypes.GeneratorActionScript);
+        Assert.IsTrue(script.GetScriptType() == typeof(IGeneratorActionScript));
         Assert.IsTrue(ar.ToString().Contains("[Message contains either failure or succes: ] Pediatric tests added"));
 
         Exception e = await Assert.ThrowsExceptionAsync<Ember.Scripting.CreateAndInsertCustomerScriptException>(async () =>
@@ -101,12 +101,12 @@ public class EmberInternalFacadeTests
         ctx = _internalScriptManager!.CreateContext(_obj.labOrder, _obj.vaccine);
         ar = await _internalScriptManager.ExecuteScript<IGeneratorActionScript>(script.ScriptName!, ctx);
 
-        Console.WriteLine("Name: " + script.ScriptName + ", ScriptType: " + script.GetScriptTypeEnum());
+        Console.WriteLine("Name: " + script.ScriptName + ", ScriptType: " + script.GetScriptType());
         Console.WriteLine("Type name: " + ar.GetType().FullName);
         Console.WriteLine("Returned result: " + ar);
 
         Assert.IsTrue(script.ScriptName == "AddPediatricTestsV4");
-        Assert.IsTrue(script.GetScriptTypeEnum() == ScriptTypes.GeneratorActionScript);
+        Assert.IsTrue(script.GetScriptType() == typeof(IGeneratorActionScript));
         Assert.IsTrue(ar.ToString().Contains("[Message contains either failure or succes: ] Pediatric tests added V3"));
         // Assert.IsTrue(false);
     }
@@ -128,12 +128,12 @@ public class EmberInternalFacadeTests
 
         ActiveActionResult ar = await _internalScriptManager!.ExecuteScript<IGeneratorActionScript>(scrip.ScriptName!, ctx);
 
-        Console.WriteLine("Name: " + scrip.ScriptName! + ", ScriptType: " + scrip.GetScriptTypeEnum());
+        Console.WriteLine("Name: " + scrip.ScriptName! + ", ScriptType: " + scrip.GetScriptType());
         Console.WriteLine("Type name: " + ar.GetType().FullName);
         Console.WriteLine("Returned result: " + ar);
 
         Assert.IsTrue(scrip.ScriptName == "AddPediatricTestsV2");
-        Assert.IsTrue(scrip.GetScriptTypeEnum() == ScriptTypes.GeneratorActionScript);
+        Assert.IsTrue(scrip.GetScriptType() == typeof(IGeneratorActionScript));
         Assert.IsTrue(ar.ToString().Contains("[Message contains either failure or succes: ] Pediatric tests added"));
 
         // Assert.IsTrue(false);

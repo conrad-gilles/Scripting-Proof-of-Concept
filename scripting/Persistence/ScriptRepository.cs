@@ -318,18 +318,33 @@ internal class ScriptRepository
             }
             var validationRecord = _compiler.BasicValidationBeforeCompiling(scriptString);
 
+
+
             string scriptType;
-            switch (validationRecord.BaseTypeName)
+            if (validationRecord.ScriptType == typeof(IGeneratorActionScript))
             {
-                case ScriptTypes.GeneratorActionScript:
-                    scriptType = nameof(IGeneratorActionScript);
-                    break;
-                case ScriptTypes.GeneratorConditionScript:
-                    scriptType = nameof(IGeneratorConditionScript);
-                    break;
-                default:
-                    throw new CouldNotMatchBaseTypeInPersistence("No valid type");
+                scriptType = nameof(IGeneratorActionScript);
             }
+            else if (validationRecord.ScriptType == typeof(IGeneratorConditionScript))
+            {
+                scriptType = nameof(IGeneratorConditionScript);
+            }
+            else
+            {
+                throw new CouldNotMatchBaseTypeInPersistence("No valid type");
+            }
+            // string scriptType;
+            // switch (validationRecord.ScriptType)
+            // {
+            //     case IGeneratorActionScript:
+            //         scriptType = nameof(IGeneratorActionScript);
+            //         break;
+            //     case ScriptTypes.GeneratorConditionScript:
+            //         scriptType = nameof(IGeneratorConditionScript);
+            //         break;
+            //     default:
+            //         throw new CouldNotMatchBaseTypeInPersistence("No valid type");
+            // }
 
             CustomerScript script = new CustomerScript
             {
@@ -461,7 +476,7 @@ internal class ScriptRepository
                 {
                     existingScript.MinApiVersion = validationRecord.Version;
                 }
-                if (script.GetScriptTypeEnum() != validationRecord.BaseTypeName)
+                if (script.GetScriptType() != validationRecord.ScriptType)
                 {
                     existingScript.ScriptType = validationRecord.BaseTypeAsString();
                 }

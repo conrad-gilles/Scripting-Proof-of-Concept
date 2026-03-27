@@ -5,21 +5,42 @@ namespace Ember.Scripting;
 public record ValidationRecord
 {
     public required string ClassName { get; init; }
-    public required ScriptTypes BaseTypeName { get; init; }
+    // public required ScriptTypes BaseTypeName { get; init; }
+    public required Type ScriptType { get; init; }
+
     public required int Version { get; init; }
 
     public string BaseTypeAsString()
     {
-        switch (BaseTypeName)
+        string sScriptType;
+        if (ScriptType == typeof(IGeneratorActionScript))
         {
-            case ScriptTypes.GeneratorActionScript:
-                return nameof(IGeneratorActionScript);
-            case ScriptTypes.GeneratorConditionScript:
-                return nameof(IGeneratorConditionScript);
-            default:
-                throw new CouldNotMatchBaseTypeInRecord("Could not match the BaseTypeNAme to a String this should never happen!");
+            sScriptType = nameof(IGeneratorActionScript);
         }
+        else if (ScriptType == typeof(IGeneratorConditionScript))
+        {
+            sScriptType = nameof(IGeneratorConditionScript);
+        }
+        else
+        {
+            throw new CouldNotMatchBaseTypeInRecord("Could not match the BaseTypeNAme to a String this should never happen!");
+        }
+
+        return sScriptType;
     }
+
+    // public string BaseTypeAsString()
+    // {
+    //     switch (BaseTypeName)
+    //     {
+    //         case ScriptTypes.GeneratorActionScript:
+    //             return nameof(IGeneratorActionScript);
+    //         case ScriptTypes.GeneratorConditionScript:
+    //             return nameof(IGeneratorConditionScript);
+    //         default:
+    //             throw new CouldNotMatchBaseTypeInRecord("Could not match the BaseTypeNAme to a String this should never happen!");
+    //     }
+    // }
 }
 
 public record GetBaseTypeReturn

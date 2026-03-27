@@ -124,51 +124,51 @@ public class SanboxTests
         _facade = EmberMethods.GetNewScriptManagerInstance();
         ValidationRecord valResult = _facade.BasicValidationBeforeCompiling(_sourceCodeActionV2!);
 
-        Console.WriteLine(nameof(valResult.BaseTypeName) + " : " + valResult.BaseTypeName);
+        Console.WriteLine(nameof(valResult.ScriptType) + " : " + valResult.ScriptType);
         Console.WriteLine(nameof(valResult.ClassName) + " : " + valResult.ClassName);
         Console.WriteLine(nameof(valResult.Version) + " : " + valResult.Version);
 
-        Assert.IsTrue(valResult.BaseTypeName == ScriptTypes.GeneratorActionScript);
+        Assert.IsTrue(valResult.ScriptType == typeof(IGeneratorActionScript));
         Assert.IsTrue(valResult.ClassName == "AddPediatricTestsV3");
         Assert.IsTrue(valResult.Version == 3);
 
         valResult = _facade.BasicValidationBeforeCompiling(_sourceCodeActionV1!);
 
-        Console.WriteLine(nameof(valResult.BaseTypeName) + " : " + valResult.BaseTypeName);
+        Console.WriteLine(nameof(valResult.ScriptType) + " : " + valResult.ScriptType);
         Console.WriteLine(nameof(valResult.ClassName) + " : " + valResult.ClassName);
         Console.WriteLine(nameof(valResult.Version) + " : " + valResult.Version);
 
-        Assert.IsTrue(valResult.BaseTypeName == ScriptTypes.GeneratorActionScript);
+        Assert.IsTrue(valResult.ScriptType == typeof(IGeneratorActionScript));
         Assert.IsTrue(valResult.ClassName == "AddPediatricTestsV2");
         Assert.IsTrue(valResult.Version == 2);
 
         valResult = _facade.BasicValidationBeforeCompiling(_sourceCodeActionV3!);
 
-        Console.WriteLine(nameof(valResult.BaseTypeName) + " : " + valResult.BaseTypeName);
+        Console.WriteLine(nameof(valResult.ScriptType) + " : " + valResult.ScriptType);
         Console.WriteLine(nameof(valResult.ClassName) + " : " + valResult.ClassName);
         Console.WriteLine(nameof(valResult.Version) + " : " + valResult.Version);
 
-        Assert.IsTrue(valResult.BaseTypeName == ScriptTypes.GeneratorActionScript);
+        Assert.IsTrue(valResult.ScriptType == typeof(IGeneratorActionScript));
         Assert.IsTrue(valResult.ClassName == "AddPediatricTestsV4");
         Assert.IsTrue(valResult.Version == 4);
 
         valResult = _facade.BasicValidationBeforeCompiling(_sourceCodeVaccineAction!);
 
-        Console.WriteLine(nameof(valResult.BaseTypeName) + " : " + valResult.BaseTypeName);
+        Console.WriteLine(nameof(valResult.ScriptType) + " : " + valResult.ScriptType);
         Console.WriteLine(nameof(valResult.ClassName) + " : " + valResult.ClassName);
         Console.WriteLine(nameof(valResult.Version) + " : " + valResult.Version);
 
-        Assert.IsTrue(valResult.BaseTypeName == ScriptTypes.GeneratorActionScript);
+        Assert.IsTrue(valResult.ScriptType == typeof(IGeneratorActionScript));
         Assert.IsTrue(valResult.ClassName == "VaccineScript");
         Assert.IsTrue(valResult.Version == 5);
 
         valResult = _facade.BasicValidationBeforeCompiling(_sourceCodePedia!);
 
-        Console.WriteLine(nameof(valResult.BaseTypeName) + " : " + valResult.BaseTypeName);
+        Console.WriteLine(nameof(valResult.ScriptType) + " : " + valResult.ScriptType);
         Console.WriteLine(nameof(valResult.ClassName) + " : " + valResult.ClassName);
         Console.WriteLine(nameof(valResult.Version) + " : " + valResult.Version);
 
-        Assert.IsTrue(valResult.BaseTypeName == ScriptTypes.GeneratorConditionScript);
+        Assert.IsTrue(valResult.ScriptType == typeof(IGeneratorConditionScript));
         Assert.IsTrue(valResult.ClassName == "PediatricCondition");
         Assert.IsTrue(valResult.Version == 1);
 
