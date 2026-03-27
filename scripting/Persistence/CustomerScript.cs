@@ -38,22 +38,7 @@ public class CustomerScript
     {
         CompiledCaches = new List<CompiledScripts>();
     }
-    // public ScriptTypes GetScriptTypeEnum()
-    // {
-    //     ScriptTypes sType;
-    //     switch (ScriptType)
-    //     {
-    //         case nameof(IGeneratorActionScript):
-    //             sType = ScriptTypes.GeneratorActionScript;
-    //             break;
-    //         case nameof(IGeneratorConditionScript):
-    //             sType = ScriptTypes.GeneratorConditionScript;
-    //             break;
-    //         default:
-    //             throw new CouldNotAssignBaseTypeException(message: "Could not assign baseTypeName");
-    //     }
-    //     return sType;
-    // }
+
     public Type GetScriptType()
     {
         Type sType;

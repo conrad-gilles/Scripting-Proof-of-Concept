@@ -102,3 +102,10 @@ public class CouldNotMatchBaseTypeInRecord : CompilationException
     public CouldNotMatchBaseTypeInRecord(string message) : base(message) { }
     public CouldNotMatchBaseTypeInRecord(string message, Exception innerException) : base(message, innerException) { }
 }
+
+public class ConcellationTokenUncheckedException : CompilationException
+{
+    public ConcellationTokenUncheckedException() : base() { }
+    public ConcellationTokenUncheckedException(string message) : base(message) { }
+    public ConcellationTokenUncheckedException(string message, Exception innerException) : base(message, innerException) { }
+}

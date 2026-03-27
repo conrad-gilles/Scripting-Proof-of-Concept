@@ -23,7 +23,7 @@ public class SecurityTests
     public async Task IllegalUsingTest()
     {
         string sourceCode = TestHelper.GetSC().sourceCodeIllegalUsings;
-        Exception ex = await Assert.ThrowsExceptionAsync<Ember.Scripting.ValidationBeforeCompilationException>(async () =>
+        Exception ex = await Assert.ThrowsExceptionAsync<Ember.Scripting.ForbiddenNamespaceException>(async () =>
         {
             CustomerScript script = await ScriptManager.CreateScript(sourceCode);
         });
@@ -41,7 +41,7 @@ public class SecurityTests
     public async Task PreventUsageTest()
     {
         string sourceCode = TestHelper.GetSC().sourceCodePreventUsage;
-        Exception ex = await Assert.ThrowsExceptionAsync<Ember.Scripting.ValidationBeforeCompilationException>(async () =>
+        Exception ex = await Assert.ThrowsExceptionAsync<Ember.Scripting.ForbiddenTypeAccessException>(async () =>
         {
             CustomerScript script = await ScriptManager.CreateScript(sourceCode);
         });
@@ -77,14 +77,14 @@ public class SecurityTests
     {
         string sourceCode = "";
 
-        Exception ex = Assert.ThrowsException<Ember.Scripting.ValidationBeforeCompilationException>(() =>
+        Exception ex = Assert.ThrowsException<System.InvalidOperationException>(() =>
         {
             ScriptManager.BasicValidationBeforeCompiling(sourceCode);
         });
         ExceptionHelper.PrintExceptionListToConsole(ex);
 
         sourceCode = "public class ShouldFail{}";
-        ex = Assert.ThrowsException<Ember.Scripting.ValidationBeforeCompilationException>(() =>
+        ex = Assert.ThrowsException<Ember.Scripting.VersionIntNotAssignedException>(() =>
        {
            ScriptManager.BasicValidationBeforeCompiling(sourceCode);
        });
@@ -93,7 +93,7 @@ public class SecurityTests
 
         sourceCode = TestHelper.GetSC().sourceCodeIllegalUsings;
 
-        ex = Assert.ThrowsException<Ember.Scripting.ValidationBeforeCompilationException>(() =>
+        ex = Assert.ThrowsException<Ember.Scripting.ForbiddenNamespaceException>(() =>
                {
                    ScriptManager.BasicValidationBeforeCompiling(sourceCode);
                });
@@ -101,10 +101,17 @@ public class SecurityTests
 
         sourceCode = TestHelper.GetSC().sourceCodePreventUsage;
 
-        ex = Assert.ThrowsException<Ember.Scripting.ValidationBeforeCompilationException>(() =>
+        ex = Assert.ThrowsException<Ember.Scripting.ForbiddenTypeAccessException>(() =>
                {
                    ScriptManager.BasicValidationBeforeCompiling(sourceCode);
                });
+        ExceptionHelper.PrintExceptionListToConsole(ex);
+
+        sourceCode = TestHelper.GetSC().sourceCodeWhileTrueUnsafe;
+        ex = Assert.ThrowsException<Ember.Scripting.ConcellationTokenUncheckedException>(() =>
+           {
+               ScriptManager.BasicValidationBeforeCompiling(sourceCode);
+           });
         ExceptionHelper.PrintExceptionListToConsole(ex);
 
         // sourceCode = TestHelper.GetSC().sourceCodeMissingUsing;  //todo doesnt work in validation yet only fails when trying to compile
@@ -115,4 +122,5 @@ public class SecurityTests
         //        });
         // ExceptionHelper.PrintExceptionListToConsole(ex);
     }
+
 }

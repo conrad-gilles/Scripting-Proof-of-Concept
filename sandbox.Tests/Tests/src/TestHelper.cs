@@ -11,6 +11,7 @@ public class TestHelper
     static string? sourceCodePedia;
     static List<string>? sourceCodes;
     static string? sourceCodeWhileTrue;
+    static string? sourceCodeWhileTrueUnsafe;
     static string? sourceCodeIllegalUsings;
     static string? sourceCodeMissingUsing;
     static string? sourceCodePreventUsage;
@@ -80,6 +81,35 @@ public class TestHelper
             "sandbox", "src", "Scripts", "FaultyScripts", "PreventUsageScript.cs"
         ))
         );
+
+        sourceCodeWhileTrueUnsafe = """
+            using System;   //todo this is possible to default in compiler
+            using System.Threading.Tasks;
+            using System.Collections.Generic;   //todo same for them
+            using Ember.Scripting;
+            using GeneratorScriptsV3;
+            using IGeneratorContext_V4;
+
+            public class WhileTrueScript : GeneratorScriptsV3.IGeneratorActionScript
+            {
+                public async Task<ActionResultV3.ActionResult> ExecuteAsync(IGeneratorContext_V4.IGeneratorContext context)
+                {
+                    int i = 0;
+                    while (i >= 0)
+                    {
+                        //Ember.Scripting.ScriptEnvironment.CurrentToken.Value.ThrowIfCancellationRequested();
+                        // Console.WriteLine("Infinite Loop, iteration N." + i);
+                        i++;
+                        if (i <= 0) //for integer overflow
+                        {
+                            i = 1;
+                        }
+                    }
+                return ActionResultV3.ActionResult.Success("Infinite Loop script returned (should never happen!)");
+                }
+            }
+        """;
+
         sourceCodes = [];
         sourceCodes!.Add(sourceCodeActionV1);
         sourceCodes!.Add(sourceCodeActionV2);
@@ -99,6 +129,7 @@ public class TestHelper
             sourceCodes = sourceCodes,
             sourceCodeVaccineAction = sourceCodeVaccineAction,
             sourceCodeWhileTrue = sourceCodeWhileTrue,
+            sourceCodeWhileTrueUnsafe = sourceCodeWhileTrueUnsafe,
             sourceCodeIllegalUsings = sourceCodeIllegalUsings,
             sourceCodeMissingUsing = sourceCodeMissingUsing,
             sourceCodePreventUsage = sourceCodePreventUsage,
@@ -157,6 +188,8 @@ public record TestHelperRecord
     public required string sourceCodeVaccineAction { get; init; }
     public required List<string> sourceCodes { get; init; }
     public required string sourceCodeWhileTrue { get; init; }
+    public required string sourceCodeWhileTrueUnsafe { get; init; }
+
     public required string sourceCodeIllegalUsings { get; init; }
     public required string sourceCodeMissingUsing { get; init; }
     public required string sourceCodePreventUsage { get; init; }

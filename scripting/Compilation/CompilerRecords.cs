@@ -28,19 +28,6 @@ public record ValidationRecord
 
         return sScriptType;
     }
-
-    // public string BaseTypeAsString()
-    // {
-    //     switch (BaseTypeName)
-    //     {
-    //         case ScriptTypes.GeneratorActionScript:
-    //             return nameof(IGeneratorActionScript);
-    //         case ScriptTypes.GeneratorConditionScript:
-    //             return nameof(IGeneratorConditionScript);
-    //         default:
-    //             throw new CouldNotMatchBaseTypeInRecord("Could not match the BaseTypeNAme to a String this should never happen!");
-    //     }
-    // }
 }
 
 public record GetBaseTypeReturn

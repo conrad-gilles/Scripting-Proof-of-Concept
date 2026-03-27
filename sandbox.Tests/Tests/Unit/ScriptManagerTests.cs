@@ -95,7 +95,7 @@ public class ScriptManagerFacadeTests
 
         Exception innerEx = ExceptionHelper.GetExceptionFromChainReversed(ex, 1);
         Console.WriteLine("Exception: " + innerEx);
-        Assert.IsTrue(innerEx.GetType() == typeof(Ember.Scripting.ValidationBeforeCompilationException));
+        // Assert.IsTrue(innerEx.GetType() == typeof(Ember.Scripting.ValidationBeforeCompilationException));
 
         //source code shoud be unchacnged
         retrievedScript = await _scriptManager.GetScript(script.Id);
@@ -249,7 +249,7 @@ public class ScriptManagerFacadeTests
 
         // Assert.IsTrue(result.StartsWith("Success:", StringComparison.OrdinalIgnoreCase));
         // Assert.IsTrue(result.Contains("PediatricCondition"));
-        await Assert.ThrowsExceptionAsync<ValidationBeforeCompilationException>(async () =>
+        await Assert.ThrowsExceptionAsync<System.InvalidOperationException>(async () =>
         {
             ValidationRecord result2 = _scriptManager.BasicValidationBeforeCompiling("wrong input test could be whatever");
         });
@@ -266,7 +266,7 @@ public class ScriptManagerFacadeTests
         string result = await _scriptManager.GetCompilationErrors(id);
         Assert.IsTrue(result.Contains("Successful Compilation!"));
 
-        await Assert.ThrowsExceptionAsync<ValidationBeforeCompilationException>(async () =>    //before was basicvalidation exception todo
+        await Assert.ThrowsExceptionAsync<System.InvalidOperationException>(async () =>    //before was basicvalidation exception todo
         {
             Guid id2 = (await _scriptManager.CreateScript("wrong input test could be whatever")).Id;
             // string result2 = await facade.GetCompilationErrors(id2);

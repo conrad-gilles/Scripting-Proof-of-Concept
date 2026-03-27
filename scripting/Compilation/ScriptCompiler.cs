@@ -139,102 +139,131 @@ internal class ScriptCompiler
     public ValidationRecord BasicValidationBeforeCompiling(string script)//record
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(BasicValidationBeforeCompiling), nameof(ScriptCompiler));
-        try
+        // try
+        // {
+        //Does basic validation such as correct interface usage, or if only one class is in the script file.
+        //Also extracts class name, type of the scrip(ex. Action) and verison of interface.
+
+        var record = GetBaseType(script);
+        var baseTypeName = record.MyClassSymbol!.BaseType!.Name;
+        var className = record.MyClassSymbol.ToString();
+        var parentSymbol = record.MyClassSymbol!.Interfaces.FirstOrDefault() ?? record.MyClassSymbol.BaseType;
+        int? versionInt = null;
+        string implementedIntrf = parentSymbol.Name;
+
+        string? contextParameterTypeName = null;
+
+        var executeMethod = record.MyClass!.DescendantNodes()
+                                   .OfType<MethodDeclarationSyntax>()
+                                   .FirstOrDefault(m => m.Identifier.Text == "ExecuteAsync" || m.Identifier.Text == "EvaluateAsync");
+
+        if (executeMethod != null)
         {
-            //Does basic validation such as correct interface usage, or if only one class is in the script file.
-            //Also extracts class name, type of the scrip(ex. Action) and verison of interface.
-
-            var record = GetBaseType(script);
-            var baseTypeName = record.MyClassSymbol!.BaseType!.Name;
-            var className = record.MyClassSymbol.ToString();
-            var parentSymbol = record.MyClassSymbol!.Interfaces.FirstOrDefault() ?? record.MyClassSymbol.BaseType;
-            int? versionInt = null;
-            string implementedIntrf = parentSymbol.Name;
-
-            string? contextParameterTypeName = null;
-
-            var executeMethod = record.MyClass!.DescendantNodes()
-                                       .OfType<MethodDeclarationSyntax>()
-                                       .FirstOrDefault(m => m.Identifier.Text == "ExecuteAsync" || m.Identifier.Text == "EvaluateAsync");
-
-            if (executeMethod != null)
+            var firstParameter = executeMethod.ParameterList.Parameters.FirstOrDefault();
+            if (firstParameter != null && firstParameter.Type != null)
             {
-                var firstParameter = executeMethod.ParameterList.Parameters.FirstOrDefault();
-                if (firstParameter != null && firstParameter.Type != null)
-                {
-                    contextParameterTypeName = firstParameter.Type.ToString();
-                }
+                contextParameterTypeName = firstParameter.Type.ToString();
             }
-
-            // Console.WriteLine("Extracted Context Parameter Type: " + contextParameterTypeName);
-            _logger.LogTrace("Extracted Context Parameter Type: " + contextParameterTypeName);
-
-            Dictionary<int, Type> activeContexts = ContextVersionScanner.GetInterfaceDictionary();
-            // Console.WriteLine("Start of dict String:");
-            _logger.LogTrace("Start of dict String:");
-            foreach (var pair in activeContexts)
-            {
-                // Console.WriteLine("Key: " + pair.Key + ", Value: " + pair.Value);
-                _logger.LogTrace("Key: " + pair.Key + ", Value: " + pair.Value);
-            }
-
-            foreach (var ctx in activeContexts)
-            {
-                string dictTypeFullName = ctx.Value.FullName ?? "";
-
-                if (ctx.Value.FullName == contextParameterTypeName)
-                {
-                    if (versionInt != null)
-                    {
-                        throw new ContextNameOccuredMoreThanOnceException("Context name occured more than once for some reason that should not happen.");
-                    }
-                    versionInt = ctx.Key;
-                }
-            }
-
-            if (versionInt == null)
-            {
-                throw new VersionIntNotAssignedException("Version Int was not assigned probably because the foeach loop faliled maybe because the Context name of the script was not in the dictionary.");
-            }
-            if (baseTypeName == null || className == null)
-            {
-                _logger.LogError("BaseTypeName or classname null in BasicValidationBeforeCompiling.");
-                throw new ClassNameOrBaseNameNullException("BaseTypeName or classname null in BasicValidationBeforeCompiling. in if (baseTypeName == null || className == null)");
-            }
-            _logger.LogTrace("Class Name = " + className);
-            _logger.LogTrace("BaseClass Name = " + baseTypeName);
-            _logger.LogTrace("Version Int = " + versionInt);
-
-            ValidateNamespaceUsage(record.Tree!, record.Model!);
-            // ScriptTypes scriptType;
-            Type scriptType;
-            switch (baseTypeName)
-            {
-                case nameof(IGeneratorActionScript):
-                    scriptType = typeof(IGeneratorActionScript);
-                    break;
-                case nameof(IGeneratorConditionScript):
-                    scriptType = typeof(IGeneratorConditionScript);
-                    break;
-                default:
-                    throw new CouldNotMatchBaseTypeInCompiler(nameof(baseTypeName) + " was not a valid option!");
-            }
-            ValidationRecord returnedRecord = new ValidationRecord
-            {
-                ClassName = className,
-                ScriptType = scriptType,
-                Version = (int)versionInt
-            };
-            return returnedRecord;
-            // return (className, baseTypeName, (int)versionInt!);
         }
-        catch (Exception e)
+
+        // Console.WriteLine("Extracted Context Parameter Type: " + contextParameterTypeName);
+        _logger.LogTrace("Extracted Context Parameter Type: " + contextParameterTypeName);
+
+        Dictionary<int, Type> activeContexts = ContextVersionScanner.GetInterfaceDictionary();
+        // Console.WriteLine("Start of dict String:");
+        _logger.LogTrace("Start of dict String:");
+        foreach (var pair in activeContexts)
         {
-            _logger.LogError("BasicValidation failed:" + e.ToString());
-            throw new ValidationBeforeCompilationException(e.ToString(), e);
+            // Console.WriteLine("Key: " + pair.Key + ", Value: " + pair.Value);
+            _logger.LogTrace("Key: " + pair.Key + ", Value: " + pair.Value);
         }
+
+        foreach (var ctx in activeContexts)
+        {
+            string dictTypeFullName = ctx.Value.FullName ?? "";
+
+            if (ctx.Value.FullName == contextParameterTypeName)
+            {
+                if (versionInt != null)
+                {
+                    throw new ContextNameOccuredMoreThanOnceException("Context name occured more than once for some reason that should not happen.");
+                }
+                versionInt = ctx.Key;
+            }
+        }
+
+        if (versionInt == null)
+        {
+            throw new VersionIntNotAssignedException("Version Int was not assigned probably because the foeach loop faliled maybe because the Context name of the script was not in the dictionary.");
+        }
+        if (baseTypeName == null || className == null)
+        {
+            _logger.LogError("BaseTypeName or classname null in BasicValidationBeforeCompiling.");
+            throw new ClassNameOrBaseNameNullException("BaseTypeName or classname null in BasicValidationBeforeCompiling. in if (baseTypeName == null || className == null)");
+        }
+        _logger.LogTrace("Class Name = " + className);
+        _logger.LogTrace("BaseClass Name = " + baseTypeName);
+        _logger.LogTrace("Version Int = " + versionInt);
+
+
+        // ScriptTypes scriptType;
+        Type scriptType;
+        switch (baseTypeName)
+        {
+            case nameof(IGeneratorActionScript):
+                scriptType = typeof(IGeneratorActionScript);
+                break;
+            case nameof(IGeneratorConditionScript):
+                scriptType = typeof(IGeneratorConditionScript);
+                break;
+            default:
+                throw new CouldNotMatchBaseTypeInCompiler(nameof(baseTypeName) + " was not a valid option!");
+        }
+        ValidationRecord returnedRecord = new ValidationRecord
+        {
+            ClassName = className,
+            ScriptType = scriptType,
+            Version = (int)versionInt
+        };
+        ValidateLoopsHavingCancellation(record.Tree!);
+        ValidateNamespaceUsage(record.Tree!, record.Model!);
+        return returnedRecord;
+        // return (className, baseTypeName, (int)versionInt!);
+        // }
+        // catch (Exception e)
+        // {
+        //     _logger.LogError("BasicValidation failed:" + e.ToString());
+        //     throw new ValidationBeforeCompilationException(e.ToString(), e);
+        // }
 
     }
+    // Todo test Checks if the Cancellation Token is being checked within each Loop if not throws error.
+    private void ValidateLoopsHavingCancellation(SyntaxTree tree)
+    {
+        var root = tree.GetRoot();
+
+        var loops = root.DescendantNodes().Where(n =>
+            n is ForStatementSyntax ||
+            n is WhileStatementSyntax ||
+            n is DoStatementSyntax ||
+            n is ForEachStatementSyntax);
+
+        // Result: "Ember.Scripting.ScriptEnvironment.CurrentToken.Value.ThrowIfCancellationRequested"
+        string requiredCall = $"{typeof(Ember.Scripting.ScriptEnvironment).Namespace}.{nameof(Ember.Scripting.ScriptEnvironment)}.{nameof(Ember.Scripting.ScriptEnvironment.CurrentToken)}.Value.{nameof(System.Threading.CancellationToken.ThrowIfCancellationRequested)}";
+
+        foreach (var loop in loops)
+        {
+            bool hasCancellation = loop.DescendantNodes()
+                .OfType<InvocationExpressionSyntax>()
+                .Any(inv => inv.Expression.ToString() == requiredCall);
+
+            if (!hasCancellation)
+            {
+                throw new ConcellationTokenUncheckedException();
+            }
+        }
+    }
+
     private void ValidateNamespaceUsage(SyntaxTree tree, SemanticModel model)
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(ValidateNamespaceUsage), nameof(ScriptCompiler));

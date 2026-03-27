@@ -15,10 +15,6 @@ public interface IGeneratorActionScript : IScript
 {
     Task<ActionResultSF> ExecuteAsync(IGeneratorBaseInterfaceSF context);
 }
-// public enum ScriptTypes
-// {
-//     GeneratorConditionScript, GeneratorActionScript
-// }
 public interface IUserSession
 {
     Guid Id { get; }

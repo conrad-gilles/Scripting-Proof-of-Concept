@@ -333,18 +333,6 @@ internal class ScriptRepository
             {
                 throw new CouldNotMatchBaseTypeInPersistence("No valid type");
             }
-            // string scriptType;
-            // switch (validationRecord.ScriptType)
-            // {
-            //     case IGeneratorActionScript:
-            //         scriptType = nameof(IGeneratorActionScript);
-            //         break;
-            //     case ScriptTypes.GeneratorConditionScript:
-            //         scriptType = nameof(IGeneratorConditionScript);
-            //         break;
-            //     default:
-            //         throw new CouldNotMatchBaseTypeInPersistence("No valid type");
-            // }
 
             CustomerScript script = new CustomerScript
             {
