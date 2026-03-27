@@ -132,18 +132,16 @@
                     <h2 class="mb-0">Edit Script: @_scriptName</h2>
 
                     <div class="d-flex gap-2">
-                        <button class="btn btn-outline-info"
-                                @onclick="() => _editorHelper?.HandleValidate(_currentScriptId, _selectedApiVersion)!"
+                        <button class="btn btn-outline-info" @onclick="() => _editorHelper?.Validate(_scriptCode)!"
                                 disabled="@(_editorHelper?.IsBusy ?? false)">
                             <i class="bi bi-check-circle"></i> Validate
                         </button>
-                        <button class="btn btn-outline-warning"
-                                @onclick="() => _editorHelper?.HandleCompile(_currentScriptId, _selectedApiVersion)!"
+                        <button class="btn btn-outline-warning" @onclick="() => _editorHelper?.Compile(_scriptCode)!"
                                 disabled="@(_editorHelper?.IsBusy ?? false)">
                             <i class="bi bi-hammer"></i> Compile
                         </button>
-                        <button class="btn btn-success"
-                                @onclick="() => _editorHelper?.HandleSave(_currentScriptId, _selectedApiVersion)!"
+                        <button class="btn btn-success" @onclick="() => _editorHelper?.Save(_currentScriptId, _scriptCode)!"
+                            //pobably bugs because of giving scriptcode instead of reading from monaco
                                 disabled="@(_editorHelper?.IsBusy ?? false)">
                             <i class="bi bi-save"></i> Save
                         </button>
@@ -155,7 +153,7 @@
 
                 @* <MonacoEditor @ref="_editor" EditorId="edit-monaco-editor" InitialCode="@_scriptCode" /> *@
                 <MonacoEditor @ref="_editor" EditorId="edit-monaco-editor" InitialCode="@_scriptCode"
-                              OnCodeChanged="() => _editorHelper?.HandleValidate(_currentScriptId, _selectedApiVersion)" />
+                              OnCodeChanged="() => _editorHelper?.HandleValidate(_currentScriptId, _selectedApiVersion)!" />
 
 
                 <div

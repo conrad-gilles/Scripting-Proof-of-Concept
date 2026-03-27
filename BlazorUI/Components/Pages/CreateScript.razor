@@ -17,17 +17,17 @@
         <h2 class="mb-0">Create New Script</h2>
         <div class="d-flex gap-2">
             <!-- No need to pass newScript boolean, the helper knows its own state -->
-            <button class="btn btn-outline-info" @onclick="() => _editorHelper?.HandleValidate()!"
+            <button class="btn btn-outline-info" @onclick="() => _editorHelper?.Validate(null)!"
                     disabled="@(_editorHelper?.IsBusy ?? false)">
                 <i class="bi bi-check-circle"></i> Validate
             </button>
-            <button class="btn btn-outline-warning" @onclick="() => _editorHelper?.HandleCompile()!"
+            <button class="btn btn-outline-warning" @onclick="() => _editorHelper?.Compile(null)!"
                     disabled="@(_editorHelper?.IsBusy ?? false)">
                 <i class="bi bi-hammer"></i> Compile
             </button>
-            <button class="btn btn-success" @onclick="() => _editorHelper?.HandleSave()!"
+            <button class="btn btn-success" @onclick="() => _editorHelper?.CreateAndInsert()!"
                     disabled="@(_editorHelper?.IsBusy ?? false)">
-                <i class="bi bi-save"></i> Save
+                <i class="bi bi-save"></i> Create
             </button>
             <a href="scripts" class="btn btn-outline-secondary">
                 <i class="bi bi-arrow-left"></i> Back
@@ -36,7 +36,7 @@
     </div>
 
     <!-- We bind it to the _editor variable using @ref -->
-    <MonacoEditor @ref="_editor" InitialCode="@DefaultScript" OnCodeChanged="() => _editorHelper?.HandleValidate()" />
+    <MonacoEditor @ref="_editor" InitialCode="@DefaultScript" OnCodeChanged="() => _editorHelper?.HandleValidate()!" />
 
 
     <div style="height: @(Console.IsExpanded ? "300px" : "40px"); transition: height 0.3s ease-in-out; flex-shrink: 0;">

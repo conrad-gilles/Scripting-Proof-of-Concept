@@ -1,12 +1,80 @@
 @page "/monitoring"
+@rendermode InteractiveServer
+@using BlazorUI.Sink
+@using Serilog.Events
+@inject BlazorSink Sink
+@implements IDisposable
+
 <PageTitle>Monitoring</PageTitle>
 
-<div class="top-bar">
+<div class="top-bar mb-3">
     <h2>Monitoring</h2>
 </div>
 
-<div class="empty-state">
-    <i class="bi bi-graph-up"></i>
-    <h4>System monitoring</h4>
-    <p>View execution logs and performance metrics</p>
-</div>
+@if (Sink.LogEvents.IsEmpty)
+{
+    <div class="empty-state">
+        <i class="bi bi-graph-up"></i>
+        <h4>System monitoring</h4>
+        <p>View execution logs and performance metrics. No logs available yet.</p>
+    </div>
+}
+else
+{
+    <div class="terminal-body bg-dark p-3 rounded font-monospace" style="height: calc(100vh - 180px); overflow-y: auto;">
+        @foreach (var log in Sink.LogEvents)
+        {
+            <div class="log-line mb-1 pb-1 border-bottom border-secondary">
+                <span class="text-secondary">[@log.Timestamp.ToString("HH:mm:ss")]</span>
+                
+                @{
+                    var badgeClass = log.Level switch
+                    {
+                        LogEventLevel.Error or LogEventLevel.Fatal => "bg-danger",
+                        LogEventLevel.Warning => "bg-warning text-dark",
+                        LogEventLevel.Information => "bg-info text-dark",
+                        LogEventLevel.Debug or LogEventLevel.Verbose => "bg-secondary",
+                        _ => "bg-light text-dark"
+                    };
+
+                    var textClass = log.Level switch
+                    {
+                        LogEventLevel.Error or LogEventLevel.Fatal => "text-danger",
+                        LogEventLevel.Warning => "text-warning",
+                        _ => "text-light"
+                    };
+                }
+                
+                <span class="badge @badgeClass ms-2 me-2" style="width: 75px;">@log.Level</span>
+                <span class="@textClass">@log.RenderMessage()</span>
+                
+                @if (log.Exception != null)
+                {
+                    <div class="text-danger mt-1 ms-4 small" style="white-space: pre-wrap;">
+                        @log.Exception.ToString()
+                    </div>
+                }
+            </div>
+        }
+    </div>
+}
+
+@code {
+    protected override void OnInitialized()
+    {
+        // Subscribe to log updates
+        Sink.OnLogReceived += OnLogReceived;
+    }
+
+    private void OnLogReceived()
+    {
+        // Trigger UI re-render when a new log arrives
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        // Prevent memory leaks when navigating away from the page
+        Sink.OnLogReceived -= OnLogReceived;
+    }
+}

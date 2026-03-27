@@ -15,7 +15,24 @@
 
 ### Main Todos
 
-- really deeply test basic validation more in depth every aspect of the script should be tested
+- abstract class Context which defines Downgrade
+- change Execute and get to generic where you call <IGeneratorAction> instead of ScriptTypes.ActionScrip
+
+- new way of calling multiple methods within a script, something like this:
+  ActiveActionResult ar = await InternalScriptManager!.GetScript<IGeneratorActionScript>("AddPediatrucTestV2").ExecuteAction(ctx); //get db instance
+
+   they need to be defined in the interface
+   versioning script?
+
+- make a get script method that return the DB instance and not the the Customer Script instance, why? maybe return byte[]? 
+
+- check if the line for the cancellation token is called in every loop from within the script to avoid scripts from deadlocking:
+  Ember.Scripting.ScriptEnvironment.CurrentToken.Value.ThrowIfCancellationRequested();
+  idea: count maybe ammount of loops and force to have same amount of check tokens
+
+- add optional attribute to distinguish between scripts that get more execution time than others, let script declare execution time, but set an absolute hardcoded max somewhere
+- also what if script gets abortet halfway through? Is there a rollback changes? If no implement!
+
 - get 100% test coverage
 - put all GenCOntext in a namespace like maybe Ember.Scripting.GeneratorContextsV5 etc
 - make GeneratorContextSF mayeb an interface?

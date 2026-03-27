@@ -8,11 +8,17 @@ public interface IGeneratorBaseInterfaceSF
 {
 }
 
-[MetaDataGeneratorClass(version: 0, type: TypeInfo.AbstractBaseInSF)]
-public abstract class GeneratorContextSF
+public abstract class Context
 {
     public abstract GeneratorContextSF Downgrade();
     public abstract GeneratorContextSF CreateUsingData(DataAbstractClass data);
+}
+
+[MetaDataGeneratorClass(version: 0, type: TypeInfo.AbstractBaseInSF)]
+public abstract class GeneratorContextSF : Context
+{
+    // public abstract GeneratorContextSF Downgrade();
+    // public abstract GeneratorContextSF CreateUsingData(DataAbstractClass data);
 }
 
 // public interface IContextFactory

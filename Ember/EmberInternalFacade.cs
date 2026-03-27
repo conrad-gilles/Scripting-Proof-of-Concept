@@ -10,7 +10,6 @@ internal class EmberInternalFacade
         ScriptManager = scriptManager;
     }
 
-    // public async Task<ActiveActionResult> ExecuteScriptById(Guid id, ActiveDataClass data)
     public async Task<ActiveActionResult> ExecuteScript(Guid id, ActiveGeneratorContext ctx)
     {
         var cf = new ContextManagement(ScriptManager);

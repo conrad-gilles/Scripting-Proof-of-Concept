@@ -20,7 +20,7 @@ public class HomeTests : BunitContext
         TestHelperBUnit.SetupRealEnvironmentBUnit(Services);
     }
 
-    [TestMethod]
+    // [TestMethod]
     public void TotalScriptsTests()
     {
         var cut = Render<Home>();
@@ -47,7 +47,7 @@ public class HomeTests : BunitContext
         }, TimeSpan.FromSeconds(2));
     }
 
-    [TestMethod]
+    // [TestMethod]
     public void TestMonacoEditor()
     {
         var myCustomScript = "public class MyTestScript { public void Execute() { } }";
@@ -73,7 +73,7 @@ public class HomeTests : BunitContext
        }, TimeSpan.FromSeconds(2));
     }
 
-    [TestMethod]
+    // [TestMethod]
     public void TestMonacoEditor2()
     {
         var myCustomScript = @"

@@ -253,7 +253,9 @@ internal class ScriptRepository
                 _logger.LogError("Validation in GetCompilationErrors failed but will still try to compile." + e.ToString());
             }
             _compiler.RunCompilation(sourceCode, apiVersion: apiVersion);
-            throw new NoErrorsInScriptException("No error was in the Source Code.");
+            // throw new NoErrorsInScriptException("No error was in the Source Code.");
+            List<ScriptCompilationError> returnList = [];
+            return returnList;
         }
         catch (CompilationFailedException e)
         {

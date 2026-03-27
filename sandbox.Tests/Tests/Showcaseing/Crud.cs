@@ -59,7 +59,7 @@ public class CrudDemos
     public async Task Read()
     {
         await Create();
-        CustomerScript script = await ScriptManager.GetScriptNT("AddPediatricTestsV2", ScriptTypes.GeneratorActionScript);
+        CustomerScript script = await ScriptManager.GetScriptNT("AddPediatricTestsV2", ScriptTypes.GeneratorActionScript);  //
         Console.WriteLine("Name: " + script.ScriptName + ", ScriptType: " + script.ScriptType);
     }
     [TestMethod]
@@ -96,9 +96,12 @@ public class CrudDemos
 
         ActiveContextFactory.IGeneratorContextFactory factory = provider.GetRequiredService<ActiveContextFactory.IGeneratorContextFactory>();
 
+
         ActiveGeneratorContext ctx = factory.Create(labOrder, vaccine);
 
         ActiveActionResult ar = await InternalScriptManager!.ExecuteScript
         ("AddPediatricTestsV2", ScriptTypes.GeneratorActionScript, ctx);
+
+        // ActiveActionResult ar = await InternalScriptManager!.GetScript<IGeneratorActionScript>("AddPediatrucTestV2").ExecuteAction(ctx); //get db instance
     }
 }

@@ -29,18 +29,72 @@ namespace BlazorUI.Helpers
             _console = console;
         }
 
-        public Guid GetId(Guid? scriptId)
+
+        // Validates script, doesnt save doesnt compile
+        public async Task Validate(string? sourceCode)
         {
-            if (scriptId == null)
+            IsBusy = true;
+
+            if (sourceCode == null)
             {
-                if (CurrentScriptId == Guid.Empty)
-                {
-                    CurrentScriptId = Guid.NewGuid();
-                }
-                scriptId = CurrentScriptId;
+                sourceCode = await _editor.GetValueAsync();
             }
-            return (Guid)scriptId;
+            try
+            {
+                _scriptManager.BasicValidationBeforeCompiling(sourceCode);
+                _console.Log("Validation successfull!");
+            }
+            catch (Exception e)
+            {
+                _console.Log(e.ToString());
+            }
+            IsBusy = false;
         }
+
+        //compiles script, doesnt save doesnt perform validation, only compiles, can technically be ommitted
+        public async Task Compile(string? sourceCode)
+        {
+            IsBusy = true;
+
+            if (sourceCode == null)
+            {
+                sourceCode = await _editor.GetValueAsync();
+            }
+
+            List<ScriptCompilationError> errors = await _scriptManager.GetCompilationErrors(sourceCode);
+
+            var monacoMarkers = errors.Select(e => new MonacoMarker
+            {
+                Message = $"{e.Id} - {e.Message}",
+                Severity = e.IsError ? 8 : 4, // 8 = Error, 4 = Warning
+                StartLineNumber = e.Line,
+                StartColumn = e.Column,
+                EndLineNumber = e.EndLine,
+                EndColumn = e.EndColumn
+            }).ToList<object>();
+
+            await _editor.SetErrorsAsync(monacoMarkers);
+            IsBusy = false;
+        }
+
+        //saves script
+        public async Task Save(Guid scriptId, string sourceCode)
+        {
+            IsBusy = true;
+
+            await _scriptManager.UpdateScriptAndCompile(scriptId, sourceCode);
+            IsBusy = false;
+        }
+
+        public async Task CreateAndInsert()
+        {
+            IsBusy = true;
+
+            var code = await _editor.GetValueAsync();
+            await _scriptManager.CreateScript(code);
+            IsBusy = false;
+        }
+
         public async Task HandleValidate(Guid? scriptId = null, int? selectedVersion = null)
         {
             scriptId = GetId(scriptId);
@@ -128,24 +182,62 @@ namespace BlazorUI.Helpers
 
         }
 
-        public async Task HandleSave(Guid? scriptId = null, int? selectedVersion = null)
+        public Guid GetId(Guid? scriptId)
+        {
+            if (scriptId == null)
+            {
+                if (CurrentScriptId == Guid.Empty)
+                {
+                    CurrentScriptId = Guid.NewGuid();
+                }
+                scriptId = CurrentScriptId;
+            }
+            return (Guid)scriptId;
+        }
+
+        public async Task HandleKnownSave(Guid scriptId, int? selectedVersion = null)
         {
             IsBusy = true;
-            scriptId = GetId(scriptId);
-            CurrentScriptId = (Guid)scriptId;
+            var code = await _editor.GetValueAsync();
+            await TryUpdating(scriptId, code);
+            IsBusy = false;
+        }
+
+        public async Task HandleUnknownSave()
+        {
+            IsBusy = true;
+
+            Guid scriptId = Guid.NewGuid();
             var code = await _editor.GetValueAsync();
             try
             {
                 try
                 {
                     //first tries to insert and compile new script
-                    Guid newScript = (await _scriptManager.CreateScript(code)).Id;
-                    CurrentScriptId = newScript;
+                    scriptId = (await _scriptManager.CreateScript(code)).Id;
+                    CurrentScriptId = scriptId;
                     _console.Log("Compilation successful, script was created and inserted into the DB.");
                 }
                 catch
                 {
-                    await TryUpdating((Guid)scriptId, code, (int)selectedVersion!);
+                    try
+                    {
+                        try
+                        {
+                            await _scriptManager.UpdateScriptAndCompile((Guid)scriptId, code);
+                            _console.Log("Script successfully updated and compiled.");
+                        }
+                        catch (Exception e)
+                        {
+                            await _scriptManager.UpdateScriptSC((Guid)scriptId, code);
+                            _console.Log("Script did not compile successfully but nevertheless it got saved, here are the compilation errors:");
+                            _console.Log(e.ToString());
+                        }
+                    }
+                    catch
+                    {
+                        await _scriptManager.CreateScriptWithoutCompiling(scriptId, code);
+                    }
                 }
                 IsBusy = false;
             }
@@ -154,24 +246,31 @@ namespace BlazorUI.Helpers
                 //Rare edge case when in ScriptTemplate and compiling and it doesnt find the id because it is not in the variable because one switched tabs
                 var vali = _scriptManager.BasicValidationBeforeCompiling(code);
                 Guid retrievedId = await _scriptManager.GetScriptId(vali.ClassName, vali.BaseTypeName);
-                await TryUpdating(retrievedId, code, (int)selectedVersion!);
+                await TryUpdating(retrievedId, code);
                 // _console.Log("Something went wrong in line 139: " + e.ToString());
                 IsBusy = false;
             }
         }
 
-        public async Task TryUpdating(Guid scriptId, string code, int selectedVersion)
+        public async Task TryUpdating(Guid scriptId, string code)
         {
             try
             {
-                await _scriptManager.UpdateScriptAndCompile((Guid)scriptId, code, apiVersion: selectedVersion);
-                _console.Log("Script successfully updated and compiled.");
+                try
+                {
+                    await _scriptManager.UpdateScriptAndCompile((Guid)scriptId, code);
+                    _console.Log("Script successfully updated and compiled.");
+                }
+                catch (Exception e)
+                {
+                    await _scriptManager.UpdateScriptSC((Guid)scriptId, code);
+                    _console.Log("Script did not compile successfully but nevertheless it got saved, here are the compilation errors:");
+                    _console.Log(e.ToString());
+                }
             }
-            catch (Exception e)
+            catch
             {
-                await _scriptManager.UpdateScriptSC((Guid)scriptId, code, apiVersion: selectedVersion);
-                _console.Log("Script did not compile successfully but nevertheless it got saved, here are the compilation errors:");
-                _console.Log(e.ToString());
+                await _scriptManager.CreateScriptWithoutCompiling(scriptId, code);
             }
         }
 
