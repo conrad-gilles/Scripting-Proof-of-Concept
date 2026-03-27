@@ -15,6 +15,8 @@
 
 ### Main Todos
 
+- maybe make it so can call script oinly by name not both name and type? No sure some downsides
+  
 - abstract class Context which defines Downgrade
 - change Execute and get to generic where you call <IGeneratorAction> instead of ScriptTypes.ActionScrip
 

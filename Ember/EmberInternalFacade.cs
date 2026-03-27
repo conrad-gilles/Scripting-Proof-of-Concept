@@ -21,9 +21,34 @@ internal class EmberInternalFacade
         return ar;
     }
 
-    public async Task<ActiveActionResult> ExecuteScript(string name, ScriptTypes scriptType, ActiveGeneratorContext ctx) //maybe make generic
+    public async Task<ActiveActionResult> ExecuteScript<ScriptType>(string name, ActiveGeneratorContext ctx) where ScriptType : IScript
     {
-        Guid id = await ScriptManager.GetScriptId(name, scriptType);
+        // ScriptTypes scriptType;
+        // if (typeof(ScriptType) == typeof(IGeneratorActionScript))
+        // {
+        //     scriptType = ScriptTypes.GeneratorActionScript;
+        // }
+        // else if (typeof(ScriptType) == typeof(IGeneratorConditionScript))
+        // {
+        //     scriptType = ScriptTypes.GeneratorConditionScript;
+        // }
+        // else
+        // {
+        //     throw new Exception();
+        // }
+
+        // // switch (typeof(ScriptType))
+        // // {
+        // //     case IGeneratorActionScript:
+        // //         scriptType = ScriptTypes.GeneratorActionScript;
+        // //         break;
+        // //     case IGeneratorConditionScript:
+        // //         scriptType = ScriptTypes.GeneratorConditionScript;
+        // //         break;
+        // //     default:
+        // //         throw new Exception();
+        // // }
+        Guid id = await ScriptManager.GetScriptId<ScriptType>(name);
         var cf = new ContextManagement(ScriptManager);
         GeneratorContextSF context = await cf.CreateByDowngrade(id, ctx);
         var result = await ScriptManager.ExecuteScriptById(id, context);

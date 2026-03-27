@@ -245,7 +245,13 @@ namespace BlazorUI.Helpers
             {
                 //Rare edge case when in ScriptTemplate and compiling and it doesnt find the id because it is not in the variable because one switched tabs
                 var vali = _scriptManager.BasicValidationBeforeCompiling(code);
-                Guid retrievedId = await _scriptManager.GetScriptId(vali.ClassName, vali.BaseTypeName);
+
+                // Type testType=;
+                Guid retrievedId = await _scriptManager.GetScriptId<IGeneratorActionScript>(vali.ClassName);
+                if (true)
+                {
+                    throw new Exception();
+                }
                 await TryUpdating(retrievedId, code);
                 // _console.Log("Something went wrong in line 139: " + e.ToString());
                 IsBusy = false;

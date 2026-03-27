@@ -116,7 +116,7 @@ public class ScriptManagerFacadeTests
         await _scriptManager.UpdateScriptAndCompile(script.Id, TestHelper.GetSC().sourceCodePedia);
         retrievedScript = await _scriptManager.GetScript(script.Id);
         Assert.IsTrue(retrievedScript.ScriptName == nameof(PediatricCondition));
-        Assert.IsTrue(retrievedScript.GetScriptType() == ScriptTypes.GeneratorConditionScript);
+        Assert.IsTrue(retrievedScript.GetScriptTypeEnum() == ScriptTypes.GeneratorConditionScript);
     }
 
     [TestMethod]

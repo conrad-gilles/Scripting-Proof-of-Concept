@@ -59,7 +59,7 @@ public class CrudDemos
     public async Task Read()
     {
         await Create();
-        CustomerScript script = await ScriptManager.GetScriptNT("AddPediatricTestsV2", ScriptTypes.GeneratorActionScript);  //
+        CustomerScript script = await ScriptManager.GetScriptNT<IGeneratorActionScript>("AddPediatricTestsV2");  //
         Console.WriteLine("Name: " + script.ScriptName + ", ScriptType: " + script.ScriptType);
     }
     [TestMethod]
@@ -67,14 +67,14 @@ public class CrudDemos
     {
         await Create();
         string newSourceCode = TestHelper.GetSC().sourceCodeActionV3;
-        await ScriptManager.UpdateScriptNT("AddPediatricTestsV2", ScriptTypes.GeneratorActionScript, newSourceCode);
+        await ScriptManager.UpdateScriptNT<IGeneratorActionScript>("AddPediatricTestsV2", newSourceCode);
     }
 
     [TestMethod]
     public async Task Delete()
     {
         await Create();
-        await ScriptManager.DeleteScriptNT("AddPediatricTestsV2", ScriptTypes.GeneratorActionScript);
+        await ScriptManager.DeleteScriptNT<IGeneratorActionScript>("AddPediatricTestsV2");
     }
     [TestMethod]
     public async Task Execute()
@@ -99,8 +99,11 @@ public class CrudDemos
 
         ActiveGeneratorContext ctx = factory.Create(labOrder, vaccine);
 
-        ActiveActionResult ar = await InternalScriptManager!.ExecuteScript
-        ("AddPediatricTestsV2", ScriptTypes.GeneratorActionScript, ctx);
+        // ActiveActionResult ar = await InternalScriptManager!.ExecuteScript
+        // ("AddPediatricTestsV2", ScriptTypes.GeneratorActionScript, ctx);
+
+        ActiveActionResult ar = await InternalScriptManager!.ExecuteScript<IGeneratorActionScript>
+                ("AddPediatricTestsV2", ctx);
 
         // ActiveActionResult ar = await InternalScriptManager!.GetScript<IGeneratorActionScript>("AddPediatrucTestV2").ExecuteAction(ctx); //get db instance
     }

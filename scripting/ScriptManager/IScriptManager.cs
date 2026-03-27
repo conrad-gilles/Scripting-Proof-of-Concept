@@ -11,7 +11,7 @@ public interface IScriptManager
     /// <returns></returns>
     Task<object> ExecuteScriptById(Guid scriptId, GeneratorContextSF context, int? currentApiVersion = null);
 
-    Task<object> ExecuteScriptByNameAndType(string name, ScriptTypes scriptType, GeneratorContextSF context, int? currentApiVersion = null);
+    Task<object> ExecuteScriptByNameAndType<ScriptType>(string name, GeneratorContextSF context, int? currentApiVersion = null) where ScriptType : IScript;
 }
 
 

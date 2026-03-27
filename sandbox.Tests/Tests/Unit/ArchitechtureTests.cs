@@ -27,7 +27,7 @@ public class ArchitechtureTests
 
         foreach (var script in scripts)
         {
-            ScriptTypes type = script.GetScriptType();
+            ScriptTypes type = script.GetScriptTypeEnum();
             if (enumValues.Contains(type) == false)
             {
                 throw new Exception();
