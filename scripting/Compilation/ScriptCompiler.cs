@@ -214,7 +214,7 @@ internal class ScriptCompiler
                     throw new CouldNotMatchBaseTypeInCompiler(nameof(baseTypeName) + " was not a valid option!");
             }
 
-            int executionTime = GetExecutionTime(script, tree);
+            int? executionTime = GetExecutionTime(script, tree);
             ValidateLoopsHavingCancellation(tree!);
             ValidateNamespaceUsage(tree!, model!);
             ValidationRecord returnedRecord = new ValidationRecord
@@ -237,9 +237,9 @@ internal class ScriptCompiler
         }
     }
 
-    public int GetExecutionTime(string script, SyntaxTree syntaxTree)
+    public int? GetExecutionTime(string script, SyntaxTree syntaxTree)
     {
-        int executionTime = (int)ExecutionTimeGroups.Medium;
+        int? executionTime = null;
 
         var syntaxRoot = syntaxTree.GetRoot();
         var classNode = syntaxRoot.DescendantNodes().OfType<ClassDeclarationSyntax>().FirstOrDefault();
@@ -254,7 +254,7 @@ internal class ScriptCompiler
 
             var argumentFullString = firstArgument.NormalizeWhitespace().ToFullString();
             string enumString = argumentFullString.Split('.').Last();
-            executionTime = ((int)ExecutionTime.GetDurationFromEnumString(enumString));
+            executionTime = ExecutionTime.GetDurationFromEnumString(enumString);
         }
         return executionTime;
     }

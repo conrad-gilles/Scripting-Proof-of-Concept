@@ -9,7 +9,7 @@ public record ValidationRecord
     public required Type ScriptType { get; init; }
 
     public required int Version { get; init; }
-    public required int ExecutionTime { get; init; }
+    public required int? ExecutionTime { get; init; }
 
     public string BaseTypeAsString()
     {
@@ -90,7 +90,7 @@ public class ExecutionTime : Attribute
         return result;
     }
 
-    public static int GetDurationFromEnumString(string enumString)
+    public static int? GetDurationFromEnumString(string enumString)
     {
         ExecutionTimeGroups result;
         switch (enumString)

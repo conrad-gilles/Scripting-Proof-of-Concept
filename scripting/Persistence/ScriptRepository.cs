@@ -675,7 +675,7 @@ internal class ScriptRepository
                 CreatedAt = DateTime.UtcNow,
                 ModifiedAt = DateTime.UtcNow,
                 CreatedBy = userName,
-                ExecutionTimeInMS = ((int)ExecutionTimeGroups.Medium)
+                ExecutionTimeInMS = null
             };
             db.CustomerScripts.Add(testScript);
             await db.SaveChangesAsync();

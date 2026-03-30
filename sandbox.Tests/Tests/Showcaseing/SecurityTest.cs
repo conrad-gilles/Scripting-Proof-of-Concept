@@ -151,7 +151,7 @@ public class SecurityTests
     {
         string sourceCode = TestHelper.GetSC().sourceCodeExecutionTimeTest;
         int expectedMS = 1000;
-        int realMS = ScriptManager.BasicValidationBeforeCompiling(sourceCode).ExecutionTime;
+        int? realMS = ScriptManager.BasicValidationBeforeCompiling(sourceCode).ExecutionTime;
 
         Console.WriteLine("Source code:" + sourceCode);
         Console.WriteLine("Real MS: " + realMS);
