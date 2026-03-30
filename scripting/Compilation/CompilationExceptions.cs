@@ -22,6 +22,13 @@ public class CompilationFailedException : CompilationException
     }
 }
 
+public class ExecutionTimeCouldNotBeAssigned : CompilationException
+{
+    public ExecutionTimeCouldNotBeAssigned() : base() { }
+    public ExecutionTimeCouldNotBeAssigned(string message) : base(message) { }
+    public ExecutionTimeCouldNotBeAssigned(string message, Exception innerException) : base(message, innerException) { }
+}
+
 public class MoreThanOneClassFoundInScriptException : CompilationException
 {
     public MoreThanOneClassFoundInScriptException() : base() { }

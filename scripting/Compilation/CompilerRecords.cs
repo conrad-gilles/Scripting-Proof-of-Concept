@@ -114,7 +114,11 @@ public class ExecutionTime : Attribute
                 }
                 catch
                 {
-                    throw new Exception("todo handel");
+                    //Here debatable what should be done, as it is not as important one could just give the max or medium duration instead of throw an exception, Examples below:
+                    // result = ExecutionTimeGroups.ExtraLong;
+                    // result = ExecutionTimeGroups.Short;
+
+                    throw new ExecutionTimeCouldNotBeAssigned();
                 }
 
         }

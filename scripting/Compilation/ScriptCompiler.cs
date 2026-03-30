@@ -214,7 +214,6 @@ internal class ScriptCompiler
                     throw new CouldNotMatchBaseTypeInCompiler(nameof(baseTypeName) + " was not a valid option!");
             }
 
-            int? executionTime = GetExecutionTime(script, tree);
             ValidateLoopsHavingCancellation(tree!);
             ValidateNamespaceUsage(tree!, model!);
             ValidationRecord returnedRecord = new ValidationRecord
@@ -222,7 +221,7 @@ internal class ScriptCompiler
                 ClassName = className,
                 ScriptType = scriptType,
                 Version = (int)versionInt,
-                ExecutionTime = executionTime
+                ExecutionTime = GetExecutionTime(tree),
             };
             return returnedRecord;
         }
@@ -237,7 +236,7 @@ internal class ScriptCompiler
         }
     }
 
-    public int? GetExecutionTime(string script, SyntaxTree syntaxTree)
+    public int? GetExecutionTime(SyntaxTree syntaxTree)
     {
         int? executionTime = null;
 
