@@ -46,4 +46,10 @@ public record ScriptCompilationError(
     int Column,
     int EndLine,
     int EndColumn,
-    bool IsError);
+    bool IsError)
+{
+    public override string ToString()
+    {
+        return "An error occurred in Line: " + Line + ", Column: " + Column + " Message: " + Message;
+    }
+}

@@ -49,14 +49,25 @@ public class VersionIntNotAssignedException : ValidationBeforeCompilationExcepti
     public VersionIntNotAssignedException(string message, Exception innerException) : base(message, innerException) { }
 }
 
-public class ClassNameOrBaseNameNullException : CompilationException
+public class ClassNameOrBaseNameNullException : ValidationBeforeCompilationException
 {
     public ClassNameOrBaseNameNullException() : base() { }
     public ClassNameOrBaseNameNullException(string message) : base(message) { }
     public ClassNameOrBaseNameNullException(string message, Exception innerException) : base(message, innerException) { }
 }
-
-public class ForbiddenNamespaceException : CompilationException
+public class ScriptWasEmptyOrNullException : ValidationBeforeCompilationException
+{
+    public ScriptWasEmptyOrNullException() : base() { }
+    public ScriptWasEmptyOrNullException(string message) : base(message) { }
+    public ScriptWasEmptyOrNullException(string message, Exception innerException) : base(message, innerException) { }
+}
+public class ScriptFieldNullException : ValidationBeforeCompilationException
+{
+    public ScriptFieldNullException() : base() { }
+    public ScriptFieldNullException(string message) : base(message) { }
+    public ScriptFieldNullException(string message, Exception innerException) : base(message, innerException) { }
+}
+public class ForbiddenNamespaceException : ValidationBeforeCompilationException
 {
     public string? AttemptedNamespace { get; }
 

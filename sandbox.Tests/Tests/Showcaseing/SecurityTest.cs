@@ -32,10 +32,17 @@ public class SecurityTests
     public async Task MissingUsingTest()
     {
         string sourceCode = TestHelper.GetSC().sourceCodeMissingUsing;
-        Exception ex = await Assert.ThrowsExceptionAsync<Ember.Scripting.CompilationFailedException>(async () =>
+        Ember.Scripting.CompilationFailedException ex = await Assert.ThrowsExceptionAsync<Ember.Scripting.CompilationFailedException>(async () =>
         {
             CustomerScript script = await ScriptManager.CreateScript(sourceCode);
         });
+
+        ExceptionHelper.PrintExceptionListToConsole(ex);
+
+        foreach (var item in ex.Errors)
+        {
+            Console.WriteLine(item.ToString());
+        }
     }
     [TestMethod]
     public async Task PreventUsageTest()
@@ -77,14 +84,17 @@ public class SecurityTests
     {
         string sourceCode = "";
 
-        Exception ex = Assert.ThrowsException<System.InvalidOperationException>(() =>
+        // Exception when Source code is empty
+        Exception ex = Assert.ThrowsException<Ember.Scripting.ScriptWasEmptyOrNullException>(() =>
         {
             ScriptManager.BasicValidationBeforeCompiling(sourceCode);
         });
         ExceptionHelper.PrintExceptionListToConsole(ex);
 
         sourceCode = "public class ShouldFail{}";
-        ex = Assert.ThrowsException<Ember.Scripting.VersionIntNotAssignedException>(() =>
+
+        //Exception when Script doesnt inherit from the predefined classes      
+        ex = Assert.ThrowsException<Ember.Scripting.ScriptFieldNullException>(() =>
        {
            ScriptManager.BasicValidationBeforeCompiling(sourceCode);
        });
@@ -93,6 +103,7 @@ public class SecurityTests
 
         sourceCode = TestHelper.GetSC().sourceCodeIllegalUsings;
 
+        //Exception when the scripts has a using at the top that is defined ass illegal, source code: file=IllegalUsingScript.cs
         ex = Assert.ThrowsException<Ember.Scripting.ForbiddenNamespaceException>(() =>
                {
                    ScriptManager.BasicValidationBeforeCompiling(sourceCode);
@@ -101,6 +112,7 @@ public class SecurityTests
 
         sourceCode = TestHelper.GetSC().sourceCodePreventUsage;
 
+        //Exception when there is a forbidden Type access like System.IO.BufferedStream? stream for example, source code: file=PreventUsageScript.cs
         ex = Assert.ThrowsException<Ember.Scripting.ForbiddenTypeAccessException>(() =>
                {
                    ScriptManager.BasicValidationBeforeCompiling(sourceCode);
@@ -108,7 +120,19 @@ public class SecurityTests
         ExceptionHelper.PrintExceptionListToConsole(ex);
 
         sourceCode = TestHelper.GetSC().sourceCodeWhileTrueUnsafe;
+
+        //Exception when there is a loop that does not contain a check for the cancellation token, source code: file=WhileTrueScript.cs
         ex = Assert.ThrowsException<Ember.Scripting.ConcellationTokenUncheckedException>(() =>
+           {
+               ScriptManager.BasicValidationBeforeCompiling(sourceCode);
+           });
+        ExceptionHelper.PrintExceptionListToConsole(ex);
+
+
+        sourceCode = TestHelper.GetSC().sourceCodeMultipleClasses;
+
+        //Exception when there is a more than one class (script) defined in a file (or db entry), source code: file=MultipleClassesScript.cs
+        ex = Assert.ThrowsException<Ember.Scripting.MoreThanOneClassFoundInScriptException>(() =>
            {
                ScriptManager.BasicValidationBeforeCompiling(sourceCode);
            });
