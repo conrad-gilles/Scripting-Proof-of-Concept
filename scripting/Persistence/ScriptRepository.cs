@@ -343,7 +343,8 @@ internal class ScriptRepository
                 MinApiVersion = validationRecord.Version,
                 CreatedAt = createdAt,
                 ModifiedAt = DateTime.UtcNow,
-                CreatedBy = _userSession.UserName
+                CreatedBy = _userSession.UserName,
+                ExecutionTimeInMS = validationRecord.ExecutionTime
             };
             bool checkForDuplicates = true; //never set this to false!
             if (checkForDuplicates)
@@ -399,7 +400,8 @@ internal class ScriptRepository
                     CompilationDate = DateTime.UtcNow,
                     CompilationSuccess = true,
                     CompilationErrors = "",
-                    OldSourceCode = script.SourceCode
+                    OldSourceCode = script.SourceCode,
+                    CustomerScript = script
                 };
                 await InsertScriptCompiledCache(tempCache);
                 await db.SaveChangesAsync();
@@ -545,7 +547,7 @@ internal class ScriptRepository
         }
         using (var db = await _contextFactory.CreateDbContextAsync())
         {
-            var cache = await db.ScriptCompiledCaches.SingleAsync(b => b.ScriptId == id && b.ApiVersion == apiVersion);
+            var cache = await db.ScriptCompiledCaches.Include(c => c.CustomerScript).SingleAsync(b => b.ScriptId == id && b.ApiVersion == apiVersion);
             return cache;
         }
     }
@@ -672,7 +674,8 @@ internal class ScriptRepository
                 MinApiVersion = GetRecentApiVersion(),
                 CreatedAt = DateTime.UtcNow,
                 ModifiedAt = DateTime.UtcNow,
-                CreatedBy = userName
+                CreatedBy = userName,
+                ExecutionTimeInMS = ((int)ExecutionTimeGroups.Medium)
             };
             db.CustomerScripts.Add(testScript);
             await db.SaveChangesAsync();

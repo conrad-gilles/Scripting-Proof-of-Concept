@@ -8,7 +8,8 @@ CREATE TABLE customer_scripts (
     -- From [ScriptMetadata] attribute
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     modified_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    created_by VARCHAR(100)
+    created_by VARCHAR(100),
+    execution_time INT,
     -- PRIMARY KEY (script_name,script_type)
 );
 -- Compiled versions per API

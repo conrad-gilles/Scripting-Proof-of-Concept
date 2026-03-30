@@ -9,6 +9,7 @@ public record ValidationRecord
     public required Type ScriptType { get; init; }
 
     public required int Version { get; init; }
+    public required int ExecutionTime { get; init; }
 
     public string BaseTypeAsString()
     {
@@ -30,14 +31,14 @@ public record ValidationRecord
     }
 }
 
-public record GetBaseTypeReturn
-{
-    public required Microsoft.CodeAnalysis.INamedTypeSymbol? BaseType { get; init; }
-    public required Microsoft.CodeAnalysis.ITypeSymbol? MyClassSymbol { get; init; }
-    public required Microsoft.CodeAnalysis.CSharp.Syntax.ClassDeclarationSyntax? MyClass { get; init; }
-    public required SyntaxTree Tree { get; init; }
-    public required Microsoft.CodeAnalysis.SemanticModel? Model { get; init; }
-}
+// public record GetBaseTypeReturn
+// {
+//     public required Microsoft.CodeAnalysis.INamedTypeSymbol? BaseType { get; init; }
+//     public required Microsoft.CodeAnalysis.ITypeSymbol? MyClassSymbol { get; init; }
+//     public required Microsoft.CodeAnalysis.CSharp.Syntax.ClassDeclarationSyntax? MyClass { get; init; }
+//     public required SyntaxTree Tree { get; init; }
+//     public required Microsoft.CodeAnalysis.SemanticModel? Model { get; init; }
+// }
 
 public record ScriptCompilationError(
     string Id,
@@ -52,4 +53,75 @@ public record ScriptCompilationError(
     {
         return "An error occurred in Line: " + Line + ", Column: " + Column + " Message: " + Message;
     }
+}
+
+[AttributeUsage(AttributeTargets.Class)]
+public class ExecutionTime : Attribute
+{
+    public static int MinimumDuration = ((int)ExecutionTimeGroups.Short);
+    public static int MaximumDuration = ((int)ExecutionTimeGroups.ExtraLong);
+    public int MS { get; set; }
+
+    public ExecutionTime(int ms)
+    {
+        MS = GetSafeDuration(ms);
+    }
+    public ExecutionTime(ExecutionTimeGroups group)
+    {
+        MS = GetSafeDuration(((int)group));
+    }
+
+    private static int GetSafeDuration(int time)
+    {
+        int result = time;
+
+        if (time < MinimumDuration)
+        {
+            result = MinimumDuration;
+        }
+        if (time > MaximumDuration)
+        {
+            result = MaximumDuration;
+        }
+        if (result != MinimumDuration && result != MaximumDuration)
+        {
+            result = time;
+        }
+        return result;
+    }
+
+    public static int GetDurationFromEnumString(string enumString)
+    {
+        ExecutionTimeGroups result;
+        switch (enumString)
+        {
+            case nameof(ExecutionTimeGroups.Short):
+                result = ExecutionTimeGroups.Short;
+                break;
+            case nameof(ExecutionTimeGroups.Medium):
+                result = ExecutionTimeGroups.Medium;
+                break;
+            case nameof(ExecutionTimeGroups.Long):
+                result = ExecutionTimeGroups.Long;
+                break;
+            case nameof(ExecutionTimeGroups.ExtraLong):
+                result = ExecutionTimeGroups.ExtraLong;
+                break;
+            default:
+                try
+                {
+                    return GetSafeDuration(Int32.Parse(enumString));
+                }
+                catch
+                {
+                    throw new Exception("todo handel");
+                }
+
+        }
+        return GetSafeDuration(((int)result));
+    }
+}
+public enum ExecutionTimeGroups
+{
+    Short = 100, Medium = 500, Long = 1000, ExtraLong = 5000
 }

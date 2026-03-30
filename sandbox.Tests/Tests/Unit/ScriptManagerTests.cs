@@ -170,7 +170,8 @@ public class ScriptManagerFacadeTests
 
         List<CustomerScript> scripts = await _scriptManager!.ListScripts(includeCaches: true);
         Assert.IsNotNull(scripts);
-        Assert.IsTrue(scripts.Count == 5);
+        Console.WriteLine(nameof(scripts.Count) + scripts.Count);
+        Assert.IsTrue(scripts.Count == 6);
 
         CustomerScriptFilter filters = new CustomerScriptFilter(scriptName: "VaccineScript");   //todo fix this oine thorws errors
         List<CustomerScript> scriptsFiltered = await _scriptManager.ListScripts(includeCaches: true, filters: filters);

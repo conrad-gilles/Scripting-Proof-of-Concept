@@ -34,4 +34,36 @@ public class ArchitechtureTests
         //     }
         // }
     }
+
+    [TestMethod]
+    public async Task ExecutionTimesEnumValuesVerification()
+    {
+        List<CustomerScript> scripts = await ScriptManager.ListScripts();
+
+        ExecutionTimeGroups[] enumValues = Enum.GetValues<ExecutionTimeGroups>();
+
+        foreach (var item in enumValues)
+        {
+            if (((int)item) > ExecutionTime.MaximumDuration)
+            {
+                throw new Exception("enum value too big");
+            }
+            if (((int)item) < ExecutionTime.MinimumDuration)
+            {
+                throw new Exception("enum value too small");
+            }
+        }
+
+        foreach (var script in scripts)
+        {
+            if (script.ExecutionTimeInMS > ExecutionTime.MaximumDuration)
+            {
+                throw new Exception("duration too big");
+            }
+            if (script.ExecutionTimeInMS < ExecutionTime.MinimumDuration)
+            {
+                throw new Exception("duration too small");
+            }
+        }
+    }
 }

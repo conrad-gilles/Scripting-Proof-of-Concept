@@ -9,20 +9,24 @@ namespace Ember.Scripting;
 
 internal class ScriptExecutor
 {
-    private readonly static int _scriptTimeout = 1000;   // ms of how much time scripts get to execute
+    private int _scriptTimeout = ((int)ExecutionTimeGroups.Medium);   // ms of how much time scripts get to execute
     private readonly ILogger<ScriptExecutor> _logger;
     public ScriptExecutor(ILogger<ScriptExecutor> logger)
     {
         _logger = logger;
     }
 
-    public async Task<T> RunScriptExecution<T>(byte[] compiledScript, GeneratorContextSF genContext)
+    public async Task<T> RunScriptExecution<T>(byte[] compiledScript, GeneratorContextSF genContext, int? executionTime)
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(RunScriptExecution), nameof(ScriptExecutor));
 
         if (compiledScript.Length > 5 * 1024 * 1024) // 5 mb maximum size
         {
             throw new CompiledScriptWasTooLargeException(nameof(RunScriptExecution) + " failed in if (compiledScript.Length > 5 * 1024 * 1024)");
+        }
+        if (executionTime != null)
+        {
+            _scriptTimeout = (int)executionTime;
         }
 
         Assembly assembly = Assembly.Load(compiledScript);

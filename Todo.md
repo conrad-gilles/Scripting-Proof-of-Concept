@@ -16,9 +16,6 @@
 ### Main Todos
 
 - maybe make it so can call script oinly by name not both name and type? No sure some downsides
-  
-- abstract class Context which defines Downgrade
-- change Execute and get to generic where you call <IGeneratorAction> instead of ScriptTypes.ActionScrip
 
 - new way of calling multiple methods within a script, something like this:
   ActiveActionResult ar = await InternalScriptManager!.GetScript<IGeneratorActionScript>("AddPediatrucTestV2").ExecuteAction(ctx); //get db instance

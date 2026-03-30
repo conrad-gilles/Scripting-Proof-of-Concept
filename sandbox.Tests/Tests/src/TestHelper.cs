@@ -96,6 +96,13 @@ public class TestHelper
                     "sandbox", "src", "Scripts", "FaultyScripts", "MultipleClassesScript.cs"
                 ))
                 );
+        string sourceCodeExcecutionTimeTest = EmberMethods.CreateStringFromCsFile(
+                Path.GetFullPath(Path.Combine(
+                AppDomain.CurrentDomain.BaseDirectory,
+                "..", "..", "..", "..",
+                "sandbox", "src", "Scripts", "ActionScripts", "ExecutionTimeTest.cs"
+            ))
+            );
         sourceCodes = [];
         sourceCodes!.Add(sourceCodeActionV1);
         sourceCodes!.Add(sourceCodeActionV2);
@@ -119,7 +126,8 @@ public class TestHelper
             sourceCodeIllegalUsings = sourceCodeIllegalUsings,
             sourceCodeMissingUsing = sourceCodeMissingUsing,
             sourceCodePreventUsage = sourceCodePreventUsage,
-            sourceCodeMultipleClasses = sourceCodeMultipleClasses
+            sourceCodeMultipleClasses = sourceCodeMultipleClasses,
+            sourceCodeExecutionTimeTest = sourceCodeExcecutionTimeTest
         };
     }
 
@@ -181,6 +189,7 @@ public record TestHelperRecord
     public required string sourceCodeMissingUsing { get; init; }
     public required string sourceCodePreventUsage { get; init; }
     public required string sourceCodeMultipleClasses { get; init; }
+    public required string sourceCodeExecutionTimeTest { get; init; }
 }
 internal record ObjectsRecord
 {

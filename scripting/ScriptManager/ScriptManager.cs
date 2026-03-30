@@ -170,11 +170,6 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
         return _compiler.BasicValidationBeforeCompiling(script);
     }
 
-    public INamedTypeSymbol GetBaseType(string script)
-    {
-        return _compiler.GetBaseType(script).BaseType!;
-    }
-
     #endregion
 
     #region Execution Operations
@@ -185,6 +180,7 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
         _logger.LogTrace("Entered {MethodName} in {ClassName} with scriptId: {ScriptId}.", nameof(ExecuteScriptById), nameof(ScriptManagerFacade), scriptId);
 
         byte[]? compiledScript = null;
+        int? executionTime = null;
         try
         {
             var temp = await _db.GetCompiledScripCache(scriptId, apiVersion);
@@ -195,9 +191,11 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
             _logger.LogError("Retrieval failed jit comp launched:" + e.ToString());
             await CompileScript(scriptId, GetRunningApiVersion());
             //try again, if fails again we catch error outside
-            compiledScript = (await _db.GetCompiledScripCache(scriptId, apiVersion)).AssemblyBytes;
+            CompiledScripts script = await _db.GetCompiledScripCache(scriptId, apiVersion);
+            compiledScript = script.AssemblyBytes;
+            executionTime = script.CustomerScript!.ExecutionTimeInMS;
         }
-        object result = await _executor.RunScriptExecution<object>(compiledScript!, context);  //returns either bool or action result todo maybe add checks if thats the case but normally should be
+        object result = await _executor.RunScriptExecution<object>(compiledScript!, context, executionTime);  //returns either bool or action result todo maybe add checks if thats the case but normally should be
         return result;
     }
 

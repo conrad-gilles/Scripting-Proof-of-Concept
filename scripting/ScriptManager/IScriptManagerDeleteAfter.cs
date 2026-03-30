@@ -59,8 +59,6 @@ public interface ISccriptManagerDeleteAfter : IScriptManagerExtended
   /// <returns></returns>
   ValidationRecord BasicValidationBeforeCompiling(string script);
 
-  INamedTypeSymbol GetBaseType(string script);
-
   #endregion
 
   #region Cache Management

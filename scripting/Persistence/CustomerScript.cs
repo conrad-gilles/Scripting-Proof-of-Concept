@@ -32,6 +32,9 @@ public class CustomerScript
     [Column("created_by")]
     public string? CreatedBy { get; set; }
 
+    [Column("execution_time")]
+    public int? ExecutionTimeInMS { get; set; }
+
     public List<CompiledScripts> CompiledCaches { get; set; }
 
     public CustomerScript()

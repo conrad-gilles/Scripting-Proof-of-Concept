@@ -3,6 +3,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.Extensions.Logging;
+using Npgsql.Internal;
 using System.Reflection;
 
 namespace Ember.Scripting;
@@ -107,16 +108,24 @@ internal class ScriptCompiler
         byte[] assemblyBytes = ms.ToArray();
         return assemblyBytes;
     }
-
-    public GetBaseTypeReturn GetBaseType(string script)
+    public ValidationRecord BasicValidationBeforeCompiling(string script)//record
     {
-        //Gets base class name like IGeneratorScript and so on
+        _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(BasicValidationBeforeCompiling), nameof(ScriptCompiler));
+
+        //Does basic validation such as correct interface usage, or if only one class is in the script file.
+        //Also extracts class name, type of the scrip(ex. Action) and verison of interface.
         // Source - https://stackoverflow.com/a/33095466
+
+        if (string.IsNullOrWhiteSpace(script))
+        {
+            throw new ScriptWasEmptyOrNullException();
+        }
 
         SyntaxTree tree = CSharpSyntaxTree.ParseText(script);   //being called twice also in RunCompilation() might be better for performance to remove twice but also you want to be able to compile without having to parse always
         var mscorlib = MetadataReference.CreateFromFile(typeof(object).Assembly.Location);
+        IEnumerable<MetadataReference>? referencesBT = [mscorlib];
         var compilation = CSharpCompilation.Create("MyCompilation",
-            syntaxTrees: new[] { tree }, references: new[] { mscorlib });   // i might be able to use this method to init the refrences also above?
+            syntaxTrees: new[] { tree }, references: referencesBT);   // i might be able to use this method to init the refrences also above?
         var model = compilation.GetSemanticModel(tree);
         var classesInTree = tree.GetRoot().DescendantNodes().OfType<ClassDeclarationSyntax>();
         if (classesInTree.Count() > 1)
@@ -127,37 +136,18 @@ internal class ScriptCompiler
         var myClass = classesInTree.Last();
         var myClassSymbol = model.GetDeclaredSymbol(myClass) as ITypeSymbol;
 
-        return new GetBaseTypeReturn
-        {
-            BaseType = myClassSymbol!.BaseType!,
-            Model = model,
-            MyClass = myClass,
-            MyClassSymbol = myClassSymbol,
-            Tree = tree
-        };
-    }
-    public ValidationRecord BasicValidationBeforeCompiling(string script)//record
-    {
-        _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(BasicValidationBeforeCompiling), nameof(ScriptCompiler));
 
-        //Does basic validation such as correct interface usage, or if only one class is in the script file.
-        //Also extracts class name, type of the scrip(ex. Action) and verison of interface.
-        if (string.IsNullOrWhiteSpace(script))
-        {
-            throw new ScriptWasEmptyOrNullException();
-        }
         try
         {
-            var record = GetBaseType(script);
-            var baseTypeName = record.MyClassSymbol!.BaseType!.Name;
-            var className = record.MyClassSymbol.ToString();
-            var parentSymbol = record.MyClassSymbol!.Interfaces.FirstOrDefault() ?? record.MyClassSymbol.BaseType;
+            var baseTypeName = myClassSymbol!.BaseType!.Name;
+            var className = myClassSymbol.ToString();
+            var parentSymbol = myClassSymbol!.Interfaces.FirstOrDefault() ?? myClassSymbol.BaseType;
             int? versionInt = null;
             string implementedIntrf = parentSymbol.Name;
 
             string? contextParameterTypeName = null;
 
-            var executeMethod = record.MyClass!.DescendantNodes()
+            var executeMethod = myClass!.DescendantNodes()
                                        .OfType<MethodDeclarationSyntax>()
                                        .FirstOrDefault(m => m.Identifier.Text == "ExecuteAsync" || m.Identifier.Text == "EvaluateAsync");
 
@@ -223,14 +213,17 @@ internal class ScriptCompiler
                 default:
                     throw new CouldNotMatchBaseTypeInCompiler(nameof(baseTypeName) + " was not a valid option!");
             }
+
+            int executionTime = GetExecutionTime(script, tree);
+            ValidateLoopsHavingCancellation(tree!);
+            ValidateNamespaceUsage(tree!, model!);
             ValidationRecord returnedRecord = new ValidationRecord
             {
                 ClassName = className,
                 ScriptType = scriptType,
-                Version = (int)versionInt
+                Version = (int)versionInt,
+                ExecutionTime = executionTime
             };
-            ValidateLoopsHavingCancellation(record.Tree!);
-            ValidateNamespaceUsage(record.Tree!, record.Model!);
             return returnedRecord;
         }
 
@@ -242,6 +235,28 @@ internal class ScriptCompiler
         {
             throw new ScriptFieldNullException("The script very likely did not implement one of the predefined interfaces.", e);
         }
+    }
+
+    public int GetExecutionTime(string script, SyntaxTree syntaxTree)
+    {
+        int executionTime = (int)ExecutionTimeGroups.Medium;
+
+        var syntaxRoot = syntaxTree.GetRoot();
+        var classNode = syntaxRoot.DescendantNodes().OfType<ClassDeclarationSyntax>().FirstOrDefault();
+
+        var timeAttribute = classNode!.AttributeLists
+            .SelectMany(al => al.Attributes)
+            .FirstOrDefault(a => a.Name.ToString().Contains(nameof(ExecutionTime)));
+
+        if (timeAttribute?.ArgumentList != null && timeAttribute.ArgumentList.Arguments.Any())
+        {
+            var firstArgument = timeAttribute.ArgumentList.Arguments.First();
+
+            var argumentFullString = firstArgument.NormalizeWhitespace().ToFullString();
+            string enumString = argumentFullString.Split('.').Last();
+            executionTime = ((int)ExecutionTime.GetDurationFromEnumString(enumString));
+        }
+        return executionTime;
     }
     // Todo test Checks if the Cancellation Token is being checked within each Loop if not throws error.
     private void ValidateLoopsHavingCancellation(SyntaxTree tree)
