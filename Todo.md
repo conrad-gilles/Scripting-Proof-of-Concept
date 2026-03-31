@@ -1,5 +1,6 @@
 # Todo
 
+- write basicVali checks to ensure no loose methods
 - wirte scriot that doesntimplement all
 - should ScriptBase implement both the Condition and the Action interface or only the Action?
 

@@ -132,8 +132,15 @@ internal class ScriptExecutor
             }
             using var cts = new CancellationTokenSource(_scriptTimeout);
             ScriptEnvironment.CurrentToken.Value = cts.Token;
-
-            var resultTask = (Task)method.Invoke(scriptInstance, new object[] { genContext })!;
+            System.Threading.Tasks.Task? resultTask;
+            try
+            {
+                resultTask = (Task)method.Invoke(scriptInstance, new object[] { genContext })!;
+            }
+            catch (NullReferenceException)
+            {
+                throw new CouldNotFindMethodException();
+            }
 
             try
             {
@@ -155,11 +162,19 @@ internal class ScriptExecutor
 
             return (ActionResultSF)resultValue!;  //this might fail because not baseclass idk, if it does maybe change whole structure to only one function
         }
+
         catch (Exception e)
         {
             _logger.LogError(e.ToString());
             _logger.LogWarning("You might have passed the wrong GeneratorContext class, ex V1 instead of V2");
-            throw new ActionScriptExecutionException("You might have passed the wrong GeneratorContext class, ex V1 instead of V2", e);
+            if (e.GetType() != typeof(CouldNotFindMethodException))
+            {
+                throw new ActionScriptExecutionException("You might have passed the wrong GeneratorContext class, ex V1 instead of V2", e);
+            }
+            else
+            {
+                throw;
+            }
         }
 
     }

@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Ember.Simulation;
 using ScriptMethodManager;
+using Sandbox;
 
 [TestClass]
 public class MultiMethodScriptTests
@@ -84,6 +85,32 @@ public class MultiMethodScriptTests
         Console.WriteLine(ar.ToString());
         Assert.IsTrue(ar.ToString().Contains("Default method ExecuteAsync was called"));
 
+        // Assert.IsTrue(false);
+    }
+
+    [TestMethod]
+    public async Task NegativeTest()
+    {
+        string sourceCode = TestHelper.GetSC().sourceCodeMultiMethodScripts;
+        CustomerScript scriptDB = await ScriptManager.CreateScript(sourceCode);
+
+        Exception ex = await Assert.ThrowsExceptionAsync<Ember.Scripting.CouldNotFindMethodException>(async () =>
+        {
+            ActiveActionResult ar = await InternalScriptManager!.ExecuteScript<IGeneratorActionScript>
+            (scriptDB.ScriptName!, TestHelper.GetContext(), methodName: "MethodDoesntExist");
+        });
+
+        ExceptionHelper.PrintExceptionListToConsole(ex);
+
+        sourceCode = TestHelper.GetSC().sourceCodeActionV3;
+        scriptDB = await ScriptManager.CreateScript(sourceCode);
+
+        ex = await Assert.ThrowsExceptionAsync<Ember.Scripting.CouldNotFindMethodException>(async () =>
+       {
+           ActiveActionResult ar = await InternalScriptManager!.ExecuteScript<IGeneratorActionScript>
+               (scriptDB.ScriptName!, TestHelper.GetContext(), methodName: "ExecuteAction1");
+       });
+        ExceptionHelper.PrintExceptionListToConsole(ex);
         // Assert.IsTrue(false);
     }
 }

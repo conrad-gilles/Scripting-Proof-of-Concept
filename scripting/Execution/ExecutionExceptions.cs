@@ -19,6 +19,12 @@ public class ActionScriptExecutionException : ScriptExecutionException
     public ActionScriptExecutionException(string message) : base(message) { }
     public ActionScriptExecutionException(string message, Exception innerException) : base(message, innerException) { }
 }
+public class CouldNotFindMethodException : ActionScriptExecutionException
+{
+    public CouldNotFindMethodException() : base() { }
+    public CouldNotFindMethodException(string message) : base(message) { }
+    public CouldNotFindMethodException(string message, Exception innerException) : base(message, innerException) { }
+}
 public class CompiledScriptWasTooLargeException : ScriptExecutionException
 {
     public CompiledScriptWasTooLargeException() : base() { }
