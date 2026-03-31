@@ -83,7 +83,9 @@ internal class ScriptExecutor
         _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(RunConditionScript), nameof(ScriptExecutor));
         try
         {
-            MethodInfo method = type.GetMethod("EvaluateAsync")!;
+            // MethodInfo method = type.GetMethod("EvaluateAsync")!;
+            MethodInfo method = type.GetMethod(nameof(IGeneratorConditionScript.EvaluateAsync))!;
+
             using var cts = new CancellationTokenSource(_scriptTimeout);
             ScriptEnvironment.CurrentToken.Value = cts.Token;
 
@@ -115,12 +117,12 @@ internal class ScriptExecutor
         }
 
     }
-    public async Task<ActionResultSF> RunActionScript(Type type, object scriptInstance, GeneratorContextSF genContext)
+    public async Task<ActionResultSF> RunActionScript(Type type, object scriptInstance, GeneratorContextSF genContext)  //todo pass Method name as string or enum and also pass arguments maybe as List<args>
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(RunActionScript), nameof(ScriptExecutor));
         try
         {
-            MethodInfo method = type.GetMethod("ExecuteAsync")!;
+            MethodInfo method = type.GetMethod(nameof(IGeneratorActionScript.ExecuteAsync))!;
 
             using var cts = new CancellationTokenSource(_scriptTimeout);
             ScriptEnvironment.CurrentToken.Value = cts.Token;

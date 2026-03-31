@@ -1,5 +1,18 @@
 namespace Ember.Scripting;
 
+// public abstract class ScriptBase : IGeneratorActionScript
+// {
+//     public virtual Task<ActionResultSF> ExecuteAsync(IGeneratorBaseInterfaceSF context)
+//     {
+//         throw new NotImplementedException();
+//     }
+// }
+
+// public interface IScriptBase : IGeneratorActionScript
+// {
+
+// }
+
 public interface IScript
 {
 
