@@ -175,7 +175,7 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
     #region Execution Operations
 
     // Generic execution 
-    public async Task<object> ExecuteScriptById(Guid scriptId, GeneratorContextSF context, int? apiVersion = null)
+    public async Task<object> ExecuteScriptById(Guid scriptId, GeneratorContextSF context, int? apiVersion = null, string? methodName = null)
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName} with scriptId: {ScriptId}.", nameof(ExecuteScriptById), nameof(ScriptManagerFacade), scriptId);
 
@@ -195,15 +195,15 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
             compiledScript = script.AssemblyBytes;
             executionTime = script.CustomerScript!.ExecutionTimeInMS;
         }
-        object result = await _executor.RunScriptExecution<object>(compiledScript!, context, executionTime);  //returns either bool or action result todo maybe add checks if thats the case but normally should be
+        object result = await _executor.RunScriptExecution<object>(compiledScript!, context, executionTime, methodName);  //returns either bool or action result todo maybe add checks if thats the case but normally should be
         return result;
     }
 
-    public async Task<object> ExecuteScriptByNameAndType<ScriptType>(string name, GeneratorContextSF context, int? apiVersion = null) where ScriptType : IScript
+    public async Task<object> ExecuteScriptByNameAndType<ScriptType>(string name, GeneratorContextSF context, int? apiVersion = null, string? methodName = null) where ScriptType : IScript
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName} with scriptName: {ScriptId}.", nameof(ExecuteScriptByNameAndType), nameof(ScriptManagerFacade), name);
         Guid scriptId = await GetScriptId<ScriptType>(name);
-        return await ExecuteScriptById(scriptId, context, apiVersion);
+        return await ExecuteScriptById(scriptId, context, apiVersion, methodName);
     }
 
     #endregion

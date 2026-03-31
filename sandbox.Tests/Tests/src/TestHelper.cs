@@ -103,6 +103,13 @@ public class TestHelper
                 "sandbox", "src", "Scripts", "ActionScripts", "ExecutionTimeTest.cs"
             ))
             );
+        string sourceCodeMultiMethodScripts = EmberMethods.CreateStringFromCsFile(
+            Path.GetFullPath(Path.Combine(
+            AppDomain.CurrentDomain.BaseDirectory,
+            "..", "..", "..", "..",
+            "sandbox", "src", "Scripts", "ActionScripts", "MultipleMethodsScript.cs"
+        ))
+        );
         sourceCodes = [];
         sourceCodes!.Add(sourceCodeActionV1);
         sourceCodes!.Add(sourceCodeActionV2);
@@ -127,7 +134,8 @@ public class TestHelper
             sourceCodeMissingUsing = sourceCodeMissingUsing,
             sourceCodePreventUsage = sourceCodePreventUsage,
             sourceCodeMultipleClasses = sourceCodeMultipleClasses,
-            sourceCodeExecutionTimeTest = sourceCodeExcecutionTimeTest
+            sourceCodeExecutionTimeTest = sourceCodeExcecutionTimeTest,
+            sourceCodeMultiMethodScripts = sourceCodeMultiMethodScripts
         };
     }
 
@@ -170,7 +178,30 @@ public class TestHelper
 
         return scriptManager = provider.GetRequiredService<ISccriptManagerDeleteAfter>();
     }
+    public static ActiveGeneratorContext GetContext()
+    {
+        LabOrder labOrder = new LabOrder("1", "Pediatrics");
+        Vaccine vaccine = new Vaccine("Polio", 1, DateTime.UtcNow);
 
+        ConsoleLogger logger = new ConsoleLogger();
+        DataAccess testDataAccess = new DataAccess();
+
+
+
+        var services = new ServiceCollection();
+
+        Ember.Simulation.SandboxServiceCollectionExtensions.AddSandboxServices
+        (services, logger, testDataAccess);
+
+        using var provider = services.BuildServiceProvider();
+
+        ActiveContextFactory.IGeneratorContextFactory factory = provider.GetRequiredService<ActiveContextFactory.IGeneratorContextFactory>();
+
+
+        ActiveGeneratorContext ctx = factory.Create(labOrder, vaccine);
+
+        return ctx;
+    }
 
 }
 
@@ -190,6 +221,7 @@ public record TestHelperRecord
     public required string sourceCodePreventUsage { get; init; }
     public required string sourceCodeMultipleClasses { get; init; }
     public required string sourceCodeExecutionTimeTest { get; init; }
+    public required string sourceCodeMultiMethodScripts { get; init; }
 }
 internal record ObjectsRecord
 {

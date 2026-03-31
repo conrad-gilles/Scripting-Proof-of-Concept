@@ -1,5 +1,6 @@
 # Todo
 
+- wirte scriot that doesntimplement all
 - should ScriptBase implement both the Condition and the Action interface or only the Action?
 
 - 1 abstract class instead of interfaces for each new method, 

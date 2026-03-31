@@ -55,9 +55,4 @@ public class AddPediatricTestsV4 : GeneratorScriptsV3.IGeneratorActionScript
         return ActionResultV3.ActionResult.Success("Pediatric tests added V3");
         // return null; //just for compiler
     }
-
-    public async Task<ActionResultSF> ExecuteAction1(IGeneratorBaseInterfaceSF context)
-    {
-        return ActionResultV3.ActionResult.Success("Pediatric tests added V3");
-    }
 }

@@ -16,7 +16,7 @@ internal class ScriptExecutor
         _logger = logger;
     }
 
-    public async Task<T> RunScriptExecution<T>(byte[] compiledScript, GeneratorContextSF genContext, int? executionTime)
+    public async Task<T> RunScriptExecution<T>(byte[] compiledScript, GeneratorContextSF genContext, int? executionTime, string? methodName = null)
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(RunScriptExecution), nameof(ScriptExecutor));
 
@@ -68,7 +68,7 @@ internal class ScriptExecutor
         }
         else if (typeof(IGeneratorActionScript).IsAssignableFrom(type))
         {
-            var result = await RunActionScript(type, scriptInstance, genContext);
+            var result = await RunActionScript(type, scriptInstance, genContext, methodName);
             return (T)(object)result;
         }
         else
@@ -83,7 +83,6 @@ internal class ScriptExecutor
         _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(RunConditionScript), nameof(ScriptExecutor));
         try
         {
-            // MethodInfo method = type.GetMethod("EvaluateAsync")!;
             MethodInfo method = type.GetMethod(nameof(IGeneratorConditionScript.EvaluateAsync))!;
 
             using var cts = new CancellationTokenSource(_scriptTimeout);
@@ -117,13 +116,20 @@ internal class ScriptExecutor
         }
 
     }
-    public async Task<ActionResultSF> RunActionScript(Type type, object scriptInstance, GeneratorContextSF genContext)  //todo pass Method name as string or enum and also pass arguments maybe as List<args>
+    public async Task<ActionResultSF> RunActionScript(Type type, object scriptInstance, GeneratorContextSF genContext, string? methodName = null)  //todo pass Method name as string or enum and also pass arguments maybe as List<args>
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(RunActionScript), nameof(ScriptExecutor));
         try
         {
-            MethodInfo method = type.GetMethod(nameof(IGeneratorActionScript.ExecuteAsync))!;
-
+            MethodInfo method;
+            if (methodName == null)
+            {
+                method = type.GetMethod(nameof(IGeneratorActionScript.ExecuteAsync))!;
+            }
+            else    //todo error handling id method name is bogus
+            {
+                method = type.GetMethod(methodName)!;
+            }
             using var cts = new CancellationTokenSource(_scriptTimeout);
             ScriptEnvironment.CurrentToken.Value = cts.Token;
 
@@ -133,9 +139,9 @@ internal class ScriptExecutor
             {
                 await resultTask.WaitAsync(cts.Token);
             }
-            catch (OperationCanceledException)
+            catch (OperationCanceledException ex)
             {
-                throw new ActionScriptTimeoutException(nameof(RunConditionScript) + " script exceeded time limit and was safely terminated.");
+                throw new ActionScriptTimeoutException(nameof(RunConditionScript) + " script exceeded time limit and was safely terminated.", ex);
             }
             finally
             {

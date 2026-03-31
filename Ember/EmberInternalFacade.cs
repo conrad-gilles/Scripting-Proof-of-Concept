@@ -10,48 +10,23 @@ internal class EmberInternalFacade
         ScriptManager = scriptManager;
     }
 
-    public async Task<ActiveActionResult> ExecuteScript(Guid id, ActiveGeneratorContext ctx)
+    public async Task<ActiveActionResult> ExecuteScript(Guid id, ActiveGeneratorContext ctx, string? methodName = null)
     {
         var cf = new ContextManagement(ScriptManager);
         // GeneratorContextSF ctx = await cf.CreateByDowngrade(id, data);
         // ctx = await cf.CreateByDowngrade(id, ctx);
         GeneratorContextSF context = await cf.CreateByDowngrade(id, ctx);
-        var result = await ScriptManager.ExecuteScriptById(id, context);
+        var result = await ScriptManager.ExecuteScriptById(id, context, methodName: methodName);
         ActiveActionResult ar = (ActiveActionResult)EmberMethods.UpgradeActionResult(result);
         return ar;
     }
 
-    public async Task<ActiveActionResult> ExecuteScript<ScriptType>(string name, ActiveGeneratorContext ctx) where ScriptType : IScript
+    public async Task<ActiveActionResult> ExecuteScript<ScriptType>(string name, ActiveGeneratorContext ctx, string? methodName = null) where ScriptType : IScript
     {
-        // ScriptTypes scriptType;
-        // if (typeof(ScriptType) == typeof(IGeneratorActionScript))
-        // {
-        //     scriptType = ScriptTypes.GeneratorActionScript;
-        // }
-        // else if (typeof(ScriptType) == typeof(IGeneratorConditionScript))
-        // {
-        //     scriptType = ScriptTypes.GeneratorConditionScript;
-        // }
-        // else
-        // {
-        //     throw new Exception();
-        // }
-
-        // // switch (typeof(ScriptType))
-        // // {
-        // //     case IGeneratorActionScript:
-        // //         scriptType = ScriptTypes.GeneratorActionScript;
-        // //         break;
-        // //     case IGeneratorConditionScript:
-        // //         scriptType = ScriptTypes.GeneratorConditionScript;
-        // //         break;
-        // //     default:
-        // //         throw new Exception();
-        // // }
         Guid id = await ScriptManager.GetScriptId<ScriptType>(name);
         var cf = new ContextManagement(ScriptManager);
         GeneratorContextSF context = await cf.CreateByDowngrade(id, ctx);
-        var result = await ScriptManager.ExecuteScriptById(id, context);
+        var result = await ScriptManager.ExecuteScriptById(id, context, methodName: methodName);
         ActiveActionResult ar = (ActiveActionResult)EmberMethods.UpgradeActionResult(result);
         return ar;
     }
