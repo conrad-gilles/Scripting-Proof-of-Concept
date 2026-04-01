@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Ember.Simulation;
 using ScriptMethodManager;
 using Sandbox;
+using Microsoft.CodeAnalysis.Scripting;
 
 [TestClass]
 public class MultiMethodScriptTests
@@ -112,5 +113,23 @@ public class MultiMethodScriptTests
        });
         ExceptionHelper.PrintExceptionListToConsole(ex);
         // Assert.IsTrue(false);
+    }
+
+    [TestMethod]
+
+    public async Task TestValidationNormalScriptAsync()
+    {
+        Console.WriteLine("Source Code 1:");
+        string sourceCode = TestHelper.GetSC().sourceCodeActionV2;
+        CustomerScript scriptDB = await ScriptManager.CreateScript(sourceCode);
+
+        ValidationRecord vr = ScriptManager.BasicValidationBeforeCompiling(sourceCode);
+
+        Console.WriteLine("Source Code 2:");
+        sourceCode = TestHelper.GetSC().sourceCodeActionV3;
+        scriptDB = await ScriptManager.CreateScript(sourceCode);
+
+        vr = ScriptManager.BasicValidationBeforeCompiling(sourceCode);
+
     }
 }

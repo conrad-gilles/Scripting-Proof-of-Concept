@@ -129,3 +129,64 @@ public enum ExecutionTimeGroups
 {
     Short = 100, Medium = 500, Long = 1000, ExtraLong = 5000
 }
+
+public record MethodRecord
+{
+    public required string Name { get; init; }
+    public required string ReturnType { get; init; }
+
+    public required List<ParameterRecord> Parameters { get; init; }
+
+    public static bool IsTheSame(MethodRecord record1, MethodRecord record2)
+    {
+        if (record1.Name != record2.Name)
+        {
+            return false;
+        }
+        if (record1.ReturnType != record2.ReturnType)
+        {
+            return false;
+        }
+        if (record1.Parameters.Count() != record2.Parameters.Count())
+        {
+            return false;
+        }
+        // bool isInside =false;
+        foreach (var param1 in record1.Parameters)
+        {
+            bool isInside = false;
+            foreach (var param2 in record2.Parameters)
+            {
+
+                if (ParameterRecord.IsTheSame(param1, param2))
+                {
+                    isInside = true;
+                }
+            }
+            if (isInside == false)
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+}
+
+public record ParameterRecord
+{
+    public required string Name { get; init; }
+    public required string ReturnType { get; init; }
+
+    public static bool IsTheSame(ParameterRecord param1, ParameterRecord param2)
+    {
+        if (param1.Name != param2.Name)
+        {
+            return false;
+        }
+        if (param1.ReturnType != param2.ReturnType)
+        {
+            return false;
+        }
+        return true;
+    }
+}

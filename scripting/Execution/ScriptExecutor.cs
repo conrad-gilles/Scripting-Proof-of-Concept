@@ -137,9 +137,9 @@ internal class ScriptExecutor
             {
                 resultTask = (Task)method.Invoke(scriptInstance, new object[] { genContext })!;
             }
-            catch (NullReferenceException)
+            catch (NullReferenceException ex)
             {
-                throw new CouldNotFindMethodException();
+                throw new CouldNotFindMethodException(message: "", innerException: ex);
             }
 
             try

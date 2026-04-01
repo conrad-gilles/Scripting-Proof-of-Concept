@@ -213,7 +213,7 @@ internal class ScriptCompiler
                 default:
                     throw new CouldNotMatchBaseTypeInCompiler(nameof(baseTypeName) + " was not a valid option!");
             }
-
+            ValidateOnlyInheritedMethods(tree!, model);
             ValidateLoopsHavingCancellation(tree!);
             ValidateNamespaceUsage(tree!, model!);
             ValidationRecord returnedRecord = new ValidationRecord
@@ -257,6 +257,143 @@ internal class ScriptCompiler
         }
         return executionTime;
     }
+
+    private void ValidateOnlyInheritedMethods(SyntaxTree tree, SemanticModel semanticModel)
+    {
+        SyntaxNode root = tree.GetRoot();
+        IEnumerable<MethodDeclarationSyntax> methods = root.DescendantNodes().OfType<MethodDeclarationSyntax>();
+        List<MethodRecord> methodsRoslyn = GetMethodsRoslyn(methods, semanticModel);
+
+        Assembly myAssembly = Assembly.GetExecutingAssembly();
+        string targetNamespace = "Ember.Scripting.AdditionalMethods";
+        IEnumerable<Type> types = myAssembly.GetTypes().Where(type => type.Namespace == targetNamespace && type.IsInterface
+                // && !type.Name.StartsWith("<") //last line to exclude compiler generated 
+                );
+        List<MethodRecord> methodsAssembly = GetMethodsAssembly(types);
+
+        foreach (var meth1 in methodsRoslyn)
+        {
+            // if (methodsAssembly.Contains(method) == false)
+            // {
+            //     if (method.Name != nameof(Ember.Scripting.IGeneratorActionScript.ExecuteAsync))
+            //     {
+            //         throw new Exception(message: "No new methods allowed that are not predefinded!");
+            //     }
+            // }
+            bool isInside = false;
+            foreach (var meth2 in methodsAssembly)
+            {
+                if (MethodRecord.IsTheSame(meth1, meth2))
+                {
+                    isInside = true;
+                }
+                else
+                {
+                    Console.WriteLine("Method from Assembly that wasnt found: " + meth2);
+                }
+            }
+            if (isInside == false)
+            {
+                if (meth1.Name != nameof(Ember.Scripting.IGeneratorActionScript.ExecuteAsync)
+                && meth1.Name != nameof(Ember.Scripting.IGeneratorConditionScript.EvaluateAsync)
+                )
+                {
+                    Console.WriteLine("Method from Roslyn: " + meth1);
+                    // Console.WriteLine("Method from Roslyn: "+meth2);
+                    throw new Exception(message: "No new methods allowed that are not predefinded!");
+                }
+            }
+        }
+    }
+
+    private List<MethodRecord> GetMethodsRoslyn(IEnumerable<MethodDeclarationSyntax> methods, SemanticModel semanticModel)
+    {
+        List<MethodRecord> result = [];
+
+        foreach (var method in methods)
+        {
+            IMethodSymbol methodSymbol = semanticModel.GetDeclaredSymbol(method)!;
+
+            string methodName = methodSymbol.Name;
+            string returnType = methodSymbol.ReturnType.MetadataName;
+
+
+            List<ParameterRecord> resultParams = [];
+
+            foreach (IParameterSymbol paramSymbol in methodSymbol.Parameters)
+            {
+                try
+                {
+                    string paramName = paramSymbol.Name;
+                    string paramType = paramSymbol.Type.MetadataName;
+
+                    resultParams.Add(new ParameterRecord { Name = paramName, ReturnType = paramType });
+                }
+                catch { continue; }
+            }
+            // string methodName = method.Identifier.ValueText;
+            // string returnType = method.ReturnType.ToString();
+            // SeparatedSyntaxList<ParameterSyntax> parameters = method.ParameterList.Parameters;
+
+            // List<ParameterRecord> resultParams = [];
+            // foreach (ParameterSyntax param in parameters)
+            // {
+            //     try
+            //     {
+
+            //         string paramName = param.Identifier.ValueText;
+            //         string paramType = param.Type?.ToString()!;
+            //         resultParams.Add(new ParameterRecord { Name = paramName, ReturnType = paramType });
+            //     }
+            //     catch
+            //     {
+            //         continue;
+            //     }
+            // }
+            result.Add(new MethodRecord { Name = methodName, ReturnType = returnType, Parameters = resultParams });
+        }
+
+        return result;
+    }
+    private List<MethodRecord> GetMethodsAssembly(IEnumerable<Type> types)
+    {
+        List<MethodRecord> result = [];
+
+
+        BindingFlags flags = BindingFlags.NonPublic |
+                                         BindingFlags.Public |
+                                         BindingFlags.Instance |
+                                         BindingFlags.Static;
+        foreach (var t in types)
+        {
+            MethodInfo[] methodsInType = t.GetMethods(flags);
+            foreach (var m in methodsInType)
+            {
+                string methodName = m.Name;
+                string returnType = m.ReturnType.Name;
+                ParameterInfo[] parameters = m.GetParameters();
+
+                List<ParameterRecord> resultParams = [];
+                foreach (ParameterInfo param in parameters)
+                {
+                    try
+                    {
+                        string paramName = param.Name!;
+                        string paramType = param.ParameterType.Name;
+                        resultParams.Add(new ParameterRecord { Name = paramName, ReturnType = paramType });
+                    }
+                    catch
+                    {
+                        continue;
+                    }
+                }
+                result.Add(new MethodRecord { Name = methodName, ReturnType = returnType, Parameters = resultParams });
+            }
+        }
+
+        return result;
+    }
+
     // Todo test Checks if the Cancellation Token is being checked within each Loop if not throws error.
     private void ValidateLoopsHavingCancellation(SyntaxTree tree)
     {
