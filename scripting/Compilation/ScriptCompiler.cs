@@ -273,13 +273,6 @@ internal class ScriptCompiler
 
         foreach (var meth1 in methodsRoslyn)
         {
-            // if (methodsAssembly.Contains(method) == false)
-            // {
-            //     if (method.Name != nameof(Ember.Scripting.IGeneratorActionScript.ExecuteAsync))
-            //     {
-            //         throw new Exception(message: "No new methods allowed that are not predefinded!");
-            //     }
-            // }
             bool isInside = false;
             foreach (var meth2 in methodsAssembly)
             {
@@ -300,7 +293,7 @@ internal class ScriptCompiler
                 {
                     Console.WriteLine("Method from Roslyn: " + meth1);
                     // Console.WriteLine("Method from Roslyn: "+meth2);
-                    throw new Exception(message: "No new methods allowed that are not predefinded!");
+                    throw new UndefinedMethodException(message: "No new methods allowed that are not predefinded!", meth1);
                 }
             }
         }

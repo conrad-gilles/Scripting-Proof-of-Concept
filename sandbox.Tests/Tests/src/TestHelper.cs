@@ -110,6 +110,34 @@ public class TestHelper
             "sandbox", "src", "Scripts", "ActionScripts", "MultipleMethodsScript.cs"
         ))
         );
+        string undefinedMethodsScriptPublic = EmberMethods.CreateStringFromCsFile(
+            Path.GetFullPath(Path.Combine(
+            AppDomain.CurrentDomain.BaseDirectory,
+            "..", "..", "..", "..",
+            "sandbox", "src", "Scripts", "FaultyScripts", "UndefinedMethods", "PublicScript.cs"
+        ))
+        );
+        string undefinedMethodsScriptPrivate = EmberMethods.CreateStringFromCsFile(
+            Path.GetFullPath(Path.Combine(
+            AppDomain.CurrentDomain.BaseDirectory,
+            "..", "..", "..", "..",
+            "sandbox", "src", "Scripts", "FaultyScripts", "UndefinedMethods", "PrivateScript.cs"
+        ))
+        );
+        string undefinedMethodsScriptInternal = EmberMethods.CreateStringFromCsFile(
+            Path.GetFullPath(Path.Combine(
+            AppDomain.CurrentDomain.BaseDirectory,
+            "..", "..", "..", "..",
+            "sandbox", "src", "Scripts", "FaultyScripts", "UndefinedMethods", "InternalScript.cs"
+        ))
+        );
+        string undefinedMethodsStatic = EmberMethods.CreateStringFromCsFile(
+            Path.GetFullPath(Path.Combine(
+            AppDomain.CurrentDomain.BaseDirectory,
+            "..", "..", "..", "..",
+            "sandbox", "src", "Scripts", "FaultyScripts", "UndefinedMethods", "StaticScript.cs"
+        ))
+        );
         sourceCodes = [];
         sourceCodes!.Add(sourceCodeActionV1);
         sourceCodes!.Add(sourceCodeActionV2);
@@ -135,7 +163,11 @@ public class TestHelper
             sourceCodePreventUsage = sourceCodePreventUsage,
             sourceCodeMultipleClasses = sourceCodeMultipleClasses,
             sourceCodeExecutionTimeTest = sourceCodeExcecutionTimeTest,
-            sourceCodeMultiMethodScripts = sourceCodeMultiMethodScripts
+            sourceCodeMultiMethodScripts = sourceCodeMultiMethodScripts,
+            undefinedMethodsScriptPublic = undefinedMethodsScriptPublic,
+            undefinedMethodsScriptInternal = undefinedMethodsScriptInternal,
+            undefinedMethodsScriptPrivate = undefinedMethodsScriptPrivate,
+            undefinedMethodsScriptStatic = undefinedMethodsStatic
         };
     }
 
@@ -222,6 +254,11 @@ public record TestHelperRecord
     public required string sourceCodeMultipleClasses { get; init; }
     public required string sourceCodeExecutionTimeTest { get; init; }
     public required string sourceCodeMultiMethodScripts { get; init; }
+    public required string undefinedMethodsScriptPublic { get; init; }
+    public required string undefinedMethodsScriptPrivate { get; init; }
+    public required string undefinedMethodsScriptInternal { get; init; }
+    public required string undefinedMethodsScriptStatic { get; init; }
+
 }
 internal record ObjectsRecord
 {

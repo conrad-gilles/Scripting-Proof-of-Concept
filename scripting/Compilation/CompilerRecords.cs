@@ -170,6 +170,10 @@ public record MethodRecord
         }
         return true;
     }
+    public override string ToString()
+    {
+        return nameof(MethodRecord) + ": Name: " + Name + ", ReturnType: " + ReturnType + ", Parameters: " + Parameters;
+    }
 }
 
 public record ParameterRecord
@@ -188,5 +192,9 @@ public record ParameterRecord
             return false;
         }
         return true;
+    }
+    public override string ToString()
+    {
+        return nameof(ParameterRecord) + ": Name: " + Name + ", ReturnType: " + ReturnType;
     }
 }

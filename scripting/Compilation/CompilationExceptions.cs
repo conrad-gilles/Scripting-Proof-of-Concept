@@ -87,6 +87,19 @@ public class ForbiddenNamespaceException : ValidationBeforeCompilationException
         AttemptedNamespace = attemptedNamespace;
     }
 }
+public class UndefinedMethodException : ValidationBeforeCompilationException
+{
+    public MethodRecord? Method { get; }
+
+    public UndefinedMethodException() : base() { }
+    public UndefinedMethodException(string message) : base(message) { }
+    public UndefinedMethodException(string message, Exception innerException) : base(message, innerException) { }
+
+    public UndefinedMethodException(string message, MethodRecord method) : base(message)
+    {
+        Method = method;
+    }
+}
 public class ForbiddenTypeAccessException : ForbiddenNamespaceException
 {
     public new string? AttemptedNamespace { get; }

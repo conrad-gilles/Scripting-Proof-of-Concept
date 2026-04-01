@@ -132,4 +132,54 @@ public class MultiMethodScriptTests
         vr = ScriptManager.BasicValidationBeforeCompiling(sourceCode);
 
     }
+
+    [TestMethod]
+    public async Task TestValidationShouldThrowAsync()
+    {
+        string sourceCode = TestHelper.GetSC().undefinedMethodsScriptPublic;
+
+        UndefinedMethodException ex = await Assert.ThrowsExceptionAsync<UndefinedMethodException>(async () =>
+             {
+                 ValidationRecord vr = ScriptManager.BasicValidationBeforeCompiling(sourceCode);
+             });
+
+        Console.WriteLine(ex.Method);
+        Assert.IsTrue(ex.Method!.Name == nameof(PublicScript.SomeUndefindedMethod));
+        Assert.IsTrue(ex.Method.ReturnType == "Task`1");
+
+        sourceCode = TestHelper.GetSC().undefinedMethodsScriptPrivate;
+
+        ex = await Assert.ThrowsExceptionAsync<UndefinedMethodException>(async () =>
+            {
+                ValidationRecord vr = ScriptManager.BasicValidationBeforeCompiling(sourceCode);
+            });
+
+        Console.WriteLine(ex.Method);
+        Assert.IsTrue(ex.Method!.Name == "SomeUndefindedPrivateMethod");
+        Assert.IsTrue(ex.Method.ReturnType == "Task`1");
+
+        sourceCode = TestHelper.GetSC().undefinedMethodsScriptInternal;
+
+        ex = await Assert.ThrowsExceptionAsync<UndefinedMethodException>(async () =>
+            {
+                ValidationRecord vr = ScriptManager.BasicValidationBeforeCompiling(sourceCode);
+            });
+
+        Console.WriteLine(ex.Method);
+        Assert.IsTrue(ex.Method!.Name == nameof(InternalScript.SomeUndefindedInternalMethod));
+        Assert.IsTrue(ex.Method.ReturnType == "Task`1");
+
+        sourceCode = TestHelper.GetSC().undefinedMethodsScriptStatic;
+
+        ex = await Assert.ThrowsExceptionAsync<UndefinedMethodException>(async () =>
+            {
+                ValidationRecord vr = ScriptManager.BasicValidationBeforeCompiling(sourceCode);
+            });
+
+        Console.WriteLine(ex.Method);
+        Assert.IsTrue(ex.Method!.Name == nameof(StaticScript.SomeUndefindedStaticMethod));
+        Assert.IsTrue(ex.Method.ReturnType == "Task`1");
+
+        // Assert.IsFalse(true);
+    }
 }
