@@ -305,6 +305,19 @@ internal class ScriptCompiler
 
         foreach (var method in methods)
         {
+            if (method.Modifiers.Any(SyntaxKind.PrivateKeyword))
+            {
+                // continue;   //skips private methods
+            }
+            if (method.Modifiers.Any(SyntaxKind.InternalKeyword))
+            {
+                // continue;   //skips internal methods
+            }
+            if (method.Modifiers.Any(SyntaxKind.ProtectedKeyword))
+            {
+                // continue;   //skips protected methods
+            }
+
             IMethodSymbol methodSymbol = semanticModel.GetDeclaredSymbol(method)!;
 
             string methodName = methodSymbol.Name;
@@ -324,25 +337,6 @@ internal class ScriptCompiler
                 }
                 catch { continue; }
             }
-            // string methodName = method.Identifier.ValueText;
-            // string returnType = method.ReturnType.ToString();
-            // SeparatedSyntaxList<ParameterSyntax> parameters = method.ParameterList.Parameters;
-
-            // List<ParameterRecord> resultParams = [];
-            // foreach (ParameterSyntax param in parameters)
-            // {
-            //     try
-            //     {
-
-            //         string paramName = param.Identifier.ValueText;
-            //         string paramType = param.Type?.ToString()!;
-            //         resultParams.Add(new ParameterRecord { Name = paramName, ReturnType = paramType });
-            //     }
-            //     catch
-            //     {
-            //         continue;
-            //     }
-            // }
             result.Add(new MethodRecord { Name = methodName, ReturnType = returnType, Parameters = resultParams });
         }
 
@@ -353,10 +347,11 @@ internal class ScriptCompiler
         List<MethodRecord> result = [];
 
 
-        BindingFlags flags = BindingFlags.NonPublic |
-                                         BindingFlags.Public |
-                                         BindingFlags.Instance |
-                                         BindingFlags.Static;
+        BindingFlags flags =
+                            BindingFlags.NonPublic |
+                            BindingFlags.Public |
+                            BindingFlags.Instance |
+                            BindingFlags.Static;
         foreach (var t in types)
         {
             MethodInfo[] methodsInType = t.GetMethods(flags);

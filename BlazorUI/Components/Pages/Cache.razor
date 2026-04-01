@@ -72,10 +72,12 @@
         </div>
     }
     <FakeTerminal />
+    <Popup @ref="myPopup" />
 </div>
 
 @code {
     private List<CompiledScripts> _caches = [];
+    private Popup myPopup = default!;
 
     protected override async Task OnInitializedAsync()
     {
@@ -84,19 +86,43 @@
 
     private async Task LoadCaches()
     {
-        // Fetch all caches from the database
-        _caches = await ScriptManager.GetAllCompiledScriptCaches();
-        StateHasChanged();
+        try
+        {
+            // Fetch all caches from the database
+            _caches = await ScriptManager.GetAllCompiledScriptCaches();
+            StateHasChanged();
+        }
+        catch (Exception e)
+        {
+            Console.LogException(e);
+            myPopup.CreateErrorPopup(e.GetType().Name, e.Message);
+        }
     }
 
     private async Task HandleClearAll()
     {
-        await ScriptManager.ClearAllCaches();
-        await LoadCaches();
+        try
+        {
+            await ScriptManager.ClearAllCaches();
+            await LoadCaches();
+        }
+        catch (Exception e)
+        {
+            Console.LogException(e);
+            myPopup.CreateErrorPopup(e.GetType().Name, e.Message);
+        }
     }
     private async Task HandleDeleteCache(CompiledScripts cache)
     {
-        await ScriptManager.DeleteScriptCache(cache.ScriptId, cache.ApiVersion);
-        await LoadCaches();
+        try
+        {
+            await ScriptManager.DeleteScriptCache(cache.ScriptId, cache.ApiVersion);
+            await LoadCaches();
+        }
+        catch (Exception e)
+        {
+            Console.LogException(e);
+            myPopup.CreateErrorPopup(e.GetType().Name, e.Message);
+        }
     }
 }

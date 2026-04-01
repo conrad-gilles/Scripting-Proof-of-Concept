@@ -21,10 +21,10 @@
                     disabled="@(_editorHelper?.IsBusy ?? false)">
                 <i class="bi bi-check-circle"></i> Validate
             </button>
-            <button class="btn btn-outline-warning" @onclick="() => _editorHelper?.Compile(null)!"
+            @* <button class="btn btn-outline-warning" @onclick="() => _editorHelper?.Compile(null)!"
                     disabled="@(_editorHelper?.IsBusy ?? false)">
                 <i class="bi bi-hammer"></i> Compile
-            </button>
+            </button> *@
             <button class="btn btn-success" @onclick="() => _editorHelper?.CreateAndInsert()!"
                     disabled="@(_editorHelper?.IsBusy ?? false)">
                 <i class="bi bi-save"></i> Create
@@ -44,9 +44,11 @@
 </div>
 
 <FakeTerminal />
+<Popup @ref="myPopup" />
 
 @code {
     private MonacoEditor _editor = default!;
+    private Popup myPopup = default!;
     private MonacoEditorHelper _editorHelper = default!;
 
     public string DefaultScript = GetTemplate();
@@ -84,14 +86,22 @@
     // YOU MUST HAVE THIS to initialize the helper!
     protected override void OnAfterRender(bool firstRender)
     {
-        if (firstRender && _editor != null)
+        try
         {
-            _editorHelper = new MonacoEditorHelper(ScriptManager, _editor, Console)
+            if (firstRender && _editor != null)
             {
-                ScriptName = "New Script",
-                CurrentScriptId = Guid.Empty // Explicitly set to empty so the helper knows it's new
-            };
-            StateHasChanged();
+                _editorHelper = new MonacoEditorHelper(ScriptManager, _editor, Console, myPopup)
+                {
+                    ScriptName = "New Script",
+                    CurrentScriptId = Guid.Empty // Explicitly set to empty so the helper knows it's new
+                };
+                StateHasChanged();
+            }
+        }
+        catch (Exception e)
+        {
+            Console.LogException(e);
+            myPopup.CreateErrorPopup(e.GetType().Name, e.Message);
         }
     }
 }

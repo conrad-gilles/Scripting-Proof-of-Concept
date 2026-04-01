@@ -1,12 +1,38 @@
 @page "/settings"
+@rendermode InteractiveServer
+
+@using BlazorUI.Settings
 <PageTitle>Settings</PageTitle>
 
-<div class="top-bar">
-    <h2>Settings</h2>
+<div class="top-bar mb-4">
+    <h2 class="mb-0">Settings</h2>
 </div>
 
-<div class="empty-state">
-    <i class="bi bi-gear"></i>
-    <h4>System settings</h4>
-    <p>Configure system preferences</p>
-</div>
+<div class="card shadow-sm">
+    <div class="card-header bg-white py-3">
+        <h5 class="mb-0"><i class="bi bi-gear me-2"></i> System Preferences</h5>
+    </div>
+    <div class="card-body">
+        
+        <!-- Use Console Switch -->
+        <div class="form-check form-switch fs-5 mb-3">
+            <input class="form-check-input cursor-pointer" type="checkbox" id="useConsole"
+                   @bind="AppSettings.UseConsole">
+                <label class="form-check-label" for="useConsole">Enable Console Output</label>
+            </div>
+
+            <!-- Use Popup Switch -->
+            <div class="form-check form-switch fs-5 mb-3">
+                <input class="form-check-input cursor-pointer" type="checkbox" id="usePopup" @bind="AppSettings.UsePopup">
+                    <label class="form-check-label" for="usePopup">Enable Action Popups</label>
+                </div>
+
+                <!-- Print Detailed in Console Switch -->
+                <div class="form-check form-switch fs-5 mb-3">
+                    <input class="form-check-input cursor-pointer" type="checkbox" id="printDetailed"
+                           @bind="AppSettings.PrintDetailedInConsole">
+                        <label class="form-check-label" for="printDetailed">Print Detailed Logs in Console</label>
+                    </div>
+
+                </div>
+            </div>

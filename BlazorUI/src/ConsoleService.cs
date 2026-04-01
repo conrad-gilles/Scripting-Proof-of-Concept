@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using BlazorUI.Settings;
 
 namespace BlazorUI.Services
 {
@@ -8,18 +9,36 @@ namespace BlazorUI.Services
         public List<(DateTime timestamp, string message)> Logs { get; private set; } = new();
         public bool IsExpanded { get; set; } = false;
 
+
         // Event to tell the UI to re-render when a log is added
         public event Action? OnChange;
 
         public void Log(string message)
         {
-            Console.WriteLine(message);
-            Logs.Add((DateTime.Now, message));
-            if (message.Contains("Error"))
+            if (AppSettings.UseConsole)
             {
-                IsExpanded = true;
+                Console.WriteLine(message);
+                Logs.Add((DateTime.Now, message));
+                if (message.Contains("Error"))
+                {
+                    IsExpanded = true;
+                }
+                NotifyStateChanged();
             }
-            NotifyStateChanged();
+        }
+        public void LogException(Exception exception)
+        {
+            if (AppSettings.UseConsole)
+            {
+                if (AppSettings.PrintDetailedInConsole)
+                {
+                    Log(exception.ToString());
+                }
+                else
+                {
+                    Log(exception.Message);
+                }
+            }
         }
 
         public void Clear()

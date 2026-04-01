@@ -1,9 +1,11 @@
 ﻿@page "/"
 @rendermode InteractiveServer
+@using BlazorUI.Services
 @using Ember.Scripting
 @using BlazorUI.TotalExecutions
 @using Microsoft.EntityFrameworkCore
 @inject IDbContextFactory<EFModeling.EntityProperties.FluentAPI.Required.ScriptDbContext> DbFactory
+@inject ConsoleService Console
 
 @inject ISccriptManagerDeleteAfter ScriptManager
 <PageTitle>Dashboard</PageTitle>
@@ -195,7 +197,7 @@ block in Home.razor -->
                                     }
                                     <span class="status-dot @dotClass"></span>
                                     <strong>@(string.IsNullOrEmpty(instance.InstanceName) ? (instance.Hostname ??
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                instance.InstanceId.ToString().Substring(0, 8)) : instance.InstanceName)</strong>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             instance.InstanceId.ToString().Substring(0, 8)) : instance.InstanceName)</strong>
                                     </div>
                                     <span class="badge bg-primary">v@(instance.EmberVersion ?? "Unknown") (API
                                         v@(instance.SdkVersion))</span>
@@ -282,9 +284,10 @@ block in Home.razor -->
                 </div>
             </div>
         }
-
+<Popup @ref="myPopup" />
 
 @code {
+    private Popup myPopup = default!;
     private bool _isLoading = true;
     private bool _isWorking = false;
     private int _totalScripts = 0;
@@ -310,11 +313,19 @@ block in Home.razor -->
     }
     private async Task LoadEmberInstances()
     {
-        using var context = await DbFactory.CreateDbContextAsync();
-        // Order by the most recently active instances
-        emberInstances = await context.EmberInstances
-            .OrderByDescending(e => e.LastHeartbeat)
-            .ToListAsync();
+        try
+        {
+            using var context = await DbFactory.CreateDbContextAsync();
+            // Order by the most recently active instances
+            emberInstances = await context.EmberInstances
+                .OrderByDescending(e => e.LastHeartbeat)
+                .ToListAsync();
+        }
+        catch (Exception e)
+        {
+            Console.LogException(e);
+            myPopup.CreateErrorPopup(e.GetType().Name, e.Message);
+        }
     }
     // Helper method for the "Last heartbeat: X ago" text
     private string GetTimeAgo(DateTime dateTime)
@@ -332,47 +343,72 @@ block in Home.razor -->
     }
     private async Task TestUpdate()
     {
-
-        await LoadDashBoardData();
-        _totalScripts++;
-        StateHasChanged();
+        try
+        {
+            await LoadDashBoardData();
+            _totalScripts++;
+            StateHasChanged();
+        }
+       
+        catch (Exception e)
+        {
+            Console.LogException(e);
+            myPopup.CreateErrorPopup(e.GetType().Name, e.Message);
+        }
     }
     private async Task LoadDashBoardData()
     {
-        EmberMethods em = new EmberMethods(ScriptManager);
-        _currentEmberVersionApi = ScriptManager.GetRunningApiVersion();
-        _customerScripts = await ScriptManager.ListScripts(includeCaches: true);
-        _totalScripts = _customerScripts.Count();
-        _compiledScripts = 0;
-        _pendingScripts = 0;
-
-        foreach (var script in _customerScripts)
+        try
         {
-            List<int> versions = [];
-            foreach (var cache in script.CompiledCaches)
-            {
-                versions.Add(cache.ApiVersion);
-            }
-            if (versions.Contains(ScriptManager.GetRunningApiVersion()) == false)
-            {
-                _pendingScripts++;
-            }
-        }
-        _compiledScripts = _totalScripts - _pendingScripts;
-        // ADD THESE LINES to populate the Recent Scripts table:
-        // Order by ModifiedAt (or CreatedAt if ModifiedAt is null), descending, and take the top 5.
-        _recentScripts = _customerScripts
-            .OrderByDescending(s => s.ModifiedAt ?? s.CreatedAt ?? DateTime.MinValue)
-            .Take(3)
-            .ToList();
+            EmberMethods em = new EmberMethods(ScriptManager);
+            _currentEmberVersionApi = ScriptManager.GetRunningApiVersion();
+            _customerScripts = await ScriptManager.ListScripts(includeCaches: true);
+            _totalScripts = _customerScripts.Count();
+            _compiledScripts = 0;
+            _pendingScripts = 0;
 
-        StateHasChanged();
+            foreach (var script in _customerScripts)
+            {
+                List<int> versions = [];
+                foreach (var cache in script.CompiledCaches)
+                {
+                    versions.Add(cache.ApiVersion);
+                }
+                if (versions.Contains(ScriptManager.GetRunningApiVersion()) == false)
+                {
+                    _pendingScripts++;
+                }
+            }
+            _compiledScripts = _totalScripts - _pendingScripts;
+            // ADD THESE LINES to populate the Recent Scripts table:
+            // Order by ModifiedAt (or CreatedAt if ModifiedAt is null), descending, and take the top 5.
+            _recentScripts = _customerScripts
+                .OrderByDescending(s => s.ModifiedAt ?? s.CreatedAt ?? DateTime.MinValue)
+                .Take(3)
+                .ToList();
+
+            StateHasChanged();
+        }
+      
+        catch (Exception e)
+        {
+            Console.LogException(e);
+            myPopup.CreateErrorPopup(e.GetType().Name, e.Message);
+        }
     }
 
     private async Task HandleCompileAllScripts()
     {
-        await ScriptManager.CompileAllScripts();
-        await LoadDashBoardData();
+        try
+        {
+            await ScriptManager.CompileAllScripts();
+            await LoadDashBoardData();
+        }
+        catch (Exception e)
+        {
+            Console.LogException(e);
+            myPopup.CreateErrorPopup(e.GetType().Name, e.Message);
+        }
     }
     private async Task HandleCompileAllScriptsFromFolder()
     {
@@ -410,19 +446,29 @@ block in Home.razor -->
         catch (Exception e)
         {
             _isWorking = false;
-            Console.WriteLine(e.ToString());
+            @* Console.WriteLine(e.ToString()); *@
+            Console.Log(e.Message);
             await LoadDashBoardData();
 
-            throw; //todo remove
+            @* throw; //todo remove *@
         }
 
     }
 
     private void CloseErrorPopup()
     {
-        _showErrorPopup = false;
-        _errorMessage = string.Empty;
-        _errorDetails = string.Empty;
+        try
+        {
+            _showErrorPopup = false;
+            _errorMessage = string.Empty;
+            _errorDetails = string.Empty;
+        }
+        
+        catch (Exception e)
+        {
+            Console.LogException(e);
+            myPopup.CreateErrorPopup(e.GetType().Name, e.Message);
+        }
     }
 
     private async Task HandleClearAllCaches()
@@ -434,13 +480,23 @@ block in Home.razor -->
         }
         catch (Exception e)
         {
-            Console.WriteLine(e.ToString());
+            Console.LogException(e);
+            myPopup.CreateErrorPopup(e.GetType().Name, e.Message);
         }
     }
     private async Task HandleDeleteAllScripts()
     {
-        @* await ScriptManager.EnsureDeletedCreated(); *@
-        await ScriptManager.DeleteAllData();
-        await LoadDashBoardData();
+        try
+        {
+            @* await ScriptManager.EnsureDeletedCreated(); *@
+            await ScriptManager.DeleteAllData();
+            await LoadDashBoardData();
+        }
+       
+        catch (Exception e)
+        {
+            Console.LogException(e);
+            myPopup.CreateErrorPopup(e.GetType().Name, e.Message);
+        }
     }
 }

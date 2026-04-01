@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using BlazorUI.Components;
+using BlazorUI.Components.Pages;
 using BlazorUI.Services;
 using Ember.Scripting;
 using Microsoft.JSInterop;
@@ -15,6 +16,7 @@ namespace BlazorUI.Helpers
         private readonly ISccriptManagerDeleteAfter _scriptManager;
         private readonly MonacoEditor _editor;
         private readonly ConsoleService _console;
+        private readonly Popup _myPopup = default!;
 
         public bool IsBusy { get; private set; } = false;
         public string ScriptName { get; set; } = string.Empty;
@@ -22,11 +24,12 @@ namespace BlazorUI.Helpers
         // If this is Guid.Empty, the helper knows it's a new script.
         public Guid CurrentScriptId { get; set; } = Guid.Empty;
 
-        public MonacoEditorHelper(ISccriptManagerDeleteAfter scriptManager, MonacoEditor editor, ConsoleService console)
+        public MonacoEditorHelper(ISccriptManagerDeleteAfter scriptManager, MonacoEditor editor, ConsoleService console, Popup myPopup)
         {
             _scriptManager = scriptManager;
             _editor = editor;
             _console = console;
+            _myPopup = myPopup;
         }
 
 
@@ -34,6 +37,8 @@ namespace BlazorUI.Helpers
         public async Task Validate(string? sourceCode)
         {
             IsBusy = true;
+
+            sourceCode = await _editor.GetValueAsync();
 
             if (sourceCode == null)
             {
@@ -43,10 +48,12 @@ namespace BlazorUI.Helpers
             {
                 _scriptManager.BasicValidationBeforeCompiling(sourceCode);
                 _console.Log("Validation successfull!");
+                _myPopup.CreateNormalPopup("Success!", "Validation successfull!");
             }
             catch (Exception e)
             {
-                _console.Log(e.ToString());
+                _console.LogException(e);
+                _myPopup.CreateErrorPopup(e.GetType().Name, e.Message);
             }
             IsBusy = false;
         }
@@ -55,43 +62,70 @@ namespace BlazorUI.Helpers
         public async Task Compile(string? sourceCode)
         {
             IsBusy = true;
-
-            if (sourceCode == null)
+            try
             {
-                sourceCode = await _editor.GetValueAsync();
+
+                if (sourceCode == null)
+                {
+                    sourceCode = await _editor.GetValueAsync();
+                }
+
+                List<ScriptCompilationError> errors = await _scriptManager.GetCompilationErrors(sourceCode);
+
+                var monacoMarkers = errors.Select(e => new MonacoMarker
+                {
+                    Message = $"{e.Id} - {e.Message}",
+                    Severity = e.IsError ? 8 : 4, // 8 = Error, 4 = Warning
+                    StartLineNumber = e.Line,
+                    StartColumn = e.Column,
+                    EndLineNumber = e.EndLine,
+                    EndColumn = e.EndColumn
+                }).ToList<object>();
+
+                await _editor.SetErrorsAsync(monacoMarkers);
             }
 
-            List<ScriptCompilationError> errors = await _scriptManager.GetCompilationErrors(sourceCode);
-
-            var monacoMarkers = errors.Select(e => new MonacoMarker
+            catch (Exception e)
             {
-                Message = $"{e.Id} - {e.Message}",
-                Severity = e.IsError ? 8 : 4, // 8 = Error, 4 = Warning
-                StartLineNumber = e.Line,
-                StartColumn = e.Column,
-                EndLineNumber = e.EndLine,
-                EndColumn = e.EndColumn
-            }).ToList<object>();
-
-            await _editor.SetErrorsAsync(monacoMarkers);
+                _console.LogException(e);
+                _myPopup.CreateErrorPopup(e.GetType().Name, e.Message);
+            }
             IsBusy = false;
         }
 
         //saves script
         public async Task Save(Guid scriptId, string sourceCode)
         {
-            IsBusy = true;
+            try
+            {
+                IsBusy = true;
 
-            await _scriptManager.UpdateScriptAndCompile(scriptId, sourceCode);
-            IsBusy = false;
+                var code = await _editor.GetValueAsync();
+                await _scriptManager.UpdateScriptAndCompile(scriptId, code);
+                IsBusy = false;
+            }
+            catch (Exception e)
+            {
+                _console.LogException(e);
+                _myPopup.CreateErrorPopup(e.GetType().Name, e.Message);
+            }
         }
 
         public async Task CreateAndInsert()
         {
-            IsBusy = true;
 
-            var code = await _editor.GetValueAsync();
-            await _scriptManager.CreateScript(code);
+            IsBusy = true;
+            try
+            {
+                var code = await _editor.GetValueAsync();
+                await _scriptManager.CreateScript(code);
+            }
+            catch (Exception e)
+            {
+                _console.LogException(e);
+                _myPopup.CreateErrorPopup(e.GetType().Name, e.Message);
+            }
+
             IsBusy = false;
         }
 
@@ -109,7 +143,8 @@ namespace BlazorUI.Helpers
             }
             catch (Exception e)
             {
-                _console.Log(e.ToString());
+                _console.LogException(e);
+                _myPopup.CreateErrorPopup(e.GetType().Name, e.Message);
             }
             try
             {
@@ -132,8 +167,8 @@ namespace BlazorUI.Helpers
             }
             catch (Exception e)
             {
-                _console.Log("Failed to highlight compiler errors!");
-                _console.Log(e.ToString());
+                _console.LogException(e);
+                _myPopup.CreateErrorPopup(e.GetType().Name, e.Message);
             }
         }
 
@@ -166,9 +201,10 @@ namespace BlazorUI.Helpers
                             bool result = await _scriptManager.ThrowCompilationErrors(code);
                             _console.Log("Script successfully compiled but did not get saved.");
                         }
-                        catch
+                        catch (Exception ex)
                         {
-                            _console.Log("Compilation failed: " + e.ToString());
+                            _console.LogException(ex);
+                            _myPopup.CreateErrorPopup(ex.GetType().Name, ex.Message);
                         }
                     }
                 }
@@ -176,8 +212,8 @@ namespace BlazorUI.Helpers
             }
             catch (Exception e)
             {
-                IsBusy = false;
-                _console.Log("Somethign went wrong in line 99: " + e.ToString());
+                _console.LogException(e);
+                _myPopup.CreateErrorPopup(e.GetType().Name, e.Message);
             }
 
         }
@@ -198,8 +234,17 @@ namespace BlazorUI.Helpers
         public async Task HandleKnownSave(Guid scriptId, int? selectedVersion = null)
         {
             IsBusy = true;
-            var code = await _editor.GetValueAsync();
-            await TryUpdating(scriptId, code);
+            try
+            {
+
+                var code = await _editor.GetValueAsync();
+                await TryUpdating(scriptId, code);
+            }
+            catch (Exception e)
+            {
+                _console.LogException(e);
+                _myPopup.CreateErrorPopup(e.GetType().Name, e.Message);
+            }
             IsBusy = false;
         }
 

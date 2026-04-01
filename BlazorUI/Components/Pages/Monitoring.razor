@@ -1,8 +1,10 @@
 @page "/monitoring"
 @rendermode InteractiveServer
+@using BlazorUI.Services
 @using BlazorUI.Sink
 @using Serilog.Events
 @inject BlazorSink Sink
+@inject ConsoleService Console
 @implements IDisposable
 
 <PageTitle>Monitoring</PageTitle>
@@ -58,23 +60,49 @@ else
         }
     </div>
 }
+<Popup @ref="myPopup" />
 
 @code {
+    private Popup myPopup = default!;
     protected override void OnInitialized()
     {
-        // Subscribe to log updates
-        Sink.OnLogReceived += OnLogReceived;
+        try
+        {
+            // Subscribe to log updates
+            Sink.OnLogReceived += OnLogReceived;
+        }
+        catch (Exception e)
+        {
+            Console.LogException(e);
+            myPopup.CreateErrorPopup(e.GetType().Name, e.Message);
+        }
     }
 
     private void OnLogReceived()
     {
-        // Trigger UI re-render when a new log arrives
-        InvokeAsync(StateHasChanged);
+        try
+        {
+            // Trigger UI re-render when a new log arrives
+            InvokeAsync(StateHasChanged);
+        }
+        catch (Exception e)
+        {
+            Console.LogException(e);
+            myPopup.CreateErrorPopup(e.GetType().Name, e.Message);
+        }
     }
 
     public void Dispose()
     {
-        // Prevent memory leaks when navigating away from the page
-        Sink.OnLogReceived -= OnLogReceived;
+        try
+        {
+            // Prevent memory leaks when navigating away from the page
+            Sink.OnLogReceived -= OnLogReceived;
+        }
+        catch (Exception e)
+        {
+            Console.LogException(e);
+            myPopup.CreateErrorPopup(e.GetType().Name, e.Message);
+        }
     }
 }

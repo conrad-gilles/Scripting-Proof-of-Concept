@@ -1,5 +1,8 @@
 # Todo
 
+- add a dumb execute that compiles and executes but doesnt save to db
+- add a pop up that makes it so you dont have to manually open the console
+  
 - MetaDataIGeneratorScript attribute might be broken
 - write basicVali checks to ensure no loose methods
 - wirte scriot that doesntimplement all

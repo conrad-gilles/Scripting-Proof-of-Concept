@@ -66,7 +66,22 @@
     public async ValueTask DisposeAsync()
     {
         _dotNetRef?.Dispose();
-        if (_editorReady) await JS.InvokeVoidAsync("monacoEditor.dispose", EditorId);
+        if (_editorReady)
+        {
+            try
+            {
+                await JS.InvokeVoidAsync("monacoEditor.dispose", EditorId);
+            }
+            catch (Microsoft.JSInterop.JSDisconnectedException)
+            {
+                // The browser has disconnected, so the JS environment is already gone.
+                // We can safely ignore this.
+            }
+            catch (TaskCanceledException)
+            {
+                // Ignore cancelled tasks during disposal
+            }
+        }
     }
 }
 

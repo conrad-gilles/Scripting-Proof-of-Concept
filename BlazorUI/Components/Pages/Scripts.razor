@@ -136,10 +136,10 @@
                                 disabled="@(_editorHelper?.IsBusy ?? false)">
                             <i class="bi bi-check-circle"></i> Validate
                         </button>
-                        <button class="btn btn-outline-warning" @onclick="() => _editorHelper?.Compile(_scriptCode)!"
+                        @* <button class="btn btn-outline-warning" @onclick="() => _editorHelper?.Compile(_scriptCode)!"
                                 disabled="@(_editorHelper?.IsBusy ?? false)">
                             <i class="bi bi-hammer"></i> Compile
-                        </button>
+                        </button> *@
                         <button class="btn btn-success" @onclick="() => _editorHelper?.Save(_currentScriptId, _scriptCode)!"
                             //pobably bugs because of giving scriptcode instead of reading from monaco
                                 disabled="@(_editorHelper?.IsBusy ?? false)">
@@ -163,10 +163,12 @@
         }
 
         <FakeTerminal />
+        <Popup @ref="myPopup" />
     </div>
 
 @code {
     private List<CustomerScript> _scriptsList = new();
+    private Popup myPopup = default!;
     private bool _isLoading = true;
 
     private bool _isEditing = false;
@@ -191,55 +193,81 @@
     // We instantiate the Helper object when the MonacoEditor reference actually exists.
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (_isEditing && _editorHelper == null && _editor != null)
+        try
         {
-            _editorHelper = new MonacoEditorHelper(ScriptManager, _editor, Console)
+            if (_isEditing && _editorHelper == null && _editor != null)
             {
-                ScriptName = _scriptName,
-                CurrentScriptId = _currentScriptId
-            };
-            StateHasChanged();
-        }
+                _editorHelper = new MonacoEditorHelper(ScriptManager, _editor, Console, myPopup)
+                {
+                    ScriptName = _scriptName,
+                    CurrentScriptId = _currentScriptId
+                };
+                StateHasChanged();
+            }
 
-        if (_isEditing)
+            if (_isEditing)
+            {
+                // Tell Monaco to recalculate its theme/layout when the tab renders
+                // Using "edit-monaco-editor" because that's the EditorId you passed to the component
+                await JSRuntime.InvokeVoidAsync("window.monacoEditor.refreshTheme", "edit-monaco-editor");
+            }
+        }
+        catch (Exception e)
         {
-            // Tell Monaco to recalculate its theme/layout when the tab renders
-            // Using "edit-monaco-editor" because that's the EditorId you passed to the component
-            await JSRuntime.InvokeVoidAsync("window.monacoEditor.refreshTheme", "edit-monaco-editor");
+            Console.LogException(e);
+            myPopup.CreateErrorPopup(e.GetType().Name, e.Message);
         }
     }
 
-    private void CancelEditing()
+    private async Task CancelEditing()
     {
-        _isEditing = false;
-        _editorHelper = null!;
+        try
+        {
+
+            _isEditing = false;
+            _editorHelper = null!;
+            await LoadScripts();
+        }
+        catch (Exception e)
+        {
+            Console.LogException(e);
+            myPopup.CreateErrorPopup(e.GetType().Name, e.Message);
+        }
     }
 
     private async Task OnVersionChanged()
     {
-        ServiceCollection services2 = new ServiceCollection();
-
-        LoggerForScripting? logger = new LoggerForScripting();
-        Log.Debug("Sandbox launched.");
-
-        services2 = new ServiceCollection();
-        services2.AddLogging(builder =>
+        try
         {
-            builder.AddSerilog(dispose: true);
-        });
+            ServiceCollection services2 = new ServiceCollection();
 
-        services2.AddDbContextFactory<EFModeling.EntityProperties.FluentAPI.Required.ScriptDbContext>();
-        services2.AddSingleton<IUserSession, Sandbox.SandBoxUserSession>();
+            LoggerForScripting? logger = new LoggerForScripting();
+            Log.Debug("Sandbox launched.");
 
-        ScriptingServiceCollectionExtensions.AddEmberScripting(services2, EmberMethods.GetReferences(),
-            EmberMethods.GetEmberApiVersion(testingDiffrentVersion: _selectedApiVersion));
+            services2 = new ServiceCollection();
+            services2.AddLogging(builder =>
+            {
+                builder.AddSerilog(dispose: true);
+            });
 
-        var provider2 = services2.BuildServiceProvider();
+            services2.AddDbContextFactory<EFModeling.EntityProperties.FluentAPI.Required.ScriptDbContext>();
+            services2.AddSingleton<IUserSession, Sandbox.SandBoxUserSession>();
 
-        ScriptManager = provider2.GetRequiredService<ISccriptManagerDeleteAfter>();
-        Console.Log($"User selected API Version: {_selectedApiVersion}");
+            ScriptingServiceCollectionExtensions.AddEmberScripting(services2, EmberMethods.GetReferences(),
+                EmberMethods.GetEmberApiVersion(testingDiffrentVersion: _selectedApiVersion));
 
-        await LoadScripts();
+            var provider2 = services2.BuildServiceProvider();
+
+            ScriptManager = provider2.GetRequiredService<ISccriptManagerDeleteAfter>();
+            Console.Log($"User selected API Version: {_selectedApiVersion}");
+
+            await LoadScripts();
+        }
+        catch (Exception e)
+        {
+            Console.LogException(e);
+            myPopup.CreateErrorPopup(e.GetType().Name, e.Message);
+        }
     }
 
     private async Task LoadScripts()
@@ -249,11 +277,17 @@
         {
             _scriptsList = await ScriptManager.ListScripts(null!, includeCaches: false);
         }
+        catch (Exception e)
+        {
+            Console.LogException(e);
+            myPopup.CreateErrorPopup(e.GetType().Name, e.Message);
+        }
         finally
         {
             _isLoading = false;
             StateHasChanged();
         }
+         
     }
 
     private async Task ExecuteScript(Guid id)
@@ -284,7 +318,8 @@ resultObj.GetType().ToString());
         }
         catch (Exception e)
         {
-            Console.Log(e.ToString());
+            Console.LogException(e);
+            myPopup.CreateErrorPopup(e.GetType().Name, e.Message);
         }
     }
 
@@ -297,14 +332,24 @@ resultObj.GetType().ToString());
         }
         catch (Exception e)
         {
-            Console.Log(e.ToString());
+            Console.LogException(e);
+            myPopup.CreateErrorPopup(e.GetType().Name, e.Message);
         }
     }
 
     private async Task DeleteScript(Guid id)
     {
-        await ScriptManager.DeleteScript(id);
-        await LoadScripts();
+        try
+        {
+
+            await ScriptManager.DeleteScript(id);
+            await LoadScripts();
+        }
+        catch (Exception e)
+        {
+            Console.LogException(e);
+            myPopup.CreateErrorPopup(e.GetType().Name, e.Message);
+        }
     }
 
     public static string GetTemplate()
@@ -338,9 +383,10 @@ resultObj.GetType().ToString());
                 await LoadScripts();
             }
         }
-        catch (Exception ex)
+        catch (Exception e)
         {
-            Console.Log($"Failed to load script: {ex.Message}");
+            Console.LogException(e);
+            myPopup.CreateErrorPopup(e.GetType().Name, e.Message);
         }
     }
 }

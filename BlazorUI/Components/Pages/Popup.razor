@@ -1,0 +1,94 @@
+@using BlazorUI.Settings
+@if (isVisible)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5); z-index: 1050;">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content @GetBorderClass()">
+                
+                <div class="modal-header @GetHeaderClass()">
+                    <h5 class="modal-title">@title</h5>
+                    <button type="button" class="btn-close btn-close-white" aria-label="Close" @onclick="Close"></button>
+                </div>
+                
+                <div class="modal-body text-dark" style="max-height: 500px; overflow-y: auto;">
+                    @if (popupType == PopupType.Output)
+                    {
+                        <pre class="bg-dark text-light p-3 rounded mb-0" style="white-space: pre-wrap;">@message</pre>
+                    }
+                    else
+                    {
+                        <p class="mb-0" style="white-space: pre-wrap;">@message</p>
+                    }
+                </div>
+                
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private bool isVisible;
+    private string title = "";
+    private string message = "";
+    private PopupType popupType;
+
+    private enum PopupType { Normal, Error, Output }
+
+    public void CreateNormalPopup(string popupTitle, string popupMessage)
+    {
+        if (AppSettings.UsePopup)
+        {
+            title = popupTitle;
+            message = popupMessage;
+            popupType = PopupType.Normal;
+            isVisible = true;
+            StateHasChanged();
+        }
+    }
+
+    public void CreateErrorPopup(string popupTitle, string popupMessage)
+    {
+        if (AppSettings.UsePopup)
+        {
+            title = popupTitle;
+            message = popupMessage;
+            popupType = PopupType.Error;
+            isVisible = true;
+            StateHasChanged();
+        }
+    }
+
+    public void CreateOutputPopup(string popupTitle, string popupMessage)
+    {
+        if (AppSettings.UsePopup)
+        {
+            title = popupTitle;
+            message = popupMessage;
+            popupType = PopupType.Output;
+            isVisible = true;
+            StateHasChanged();
+        }
+    }
+
+    public void Close()
+    {
+        isVisible = false;
+        StateHasChanged();
+    }
+
+    private string GetBorderClass() => popupType switch
+    {
+        PopupType.Error => "border-danger",
+        PopupType.Normal => "border-primary",
+        PopupType.Output => "border-secondary",
+        _ => ""
+    };
+
+    private string GetHeaderClass() => popupType switch
+    {
+        PopupType.Error => "bg-danger",
+        PopupType.Normal => "bg-primary",
+        PopupType.Output => "bg-dark",
+        _ => ""
+    };
+}
