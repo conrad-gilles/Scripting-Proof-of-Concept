@@ -26,14 +26,6 @@ namespace Ember.Scripting.AdditionalMethods
             throw new MethodNotImplementedException();
         }
     }
-
-    public interface IExecuteAction3WithArgs : IScript
-    {
-        Task<ActionResultSF> ExecuteAction3(IGeneratorBaseInterfaceSF context)
-        {
-            throw new MethodNotImplementedException();
-        }
-    }
 }
 
 

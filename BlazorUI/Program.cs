@@ -3,6 +3,7 @@ using Ember.Scripting;
 using BlazorUI.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.DataProtection;
+using Ember.Simulation;
 // using sandbox; // only if RandomMethods is in the sandbox project/namespace
 
 
@@ -27,6 +28,7 @@ builder.Services.AddDbContext<EFModeling.EntityProperties.FluentAPI.Required.Scr
 
 
 builder.Services.AddScoped<ConsoleService>();
+builder.Services.AddScoped<Ember.Simulation.EmberInternalFacade>();
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())

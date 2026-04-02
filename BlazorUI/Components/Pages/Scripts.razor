@@ -4,6 +4,7 @@
 @using BlazorUI.TotalExecutions
 @using BlazorUI.Services
 @using BlazorUI.Helpers
+@using Ember.Simulation
 @using Microsoft.CodeAnalysis.Differencing
 @using System.Text.RegularExpressions
 @using Microsoft.EntityFrameworkCore
@@ -11,6 +12,7 @@
 @inject ConsoleService Console
 @inject IJSRuntime JSRuntime
 @inject ISccriptManagerDeleteAfter ScriptManager
+@inject EmberInternalFacade EmberInternalFacade
 
 <PageTitle>Scripts</PageTitle>
 <div class="page-container">
@@ -140,6 +142,10 @@
                                 disabled="@(_editorHelper?.IsBusy ?? false)">
                             <i class="bi bi-hammer"></i> Compile
                         </button> *@
+                        <button class="btn btn-outline-primary" @onclick="() => _editorHelper?.Execute()!"
+                                disabled="@(_editorHelper?.IsBusy ?? false)">
+                            <i class="bi bi-play-circle"></i> Execute
+                        </button>
                         <button class="btn btn-success" @onclick="() => _editorHelper?.Save(_currentScriptId, _scriptCode)!"
                             //pobably bugs because of giving scriptcode instead of reading from monaco
                                 disabled="@(_editorHelper?.IsBusy ?? false)">
@@ -153,7 +159,7 @@
 
                 @* <MonacoEditor @ref="_editor" EditorId="edit-monaco-editor" InitialCode="@_scriptCode" /> *@
                 <MonacoEditor @ref="_editor" EditorId="edit-monaco-editor" InitialCode="@_scriptCode"
-                              OnCodeChanged="() => _editorHelper?.HandleValidate(_currentScriptId, _selectedApiVersion)!" />
+                              OnCodeChanged="() => _editorHelper?.SetErrorsInEditorAsync(_currentScriptId, _selectedApiVersion)!" />
 
 
                 <div
@@ -197,7 +203,7 @@
         {
             if (_isEditing && _editorHelper == null && _editor != null)
             {
-                _editorHelper = new MonacoEditorHelper(ScriptManager, _editor, Console, myPopup)
+                _editorHelper = new MonacoEditorHelper(ScriptManager, EmberInternalFacade, _editor, Console, myPopup)
                 {
                     ScriptName = _scriptName,
                     CurrentScriptId = _currentScriptId
@@ -294,7 +300,11 @@
     {
         try
         {
-            Console.Log("Test if it prints");
+            ActiveActionResult ar = await EmberInternalFacade.ExecuteScript(id, TestHelper.GetContext());
+            Console.Log(ar.ToString());
+            myPopup.CreateNormalPopup("Success", ar.ToString());
+
+            @* Console.Log("Test if it prints");
             EmberMethods em = new EmberMethods(ScriptManager);
             CustomerScript script = await ScriptManager.GetScript(id);
             var ctx = await em.GetTestingContext<GeneratorContextV4.GeneratorContext>(autoDetectFromScript: script);
@@ -314,7 +324,7 @@
 resultObj.GetType().ToString());
             }
             TotalExecutions.IncrementTotalExecutions();
-            await LoadScripts();
+            await LoadScripts(); *@
         }
         catch (Exception e)
         {

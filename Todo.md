@@ -1,5 +1,8 @@
 # Todo
 
+- in ui maybe give the possibility to execute specific functions
+- update script template and also allow private methods 
+- improve the ember internal facade, definetly fix the sourceCode property in createbydowngrade
 - add a dumb execute that compiles and executes but doesnt save to db
 - add a pop up that makes it so you dont have to manually open the console
   

@@ -307,7 +307,7 @@ internal class ScriptCompiler
         {
             if (method.Modifiers.Any(SyntaxKind.PrivateKeyword))
             {
-                // continue;   //skips private methods
+                continue;   //skips private methods
             }
             if (method.Modifiers.Any(SyntaxKind.InternalKeyword))
             {

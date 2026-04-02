@@ -5,9 +5,11 @@
 @using Ember.Scripting
 @using System.Text.RegularExpressions
 @using System.Reflection
+@using Ember.Simulation
 
 @inject ConsoleService Console
 @inject ISccriptManagerDeleteAfter ScriptManager
+@inject EmberInternalFacade EmberInternalFacade
 
 <PageTitle>Create Script</PageTitle>
 
@@ -25,6 +27,10 @@
                     disabled="@(_editorHelper?.IsBusy ?? false)">
                 <i class="bi bi-hammer"></i> Compile
             </button> *@
+            <button class="btn btn-outline-primary" @onclick="() => _editorHelper?.Execute()!"
+                    disabled="@(_editorHelper?.IsBusy ?? false)">
+                <i class="bi bi-play-circle"></i> Execute
+            </button>
             <button class="btn btn-success" @onclick="() => _editorHelper?.CreateAndInsert()!"
                     disabled="@(_editorHelper?.IsBusy ?? false)">
                 <i class="bi bi-save"></i> Create
@@ -36,7 +42,8 @@
     </div>
 
     <!-- We bind it to the _editor variable using @ref -->
-    <MonacoEditor @ref="_editor" InitialCode="@DefaultScript" OnCodeChanged="() => _editorHelper?.HandleValidate()!" />
+    <MonacoEditor @ref="_editor" InitialCode="@DefaultScript"
+                  OnCodeChanged="() => _editorHelper?.SetErrorsInEditorAsync()!" />
 
 
     <div style="height: @(Console.IsExpanded ? "300px" : "40px"); transition: height 0.3s ease-in-out; flex-shrink: 0;">
@@ -90,7 +97,7 @@
         {
             if (firstRender && _editor != null)
             {
-                _editorHelper = new MonacoEditorHelper(ScriptManager, _editor, Console, myPopup)
+                _editorHelper = new MonacoEditorHelper(ScriptManager, EmberInternalFacade, _editor, Console, myPopup)
                 {
                     ScriptName = "New Script",
                     CurrentScriptId = Guid.Empty // Explicitly set to empty so the helper knows it's new

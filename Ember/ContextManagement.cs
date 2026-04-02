@@ -14,14 +14,13 @@ namespace Ember.Simulation
             _scriptManager = scriptManager;
         }
 
-        public async Task<GeneratorContextSF> CreateByDowngrade(Guid id, ActiveGeneratorContext ctx)
+        public async Task<GeneratorContextSF> CreateByDowngrade(string sourceCode, ActiveGeneratorContext ctx)
         {
-            CustomerScript script = await _scriptManager.GetScript(id);
-            if (script.SourceCode == null)
+            if (sourceCode == null)
             {
                 throw new SourceCodeNullWhenDowngradeException();
             }
-            var vali = _scriptManager.BasicValidationBeforeCompiling(script.SourceCode!);
+            var vali = _scriptManager.BasicValidationBeforeCompiling(sourceCode!);
             int? apiV = null;
             if (apiV == null)
             {

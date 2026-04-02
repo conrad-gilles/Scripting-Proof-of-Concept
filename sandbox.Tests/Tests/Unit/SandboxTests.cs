@@ -248,7 +248,7 @@ public class SanboxTests
         id = (await _facade.CreateScript(src!)).Id;
 
         sf = new ContextManagement(_facade);
-        GeneratorContextSF ctx = await sf.CreateByDowngrade(id, data!);
+        GeneratorContextSF ctx = await sf.CreateByDowngrade(src, data!);
         Console.WriteLine("Type name: " + ctx.GetType().FullName);
 
         result = await _facade.ExecuteScriptById(id, ctx);
@@ -261,7 +261,7 @@ public class SanboxTests
         id = (await _facade.CreateScript(src!)).Id;
 
         sf = new ContextManagement(_facade);
-        ctx = await sf.CreateByDowngrade(id!, data!);
+        ctx = await sf.CreateByDowngrade(src!, data!);
         Console.WriteLine("Type name: " + ctx.GetType().FullName);
 
         result = await _facade.ExecuteScriptById(id, ctx);
@@ -274,7 +274,7 @@ public class SanboxTests
         id = (await _facade.CreateScript(src!)).Id;
 
         sf = new ContextManagement(_facade);
-        ctx = await sf.CreateByDowngrade(id!, data!);
+        ctx = await sf.CreateByDowngrade(src!, data!);
         Console.WriteLine("Type name: " + ctx.GetType().FullName);
 
         result = await _facade.ExecuteScriptById(id, ctx);
@@ -287,7 +287,7 @@ public class SanboxTests
         id = (await _facade.CreateScript(src!)).Id;
 
         sf = new ContextManagement(_facade);
-        ctx = await sf.CreateByDowngrade(id!, data!);
+        ctx = await sf.CreateByDowngrade(src!, data!);
         Console.WriteLine("Type name: " + ctx.GetType().FullName);
 
         result = await _facade.ExecuteScriptById(id, ctx);
@@ -298,7 +298,7 @@ public class SanboxTests
 
 
         ////////////////////////////////////////////
-        ctx = await sf.CreateByDowngrade(id!, data!);
+        ctx = await sf.CreateByDowngrade(src!, data!);
         result = await _facade.ExecuteScriptById(id, ctx);
 
 

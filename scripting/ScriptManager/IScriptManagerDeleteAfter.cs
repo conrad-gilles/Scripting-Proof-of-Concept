@@ -61,6 +61,9 @@ public interface ISccriptManagerDeleteAfter : IScriptManagerExtended
 
   #endregion
 
+  Task<object> ExecuteUnfinishedScriptBySourceCode(string sourceCode, GeneratorContextSF context, int? apiVersion = null, string? methodName = null);
+
+
   #region Cache Management
 
   /// <summary>

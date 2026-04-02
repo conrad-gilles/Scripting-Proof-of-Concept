@@ -7,6 +7,7 @@ using BlazorUI.Components;
 using BlazorUI.Components.Pages;
 using BlazorUI.Services;
 using Ember.Scripting;
+using Ember.Simulation;
 using Microsoft.JSInterop;
 
 namespace BlazorUI.Helpers
@@ -14,6 +15,7 @@ namespace BlazorUI.Helpers
     public class MonacoEditorHelper
     {
         private readonly ISccriptManagerDeleteAfter _scriptManager;
+        private readonly EmberInternalFacade _eif;
         private readonly MonacoEditor _editor;
         private readonly ConsoleService _console;
         private readonly Popup _myPopup = default!;
@@ -24,9 +26,10 @@ namespace BlazorUI.Helpers
         // If this is Guid.Empty, the helper knows it's a new script.
         public Guid CurrentScriptId { get; set; } = Guid.Empty;
 
-        public MonacoEditorHelper(ISccriptManagerDeleteAfter scriptManager, MonacoEditor editor, ConsoleService console, Popup myPopup)
+        internal MonacoEditorHelper(ISccriptManagerDeleteAfter scriptManager, EmberInternalFacade eif, MonacoEditor editor, ConsoleService console, Popup myPopup)
         {
             _scriptManager = scriptManager;
+            _eif = eif;
             _editor = editor;
             _console = console;
             _myPopup = myPopup;
@@ -55,6 +58,25 @@ namespace BlazorUI.Helpers
                 _console.LogException(e);
                 _myPopup.CreateErrorPopup(e.GetType().Name, e.Message);
             }
+            IsBusy = false;
+        }
+        public async Task Execute()
+        {
+            IsBusy = true;
+            try
+            {
+                string sourceCode = await _editor.GetValueAsync();
+                ActiveActionResult ar = await _eif.ExecuteUnfinishedScriptBySourceCode(sourceCode, TestHelper.GetContext());
+                _console.Log(ar.ToString());
+                _myPopup.CreateNormalPopup("Success", ar.ToString());
+            }
+            catch (Exception e)
+            {
+                _console.LogException(e);
+                _myPopup.CreateErrorPopup(e.GetType().Name, e.Message);
+            }
+
+
             IsBusy = false;
         }
 
@@ -129,201 +151,219 @@ namespace BlazorUI.Helpers
             IsBusy = false;
         }
 
-        public async Task HandleValidate(Guid? scriptId = null, int? selectedVersion = null)
+        public async Task SetErrorsInEditorAsync(Guid? scriptId = null, int? selectedVersion = null)
         {
-            scriptId = GetId(scriptId);
             var code = await _editor.GetValueAsync();
-            CurrentScriptId = (Guid)scriptId;
-            _console.Log("Validating script:");
             await _editor.ClearErrorsAsync();
-            try
+            List<ScriptCompilationError> errors = await _scriptManager.GetCompilationErrors(code);
+            var monacoMarkers = errors.Select(e => new MonacoMarker
             {
-                _scriptManager.BasicValidationBeforeCompiling(code);
-                _console.Log("Validation successfull!");
-            }
-            catch (Exception e)
-            {
-                _console.LogException(e);
-                _myPopup.CreateErrorPopup(e.GetType().Name, e.Message);
-            }
-            try
-            {
-                List<ScriptCompilationError> errors = await _scriptManager.GetCompilationErrors(code);
-                var monacoMarkers = errors.Select(e => new MonacoMarker
-                {
-                    Message = $"{e.Id} - {e.Message}",
-                    Severity = e.IsError ? 8 : 4, // 8 = Error, 4 = Warning
-                    StartLineNumber = e.Line,
-                    StartColumn = e.Column,
-                    EndLineNumber = e.EndLine,
-                    EndColumn = e.EndColumn
-                }).ToList<object>();
+                Message = $"{e.Id} - {e.Message}",
+                Severity = e.IsError ? 8 : 4, // 8 = Error, 4 = Warning
+                StartLineNumber = e.Line,
+                StartColumn = e.Column,
+                EndLineNumber = e.EndLine,
+                EndColumn = e.EndColumn
+            }).ToList<object>();
 
-                await _editor.SetErrorsAsync(monacoMarkers);
-            }
-            catch (NoErrorsInScriptException e)
-            {
-                _console.Log(e.ToString());
-            }
-            catch (Exception e)
-            {
-                _console.LogException(e);
-                _myPopup.CreateErrorPopup(e.GetType().Name, e.Message);
-            }
+            await _editor.SetErrorsAsync(monacoMarkers);
         }
 
-        public async Task HandleCompile(Guid? scriptId = null, int? selectedVersion = null)
-        {
-            try
-            {
-                IsBusy = true;
-                scriptId = GetId(scriptId);
-                CurrentScriptId = (Guid)scriptId;
-                var code = await _editor.GetValueAsync();
-                try
-                {
-                    //first tries to insert and compile new script
-                    Guid newScript = (await _scriptManager.CreateScript(code)).Id;
-                    CurrentScriptId = newScript;
-                    _console.Log("Compilation successful, script was created and inserted into the DB.");
-                }
-                catch
-                {
-                    try
-                    {
-                        await _scriptManager.UpdateScriptAndCompile((Guid)scriptId, code, apiVersion: selectedVersion);
-                        _console.Log("Script successfully updated and compiled.");
-                    }
-                    catch (Exception e)
-                    {
-                        try
-                        {
-                            bool result = await _scriptManager.ThrowCompilationErrors(code);
-                            _console.Log("Script successfully compiled but did not get saved.");
-                        }
-                        catch (Exception ex)
-                        {
-                            _console.LogException(ex);
-                            _myPopup.CreateErrorPopup(ex.GetType().Name, ex.Message);
-                        }
-                    }
-                }
-                IsBusy = false;
-            }
-            catch (Exception e)
-            {
-                _console.LogException(e);
-                _myPopup.CreateErrorPopup(e.GetType().Name, e.Message);
-            }
+        // public async Task HandleValidate(Guid? scriptId = null, int? selectedVersion = null)
+        // {
+        //     scriptId = GetId(scriptId);
+        //     var code = await _editor.GetValueAsync();
+        //     CurrentScriptId = (Guid)scriptId;
+        //     _console.Log("Validating script:");
+        //     await _editor.ClearErrorsAsync();
+        //     try
+        //     {
+        //         _scriptManager.BasicValidationBeforeCompiling(code);
+        //         _console.Log("Validation successfull!");
+        //     }
+        //     catch (Exception e)
+        //     {
+        //         _console.LogException(e);
+        //         _myPopup.CreateErrorPopup(e.GetType().Name, e.Message);
+        //     }
+        //     try
+        //     {
+        //         List<ScriptCompilationError> errors = await _scriptManager.GetCompilationErrors(code);
+        //         var monacoMarkers = errors.Select(e => new MonacoMarker
+        //         {
+        //             Message = $"{e.Id} - {e.Message}",
+        //             Severity = e.IsError ? 8 : 4, // 8 = Error, 4 = Warning
+        //             StartLineNumber = e.Line,
+        //             StartColumn = e.Column,
+        //             EndLineNumber = e.EndLine,
+        //             EndColumn = e.EndColumn
+        //         }).ToList<object>();
 
-        }
+        //         await _editor.SetErrorsAsync(monacoMarkers);
+        //     }
+        //     catch (NoErrorsInScriptException e)
+        //     {
+        //         _console.Log(e.ToString());
+        //     }
+        //     catch (Exception e)
+        //     {
+        //         _console.LogException(e);
+        //         _myPopup.CreateErrorPopup(e.GetType().Name, e.Message);
+        //     }
+        // }
 
-        public Guid GetId(Guid? scriptId)
-        {
-            if (scriptId == null)
-            {
-                if (CurrentScriptId == Guid.Empty)
-                {
-                    CurrentScriptId = Guid.NewGuid();
-                }
-                scriptId = CurrentScriptId;
-            }
-            return (Guid)scriptId;
-        }
+        // public async Task HandleCompile(Guid? scriptId = null, int? selectedVersion = null)
+        // {
+        //     try
+        //     {
+        //         IsBusy = true;
+        //         scriptId = GetId(scriptId);
+        //         CurrentScriptId = (Guid)scriptId;
+        //         var code = await _editor.GetValueAsync();
+        //         try
+        //         {
+        //             //first tries to insert and compile new script
+        //             Guid newScript = (await _scriptManager.CreateScript(code)).Id;
+        //             CurrentScriptId = newScript;
+        //             _console.Log("Compilation successful, script was created and inserted into the DB.");
+        //         }
+        //         catch
+        //         {
+        //             try
+        //             {
+        //                 await _scriptManager.UpdateScriptAndCompile((Guid)scriptId, code, apiVersion: selectedVersion);
+        //                 _console.Log("Script successfully updated and compiled.");
+        //             }
+        //             catch (Exception e)
+        //             {
+        //                 try
+        //                 {
+        //                     bool result = await _scriptManager.ThrowCompilationErrors(code);
+        //                     _console.Log("Script successfully compiled but did not get saved.");
+        //                 }
+        //                 catch (Exception ex)
+        //                 {
+        //                     _console.LogException(ex);
+        //                     _myPopup.CreateErrorPopup(ex.GetType().Name, ex.Message);
+        //                 }
+        //             }
+        //         }
+        //         IsBusy = false;
+        //     }
+        //     catch (Exception e)
+        //     {
+        //         _console.LogException(e);
+        //         _myPopup.CreateErrorPopup(e.GetType().Name, e.Message);
+        //     }
 
-        public async Task HandleKnownSave(Guid scriptId, int? selectedVersion = null)
-        {
-            IsBusy = true;
-            try
-            {
+        // }
 
-                var code = await _editor.GetValueAsync();
-                await TryUpdating(scriptId, code);
-            }
-            catch (Exception e)
-            {
-                _console.LogException(e);
-                _myPopup.CreateErrorPopup(e.GetType().Name, e.Message);
-            }
-            IsBusy = false;
-        }
+        // public Guid GetId(Guid? scriptId)
+        // {
+        //     if (scriptId == null)
+        //     {
+        //         if (CurrentScriptId == Guid.Empty)
+        //         {
+        //             CurrentScriptId = Guid.NewGuid();
+        //         }
+        //         scriptId = CurrentScriptId;
+        //     }
+        //     return (Guid)scriptId;
+        // }
 
-        public async Task HandleUnknownSave()
-        {
-            IsBusy = true;
+        // public async Task HandleKnownSave(Guid scriptId, int? selectedVersion = null)
+        // {
+        //     IsBusy = true;
+        //     try
+        //     {
 
-            Guid scriptId = Guid.NewGuid();
-            var code = await _editor.GetValueAsync();
-            try
-            {
-                try
-                {
-                    //first tries to insert and compile new script
-                    scriptId = (await _scriptManager.CreateScript(code)).Id;
-                    CurrentScriptId = scriptId;
-                    _console.Log("Compilation successful, script was created and inserted into the DB.");
-                }
-                catch
-                {
-                    try
-                    {
-                        try
-                        {
-                            await _scriptManager.UpdateScriptAndCompile((Guid)scriptId, code);
-                            _console.Log("Script successfully updated and compiled.");
-                        }
-                        catch (Exception e)
-                        {
-                            await _scriptManager.UpdateScriptSC((Guid)scriptId, code);
-                            _console.Log("Script did not compile successfully but nevertheless it got saved, here are the compilation errors:");
-                            _console.Log(e.ToString());
-                        }
-                    }
-                    catch
-                    {
-                        await _scriptManager.CreateScriptWithoutCompiling(scriptId, code);
-                    }
-                }
-                IsBusy = false;
-            }
-            catch (System.Exception)
-            {
-                //Rare edge case when in ScriptTemplate and compiling and it doesnt find the id because it is not in the variable because one switched tabs
-                var vali = _scriptManager.BasicValidationBeforeCompiling(code);
+        //         var code = await _editor.GetValueAsync();
+        //         await TryUpdating(scriptId, code);
+        //     }
+        //     catch (Exception e)
+        //     {
+        //         _console.LogException(e);
+        //         _myPopup.CreateErrorPopup(e.GetType().Name, e.Message);
+        //     }
+        //     IsBusy = false;
+        // }
 
-                // Type testType=;
-                Guid retrievedId = await _scriptManager.GetScriptId<IGeneratorActionScript>(vali.ClassName);
-                if (true)
-                {
-                    throw new Exception();
-                }
-                await TryUpdating(retrievedId, code);
-                // _console.Log("Something went wrong in line 139: " + e.ToString());
-                IsBusy = false;
-            }
-        }
+        // public async Task HandleUnknownSave()
+        // {
+        //     IsBusy = true;
 
-        public async Task TryUpdating(Guid scriptId, string code)
-        {
-            try
-            {
-                try
-                {
-                    await _scriptManager.UpdateScriptAndCompile((Guid)scriptId, code);
-                    _console.Log("Script successfully updated and compiled.");
-                }
-                catch (Exception e)
-                {
-                    await _scriptManager.UpdateScriptSC((Guid)scriptId, code);
-                    _console.Log("Script did not compile successfully but nevertheless it got saved, here are the compilation errors:");
-                    _console.Log(e.ToString());
-                }
-            }
-            catch
-            {
-                await _scriptManager.CreateScriptWithoutCompiling(scriptId, code);
-            }
-        }
+        //     Guid scriptId = Guid.NewGuid();
+        //     var code = await _editor.GetValueAsync();
+        //     try
+        //     {
+        //         try
+        //         {
+        //             //first tries to insert and compile new script
+        //             scriptId = (await _scriptManager.CreateScript(code)).Id;
+        //             CurrentScriptId = scriptId;
+        //             _console.Log("Compilation successful, script was created and inserted into the DB.");
+        //         }
+        //         catch
+        //         {
+        //             try
+        //             {
+        //                 try
+        //                 {
+        //                     await _scriptManager.UpdateScriptAndCompile((Guid)scriptId, code);
+        //                     _console.Log("Script successfully updated and compiled.");
+        //                 }
+        //                 catch (Exception e)
+        //                 {
+        //                     await _scriptManager.UpdateScriptSC((Guid)scriptId, code);
+        //                     _console.Log("Script did not compile successfully but nevertheless it got saved, here are the compilation errors:");
+        //                     _console.Log(e.ToString());
+        //                 }
+        //             }
+        //             catch
+        //             {
+        //                 await _scriptManager.CreateScriptWithoutCompiling(scriptId, code);
+        //             }
+        //         }
+        //         IsBusy = false;
+        //     }
+        //     catch (System.Exception)
+        //     {
+        //         //Rare edge case when in ScriptTemplate and compiling and it doesnt find the id because it is not in the variable because one switched tabs
+        //         var vali = _scriptManager.BasicValidationBeforeCompiling(code);
+
+        //         // Type testType=;
+        //         Guid retrievedId = await _scriptManager.GetScriptId<IGeneratorActionScript>(vali.ClassName);
+        //         if (true)
+        //         {
+        //             throw new Exception();
+        //         }
+        //         await TryUpdating(retrievedId, code);
+        //         // _console.Log("Something went wrong in line 139: " + e.ToString());
+        //         IsBusy = false;
+        //     }
+        // }
+
+        // public async Task TryUpdating(Guid scriptId, string code)
+        // {
+        //     try
+        //     {
+        //         try
+        //         {
+        //             await _scriptManager.UpdateScriptAndCompile((Guid)scriptId, code);
+        //             _console.Log("Script successfully updated and compiled.");
+        //         }
+        //         catch (Exception e)
+        //         {
+        //             await _scriptManager.UpdateScriptSC((Guid)scriptId, code);
+        //             _console.Log("Script did not compile successfully but nevertheless it got saved, here are the compilation errors:");
+        //             _console.Log(e.ToString());
+        //         }
+        //     }
+        //     catch
+        //     {
+        //         await _scriptManager.CreateScriptWithoutCompiling(scriptId, code);
+        //     }
+        // }
 
 
 

@@ -5,6 +5,7 @@ using Serilog;
 using Microsoft.Extensions.DependencyInjection;
 using sandbox.Tests;
 using Sandbox;
+using Ember.Simulation;
 
 namespace FirstTests;
 
@@ -412,6 +413,20 @@ public class ScriptManagerFacadeTests
         object actResult = await _scriptManager.ExecuteScriptById(actId, context);
         Assert.IsInstanceOfType(actResult, typeof(ActionResultSF));
         // Assert.IsTrue(((ActionResultBaseClass)actResult).IsSuccess);
+    }
+
+    [TestMethod]
+    public async Task ExecuteUnfinishedScriptBySourceCodeTest()
+    {
+        string sourceCode = TestHelper.GetSC().sourceCodeActionV3;
+        ActiveGeneratorContext ctx = TestHelper.GetContext();
+        EmberInternalFacade eif = new EmberInternalFacade(_scriptManager!);
+        ActiveActionResult ar = await eif.ExecuteUnfinishedScriptBySourceCode(sourceCode, ctx);
+
+
+        Assert.IsTrue(ar != null);
+        Console.WriteLine("result is: " + ar.ToString());
+        Assert.IsTrue(ar.ToString()!.Contains("Pediatric tests added V3"));
     }
 
     #endregion
