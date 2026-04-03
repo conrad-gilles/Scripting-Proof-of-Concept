@@ -33,7 +33,7 @@ public class ScriptDbContext : DbContext //, IDataProtectionKeyContext
         {
             //tries to get connection string from environment variable if not it falls back to the docker container
             string? connectionString = null;
-            // connectionString = Environment.GetEnvironmentVariable("DATABASE_URL")!;
+            connectionString = Environment.GetEnvironmentVariable("DATABASE_URL")!;
 
             bool useContainer = true;
             if (useContainer)

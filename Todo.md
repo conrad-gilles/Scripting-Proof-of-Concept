@@ -2,38 +2,12 @@
 
 - maybe add a context tab to the ui to be able to modify etc
   
-- MetaDataIGeneratorScript attribute might be broken
-- write basicVali checks to ensure no loose methods
-- wirte scriot that doesntimplement all
 - should ScriptBase implement both the Condition and the Action interface or only the Action?
-
-- 1 abstract class instead of interfaces for each new method, 
-- to have perfect intellisense and compile time safety one could then implment new abstract classes that somehow include only the actually overriden functions, how would you do this parent class, child class? Or completely seperate
-- these abstract classes would have to be defined inside the Ember project?
-- the concrete issue would be that the developer would get intellisense for example when typing " someScript.ExecuteAction4(); " which would always throw a NotImplementedException because the script someScript does not overrride the ExecuteAction4() method.
-
-- maybe use a mix of both and have an abstract class that implements the interfaces, the scripts then inherit from the class, then one could create a facade in Ember where one could type cast using the "is" keyword, to a specific interface so that the developer in ember than uses this facade where he only gets intellisense for a specific method.
-
-- also write basic validation to check if user wrote method that is not added to abstract class yet, check for typos etc
-
-
-- for allowing multple methods in script,  represent each method by interface (already is), can then check at runtime only which additional methods are defined ontop
-- I would force to always have some implementation of the default ExecuteAsync and EvaluateAsync which maybe also could be used as fallback?
-  
-- The issue is how do you make a call like this " someScript.ExecuteSomeMethod(); " compile time safe?
-  
-  maybe just allow one latest and then handle the older versions again by something similar to the downgrade we already did?
-  maybe have a list of methods that each script has to implement to ensure error safety, and then throw error within empty implementations or just throw if there is no implemenation?
-
-- if multiple methods are a more rare case than scripts with only one method, maybe just check in basicValidation if script implements the default interface(with only 1 method), if this is false store the List of string interface names in the Script table, and then the user has to know when he exectues a script which methods this script has (not compile time safe), one could still maybe implement a fallback method that executes if the method doesnt exist or catch the error?
-This is less safe but also less verbose and complex than forcing every script to implement a list of methods
-To make this a bit safer and easier to work with later, one could maybe implement some form of facade, where scripts that are called often are typecast, for example " someScript " to for example " ICustomAction3 ", this would make it compile time safe, would remove the need for those specific scripts to use magic string and it would also make it possible to write simple unit tests to check if maybe the scripts have been modifed and a mehtod was removed  
 
 - One could maybe define a hierarchy of the new functions using attributes, so that one could maybe call something like ExecuteAllMethods(), ExecuteHighPriority()...
   
 - how to allow to pass nothing, for normal scripts?
 
-- ask if i need to implement rollback strategy for aborted scripts
 - test if the ExecutionTIme is actually respected and that scritps are aborted after said time
 
 ### Always check those
