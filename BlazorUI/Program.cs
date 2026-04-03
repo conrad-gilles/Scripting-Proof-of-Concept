@@ -4,6 +4,7 @@ using BlazorUI.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.DataProtection;
 using Ember.Simulation;
+using BlazorUI.Settings;
 // using sandbox; // only if RandomMethods is in the sandbox project/namespace
 
 
@@ -15,13 +16,13 @@ builder.Services.AddRazorComponents()
 
 // Register Ember scripting services (DI)
 var references = EmberMethods.GetReferences();
-int version = EmberMethods.GetEmberApiVersion();
+// int version = EmberMethods.GetEmberApiVersion();
 // string connectionString = "Host=localhost;Port=5432;Database=script_registry;Username=admin;Password=your_secure_password";
 
 builder.Services.AddDbContextFactory<EFModeling.EntityProperties.FluentAPI.Required.ScriptDbContext>();
-builder.Services.AddSingleton<IUserSession, Sandbox.SandBoxUserSession>();
+builder.Services.AddScoped<IUserSession, Sandbox.SandBoxUserSession>();
 
-builder.Services.AddEmberScripting(references, version);
+builder.Services.AddEmberScripting(references, AppSettings.EmberApiVersion);
 builder.Services.AddDbContext<EFModeling.EntityProperties.FluentAPI.Required.ScriptDbContext>();
 
 // builder.Services.AddDataProtection().PersistKeysToDbContext<EFModeling.EntityProperties.FluentAPI.Required.MyContext>();
@@ -29,6 +30,7 @@ builder.Services.AddDbContext<EFModeling.EntityProperties.FluentAPI.Required.Scr
 
 builder.Services.AddScoped<ConsoleService>();
 builder.Services.AddScoped<Ember.Simulation.EmberInternalFacade>();
+// builder.Services.AddScoped<ISccriptManagerDeleteAfter, YourScriptManagerImplementation>();
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())

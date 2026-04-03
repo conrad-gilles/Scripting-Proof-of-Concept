@@ -191,7 +191,7 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
             _logger.LogError("Retrieval failed jit comp launched:" + e.ToString());
             await CompileScript(scriptId, GetRunningApiVersion());
             //try again, if fails again we catch error outside
-            CompiledScripts script = await _db.GetCompiledScripCache(scriptId, apiVersion);
+            CompiledScript script = await _db.GetCompiledScripCache(scriptId, apiVersion);
             compiledScript = script.AssemblyBytes;
             executionTime = script.CustomerScript!.ExecutionTimeInMS;
         }
@@ -217,7 +217,7 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
     #region Cache Management
 
     // Retrieves compiled assembly bytes from cache
-    public async Task<CompiledScripts> GetCompiledCache(Guid scriptId, int? currentApiVersion = null)
+    public async Task<CompiledScript> GetCompiledCache(Guid scriptId, int? currentApiVersion = null)
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName} with scriptId: {ScriptId}.", nameof(GetCompiledCache), nameof(ScriptManagerFacade), scriptId);
         return await _db.GetCompiledScripCache(scriptId, currentApiVersion);
@@ -236,7 +236,7 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
         await _db.DeleteScriptCache(id, apiVersion);
     }
 
-    public async Task<List<CompiledScripts>> GetAllCompiledScriptCaches()
+    public async Task<List<CompiledScript>> GetAllCompiledScriptCaches()
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(GetAllCompiledScriptCaches), nameof(ScriptManagerFacade));
         return await _db.GetAllCompiledScriptCaches();
@@ -334,7 +334,7 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
         return await _db.GetScriptId<ScriptType>(scriptName);
     }
 
-    public async Task<Dictionary<int, List<CompiledScripts>>> GetCachesForEachApiVersion()
+    public async Task<Dictionary<int, List<CompiledScript>>> GetCachesForEachApiVersion()
     {
         return await _db.GetCachesForEachApiVersion();
     }

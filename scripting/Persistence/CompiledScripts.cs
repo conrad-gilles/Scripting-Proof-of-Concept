@@ -6,7 +6,7 @@ namespace Ember.Scripting;
 
 [Microsoft.EntityFrameworkCore.PrimaryKey(nameof(ScriptId), nameof(ApiVersion))]    //composite key because one script id can link multiple compiled
 [Table("compiled_scripts")]
-public class CompiledScripts
+public class CompiledScript
 {
     // [Key]
     [ForeignKey(nameof(CustomerScript))]

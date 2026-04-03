@@ -4,10 +4,6 @@
 @using Ember.Scripting
 @using BlazorUI.TotalExecutions
 @using Microsoft.EntityFrameworkCore
-@inject IDbContextFactory<EFModeling.EntityProperties.FluentAPI.Required.ScriptDbContext> DbFactory
-@inject ConsoleService Console
-
-@inject ISccriptManagerDeleteAfter ScriptManager
 <PageTitle>Dashboard</PageTitle>
 <PageTitle>Dashboard</PageTitle>
 @* <div class="top-bar">
@@ -197,7 +193,7 @@ block in Home.razor -->
                                     }
                                     <span class="status-dot @dotClass"></span>
                                     <strong>@(string.IsNullOrEmpty(instance.InstanceName) ? (instance.Hostname ??
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             instance.InstanceId.ToString().Substring(0, 8)) : instance.InstanceName)</strong>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     instance.InstanceId.ToString().Substring(0, 8)) : instance.InstanceName)</strong>
                                     </div>
                                     <span class="badge bg-primary">v@(instance.EmberVersion ?? "Unknown") (API
                                         v@(instance.SdkVersion))</span>

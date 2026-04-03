@@ -29,7 +29,7 @@ public class MultiMethodScriptTests
 
         //define specific method in the methodName parameter
         CustomerScript script = await ScriptManager.CreateScript(sourceCode);
-        ActiveActionResult ar = await InternalScriptManager!.ExecuteScript<IGeneratorActionScript>
+        ActiveActionResult ar = await InternalScriptManager!.ExecuteActionScript<IGeneratorActionScript>
         (script.ScriptName!, TestHelper.GetContext(), methodName: "ExecuteAction1");
 
         Console.WriteLine(ar.ToString());
@@ -37,19 +37,19 @@ public class MultiMethodScriptTests
 
         Exception ex = await Assert.ThrowsExceptionAsync<Ember.Scripting.ActionScriptExecutionException>(async () =>
         {
-            ar = await InternalScriptManager!.ExecuteScript<IGeneratorActionScript>
+            ar = await InternalScriptManager!.ExecuteActionScript<IGeneratorActionScript>
            (script.ScriptName!, TestHelper.GetContext(), methodName: "ExecuteAction2");
         });
 
         // Can explicitly call default method
-        ar = await InternalScriptManager!.ExecuteScript<IGeneratorActionScript>
+        ar = await InternalScriptManager!.ExecuteActionScript<IGeneratorActionScript>
        (script.ScriptName!, TestHelper.GetContext(), methodName: "ExecuteAsync");
 
         Console.WriteLine(ar.ToString());
         Assert.IsTrue(ar.ToString().Contains("Default method ExecuteAsync was called"));
 
         // if no specific method defined fall back to default
-        ar = await InternalScriptManager!.ExecuteScript<IGeneratorActionScript>
+        ar = await InternalScriptManager!.ExecuteActionScript<IGeneratorActionScript>
         (script.ScriptName!, TestHelper.GetContext());
 
         Console.WriteLine(ar.ToString());
@@ -97,7 +97,7 @@ public class MultiMethodScriptTests
 
         Exception ex = await Assert.ThrowsExceptionAsync<Ember.Scripting.CouldNotFindMethodException>(async () =>
         {
-            ActiveActionResult ar = await InternalScriptManager!.ExecuteScript<IGeneratorActionScript>
+            ActiveActionResult ar = await InternalScriptManager!.ExecuteActionScript<IGeneratorActionScript>
             (scriptDB.ScriptName!, TestHelper.GetContext(), methodName: "MethodDoesntExist");
         });
 
@@ -108,7 +108,7 @@ public class MultiMethodScriptTests
 
         ex = await Assert.ThrowsExceptionAsync<Ember.Scripting.CouldNotFindMethodException>(async () =>
        {
-           ActiveActionResult ar = await InternalScriptManager!.ExecuteScript<IGeneratorActionScript>
+           ActiveActionResult ar = await InternalScriptManager!.ExecuteActionScript<IGeneratorActionScript>
                (scriptDB.ScriptName!, TestHelper.GetContext(), methodName: "ExecuteAction1");
        });
         ExceptionHelper.PrintExceptionListToConsole(ex);

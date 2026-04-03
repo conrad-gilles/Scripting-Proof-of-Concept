@@ -10,37 +10,48 @@ internal class EmberInternalFacade
         _scriptManager = scriptManager;
     }
 
-    public async Task<ActiveActionResult> ExecuteScript(Guid id, ActiveGeneratorContext ctx, string? methodName = null)
+    private async Task<object> BaseExecute(Guid id, ActiveGeneratorContext ctx, string? methodName = null)
     {
         var cf = new ContextManagement(_scriptManager);
-        // GeneratorContextSF ctx = await cf.CreateByDowngrade(id, data);
-        // ctx = await cf.CreateByDowngrade(id, ctx);
         CustomerScript script = await _scriptManager.GetScript(id);
         GeneratorContextSF context = await cf.CreateByDowngrade(script.SourceCode!, ctx);
         var result = await _scriptManager.ExecuteScriptById(id, context, methodName: methodName);
+        return result;
+    }
+    public async Task<object> ExecuteScript(Guid id, ActiveGeneratorContext ctx, string? methodName = null)
+    {
+        var result = await BaseExecute(id, ctx, methodName);
+        return CheckUpgradeActionResult(result);
+    }
+    public async Task<ActiveActionResult> ExecuteActionScript(Guid id, ActiveGeneratorContext ctx, string? methodName = null)
+    {
+        var result = await BaseExecute(id, ctx, methodName);
         ActiveActionResult ar = (ActiveActionResult)EmberMethods.UpgradeActionResult(result);
         return ar;
     }
 
-    public async Task<ActiveActionResult> ExecuteScript<ScriptType>(string name, ActiveGeneratorContext ctx, string? methodName = null) where ScriptType : IScript
+    public async Task<ActiveActionResult> ExecuteActionScript<ScriptType>(string name, ActiveGeneratorContext ctx, string? methodName = null) where ScriptType : IScript
     {
         Guid id = await _scriptManager.GetScriptId<ScriptType>(name);
-        CustomerScript script = await _scriptManager.GetScript(id);
-        var cf = new ContextManagement(_scriptManager);
-        GeneratorContextSF context = await cf.CreateByDowngrade(script.SourceCode!, ctx);
-        var result = await _scriptManager.ExecuteScriptById(id, context, methodName: methodName);
-        ActiveActionResult ar = (ActiveActionResult)EmberMethods.UpgradeActionResult(result);
-        return ar;
+        return await ExecuteActionScript(id, ctx, methodName);
     }
-    public async Task<ActiveActionResult> ExecuteUnfinishedScriptBySourceCode(string sourceCode, ActiveGeneratorContext context, string? methodName = null)
+    public async Task<object> ExecuteUnfinishedScriptBySourceCode(string sourceCode, ActiveGeneratorContext context, string? methodName = null)
     {
         var cf = new ContextManagement(_scriptManager);
         GeneratorContextSF ctx = await cf.CreateByDowngrade(sourceCode, context);
 
-        var result = await _scriptManager.ExecuteUnfinishedScriptBySourceCode(sourceCode, ctx);
+        var result = await _scriptManager.ExecuteUnfinishedScriptBySourceCode(sourceCode, ctx, methodName: methodName);
 
-        ActiveActionResult ar = (ActiveActionResult)EmberMethods.UpgradeActionResult(result);
-        return ar;
+        return CheckUpgradeActionResult(result);
+    }
+    private object CheckUpgradeActionResult(object result)
+    {
+        if (result.GetType() != typeof(bool))
+        {
+            ActiveActionResult ar = (ActiveActionResult)EmberMethods.UpgradeActionResult(result);
+            return ar;
+        }
+        return result;
     }
     public ActiveGeneratorContext CreateContext(ILabOrderInterfaceV4NoInheritence labOrder, IVaccineInterface vaccine)
     {

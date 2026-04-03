@@ -35,11 +35,11 @@ public class CustomerScript
     [Column("execution_time")]
     public int? ExecutionTimeInMS { get; set; }
 
-    public List<CompiledScripts> CompiledCaches { get; set; }
+    public List<CompiledScript> CompiledCaches { get; set; }
 
     public CustomerScript()
     {
-        CompiledCaches = new List<CompiledScripts>();
+        CompiledCaches = new List<CompiledScript>();
     }
 
     public Type GetScriptType()

@@ -105,7 +105,7 @@ internal class ScriptRepository
 
 
     }
-    public async Task<List<CompiledScripts>> GetAllCompiledScriptCaches(bool includeScripts = true)
+    public async Task<List<CompiledScript>> GetAllCompiledScriptCaches(bool includeScripts = true)
     {
 
         _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(GetAllCompiledScriptCaches), nameof(ScriptRepository));
@@ -216,7 +216,7 @@ internal class ScriptRepository
             }
             else
             {
-                CompiledScripts cache = await GetCompiledScripCache(scriptId, (int)apiVersion);
+                CompiledScript cache = await GetCompiledScripCache(scriptId, (int)apiVersion);
                 sourceCode = cache.OldSourceCode!;
             }
             try
@@ -392,7 +392,7 @@ internal class ScriptRepository
                 byte[] tempComp;
                 tempComp = _compiler.RunCompilation(script.SourceCode!, metaData: getTupleFromVal);
 
-                CompiledScripts tempCache = new CompiledScripts
+                CompiledScript tempCache = new CompiledScript
                 {
                     ScriptId = script.Id,
                     ApiVersion = (int)apiV,
@@ -427,7 +427,7 @@ internal class ScriptRepository
         {
             try
             {
-                CompiledScripts temp = await GetCompiledScripCache(id, apiVersion);
+                CompiledScript temp = await GetCompiledScripCache(id, apiVersion);
                 db.Remove(temp);
                 await db.SaveChangesAsync();
             }
@@ -504,7 +504,7 @@ internal class ScriptRepository
                 byte[] compilation;
                 compilation = _compiler.RunCompilation(newSourceCode, metaData: validationRecord);
 
-                CompiledScripts cache = new CompiledScripts
+                CompiledScript cache = new CompiledScript
                 {
                     ScriptId = script.Id,
                     ApiVersion = (int)apiVersion,
@@ -524,7 +524,7 @@ internal class ScriptRepository
             }
         }
     }
-    public async Task InsertScriptCompiledCache(CompiledScripts scriptCompiledCache)
+    public async Task InsertScriptCompiledCache(CompiledScript scriptCompiledCache)
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(InsertScriptCompiledCache), nameof(ScriptRepository));
 
@@ -537,7 +537,7 @@ internal class ScriptRepository
         }
     }
 
-    public async Task<CompiledScripts> GetCompiledScripCache(Guid id, int? apiVersion = null)
+    public async Task<CompiledScript> GetCompiledScripCache(Guid id, int? apiVersion = null)
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName} with ID: {ScriptId}.", nameof(GetCompiledScripCache), nameof(ScriptRepository), id);
 
@@ -559,7 +559,6 @@ internal class ScriptRepository
         {
             using (var db = await _contextFactory.CreateDbContextAsync())
             {
-
                 var script = await db.CustomerScripts.Include(s => s.CompiledCaches).SingleAsync(b => b.Id == id);
                 return script;
             }
@@ -739,7 +738,7 @@ internal class ScriptRepository
                 }
             }
         }
-        List<CompiledScripts> allCaches = await GetAllCompiledScriptCaches();
+        List<CompiledScript> allCaches = await GetAllCompiledScriptCaches();
         Dictionary<Guid, int> cachesToDelete = [];
         for (int i = 0; i < allCaches.Count(); i++)
         {
@@ -879,19 +878,19 @@ internal class ScriptRepository
         }
     }
 
-    public async Task<Dictionary<int, List<CompiledScripts>>> GetCachesForEachApiVersion()
+    public async Task<Dictionary<int, List<CompiledScript>>> GetCachesForEachApiVersion()
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(GetActiveApiVersions), nameof(ScriptRepository));
 
         var caches = await GetAllCompiledScriptCaches();
-        Dictionary<int, List<CompiledScripts>> returnedDict = [];
+        Dictionary<int, List<CompiledScript>> returnedDict = [];
 
         List<int> ls = [];
         foreach (var cache in caches)
         {
             if (returnedDict.Keys.Contains(cache.ApiVersion) == false)
             {
-                List<CompiledScripts> newList = [];
+                List<CompiledScript> newList = [];
                 returnedDict.Add(cache.ApiVersion, newList);
                 returnedDict[cache.ApiVersion].Add(cache);
             }

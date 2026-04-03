@@ -421,7 +421,7 @@ public class ScriptManagerFacadeTests
         string sourceCode = TestHelper.GetSC().sourceCodeActionV3;
         ActiveGeneratorContext ctx = TestHelper.GetContext();
         EmberInternalFacade eif = new EmberInternalFacade(_scriptManager!);
-        ActiveActionResult ar = await eif.ExecuteUnfinishedScriptBySourceCode(sourceCode, ctx);
+        object ar = await eif.ExecuteUnfinishedScriptBySourceCode(sourceCode, ctx);
 
 
         Assert.IsTrue(ar != null);
@@ -438,7 +438,7 @@ public class ScriptManagerFacadeTests
     {
         Guid id = (await _scriptManager!.CreateScript(_sourceCodePedia!)).Id;
 
-        CompiledScripts cache = await _scriptManager.GetCompiledCache(id);
+        CompiledScript cache = await _scriptManager.GetCompiledCache(id);
         byte[] cacheAB = cache.AssemblyBytes!;
 
         Assert.IsNotNull(cacheAB);
@@ -450,7 +450,7 @@ public class ScriptManagerFacadeTests
     {
         Guid id = (await _scriptManager!.CreateScript(_sourceCodePedia!)).Id;
 
-        CompiledScripts cache = await _scriptManager.GetCompiledCache(id);
+        CompiledScript cache = await _scriptManager.GetCompiledCache(id);
         byte[] cacheAB = cache.AssemblyBytes!;
         Assert.IsTrue(cacheAB.Length > 0);
 

@@ -6,10 +6,7 @@
 @using System.Text.RegularExpressions
 @using System.Reflection
 @using Ember.Simulation
-
-@inject ConsoleService Console
-@inject ISccriptManagerDeleteAfter ScriptManager
-@inject EmberInternalFacade EmberInternalFacade
+@using System.Threading.Tasks
 
 <PageTitle>Create Script</PageTitle>
 
@@ -18,8 +15,9 @@
     <div class="top-bar d-flex justify-content-between align-items-center mb-3 flex-shrink-0">
         <h2 class="mb-0">Create New Script</h2>
         <div class="d-flex gap-2">
+ 
             <!-- No need to pass newScript boolean, the helper knows its own state -->
-            <button class="btn btn-outline-info" @onclick="() => _editorHelper?.Validate(null)!"
+            <button class="btn btn-outline-info" @onclick="async () => await Validate()!"
                     disabled="@(_editorHelper?.IsBusy ?? false)">
                 <i class="bi bi-check-circle"></i> Validate
             </button>
@@ -27,11 +25,19 @@
                     disabled="@(_editorHelper?.IsBusy ?? false)">
                 <i class="bi bi-hammer"></i> Compile
             </button> *@
-            <button class="btn btn-outline-primary" @onclick="() => _editorHelper?.Execute()!"
+            <button class="btn btn-outline-primary" @onclick="async () => await Execute()"
                     disabled="@(_editorHelper?.IsBusy ?? false)">
                 <i class="bi bi-play-circle"></i> Execute
             </button>
-            <button class="btn btn-success" @onclick="() => _editorHelper?.CreateAndInsert()!"
+            <select class="form-select" style="width: auto; min-width: 180px;" @bind="SelectedMethod"
+                    disabled="@(_editorHelper?.IsBusy ?? false)">
+                <option value="" disabled>Select a method...</option>
+                @foreach (var method in PredefinedMethods)
+                {
+                    <option value="@method">@method</option>
+                }
+            </select>
+            <button class="btn btn-success" @onclick="async () => await _editorHelper?.CreateAndInsert()!"
                     disabled="@(_editorHelper?.IsBusy ?? false)">
                 <i class="bi bi-save"></i> Create
             </button>
@@ -58,6 +64,8 @@
     private Popup myPopup = default!;
     private MonacoEditorHelper _editorHelper = default!;
 
+    private string SelectedMethod = "";
+    private List<string> PredefinedMethods = ["Standard"];
     public string DefaultScript = GetTemplate();
 
     @* public static string GetTemplate()
@@ -70,6 +78,32 @@
         return EmberMethods.CreateStringFromCsFile(path);
     } *@
 
+    public async Task Validate()
+    {
+        ValidationRecord? vali = await _editorHelper.Validate();
+        if (vali != null)
+        {
+            List<string> methods = ["Standard"];
+            if (vali.methods != null)
+            {
+                foreach (var method in vali.methods)
+                {
+                    methods.Add(method.Name);
+                }
+
+            }
+            PredefinedMethods = methods;
+        }
+    }
+    public async Task Execute()
+    {
+        string? methodName = null;
+        if (SelectedMethod != "Standard" && SelectedMethod != "")
+        {
+            methodName = SelectedMethod;
+        }
+        await _editorHelper?.Execute(methodName: methodName)!;
+    }
     public static string GetTemplate()
     {
         // The format is: DefaultNamespace.FolderName.FileName.Extension

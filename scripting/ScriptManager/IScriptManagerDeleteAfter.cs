@@ -72,7 +72,7 @@ public interface ISccriptManagerDeleteAfter : IScriptManagerExtended
   /// <param name="scriptId"></param>
   /// <param name="currentApiVersion"></param>
   /// <returns></returns>
-  Task<CompiledScripts> GetCompiledCache(Guid scriptId, int? currentApiVersion = null);
+  Task<CompiledScript> GetCompiledCache(Guid scriptId, int? currentApiVersion = null);
 
   /// <summary>
   /// Removes all compiled versions of a script
@@ -88,7 +88,7 @@ public interface ISccriptManagerDeleteAfter : IScriptManagerExtended
   /// Gets all Compiled Script Caches in the Database
   /// </summary>
   /// <returns></returns>
-  Task<List<CompiledScripts>> GetAllCompiledScriptCaches();
+  Task<List<CompiledScript>> GetAllCompiledScriptCaches();
 
   /// <summary>
   /// Removes all compiled caches (maintenance operation)
@@ -170,7 +170,7 @@ public interface ISccriptManagerDeleteAfter : IScriptManagerExtended
   /// 
   /// </summary>
   /// <returns></returns>
-  Task<Dictionary<int, List<CompiledScripts>>> GetCachesForEachApiVersion();
+  Task<Dictionary<int, List<CompiledScript>>> GetCachesForEachApiVersion();
 
   IUserSession GetUserName();
 

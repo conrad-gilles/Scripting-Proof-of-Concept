@@ -2,9 +2,6 @@
 @rendermode InteractiveServer
 @using BlazorUI.Services
 @using Ember.Scripting
-@inject ISccriptManagerDeleteAfter ScriptManager
-@inject ConsoleService Console
-
 <PageTitle>Cache Management</PageTitle>
 
 <div class="page-container">
@@ -76,7 +73,7 @@
 </div>
 
 @code {
-    private List<CompiledScripts> _caches = [];
+    private List<CompiledScript> _caches = [];
     private Popup myPopup = default!;
 
     protected override async Task OnInitializedAsync()
@@ -112,7 +109,7 @@
             myPopup.CreateErrorPopup(e.GetType().Name, e.Message);
         }
     }
-    private async Task HandleDeleteCache(CompiledScripts cache)
+    private async Task HandleDeleteCache(CompiledScript cache)
     {
         try
         {

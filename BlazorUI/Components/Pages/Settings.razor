@@ -2,6 +2,7 @@
 @rendermode InteractiveServer
 
 @using BlazorUI.Settings
+@using Serilog
 <PageTitle>Settings</PageTitle>
 
 <div class="top-bar mb-4">
@@ -33,6 +34,57 @@
                            @bind="AppSettings.PrintDetailedInConsole">
                         <label class="form-check-label" for="printDetailed">Print Detailed Logs in Console</label>
                     </div>
+                    <div class="mb-3 mt-3">
+                        <label class="form-label fs-5 mb-2" for="emberVersion">Ember API Version</label>
+                        <select class="form-select cursor-pointer" style="max-width: 250px;" id="emberVersion"
+                                @bind="AppSettings.EmberApiVersion" @bind:after="async () => await UpdateApiVersion()">
+                            @for (int i = 1; i <= EmberMethods.GetEmberApiVersion(); i++)
+                            {
+                                <option value="@i">Version @i</option>
+                            }
+                        </select>
+                    </div>
 
                 </div>
             </div>
+<Popup @ref="myPopup" />
+@code {
+
+    private int _selectedApiVersion = 0;
+    private Popup myPopup = default!;
+    public async Task UpdateApiVersion()
+    {
+
+        try
+        {
+            ServiceCollection services2 = new ServiceCollection();
+
+            LoggerForScripting? logger = new LoggerForScripting();
+
+            services2 = new ServiceCollection();
+            services2.AddLogging(builder =>
+            {
+                builder.AddSerilog(dispose: true);
+            });
+
+            services2.AddDbContextFactory<EFModeling.EntityProperties.FluentAPI.Required.ScriptDbContext>();
+            services2.AddSingleton<IUserSession, Sandbox.SandBoxUserSession>();
+
+            ScriptingServiceCollectionExtensions.AddEmberScripting(services2, EmberMethods.GetReferences(),
+                EmberMethods.GetEmberApiVersion(testingDiffrentVersion: _selectedApiVersion));
+
+            var provider2 = services2.BuildServiceProvider();
+
+            ScriptManager = provider2.GetRequiredService<ISccriptManagerDeleteAfter>();
+            Console.Log($"User selected API Version: {_selectedApiVersion}");
+
+            @* await LoadScripts(); *@
+        }
+        catch (Exception e)
+        {
+            Console.LogException(e);
+            myPopup.CreateErrorPopup(e.GetType().Name, e.Message);
+        }
+    }
+        
+}

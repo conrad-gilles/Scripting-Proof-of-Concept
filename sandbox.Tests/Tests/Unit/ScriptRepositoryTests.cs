@@ -64,7 +64,7 @@ public class ScriptRepositoryTests
         await _facade.CompileScript(id, oldV);
 
         var after2 = await _facade.GetScript(id, includeCaches: true);
-        CompiledScripts cache = await _facade.GetCompiledCache(id, oldV);
+        CompiledScript cache = await _facade.GetCompiledCache(id, oldV);
         Assert.IsTrue(after2.CompiledCaches.Count == 2);
         Console.WriteLine("Api Version = " + cache.ApiVersion);
         Assert.IsTrue(cache != null && (cache.ApiVersion == oldV));

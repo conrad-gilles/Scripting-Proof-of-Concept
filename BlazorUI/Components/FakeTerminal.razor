@@ -1,28 +1,27 @@
 @using BlazorUI.Services
 @using BlazorUI.Settings
-@inject ConsoleService ConsoleService
 @implements IDisposable
 @rendermode InteractiveServer
 @if (AppSettings.UseConsole)
 {
-    <div class="fake-terminal @(ConsoleService.IsExpanded ? "expanded" : "collapsed")">
+    <div class="fake-terminal @(Console.IsExpanded ? "expanded" : "collapsed")">
         <div
             class="terminal-header d-flex justify-content-between align-items-center px-3 py-2 bg-dark text-white border-bottom border-secondary">
             <div class="d-flex align-items-center gap-3">
                 <span><i class="bi bi-terminal"></i> OUTPUT</span>
-                <button class="btn btn-sm btn-outline-secondary text-white border-0 py-0" @onclick="ConsoleService.Clear">
+                <button class="btn btn-sm btn-outline-secondary text-white border-0 py-0" @onclick="Console.Clear">
                     <i class="bi bi-trash"></i> Clear
                 </button>
             </div>
             <div>
-                <button class="btn btn-sm text-white" @onclick="ConsoleService.Toggle">
-                    <i class="bi @(ConsoleService.IsExpanded ? "bi-chevron-down" : "bi-chevron-up")"></i>
+                <button class="btn btn-sm text-white" @onclick="Console.Toggle">
+                    <i class="bi @(Console.IsExpanded ? "bi-chevron-down" : "bi-chevron-up")"></i>
                 </button>
             </div>
         </div>
 
         <div class="terminal-body bg-dark text-light p-3 font-monospace" style="overflow-y: auto;">
-            @foreach (var log in ConsoleService.Logs)
+            @foreach (var log in Console.Logs)
             {
                 <div class="log-line mb-1">
                     <span class="text-secondary">[@log.timestamp.ToString("HH:mm:ss")]</span>
@@ -36,7 +35,7 @@
                     }
                 </div>
             }
-            @if (!ConsoleService.Logs.Any())
+            @if (!Console.Logs.Any())
             {
                 <div class="text-secondary">No output to display.</div>
             }
@@ -74,12 +73,12 @@
     protected override void OnInitialized()
     {
         // Subscribe to changes from the service
-        ConsoleService.OnChange += StateHasChanged;
+        Console.OnChange += StateHasChanged;
     }
 
     public void Dispose()
     {
         // Prevent memory leaks by unsubscribing
-        ConsoleService.OnChange -= StateHasChanged;
+        Console.OnChange -= StateHasChanged;
     }
 }

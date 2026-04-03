@@ -20,18 +20,18 @@ public class MultipleMethodsScriptHelper
 
     public async Task<ActiveActionResult> ExecuteAsync(ActiveGeneratorContext context)
     {
-        return await InternalScriptManager!.ExecuteScript<IGeneratorActionScript>
+        return await InternalScriptManager!.ExecuteActionScript<IGeneratorActionScript>
        (scriptName, context, methodName: "ExecuteAsync");
     }
 
     public async Task<ActiveActionResult> ExecuteAction1(ActiveGeneratorContext context)
     {
-        return await InternalScriptManager!.ExecuteScript<IGeneratorActionScript>
+        return await InternalScriptManager!.ExecuteActionScript<IGeneratorActionScript>
       (scriptName, context, methodName: "ExecuteAction1");
     }
     public async Task<ActiveActionResult> ExecuteAction2(ActiveGeneratorContext context)
     {
-        return await InternalScriptManager!.ExecuteScript<IGeneratorActionScript>
+        return await InternalScriptManager!.ExecuteActionScript<IGeneratorActionScript>
       (scriptName, context, methodName: "ExecuteAction2");
     }
 }

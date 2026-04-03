@@ -213,7 +213,7 @@ internal class ScriptCompiler
                 default:
                     throw new CouldNotMatchBaseTypeInCompiler(nameof(baseTypeName) + " was not a valid option!");
             }
-            ValidateOnlyInheritedMethods(tree!, model);
+            List<MethodRecord> methods = ValidateOnlyInheritedMethodsAndReturn(tree!, model);
             ValidateLoopsHavingCancellation(tree!);
             ValidateNamespaceUsage(tree!, model!);
             ValidationRecord returnedRecord = new ValidationRecord
@@ -222,6 +222,7 @@ internal class ScriptCompiler
                 ScriptType = scriptType,
                 Version = (int)versionInt,
                 ExecutionTime = GetExecutionTime(tree),
+                methods = methods
             };
             return returnedRecord;
         }
@@ -258,8 +259,10 @@ internal class ScriptCompiler
         return executionTime;
     }
 
-    private void ValidateOnlyInheritedMethods(SyntaxTree tree, SemanticModel semanticModel)
+    private List<MethodRecord> ValidateOnlyInheritedMethodsAndReturn(SyntaxTree tree, SemanticModel semanticModel)
     {
+        List<MethodRecord> result = [];
+
         SyntaxNode root = tree.GetRoot();
         IEnumerable<MethodDeclarationSyntax> methods = root.DescendantNodes().OfType<MethodDeclarationSyntax>();
         List<MethodRecord> methodsRoslyn = GetMethodsRoslyn(methods, semanticModel);
@@ -279,6 +282,7 @@ internal class ScriptCompiler
                 if (MethodRecord.IsTheSame(meth1, meth2))
                 {
                     isInside = true;
+                    result.Add(meth1);
                 }
                 else
                 {
@@ -297,6 +301,7 @@ internal class ScriptCompiler
                 }
             }
         }
+        return result;
     }
 
     private List<MethodRecord> GetMethodsRoslyn(IEnumerable<MethodDeclarationSyntax> methods, SemanticModel semanticModel)

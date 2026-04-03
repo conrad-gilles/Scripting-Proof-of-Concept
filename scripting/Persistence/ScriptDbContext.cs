@@ -16,7 +16,7 @@ public class ScriptDbContext : DbContext //, IDataProtectionKeyContext
     // public DbSet<DataProtectionKey> DataProtectionKeys { get; set; } = null!;   //todo this is here for blazor app to prevent loss of performance doesnt work yet app always crashes on Render.com
 
     public DbSet<CustomerScript> CustomerScripts { get; set; }
-    public DbSet<CompiledScripts> ScriptCompiledCaches { get; set; }
+    public DbSet<CompiledScript> ScriptCompiledCaches { get; set; }
     public DbSet<EmberInstance> EmberInstances { get; set; }
 
     #region Required

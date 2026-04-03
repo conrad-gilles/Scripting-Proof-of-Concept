@@ -1,10 +1,20 @@
 ﻿@using System.Net.Http
 @using System.Net.Http.Json
+@using BlazorUI.Services
 @using Microsoft.AspNetCore.Components.Forms
 @using Microsoft.AspNetCore.Components.Routing
 @using Microsoft.AspNetCore.Components.Web
 @using static Microsoft.AspNetCore.Components.Web.RenderMode
 @using Microsoft.AspNetCore.Components.Web.Virtualization
+@using Microsoft.EntityFrameworkCore
 @using Microsoft.JSInterop
 @using BlazorUI
 @using BlazorUI.Components
+@using Ember.Scripting
+@using Ember.Simulation
+@using Ember.Scripting.AdditionalMethods
+@inject ISccriptManagerDeleteAfter ScriptManager
+@inject ConsoleService Console
+@inject EmberInternalFacade EmberInternalFacade
+@inject IDbContextFactory<EFModeling.EntityProperties.FluentAPI.Required.ScriptDbContext> DbFactory
+@inject IJSRuntime JSRuntime
