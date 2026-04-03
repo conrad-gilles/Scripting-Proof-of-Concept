@@ -61,7 +61,7 @@ public class EmberInternalFacadeTests
         // var ctx = InternalScriptManager.CreateContext(_obj.labOrder, _obj.vaccine);
         var ctx = TestHelper.GetContext();
 
-        ar = await InternalScriptManager.ExecuteActionScript(id, ctx!);
+        ar = (ActiveActionResult)await InternalScriptManager.ExecuteScript(id, ctx!);
 
 
 

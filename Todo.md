@@ -1,13 +1,6 @@
 # Todo
-ennen crud        // ActiveActionResult ar = await InternalScriptManager!.GetScript<IGeneratorActionScript>("AddPediatrucTestV2").ExecuteAction(ctx); //get db instance
-
 
 - maybe add a context tab to the ui to be able to modify etc
-- in ui maybe give the possibility to execute specific functions
-- update script template and also allow private methods 
-- improve the ember internal facade, definetly fix the sourceCode property in createbydowngrade
-- add a dumb execute that compiles and executes but doesnt save to db
-- add a pop up that makes it so you dont have to manually open the console
   
 - MetaDataIGeneratorScript attribute might be broken
 - write basicVali checks to ensure no loose methods
