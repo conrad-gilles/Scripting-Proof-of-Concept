@@ -15,9 +15,9 @@ using Sandbox;
 
 public class EmberMethods
 {
-    private readonly ISccriptManagerDeleteAfter _facade;
+    private readonly IScriptManagerDeleteAfter _facade;
 
-    public EmberMethods(ISccriptManagerDeleteAfter facade)
+    public EmberMethods(IScriptManagerDeleteAfter facade)
     {
         _facade = facade;
     }
@@ -32,9 +32,9 @@ public class EmberMethods
         return 5;
     }
 
-    public static ISccriptManagerDeleteAfter GetNewScriptManagerInstance(int? apiVersion = null)
+    public static IScriptManagerDeleteAfter GetNewScriptManagerInstance(int? apiVersion = null)
     {
-        ISccriptManagerDeleteAfter facade;
+        IScriptManagerDeleteAfter facade;
         ServiceCollection services2 = new ServiceCollection();
 
         LoggerForScripting logger = new LoggerForScripting();
@@ -51,7 +51,7 @@ public class EmberMethods
         services2.AddDbContextFactory<EFModeling.EntityProperties.FluentAPI.Required.ScriptDbContext>();
         ScriptingServiceCollectionExtensions.AddEmberScripting(services2, EmberMethods.GetReferences(), EmberMethods.GetEmberApiVersion(testingDiffrentVersion: apiVersion));
         var provider2 = services2.BuildServiceProvider();
-        return facade = provider2.GetRequiredService<ISccriptManagerDeleteAfter>();
+        return facade = provider2.GetRequiredService<IScriptManagerDeleteAfter>();
     }
     public async Task<Dictionary<int, Guid>> ListAllCompiledFromDB()
     {

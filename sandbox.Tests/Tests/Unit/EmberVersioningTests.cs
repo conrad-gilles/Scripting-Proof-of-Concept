@@ -13,7 +13,7 @@ public class EmberVersioningTests
 {
 
 
-    private ISccriptManagerDeleteAfter? _facade;
+    private IScriptManagerDeleteAfter? _facade;
     private EmberMethods? _em;
     private DataV2.DataV2? _data;
     private string? _actionResultVersionSpecific;
@@ -68,7 +68,7 @@ public class EmberVersioningTests
     {
 
     }
-    public async Task<List<Guid>> SaturateDBAsync(ISccriptManagerDeleteAfter facade, EmberMethods rm)
+    public async Task<List<Guid>> SaturateDBAsync(IScriptManagerDeleteAfter facade, EmberMethods rm)
     {
         List<Guid> ids = [];
         foreach (var item in _sourceCodes!)
@@ -78,7 +78,7 @@ public class EmberVersioningTests
         }
         return ids;
     }
-    public async Task ExecuteEachScript(ISccriptManagerDeleteAfter facade, EmberMethods em)
+    public async Task ExecuteEachScript(IScriptManagerDeleteAfter facade, EmberMethods em)
     {
         foreach (var id in await SaturateDBAsync(facade, em))
         {

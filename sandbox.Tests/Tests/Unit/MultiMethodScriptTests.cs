@@ -12,7 +12,7 @@ using Microsoft.CodeAnalysis.Scripting;
 [TestClass]
 public class MultiMethodScriptTests
 {
-    static ISccriptManagerDeleteAfter ScriptManager = TestHelper.InitScriptManager();
+    static IScriptManagerDeleteAfter ScriptManager = TestHelper.InitScriptManager();
     static EmberInternalFacade InternalScriptManager = new EmberInternalFacade(ScriptManager);
     static EmberMethods em = new EmberMethods(ScriptManager);
 

@@ -10,7 +10,7 @@ using Sandbox;
 [TestClass]
 public class CrudDemos
 {
-    static ISccriptManagerDeleteAfter ScriptManager = InitScriptManager();
+    static IScriptManagerDeleteAfter ScriptManager = InitScriptManager();
     static EmberInternalFacade InternalScriptManager = new EmberInternalFacade(ScriptManager);
     static EmberMethods em = new EmberMethods(ScriptManager);
 
@@ -26,9 +26,9 @@ public class CrudDemos
         await ScriptManager.DeleteAllData();
     }
 
-    public static ISccriptManagerDeleteAfter InitScriptManager()
+    public static IScriptManagerDeleteAfter InitScriptManager()
     {
-        ISccriptManagerDeleteAfter scriptManager;
+        IScriptManagerDeleteAfter scriptManager;
         ServiceCollection services = new ServiceCollection();
 
         LoggerForScripting logger = new LoggerForScripting();
@@ -44,7 +44,7 @@ public class CrudDemos
 
         var provider = services.BuildServiceProvider();
 
-        return scriptManager = provider.GetRequiredService<ISccriptManagerDeleteAfter>();
+        return scriptManager = provider.GetRequiredService<IScriptManagerDeleteAfter>();
     }
     [TestMethod]
     public async Task Create()

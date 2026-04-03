@@ -3,9 +3,9 @@ namespace Ember.Simulation;
 
 internal class EmberInternalFacade
 {
-    private ISccriptManagerDeleteAfter _scriptManager;
+    private IScriptManagerDeleteAfter _scriptManager;
 
-    public EmberInternalFacade(ISccriptManagerDeleteAfter scriptManager)
+    public EmberInternalFacade(IScriptManagerDeleteAfter scriptManager)
     {
         _scriptManager = scriptManager;
     }

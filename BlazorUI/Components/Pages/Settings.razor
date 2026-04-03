@@ -37,7 +37,7 @@
                     <div class="mb-3 mt-3">
                         <label class="form-label fs-5 mb-2" for="emberVersion">Ember API Version</label>
                         <select class="form-select cursor-pointer" style="max-width: 250px;" id="emberVersion"
-                                @bind="AppSettings.EmberApiVersion" @bind:after="async () => await UpdateApiVersion()">
+                                @bind="_selectedApiVersion" @bind:after="async () => await UpdateApiVersion()">
                             @for (int i = 1; i <= EmberMethods.GetEmberApiVersion(); i++)
                             {
                                 <option value="@i">Version @i</option>
@@ -47,10 +47,11 @@
 
                 </div>
             </div>
+<FakeTerminal />
 <Popup @ref="myPopup" />
 @code {
-
-    private int _selectedApiVersion = 0;
+    private IScriptManagerDeleteAfter ScriptManager => ScriptManagerAccessor.Current;
+    private int _selectedApiVersion = AppSettings.EmberApiVersion;
     private Popup myPopup = default!;
     public async Task UpdateApiVersion()
     {
@@ -68,16 +69,19 @@
             });
 
             services2.AddDbContextFactory<EFModeling.EntityProperties.FluentAPI.Required.ScriptDbContext>();
-            services2.AddSingleton<IUserSession, Sandbox.SandBoxUserSession>();
-
+            services2.AddScoped<IUserSession, Sandbox.SandBoxUserSession>();
+            services2.AddScoped<EmberInternalFacade>();
             ScriptingServiceCollectionExtensions.AddEmberScripting(services2, EmberMethods.GetReferences(),
                 EmberMethods.GetEmberApiVersion(testingDiffrentVersion: _selectedApiVersion));
 
             var provider2 = services2.BuildServiceProvider();
 
-            ScriptManager = provider2.GetRequiredService<ISccriptManagerDeleteAfter>();
-            Console.Log($"User selected API Version: {_selectedApiVersion}");
+            ScriptManagerAccessor.Current = provider2.GetRequiredService<IScriptManagerDeleteAfter>();
+            EmberInternalFacadeAccessor.Current = provider2.GetRequiredService<EmberInternalFacade>();
+            Console.Log($"User selected API Version {_selectedApiVersion}");
+            AppSettings.EmberApiVersion = _selectedApiVersion;
 
+            
             @* await LoadScripts(); *@
         }
         catch (Exception e)

@@ -10,7 +10,7 @@ using Sandbox;
 [TestClass]
 public class SecurityTests
 {
-    static ISccriptManagerDeleteAfter ScriptManager = TestHelper.InitScriptManager();
+    static IScriptManagerDeleteAfter ScriptManager = TestHelper.InitScriptManager();
     static EmberInternalFacade InternalScriptManager = new EmberInternalFacade(ScriptManager);
     static EmberMethods em = new EmberMethods(ScriptManager);
 

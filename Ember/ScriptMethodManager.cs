@@ -7,11 +7,11 @@ namespace ScriptMethodManager;
 public class MultipleMethodsScriptHelper
 {
 
-    ISccriptManagerDeleteAfter ScriptManager;
+    IScriptManagerDeleteAfter ScriptManager;
     EmberInternalFacade InternalScriptManager;
     string scriptName;
 
-    internal MultipleMethodsScriptHelper(ISccriptManagerDeleteAfter scriptManager, EmberInternalFacade internalScriptManager, string scriptName)
+    internal MultipleMethodsScriptHelper(IScriptManagerDeleteAfter scriptManager, EmberInternalFacade internalScriptManager, string scriptName)
     {
         ScriptManager = scriptManager;
         InternalScriptManager = internalScriptManager;

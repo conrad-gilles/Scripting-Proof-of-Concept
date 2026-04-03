@@ -512,7 +512,9 @@ internal class ScriptRepository
                     CompilationDate = DateTime.UtcNow,
                     CompilationSuccess = true,
                     CompilationErrors = "",
-                    OldSourceCode = script.SourceCode
+                    // OldSourceCode = script.SourceCode
+                    OldSourceCode = newSourceCode
+
                 };
                 await InsertScriptCompiledCache(cache);
                 await db.SaveChangesAsync();

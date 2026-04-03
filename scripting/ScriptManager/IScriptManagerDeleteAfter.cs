@@ -2,7 +2,7 @@ using Microsoft.CodeAnalysis;
 
 namespace Ember.Scripting;
 
-public interface ISccriptManagerDeleteAfter : IScriptManagerExtended
+public interface IScriptManagerDeleteAfter : IScriptManagerExtended
 {
   Task<List<CustomerScript>> ListScripts(CustomerScriptFilter filters = null!, bool includeCaches = false);
 

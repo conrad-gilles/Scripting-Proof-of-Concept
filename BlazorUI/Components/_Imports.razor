@@ -13,8 +13,9 @@
 @using Ember.Scripting
 @using Ember.Simulation
 @using Ember.Scripting.AdditionalMethods
-@inject ISccriptManagerDeleteAfter ScriptManager
+@inject BlazorUI.Services.ScriptManagerAccessor ScriptManagerAccessor
 @inject ConsoleService Console
-@inject EmberInternalFacade EmberInternalFacade
-@inject IDbContextFactory<EFModeling.EntityProperties.FluentAPI.Required.ScriptDbContext> DbFactory
+@* @inject EmberInternalFacade EmberInternalFacade *@
+@inject BlazorUI.Services.EmberInternalFacadeAccessor EmberInternalFacadeAccessor
+@* @inject IDbContextFactory<EFModeling.EntityProperties.FluentAPI.Required.ScriptDbContext> DbFactory *@
 @inject IJSRuntime JSRuntime

@@ -153,13 +153,13 @@ block in Home.razor -->
 
     @if (emberInstances == null)
     {
-        <div class="col-12 mt-4">
+        @* <div class="col-12 mt-4">
             <p class="text-muted">Loading instances...</p>
-        </div>
+        </div> *@
     }
     else if (!emberInstances.Any())
     {
-        <div class="col-md-6 mt-4">
+        @* <div class="col-md-6 mt-4">
             <div class="card">
                 <div class="card-header">
                     <i class="bi bi-server"></i>
@@ -169,7 +169,7 @@ block in Home.razor -->
                     <p class="text-muted mb-0">No Ember instances registered.</p>
                 </div>
             </div>
-        </div>
+        </div> *@
     }
     else
     {
@@ -193,7 +193,7 @@ block in Home.razor -->
                                     }
                                     <span class="status-dot @dotClass"></span>
                                     <strong>@(string.IsNullOrEmpty(instance.InstanceName) ? (instance.Hostname ??
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     instance.InstanceId.ToString().Substring(0, 8)) : instance.InstanceName)</strong>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             instance.InstanceId.ToString().Substring(0, 8)) : instance.InstanceName)</strong>
                                     </div>
                                     <span class="badge bg-primary">v@(instance.EmberVersion ?? "Unknown") (API
                                         v@(instance.SdkVersion))</span>
@@ -213,8 +213,8 @@ block in Home.razor -->
             <div class="col-md-6">
                 <div class="card">
                     <div class="card-header">
-                        <i class="bi bi-activity"></i>
-                        Quick Actions
+                        <i class="bi bi-file-earmark-plus"></i>
+                        Script Creation
                     </div>
                     <div class="card-body">
                         <a href="/create" class="btn btn-primary w-100 mb-2">
@@ -240,6 +240,48 @@ block in Home.razor -->
                             <span>Compile Default Scripts From Folder</span>
 
                         </button>
+                        @* <button class="btn btn-outline-danger w-100 mb-2" @onclick="HandleClearAllCaches">
+                            <i class="bi bi-trash"></i>
+                            Clear All Caches
+                        </button>
+                        <button class="btn btn-outline-danger w-100 mb-2" @onclick="HandleDeleteAllScripts">
+                            <i class="bi bi-trash"></i>
+                            Delete All Scripts
+                        </button> *@
+                    </div>
+                </div>
+                
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="bi bi-folder2-open"></i>
+                        Script Management
+                    </div>
+                    <div class="card-body">
+                        @* <a href="/create" class="btn btn-primary w-100 mb-2">
+                            <i class="bi bi-plus-circle"></i>
+                            Create New Script
+                        </a> *@
+                        @* <button class="btn btn-outline-primary w-100 mb-2" @onclick="HandleCompileAllScripts"
+                                disabled="@_isWorking">
+                            @if (_isWorking)
+                            {
+                                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                <span>Compiling...</span>
+                            }
+                            else
+                            {
+                                <i class="bi bi-hammer"></i>
+                                <span>Compile All Scripts</span>
+                            }
+                        </button>
+                        <button class="btn btn-outline-primary w-100 mb-2" @onclick="HandleCompileAllScriptsFromFolder"
+                                id="compileAllDefaultScripts">
+                            <i class="bi bi-hammer"></i>
+                            <span>Compile Default Scripts From Folder</span>
+
+                        </button> *@
                         <button class="btn btn-outline-danger w-100 mb-2" @onclick="HandleClearAllCaches">
                             <i class="bi bi-trash"></i>
                             Clear All Caches
@@ -283,6 +325,7 @@ block in Home.razor -->
 <Popup @ref="myPopup" />
 
 @code {
+    private IScriptManagerDeleteAfter ScriptManager => ScriptManagerAccessor.Current;
     private Popup myPopup = default!;
     private bool _isLoading = true;
     private bool _isWorking = false;
@@ -309,7 +352,7 @@ block in Home.razor -->
     }
     private async Task LoadEmberInstances()
     {
-        try
+        @* try
         {
             using var context = await DbFactory.CreateDbContextAsync();
             // Order by the most recently active instances
@@ -321,7 +364,7 @@ block in Home.razor -->
         {
             Console.LogException(e);
             myPopup.CreateErrorPopup(e.GetType().Name, e.Message);
-        }
+        } *@
     }
     // Helper method for the "Last heartbeat: X ago" text
     private string GetTimeAgo(DateTime dateTime)

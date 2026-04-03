@@ -9,8 +9,20 @@
 
 <div class="page-container">
     <div class="top-bar mb-4">
-        <h2>API Versions</h2>
-        <p class="text-muted m-0">Manage API versions and compatibility</p>
+        <h2>Compiled Scripts</h2>
+        @if (_isEditing == false)
+        {
+            @* <p class="text-muted m-0">Manage API versions and compatibility</p> *@
+            <button class="btn btn-outline-danger" @onclick="HandleClearAll">
+                <i class="bi bi-trash"></i> Clear All Caches
+            </button>
+        }
+        else
+        {
+            <button class="btn btn-outline-secondary" @onclick="CancelEditing">
+                <i class="bi bi-arrow-left"></i> Cancel
+            </button>
+        }
     </div>
 
     @if (_isLoading)
@@ -30,96 +42,131 @@
     }
     else
     {
-        <div class="api-versions-container">
-            @* Order by API version descending so the newest is at the top *@
-            @foreach (var versionGroup in _apiVersionsData.OrderByDescending(v => v.Key))
-            {
-                <div class="card mb-4 shadow-sm">
-                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0">
-                            <i class="bi bi-layer-forward me-2"></i> API Version @versionGroup.Key
-                        </h5>
-                        <span class="badge bg-light text-primary rounded-pill fs-6">
-                            @versionGroup.Value.Count Script(s)
-                        </span>
-                    </div>
-                    <div class="card-body p-0">
-                        <div class="table-responsive">
-                            <table class="table table-hover mb-0">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>Script Name</th>
-                                        <th>Compiled Date</th>
-                                        <th>Status</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach (var cache in versionGroup.Value)
-                                    {
+        @if (_isEditing == false)
+        {
+            <div class="api-versions-container">
+                @* Order by API version descending so the newest is at the top *@
+                @foreach (var versionGroup in _apiVersionsData.OrderByDescending(v => v.Key))
+                {
+                    <div class="card mb-4 shadow-sm">
+                        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">
+                                <i class="bi bi-layer-forward me-2"></i> API Version @versionGroup.Key
+                            </h5>
+                            <span class="badge bg-light text-primary rounded-pill fs-6">
+                                @versionGroup.Value.Count Script(s)
+                            </span>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-hover mb-0">
+                                    <thead class="table-light">
                                         <tr>
-                                            <td>
-                                                <i class="bi bi-file-earmark-code text-primary me-2"></i>
-                                                <strong>@(cache.CustomerScript?.ScriptName ?? "Unknown Script")</strong>
-                                            </td>
-                                            <td>@cache.CompilationDate.ToString("MM-dd HH:mm")</td>
-                                            <td>
-                                                @if (cache.CompilationSuccess)
-                                                {
-                                                    <span class="badge bg-success">Success</span>
-                                                }
-                                                else
-                                                {
-                                                    <span class="badge bg-danger" title="@cache.CompilationErrors">Failed</span>
-                                                }
-                                            </td>
-                                            <td class="text-end">
-                                                <!-- Group all buttons in your action-buttons flex container -->
-                                                <div class="action-buttons justify-content-end">
-        
-                                                    <!-- View Button -->
-                                                    <button class="btn btn-sm btn-outline-primary btn-icon" title="View"
-                                                            @onclick="async () => await Execute(cache)">
-                                                        <i class="bi bi-eye"></i>
-                                                    </button>
-        
-                                                    <!-- Execute Button -->
-                                                    <button class="btn btn-sm btn-outline-success btn-icon" title="Execute"
-                                                            @onclick="async () => await Execute(cache)">
-                                                        <i class="bi bi-play-circle"></i>
-                                                    </button>
-        
-                                                    <!-- Delete Button -->
-                                                    <button class="btn btn-sm btn-outline-danger btn-icon" title="Delete Cache"
-                                                            @onclick="() => DeleteCache(cache.ScriptId, cache.ApiVersion)">
-                                                        <i class="bi bi-trash"></i>
-                                                    </button>
-        
-                                                </div>
-                                            </td>
+                                            <th>Script Name</th>
+                                            <th>Compiled Date</th>
+                                            <th>Status</th>
+                                            <th>Actions</th>
                                         </tr>
-                                    }
-                                </tbody>
-                            </table>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var cache in versionGroup.Value)
+                                        {
+                                            <tr>
+                                                <td>
+                                                    <i class="bi bi-file-earmark-code text-primary me-2"></i>
+                                                    <strong>@(cache.CustomerScript?.ScriptName ?? "Unknown Script")</strong>
+                                                </td>
+                                                <td>@cache.CompilationDate.ToString("MM-dd HH:mm")</td>
+                                                <td>
+                                                    @if (cache.CompilationSuccess)
+                                                    {
+                                                        <span class="badge bg-success">Success</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="badge bg-danger" title="@cache.CompilationErrors">Failed</span>
+                                                    }
+                                                </td>
+                                                <td class="text-end">
+                                                    <!-- Group all buttons in your action-buttons flex container -->
+                                                    <div class="action-buttons justify-content-end">
+        
+                                                        <!-- View Button -->
+                                                        <button class="btn btn-sm btn-outline-primary btn-icon" title="View"
+                                                                @onclick="async () => await ViewScript(cache)">
+                                                            <i class="bi bi-eye"></i>
+                                                        </button>
+        
+                                                        <!-- Execute Button -->
+                                                        <button class="btn btn-sm btn-outline-success btn-icon" title="Execute"
+                                                                @onclick="async () => await Execute(cache)">
+                                                            <i class="bi bi-play-circle"></i>
+                                                        </button>
+        
+                                                        <!-- Delete Button -->
+                                                        <button class="btn btn-sm btn-outline-danger btn-icon" title="Delete Cache"
+                                                                @onclick="() => DeleteCache(cache.ScriptId, cache.ApiVersion)">
+                                                            <i class="bi bi-trash"></i>
+                                                        </button>
+        
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
-                </div>
-            }
-        </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="d-flex flex-column" style="height: calc(100vh - 140px); overflow: hidden;">
+
+                <MonacoEditor @ref="_editor" EditorId="edit-monaco-editor" InitialCode="@_scriptCode"
+                              OnCodeChanged="() => _editorHelper?.SetErrorsInEditorAsync()!" />
+                
+            </div>
+        }
     }
 </div>
 <Popup @ref="myPopup" />
 
 @code {
+
+    private IScriptManagerDeleteAfter ScriptManager => ScriptManagerAccessor.Current;
+    private EmberInternalFacade EmberInternalFacade => EmberInternalFacadeAccessor.Current;
     private bool _isLoading = true;
     private Dictionary<int, List<CompiledScript>>? _apiVersionsData;
+    private MonacoEditor _editor = default!;
     private MonacoEditorHelper _editorHelper = default!;
     private Popup myPopup = default!;
+
+    private bool _isEditing = false;
+    private string _scriptCode = "";
+
 
     protected override async Task OnInitializedAsync()
     {
 
         await LoadData();
+    }
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (_isEditing)
+        {
+            try
+            {
+                // This triggers Monaco to recalculate its dimensions based on the new flex parent
+                await JSRuntime.InvokeVoidAsync("window.monacoEditor.refreshTheme", "edit-monaco-editor");
+            }
+            catch (Exception e)
+            {
+                Console.LogException(e);
+            }
+        }
     }
 
     private async Task LoadData()
@@ -167,6 +214,47 @@
         catch (Exception ex)
         {
             Console.LogException(ex);
+        }
+    }
+    private async Task ViewScript(CompiledScript cache)
+    {
+        try
+        {
+            _isEditing = true;
+            _scriptCode = cache.OldSourceCode!;
+            StateHasChanged();
+        }
+        catch (Exception e)
+        {
+            myPopup.CreateErrorPopup(e.GetType().Name, e.Message);
+            Console.LogException(e);
+        }
+    }
+
+    private async Task CancelEditing()
+    {
+        try
+        {
+            _isEditing = false;
+            StateHasChanged();
+        }
+        catch (Exception e)
+        {
+            myPopup.CreateErrorPopup(e.GetType().Name, e.Message);
+            Console.LogException(e);
+        }
+    }
+    private async Task HandleClearAll()
+    {
+        try
+        {
+            await ScriptManager.ClearAllCaches();
+            await LoadData();
+        }
+        catch (Exception e)
+        {
+            Console.LogException(e);
+            myPopup.CreateErrorPopup(e.GetType().Name, e.Message);
         }
     }
 }

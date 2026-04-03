@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Ember.Scripting;
 
-internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISccriptManagerDeleteAfter
+internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, IScriptManagerDeleteAfter
 {
     /// <inheritdoc cref="IScriptManager.CreateScript(string, string?, string, int)">
 

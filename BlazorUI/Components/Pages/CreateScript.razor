@@ -60,6 +60,8 @@
 <Popup @ref="myPopup" />
 
 @code {
+    private IScriptManagerDeleteAfter ScriptManager => ScriptManagerAccessor.Current;
+    private EmberInternalFacade EmberInternalFacade => EmberInternalFacadeAccessor.Current;
     private MonacoEditor _editor = default!;
     private Popup myPopup = default!;
     private MonacoEditorHelper _editorHelper = default!;
@@ -131,7 +133,8 @@
         {
             if (firstRender && _editor != null)
             {
-                _editorHelper = new MonacoEditorHelper(ScriptManager, EmberInternalFacade, _editor, Console, myPopup)
+                _editorHelper = new MonacoEditorHelper(ScriptManagerAccessor.Current, EmberInternalFacadeAccessor.Current, _editor,
+Console, myPopup)
                 {
                     ScriptName = "New Script",
                     CurrentScriptId = Guid.Empty // Explicitly set to empty so the helper knows it's new

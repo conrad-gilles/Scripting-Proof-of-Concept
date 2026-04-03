@@ -30,7 +30,15 @@ builder.Services.AddDbContext<EFModeling.EntityProperties.FluentAPI.Required.Scr
 
 builder.Services.AddScoped<ConsoleService>();
 builder.Services.AddScoped<Ember.Simulation.EmberInternalFacade>();
+builder.Services.AddScoped<EmberInternalFacadeAccessor>(sp => new EmberInternalFacadeAccessor
+{
+    Current = sp.GetRequiredService<EmberInternalFacade>()
+});
 // builder.Services.AddScoped<ISccriptManagerDeleteAfter, YourScriptManagerImplementation>();
+builder.Services.AddScoped<ScriptManagerAccessor>(sp => new ScriptManagerAccessor
+{
+    Current = sp.GetRequiredService<IScriptManagerDeleteAfter>()
+});
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())

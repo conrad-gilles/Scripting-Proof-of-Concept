@@ -73,6 +73,7 @@
 </div>
 
 @code {
+    private IScriptManagerDeleteAfter ScriptManager => ScriptManagerAccessor.Current;
     private List<CompiledScript> _caches = [];
     private Popup myPopup = default!;
 

@@ -9,8 +9,8 @@ namespace Sandbox;
 //showcases diffrent ways of how we could have solved it otherwise, no read use case as we chose other solutions (Downgrade)
 public class ContextManagementDemos
 {
-    private readonly ISccriptManagerDeleteAfter _scriptManager;
-    public ContextManagementDemos(ISccriptManagerDeleteAfter scriptManager)
+    private readonly IScriptManagerDeleteAfter _scriptManager;
+    public ContextManagementDemos(IScriptManagerDeleteAfter scriptManager)
     {
         _scriptManager = scriptManager;
     }

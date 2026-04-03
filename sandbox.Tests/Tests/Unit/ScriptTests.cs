@@ -9,7 +9,7 @@ public class ScriptTests
 {
 
 
-    private ISccriptManagerDeleteAfter? _facade;
+    private IScriptManagerDeleteAfter? _facade;
     private EmberMethods? _em;
     private string? _actionResultVersionSpecific;
     private string? _sourceCodeActionV1 = TestHelper.GetSC().sourceCodeActionV1;

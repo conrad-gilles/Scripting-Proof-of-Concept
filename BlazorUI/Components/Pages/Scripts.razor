@@ -18,9 +18,9 @@
             <h2 class="mb-0">All Scripts</h2>
 
             <div class="d-flex align-items-center gap-3">
-                @if (_currentApiVersion > 0)
-                {
-                    @* <div class="d-flex align-items-center gap-2">
+                @* @if (_currentApiVersion > 0)
+                { *@
+                @* <div class="d-flex align-items-center gap-2">
                         <label for="versionSelect" class="form-label mb-0 fw-bold text-nowrap">Compile and Execute API
                             Version:</label>
                             <select id="versionSelect" class="form-select w-auto" style="min-width: 70px;"
@@ -31,7 +31,7 @@
                                 }
                             </select>
                         </div> *@
-                }
+                @* } *@
                 <a href="/create" class="btn btn-primary text-nowrap">
                     <i class="bi bi-plus-circle"></i> New Script
                 </a>
@@ -164,7 +164,7 @@
 
             @* <MonacoEditor @ref="_editor" EditorId="edit-monaco-editor" InitialCode="@_scriptCode" /> *@
             <MonacoEditor @ref="_editor" EditorId="edit-monaco-editor" InitialCode="@_scriptCode"
-                          OnCodeChanged="() => _editorHelper?.SetErrorsInEditorAsync(_currentScriptId, _selectedApiVersion)!" />
+                          OnCodeChanged="() => _editorHelper?.SetErrorsInEditorAsync()!" />
 
 
             <div
@@ -178,13 +178,15 @@
 </div>
 
 @code {
+    private IScriptManagerDeleteAfter ScriptManager => ScriptManagerAccessor.Current;
+    private EmberInternalFacade EmberInternalFacade => EmberInternalFacadeAccessor.Current;
     private List<CustomerScript> _scriptsList = new();
     private Popup myPopup = default!;
     private bool _isLoading = true;
 
     private bool _isEditing = false;
-    private int _currentApiVersion = 0;
-    private int _selectedApiVersion = 0;
+    @* private int _currentApiVersion = 0;
+    private int _selectedApiVersion = 0; *@
     private string SelectedMethod = "";
     private List<string> PredefinedMethods = ["Standard"];
 
@@ -198,8 +200,8 @@
     private Guid _currentScriptId;
     protected override async Task OnInitializedAsync()
     {
-        _currentApiVersion = ScriptManager.GetRunningApiVersion();
-        _selectedApiVersion = _currentApiVersion;
+        @* _currentApiVersion = ScriptManager.GetRunningApiVersion();
+        _selectedApiVersion = _currentApiVersion; *@
         await LoadScripts();
     }
 
@@ -237,7 +239,8 @@
         {
             if (_isEditing && _editorHelper == null && _editor != null)
             {
-                _editorHelper = new MonacoEditorHelper(ScriptManager, EmberInternalFacade, _editor, Console, myPopup)
+                _editorHelper = new MonacoEditorHelper(ScriptManagerAccessor.Current, EmberInternalFacadeAccessor.Current, _editor,
+Console, myPopup)
                 {
                     ScriptName = _scriptName,
                     CurrentScriptId = _currentScriptId

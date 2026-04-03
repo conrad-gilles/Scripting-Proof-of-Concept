@@ -11,7 +11,7 @@ using Ember.Simulation;
 [TestClass]
 public class SanboxTests
 {
-    private ISccriptManagerDeleteAfter? _facade;
+    private IScriptManagerDeleteAfter? _facade;
     private EmberMethods? _em;
     private ObjectsRecord? _obj;
     // DataV1.MockData? data;

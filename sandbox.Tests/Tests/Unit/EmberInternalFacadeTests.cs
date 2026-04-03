@@ -10,7 +10,7 @@ using Microsoft.CodeAnalysis.Scripting;
 [TestClass]
 public class EmberInternalFacadeTests
 {
-    private ISccriptManagerDeleteAfter? _scriptManager;
+    private IScriptManagerDeleteAfter? _scriptManager;
     private EmberInternalFacade? _internalScriptManager;
     private EmberMethods? _em;
     private ObjectsRecord? _obj;

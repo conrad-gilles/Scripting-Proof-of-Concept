@@ -9,7 +9,7 @@ using Ember.Simulation;
 [TestClass]
 public class ArchitechtureTests
 {
-    static ISccriptManagerDeleteAfter ScriptManager = TestHelper.InitScriptManager();
+    static IScriptManagerDeleteAfter ScriptManager = TestHelper.InitScriptManager();
     static EmberInternalFacade InternalScriptManager = new EmberInternalFacade(ScriptManager);
     static EmberMethods em = new EmberMethods(ScriptManager);
 

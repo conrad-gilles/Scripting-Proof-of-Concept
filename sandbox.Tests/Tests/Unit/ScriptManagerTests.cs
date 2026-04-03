@@ -12,7 +12,7 @@ namespace FirstTests;
 [TestClass]
 public class ScriptManagerFacadeTests
 {
-    private ISccriptManagerDeleteAfter? _scriptManager;
+    private IScriptManagerDeleteAfter? _scriptManager;
     string? _sourceCodePedia = TestHelper.GetSC().sourceCodePedia;
     private string? _sourceCodeActionV1 = TestHelper.GetSC().sourceCodeActionV1;
     private string? _sourceCodeActionV3 = TestHelper.GetSC().sourceCodeActionV3;
