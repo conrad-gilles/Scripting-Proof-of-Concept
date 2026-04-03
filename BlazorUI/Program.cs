@@ -26,7 +26,12 @@ builder.Services.AddEmberScripting(references, AppSettings.EmberApiVersion);
 builder.Services.AddDbContext<EFModeling.EntityProperties.FluentAPI.Required.ScriptDbContext>();
 
 // builder.Services.AddDataProtection().PersistKeysToDbContext<EFModeling.EntityProperties.FluentAPI.Required.MyContext>();
+// builder.Services.AddDataProtection()
+//     .PersistKeysToDbContext<EFModeling.EntityProperties.FluentAPI.Required.ScriptDbContext>();
 
+builder.Services.AddDataProtection()
+    .SetApplicationName("ScriptingPoC")
+    .PersistKeysToFileSystem(new DirectoryInfo(Path.GetTempPath()));
 
 builder.Services.AddScoped<ConsoleService>();
 builder.Services.AddScoped<Ember.Simulation.EmberInternalFacade>();
