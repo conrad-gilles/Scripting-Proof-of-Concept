@@ -25,7 +25,7 @@ public class CompiledScript
     [Column("compilation_success")]
     public bool CompilationSuccess { get; set; }
 
-    [Column("copilation_errors")]
+    [Column("compilation_errors")]
     public string? CompilationErrors { get; set; }
 
     [Column("old_source_code")]

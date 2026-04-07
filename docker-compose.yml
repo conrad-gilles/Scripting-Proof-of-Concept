@@ -1,6 +1,19 @@
-version: "3"
+version: "3.8"
 
 services:
+  # Your BlazorUI Application
+  app:
+    build: .
+    container_name: script_blazor_app
+    restart: always
+    ports:
+      - "8080:8080" # Maps the container's 8080 port to your server's 8080 port
+    depends_on:
+      - db
+    environment:
+      # Pass your connection string to your C# app
+      - DATABASE_URL=Host=db;Port=5432;Database=script_registry;Username=admin;Password=your_secure_password
+
   db:
     image: postgres:16-alpine
     container_name: script_db_container
@@ -19,7 +32,7 @@ services:
     image: grafana/loki:latest
     container_name: loki
     ports:
-      - "3100:3100" # Log Ingestion at http://localhost:3100
+      - "3100:3100" 
     command: -config.file=/etc/loki/local-config.yaml
     volumes:
       - lokidata:/loki
@@ -28,7 +41,7 @@ services:
     image: grafana/grafana:latest
     container_name: grafana
     ports:
-      - "3000:3000" # Web UI at http://localhost:3000
+      - "3000:3000" 
     environment:
       - GF_AUTH_ANONYMOUS_ENABLED=true
       - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin

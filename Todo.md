@@ -1,3 +1,6 @@
+crud ennen         // ActiveActionResult ar = await InternalScriptManager!.GetScript<IGeneratorActionScript>("AddPediatrucTestV2").ExecuteAction(ctx); //get db 
+
+
 # Todo
 
 - maybe add a context tab to the ui to be able to modify etc

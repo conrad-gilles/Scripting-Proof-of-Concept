@@ -40,6 +40,8 @@ public class ScriptDbContext : DbContext //, IDataProtectionKeyContext
             {
                 if (string.IsNullOrEmpty(connectionString)) //using PostgreSQL container
                 {
+                    // connectionString = "Host=localhost;Port=5432;Database=script_registry;Username=admin;Password=your_secure_password";
+                    // connectionString = "Host=db;Port=5432;Database=script_registry;Username=admin;Password=your_secure_password";
                     connectionString = "Host=localhost;Port=5432;Database=script_registry;Username=admin;Password=your_secure_password";
                 }
             }

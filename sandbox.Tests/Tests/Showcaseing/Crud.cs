@@ -102,6 +102,5 @@ public class CrudDemos
         ActiveActionResult ar = await InternalScriptManager!.ExecuteActionScript<IGeneratorActionScript>
         ("AddPediatricTestsV2", ctx);
 
-        // ActiveActionResult ar = await InternalScriptManager!.GetScript<IGeneratorActionScript>("AddPediatrucTestV2").ExecuteAction(ctx); //get db 
     }
 }
