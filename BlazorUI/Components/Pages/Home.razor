@@ -193,7 +193,7 @@ block in Home.razor -->
                                     }
                                     <span class="status-dot @dotClass"></span>
                                     <strong>@(string.IsNullOrEmpty(instance.InstanceName) ? (instance.Hostname ??
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             instance.InstanceId.ToString().Substring(0, 8)) : instance.InstanceName)</strong>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     instance.InstanceId.ToString().Substring(0, 8)) : instance.InstanceName)</strong>
                                     </div>
                                     <span class="badge bg-primary">v@(instance.EmberVersion ?? "Unknown") (API
                                         v@(instance.SdkVersion))</span>
@@ -466,7 +466,8 @@ block in Home.razor -->
             ));
 
             @* await rm.CompileAllScriptsInFolderAndSaveToDB(path, "Gilles", EmberMethods.GetEmberApiVersion()); *@
-            await rm.CompileAllScriptsInFolderAndSaveToDB(userName: "Gilles", currentApiVersion: EmberMethods.GetEmberApiVersion());
+            await rm.CompileAllScriptsInFolderAndSaveToDB(userName: "Gilles", currentApiVersion:
+EmberMethods.GetEmberApiVersion(), folderPath: path);
 
             _isWorking = false;
             StateHasChanged();
@@ -478,7 +479,8 @@ block in Home.razor -->
             _isWorking = false;
             _errorMessage = e.Message;
             _errorDetails = e.ToString();
-            _showErrorPopup = true;
+            @* _showErrorPopup = true; *@
+            myPopup.CreateErrorPopup(e.GetType().Name, e.Message);
             StateHasChanged();
             await LoadDashBoardData();
         }
@@ -487,6 +489,7 @@ block in Home.razor -->
             _isWorking = false;
             @* Console.WriteLine(e.ToString()); *@
             Console.Log(e.Message);
+            myPopup.CreateErrorPopup(e.GetType().Name, e.Message);
             await LoadDashBoardData();
 
             @* throw; //todo remove *@

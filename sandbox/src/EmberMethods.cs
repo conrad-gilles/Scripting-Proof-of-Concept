@@ -111,13 +111,18 @@ public class EmberMethods
         {
             // var db = new DbHelper(UsefulMethods.GetReferences());
             string scriptString = CreateStringFromCsFile(files[i]);
-            var vali = _facade.BasicValidationBeforeCompiling(scriptString);
+            string vali = "Default Name";
+            try
+            {
+                vali = _facade.BasicValidationBeforeCompiling(scriptString).ClassName;
+            }
+            catch (System.Exception) { }
             try
             {
 
                 Guid id = Guid.NewGuid();
                 Guid randomTestScript2Id = (await _facade.CreateScript(scriptString)).Id;
-                successfullyInserted = successfullyInserted + ", " + vali.ClassName;
+                successfullyInserted = successfullyInserted + ", " + vali;
                 // Console.WriteLine(randomTestScript2.ScriptName + "Added script N" + i + ". to both tables.");
 
             }
@@ -131,7 +136,7 @@ public class EmberMethods
             // }
             catch
             {
-                failedInserted = failedInserted + ", " + vali.ClassName;
+                failedInserted = failedInserted + ", " + vali;
             }
 
         }
@@ -141,7 +146,30 @@ public class EmberMethods
         }
     }
 
+    public static async Task<Dictionary<string, string>> GetScriptTemplates(string? folderPath = null, string? userName = null, int? currentApiVersion = null)
+    {
+        Serilog.Log.Verbose("Entered {MethodName} in {ClassName}.", nameof(GetScriptTemplates), nameof(EmberMethods));
+        if (folderPath == null)
+        {
+            folderPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "src", "Scripts");
+        }
 
+        Dictionary<string, string> returnedDict = [];
+
+        string[] files = Directory.GetFiles(folderPath, "*.cs", SearchOption.AllDirectories);
+
+        foreach (var file in files)
+        {
+            try
+            {
+                string fileName = Path.GetFileNameWithoutExtension(file);
+                string scriptString = CreateStringFromCsFile(file);
+                returnedDict.Add(fileName, scriptString);
+            }
+            catch { continue; }
+        }
+        return returnedDict;
+    }
 
     public async Task EditScriptInSwitch(Guid id, string userName, int currentApiVersion)
     {

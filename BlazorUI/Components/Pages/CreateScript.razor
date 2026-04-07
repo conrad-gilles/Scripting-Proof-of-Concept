@@ -16,6 +16,14 @@
         <h2 class="mb-0">Create New Script</h2>
         <div class="d-flex gap-2">
  
+            <select class="form-select" style="width: auto; min-width: 180px;" @bind="SelectedTemplate"
+                    @bind:after="OnTemplateChanged" disabled="@(_editorHelper?.IsBusy ?? false)">
+                <option value="" disabled>Select Template</option>
+                @foreach (var method in PredefinedTemplates.Keys)
+                {
+                    <option value="@method">@method</option>
+                }
+            </select>
             <!-- No need to pass newScript boolean, the helper knows its own state -->
             <button class="btn btn-outline-info" @onclick="async () => await Validate()!"
                     disabled="@(_editorHelper?.IsBusy ?? false)">
@@ -31,7 +39,7 @@
             </button>
             <select class="form-select" style="width: auto; min-width: 180px;" @bind="SelectedMethod"
                     disabled="@(_editorHelper?.IsBusy ?? false)">
-                <option value="" disabled>Select a method...</option>
+                <option value="" disabled>Select Method</option>
                 @foreach (var method in PredefinedMethods)
                 {
                     <option value="@method">@method</option>
@@ -66,9 +74,17 @@
     private Popup myPopup = default!;
     private MonacoEditorHelper _editorHelper = default!;
 
+    @* private EmberMethods rm = new EmberMethods(ScriptManager); *@
     private string SelectedMethod = "";
+    private string SelectedTemplate = "";
     private List<string> PredefinedMethods = ["Standard"];
+    private Dictionary<string, string> PredefinedTemplates = [];
     public string DefaultScript = GetTemplate();
+
+    protected override async Task OnInitializedAsync()
+    {
+        PredefinedTemplates = await EmberMethods.GetScriptTemplates();
+    }
 
     @* public static string GetTemplate()
     {
@@ -96,6 +112,7 @@
             }
             PredefinedMethods = methods;
         }
+        PredefinedTemplates = await EmberMethods.GetScriptTemplates();
     }
     public async Task Execute()
     {
@@ -124,6 +141,11 @@
                 return reader.ReadToEnd();
             }
         }
+    }
+    public async Task OnTemplateChanged()
+    {
+        string sc = PredefinedTemplates[SelectedTemplate];
+        await _editor.SetValueAsync(sc);
     }
 
     // YOU MUST HAVE THIS to initialize the helper!
