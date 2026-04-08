@@ -83,7 +83,7 @@ public class EmberInternalFacadeTests
         // var ctx = _internalScriptManager!.CreateContext(_obj!.labOrder, _obj.vaccine);
         var ctx = TestHelper.GetContext();
         // Type scriptType=script.GetScriptType();
-        ActiveActionResult ar = await _internalScriptManager.ExecuteActionScript<IGeneratorActionScript>(script.ScriptName!, ctx);
+        ActiveActionResult ar = (ActiveActionResult)await _internalScriptManager.ExecuteScript<IGeneratorActionScript>(script.ScriptName!, ctx);
 
         Console.WriteLine("Name: " + script.ScriptName + ", ScriptType: " + script.GetScriptType().Name);
         Console.WriteLine("Type name: " + ar.GetType().FullName);
@@ -102,7 +102,7 @@ public class EmberInternalFacadeTests
         script = await _scriptManager!.CreateScript(_sourceCodeActionV3!);
         // ctx = _internalScriptManager!.CreateContext(_obj.labOrder, _obj.vaccine);
         ctx = TestHelper.GetContext();
-        ar = await _internalScriptManager.ExecuteActionScript<IGeneratorActionScript>(script.ScriptName!, ctx);
+        ar = (ActiveActionResult)await _internalScriptManager.ExecuteScript<IGeneratorActionScript>(script.ScriptName!, ctx);
 
         Console.WriteLine("Name: " + script.ScriptName + ", ScriptType: " + script.GetScriptType());
         Console.WriteLine("Type name: " + ar.GetType().FullName);
@@ -129,7 +129,7 @@ public class EmberInternalFacadeTests
         ActiveContextFactory.IGeneratorContextFactory factory = provider.GetRequiredService<ActiveContextFactory.IGeneratorContextFactory>();
         ActiveGeneratorContext ctx = factory.Create(_obj.labOrder, _obj.vaccine);
 
-        ActiveActionResult ar = await _internalScriptManager!.ExecuteActionScript<IGeneratorActionScript>(scrip.ScriptName!, ctx);
+        ActiveActionResult ar = (ActiveActionResult)await _internalScriptManager!.ExecuteScript<IGeneratorActionScript>(scrip.ScriptName!, ctx);
 
         Console.WriteLine("Name: " + scrip.ScriptName! + ", ScriptType: " + scrip.GetScriptType());
         Console.WriteLine("Type name: " + ar.GetType().FullName);

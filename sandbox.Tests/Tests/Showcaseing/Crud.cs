@@ -99,8 +99,14 @@ public class CrudDemos
 
         ActiveGeneratorContext ctx = factory.Create(labOrder, vaccine);
 
-        ActiveActionResult ar = await InternalScriptManager!.ExecuteActionScript<IGeneratorActionScript>
+        ActiveActionResult ar = (ActiveActionResult)await InternalScriptManager!.ExecuteScript<IGeneratorActionScript>
         ("AddPediatricTestsV2", ctx);
 
+
+        // ar = (ActiveActionResult)await InternalScriptManager.Execute1<IGeneratorActionScript>
+        // ("AddPediatricTestsV2", ctx);
+
+        // ar = (ActiveActionResult)await InternalScriptManager.Execute2<IGeneratorActionScript>
+        // ("AddPediatricTestsV2", ctx);
     }
 }

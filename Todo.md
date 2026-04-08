@@ -3,8 +3,10 @@ crud ennen         // ActiveActionResult ar = await InternalScriptManager!.GetSc
 MultiMethod: 
 old methods gets changed from string SetX(context) to void SetX(context), we now want the old version to always receive a default string, where to define this behaviour?
 return a new Script facade from getScript
+context needs to be versioned also that is being inserted
 
 # Todo
+- ask if multiple methods also should be allowed for condition scripts? probably yes
 
 - maybe add a context tab to the ui to be able to modify etc
   

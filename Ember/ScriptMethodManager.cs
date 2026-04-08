@@ -1,5 +1,7 @@
 using Ember.Scripting;
 using Ember.Simulation;
+using IGeneratorContext_V4;
+using Ember.Scripting.AdditionalMethods;
 
 
 namespace ScriptMethodManager;
@@ -20,18 +22,64 @@ public class MultipleMethodsScriptHelper
 
     public async Task<ActiveActionResult> ExecuteAsync(ActiveGeneratorContext context)
     {
-        return await InternalScriptManager!.ExecuteActionScript<IGeneratorActionScript>     //rename to ExecuteScript
+        return (ActiveActionResult)await InternalScriptManager!.ExecuteScript<IGeneratorActionScript>     //rename to ExecuteScript
        (scriptName, context, methodName: "ExecuteAsync");
     }
 
-    public async Task<ActiveActionResult> ExecuteAction1(ActiveGeneratorContext context)
+    public async Task<ActiveActionResult> Execute1(ActiveGeneratorContext context)
     {
-        return await InternalScriptManager!.ExecuteActionScript<IGeneratorActionScript>
-      (scriptName, context, methodName: "ExecuteAction1");
+        return (ActiveActionResult)await InternalScriptManager!.ExecuteScript<IGeneratorActionScript>
+      (scriptName, context, methodName: "Execute1");
     }
-    public async Task<ActiveActionResult> ExecuteAction2(ActiveGeneratorContext context)
+    public async Task<ActiveActionResult> Execute2(ActiveGeneratorContext context)
     {
-        return await InternalScriptManager!.ExecuteActionScript<IGeneratorActionScript>
-      (scriptName, context, methodName: "ExecuteAction2");
+        return (ActiveActionResult)await InternalScriptManager!.ExecuteScript<IGeneratorActionScript>
+      (scriptName, context, methodName: "Execute2");
     }
+}
+
+public class GeneratorScriptFacade : IMultiMethodBase
+// public class GeneratorScriptFacade : Ember.Scripting.IGeneratorActionScript, IExecute1, IExecute2
+{
+    private CustomerScript _script;
+    private IScriptManagerDeleteAfter _scriptManager;
+    private EmberInternalFacade _emberScriptManager;
+    public GeneratorScriptFacade(CustomerScript script, IScriptManagerDeleteAfter scriptManager)
+    {
+        _script = script;
+        _scriptManager = scriptManager;
+        _emberScriptManager = new EmberInternalFacade(_scriptManager);
+    }
+    public Task<ActionResultSF> ExecuteAsync(IGeneratorBaseInterfaceSF context)
+    {
+        throw new NotImplementedException();
+    }
+    public Task<ActionResultSF> Execute1(IGeneratorBaseInterfaceSF context)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<ActionResultSF> Execute2(IGeneratorBaseInterfaceSF context)
+    {
+        throw new NotImplementedException();
+    }
+
+
+
+    // public async Task<ActionResultSF> ExecuteAsync(IGeneratorBaseInterfaceSF context)
+    // {
+    //     //     return (ActiveActionResult)await _emberScriptManager!.ExecuteScript<IGeneratorActionScript>
+    //     //   (_script.ScriptName!, context, methodName: nameof(ExecuteAction1));
+    //     return null;
+    // }
+    // public async Task<ActiveActionResult> ExecuteAction1(ActiveGeneratorContext context)
+    // {
+    //     return (ActiveActionResult)await _emberScriptManager!.ExecuteScript<IGeneratorActionScript>
+    //   (_script.ScriptName!, context, methodName: nameof(ExecuteAction1));
+    // }
+    // public async Task<ActiveActionResult> ExecuteAction2(ActiveGeneratorContext context)
+    // {
+    //     return await _emberScriptManager!.ExecuteActionScript<IGeneratorActionScript>
+    //   (_script.ScriptName!, context, methodName: nameof(ExecuteAction2));
+    // }
 }

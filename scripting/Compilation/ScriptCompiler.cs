@@ -224,6 +224,7 @@ internal class ScriptCompiler
                 Version = (int)versionInt,
                 ExecutionTime = executionTime,
                 methods = methods
+                // methods = []
             };
             return returnedRecord;
         }

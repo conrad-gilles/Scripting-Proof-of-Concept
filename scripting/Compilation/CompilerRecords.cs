@@ -136,10 +136,10 @@ public record MethodRecord
         {
             return false;
         }
-        if (record1.ReturnType != record2.ReturnType)
-        {
-            return false;
-        }
+        // if (record1.ReturnType != record2.ReturnType)    //todo make sure return type is subtype of
+        // {
+        //     return false;
+        // }
         if (record1.Parameters.Count() != record2.Parameters.Count())
         {
             return false;
@@ -180,10 +180,10 @@ public record ParameterRecord
         {
             return false;
         }
-        if (param1.ReturnType != param2.ReturnType)
-        {
-            return false;
-        }
+        // if (param1.ReturnType != param2.ReturnType)  //todo make sure you can check if subtype of
+        // {
+        //     return false;
+        // }
         return true;
     }
     public override string ToString()

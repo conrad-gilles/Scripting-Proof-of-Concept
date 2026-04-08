@@ -12,11 +12,11 @@ public class InternalScript : GeneratorScriptsV3.IGeneratorActionScript
         return ActionResultV3.ActionResult.Success("Default method ExecuteAsync was called");
     }
 
-    public async Task<ActionResultSF> ExecuteAction1(IGeneratorBaseInterfaceSF context)
+    public async Task<ActionResultSF> Execute1(IGeneratorBaseInterfaceSF context)
     {
         return ActionResultV3.ActionResult.Success("ExecuteAction1 was called");
     }
-    public async Task<ActionResultSF> ExecuteAction2(IGeneratorBaseInterfaceSF context)
+    public async Task<ActionResultSF> Execute2(IGeneratorBaseInterfaceSF context)
     {
         throw new MethodNotImplementedException(message: "error was thrown");
     }
