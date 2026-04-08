@@ -10,7 +10,7 @@ public interface IGeneratorBaseInterfaceSF
 
 public abstract class Context
 {
-    public abstract GeneratorContextSF Downgrade();
+    public abstract GeneratorContextSF Downgrade(); //return context
     public abstract GeneratorContextSF CreateUsingData(DataAbstractClass data);
 }
 

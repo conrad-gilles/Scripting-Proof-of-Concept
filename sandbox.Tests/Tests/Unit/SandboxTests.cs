@@ -235,7 +235,7 @@ public class SanboxTests
 
         ActiveGeneratorContext data = new ActiveGeneratorContext(labOrder: _obj!.labOrder, vaccine: _obj.vaccine);
 
-        Guid id;
+        CustomerScript script;
         ContextManagement sf;
         ValidationRecord valResult;
         object result;
@@ -245,52 +245,52 @@ public class SanboxTests
         src = _sourceCodeVaccineAction!;
         _facade = EmberMethods.GetNewScriptManagerInstance();
         valResult = _facade.BasicValidationBeforeCompiling(src!);
-        id = (await _facade.CreateScript(src!)).Id;
+        script = (await _facade.CreateScript(src!));
 
         sf = new ContextManagement(_facade);
-        GeneratorContextSF ctx = await sf.CreateByDowngrade(src, data!);
+        GeneratorContextSF ctx = await sf.CreateByDowngrade(script.MinApiVersion, data!);
         Console.WriteLine("Type name: " + ctx.GetType().FullName);
 
-        result = await _facade.ExecuteScriptById(id, ctx);
+        result = await _facade.ExecuteScriptById(script.Id, ctx);
         ar = (ActionResultV3.ActionResult)EmberMethods.UpgradeActionResult(result);
         Console.WriteLine(ar.ToString());
         Assert.IsInstanceOfType(ar, typeof(ActionResultV3.ActionResult));
 
         src = _sourceCodeActionV3!;
         valResult = _facade.BasicValidationBeforeCompiling(src!);
-        id = (await _facade.CreateScript(src!)).Id;
+        script = (await _facade.CreateScript(src!));
 
         sf = new ContextManagement(_facade);
-        ctx = await sf.CreateByDowngrade(src!, data!);
+        ctx = await sf.CreateByDowngrade(script.MinApiVersion, data!);
         Console.WriteLine("Type name: " + ctx.GetType().FullName);
 
-        result = await _facade.ExecuteScriptById(id, ctx);
+        result = await _facade.ExecuteScriptById(script.Id, ctx);
         ar = (ActionResultV3.ActionResult)EmberMethods.UpgradeActionResult(result);
         Console.WriteLine(ar.ToString());
         Assert.IsInstanceOfType(ar, typeof(ActionResultV3.ActionResult));
 
         src = _sourceCodeActionV1!;
         valResult = _facade.BasicValidationBeforeCompiling(src!);
-        id = (await _facade.CreateScript(src!)).Id;
+        script = (await _facade.CreateScript(src!));
 
         sf = new ContextManagement(_facade);
-        ctx = await sf.CreateByDowngrade(src!, data!);
+        ctx = await sf.CreateByDowngrade(script.MinApiVersion, data!);
         Console.WriteLine("Type name: " + ctx.GetType().FullName);
 
-        result = await _facade.ExecuteScriptById(id, ctx);
+        result = await _facade.ExecuteScriptById(script.Id, ctx);
         ar = (ActionResultV3.ActionResult)EmberMethods.UpgradeActionResult(result);
         Console.WriteLine(ar.ToString());
         Assert.IsInstanceOfType(ar, typeof(ActionResultV3.ActionResult));
 
         src = _sourceCodePedia!;
         valResult = _facade.BasicValidationBeforeCompiling(src!);
-        id = (await _facade.CreateScript(src!)).Id;
+        script = (await _facade.CreateScript(src!));
 
         sf = new ContextManagement(_facade);
-        ctx = await sf.CreateByDowngrade(src!, data!);
+        ctx = await sf.CreateByDowngrade(script.MinApiVersion, data!);
         Console.WriteLine("Type name: " + ctx.GetType().FullName);
 
-        result = await _facade.ExecuteScriptById(id, ctx);
+        result = await _facade.ExecuteScriptById(script.Id, ctx);
         // ar = EmberMethods.UpgradeActionResult(result);
         Console.WriteLine(result.ToString());
 
@@ -298,8 +298,8 @@ public class SanboxTests
 
 
         ////////////////////////////////////////////
-        ctx = await sf.CreateByDowngrade(src!, data!);
-        result = await _facade.ExecuteScriptById(id, ctx);
+        ctx = await sf.CreateByDowngrade(script.MinApiVersion, data!);
+        result = await _facade.ExecuteScriptById(script.Id, ctx);
 
 
         // Assert.IsTrue(false);

@@ -113,6 +113,10 @@ public class MultiMethodScriptTests
        });
         ExceptionHelper.PrintExceptionListToConsole(ex);
         // Assert.IsTrue(false);
+
+        //Pseudo
+        // IGeneratorActionScript script = ScriptManager.GetScript<IGeneratorActionScript>("name");
+        // script.Execute1(context);
     }
 
     [TestMethod]

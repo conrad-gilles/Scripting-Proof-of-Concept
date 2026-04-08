@@ -14,13 +14,13 @@ namespace Ember.Simulation
             _scriptManager = scriptManager;
         }
 
-        public async Task<GeneratorContextSF> CreateByDowngrade(string sourceCode, ActiveGeneratorContext ctx)
+        public async Task<GeneratorContextSF> CreateByDowngrade(int desiredVersion, ActiveGeneratorContext ctx)
         {
-            if (sourceCode == null)
-            {
-                throw new SourceCodeNullWhenDowngradeException();
-            }
-            var vali = _scriptManager.BasicValidationBeforeCompiling(sourceCode!);
+            // if (sourceCode == null)
+            // {
+            //     throw new SourceCodeNullWhenDowngradeException();
+            // }
+            // var vali = _scriptManager.BasicValidationBeforeCompiling(sourceCode!);
             int? apiV = null;
             if (apiV == null)
             {
@@ -36,7 +36,8 @@ namespace Ember.Simulation
                 // recentType = contextVersionMap.Last().Value;
             }
             recentType = contextVersionMap[(int)apiV];
-            Type desiredType = contextVersionMap[vali.Version];
+            // Type desiredType = contextVersionMap[vali.Version];
+            Type desiredType = contextVersionMap[desiredVersion];
             // Ember.Scripting.GeneratorContextSF context = CreateContextForApiV(data);
             Ember.Scripting.GeneratorContextSF context = ctx;
             int iterations = 0;

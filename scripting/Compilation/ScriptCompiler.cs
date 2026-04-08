@@ -214,6 +214,7 @@ internal class ScriptCompiler
                     throw new CouldNotMatchBaseTypeInCompiler(nameof(baseTypeName) + " was not a valid option!");
             }
             List<MethodRecord> methods = ValidateOnlyInheritedMethodsAndReturn(tree!, model);
+            int? executionTime = GetExecutionTime(tree);
             ValidateLoopsHavingCancellation(tree!);
             ValidateNamespaceUsage(tree!, model!);
             ValidationRecord returnedRecord = new ValidationRecord
@@ -221,7 +222,7 @@ internal class ScriptCompiler
                 ClassName = className,
                 ScriptType = scriptType,
                 Version = (int)versionInt,
-                ExecutionTime = GetExecutionTime(tree),
+                ExecutionTime = executionTime,
                 methods = methods
             };
             return returnedRecord;

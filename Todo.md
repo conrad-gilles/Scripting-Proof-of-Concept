@@ -1,5 +1,8 @@
 crud ennen         // ActiveActionResult ar = await InternalScriptManager!.GetScript<IGeneratorActionScript>("AddPediatrucTestV2").ExecuteAction(ctx); //get db 
 
+MultiMethod: 
+old methods gets changed from string SetX(context) to void SetX(context), we now want the old version to always receive a default string, where to define this behaviour?
+return a new Script facade from getScript
 
 # Todo
 

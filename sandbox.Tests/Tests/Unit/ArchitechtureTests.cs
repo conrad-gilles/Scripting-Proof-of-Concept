@@ -5,6 +5,7 @@ using Serilog;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Ember.Simulation;
+using Sandbox;
 
 [TestClass]
 public class ArchitechtureTests
@@ -12,6 +13,91 @@ public class ArchitechtureTests
     static IScriptManagerDeleteAfter ScriptManager = TestHelper.InitScriptManager();
     static EmberInternalFacade InternalScriptManager = new EmberInternalFacade(ScriptManager);
     static EmberMethods em = new EmberMethods(ScriptManager);
+
+    string sourceCode100 = """
+        using System;   //todo this is possible to default in compiler
+        using System.Threading.Tasks;
+        using System.Collections.Generic;   //todo same for them
+        using Ember.Scripting;
+        using GeneratorScriptsGeneric;
+        using IGeneratorContext_V2;
+
+        [ExecutionTime(ExecutionTimeGroups.Short)]
+        public class ExecutionTimeTest : GeneratorScriptsGeneric.IGeneratorActionScript<IGeneratorContext_V2.IGeneratorContext, ActionResultV1.ActionResult>
+        {
+        public async Task<ActionResultV1.ActionResult> ExecuteAsync(IGeneratorContext_V2.IGeneratorContext context)    //error is here in Basyns
+        {
+        while (true)
+        {
+            Ember.Scripting.ScriptEnvironment.CurrentToken.Value.ThrowIfCancellationRequested();
+        }
+            return ActionResultV1.ActionResult.Success("Pediatric tests added");
+        }
+        }
+        """;
+    string sourceCode500 = """
+        using System;   //todo this is possible to default in compiler
+        using System.Threading.Tasks;
+        using System.Collections.Generic;   //todo same for them
+        using Ember.Scripting;
+        using GeneratorScriptsGeneric;
+        using IGeneratorContext_V2;
+
+        [ExecutionTime(ExecutionTimeGroups.Medium)]
+        public class ExecutionTimeTest : GeneratorScriptsGeneric.IGeneratorActionScript<IGeneratorContext_V2.IGeneratorContext, ActionResultV1.ActionResult>
+        {
+        public async Task<ActionResultV1.ActionResult> ExecuteAsync(IGeneratorContext_V2.IGeneratorContext context)    //error is here in Basyns
+        {
+        while (true)
+        {
+            Ember.Scripting.ScriptEnvironment.CurrentToken.Value.ThrowIfCancellationRequested();
+        }
+            return ActionResultV1.ActionResult.Success("Pediatric tests added");
+        }
+        }
+        """;
+    string sourceCode1000 = """
+        using System;   //todo this is possible to default in compiler
+        using System.Threading.Tasks;
+        using System.Collections.Generic;   //todo same for them
+        using Ember.Scripting;
+        using GeneratorScriptsGeneric;
+        using IGeneratorContext_V2;
+
+        [ExecutionTime(ExecutionTimeGroups.Long)]
+        public class ExecutionTimeTest : GeneratorScriptsGeneric.IGeneratorActionScript<IGeneratorContext_V2.IGeneratorContext, ActionResultV1.ActionResult>
+        {
+        public async Task<ActionResultV1.ActionResult> ExecuteAsync(IGeneratorContext_V2.IGeneratorContext context)    //error is here in Basyns
+        {
+        while (true)
+        {
+            Ember.Scripting.ScriptEnvironment.CurrentToken.Value.ThrowIfCancellationRequested();
+        }
+            return ActionResultV1.ActionResult.Success("Pediatric tests added");
+        }
+        }
+        """;
+    string sourceCode5000 = """
+        using System;   //todo this is possible to default in compiler
+        using System.Threading.Tasks;
+        using System.Collections.Generic;   //todo same for them
+        using Ember.Scripting;
+        using GeneratorScriptsGeneric;
+        using IGeneratorContext_V2;
+
+        [ExecutionTime(ExecutionTimeGroups.ExtraLong)]
+        public class ExecutionTimeTest : GeneratorScriptsGeneric.IGeneratorActionScript<IGeneratorContext_V2.IGeneratorContext, ActionResultV1.ActionResult>
+        {
+        public async Task<ActionResultV1.ActionResult> ExecuteAsync(IGeneratorContext_V2.IGeneratorContext context)    //error is here in Basyns
+        {
+        while (true)
+        {
+            Ember.Scripting.ScriptEnvironment.CurrentToken.Value.ThrowIfCancellationRequested();
+        }
+            return ActionResultV1.ActionResult.Success("Pediatric tests added");
+        }
+        }
+        """;
 
     [TestInitialize]
     public async Task SetupAsync()
@@ -66,93 +152,41 @@ public class ArchitechtureTests
             }
         }
 
-
-        string sourceCode = """
-        using System;   //todo this is possible to default in compiler
-        using System.Threading.Tasks;
-        using System.Collections.Generic;   //todo same for them
-        using Ember.Scripting;
-        using GeneratorScriptsGeneric;
-        using IGeneratorContext_V2;
-
-        [ExecutionTime(ExecutionTimeGroups.Short)]
-        public class ExecutionTimeTest : GeneratorScriptsGeneric.IGeneratorActionScript<IGeneratorContext_V2.IGeneratorContext, ActionResultV1.ActionResult>
-        {
-        public async Task<ActionResultV1.ActionResult> ExecuteAsync(IGeneratorContext_V2.IGeneratorContext context)    //error is here in Basyns
-        {
-            return ActionResultV1.ActionResult.Success("Pediatric tests added");
-        }
-        }
-        """;
-
         int expectedMS = 100;
-        int? realMS = ScriptManager.BasicValidationBeforeCompiling(sourceCode).ExecutionTime;
+        int? realMS = ScriptManager.BasicValidationBeforeCompiling(sourceCode100).ExecutionTime;
         Assert.IsTrue(expectedMS == realMS);
 
-        sourceCode = """
-        using System;   //todo this is possible to default in compiler
-        using System.Threading.Tasks;
-        using System.Collections.Generic;   //todo same for them
-        using Ember.Scripting;
-        using GeneratorScriptsGeneric;
-        using IGeneratorContext_V2;
 
-        [ExecutionTime(ExecutionTimeGroups.Medium)]
-        public class ExecutionTimeTest : GeneratorScriptsGeneric.IGeneratorActionScript<IGeneratorContext_V2.IGeneratorContext, ActionResultV1.ActionResult>
-        {
-        public async Task<ActionResultV1.ActionResult> ExecuteAsync(IGeneratorContext_V2.IGeneratorContext context)    //error is here in Basyns
-        {
-            return ActionResultV1.ActionResult.Success("Pediatric tests added");
-        }
-        }
-        """;
 
         expectedMS = 500;  //shows how the maximum is respected and not overstepped
-        realMS = ScriptManager.BasicValidationBeforeCompiling(sourceCode).ExecutionTime;
+        realMS = ScriptManager.BasicValidationBeforeCompiling(sourceCode500).ExecutionTime;
         Assert.IsTrue(expectedMS == realMS);
 
-        sourceCode = """
-        using System;   //todo this is possible to default in compiler
-        using System.Threading.Tasks;
-        using System.Collections.Generic;   //todo same for them
-        using Ember.Scripting;
-        using GeneratorScriptsGeneric;
-        using IGeneratorContext_V2;
 
-        [ExecutionTime(ExecutionTimeGroups.Long)]
-        public class ExecutionTimeTest : GeneratorScriptsGeneric.IGeneratorActionScript<IGeneratorContext_V2.IGeneratorContext, ActionResultV1.ActionResult>
-        {
-        public async Task<ActionResultV1.ActionResult> ExecuteAsync(IGeneratorContext_V2.IGeneratorContext context)    //error is here in Basyns
-        {
-            return ActionResultV1.ActionResult.Success("Pediatric tests added");
-        }
-        }
-        """;
 
         expectedMS = 1000;
-        realMS = ScriptManager.BasicValidationBeforeCompiling(sourceCode).ExecutionTime;
+        realMS = ScriptManager.BasicValidationBeforeCompiling(sourceCode1000).ExecutionTime;
         Assert.IsTrue(expectedMS == realMS);
 
-        sourceCode = """
-        using System;   //todo this is possible to default in compiler
-        using System.Threading.Tasks;
-        using System.Collections.Generic;   //todo same for them
-        using Ember.Scripting;
-        using GeneratorScriptsGeneric;
-        using IGeneratorContext_V2;
 
-        [ExecutionTime(ExecutionTimeGroups.ExtraLong)]
-        public class ExecutionTimeTest : GeneratorScriptsGeneric.IGeneratorActionScript<IGeneratorContext_V2.IGeneratorContext, ActionResultV1.ActionResult>
-        {
-        public async Task<ActionResultV1.ActionResult> ExecuteAsync(IGeneratorContext_V2.IGeneratorContext context)    //error is here in Basyns
-        {
-            return ActionResultV1.ActionResult.Success("Pediatric tests added");
-        }
-        }
-        """;
 
         expectedMS = 5000;
-        realMS = ScriptManager.BasicValidationBeforeCompiling(sourceCode).ExecutionTime;
+        realMS = ScriptManager.BasicValidationBeforeCompiling(sourceCode5000).ExecutionTime;
         Assert.IsTrue(expectedMS == realMS);
+    }
+
+    [TestMethod]
+    public async Task CheckTimeout()
+    {
+        var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+        Exception e = await Assert.ThrowsExceptionAsync<Ember.Scripting.ActionScriptExecutionException>(async () =>
+        {
+            await InternalScriptManager.ExecuteUnfinishedScriptBySourceCode(sourceCode5000, TestHelper.GetContext());
+        });
+        stopwatch.Stop();
+        long elapsedMs = stopwatch.ElapsedMilliseconds;
+        ExceptionHelper.PrintExceptionListToConsole(e);
+        Console.WriteLine("execution took: " + elapsedMs);
+        Assert.IsTrue(elapsedMs == 100);
     }
 }

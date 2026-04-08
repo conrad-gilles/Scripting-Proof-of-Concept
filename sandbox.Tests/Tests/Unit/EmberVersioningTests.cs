@@ -250,7 +250,7 @@ public class EmberVersioningTests
     public async Task CreateUsingDataTestAsync()
     {
         _data = new DataV2.DataV2();
-        Ember.Scripting.GeneratorContextSF ctx;
+        Ember.Scripting.GeneratorContextSF ctx;  //refactor to ContextSF
         Guid id;
         id = (await _facade!.CreateScript(_sourceCodeActionV2!)).Id;
         var vali = _facade.BasicValidationBeforeCompiling(_sourceCodeActionV2!);

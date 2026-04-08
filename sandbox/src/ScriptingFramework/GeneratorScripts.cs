@@ -101,4 +101,17 @@ namespace GeneratorScriptsV4
     }
 }
 
+// public class GeneratorActionBaseClass : IGeneratorActionScript
+// {
+//     public Task<ActionResultSF> ExecuteAsyncXXX(IGeneratorBaseInterfaceSF context)
+//     {
+//         throw new NotImplementedException();
+//     }
+
+//     public IGeneratorActionScript Upgrade(GeneratorScriptsV3.IGeneratorActionScript script)
+//     {
+
+//     }
+// }
+
 

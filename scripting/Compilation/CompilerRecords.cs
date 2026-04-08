@@ -33,15 +33,6 @@ public record ValidationRecord
     }
 }
 
-// public record GetBaseTypeReturn
-// {
-//     public required Microsoft.CodeAnalysis.INamedTypeSymbol? BaseType { get; init; }
-//     public required Microsoft.CodeAnalysis.ITypeSymbol? MyClassSymbol { get; init; }
-//     public required Microsoft.CodeAnalysis.CSharp.Syntax.ClassDeclarationSyntax? MyClass { get; init; }
-//     public required SyntaxTree Tree { get; init; }
-//     public required Microsoft.CodeAnalysis.SemanticModel? Model { get; init; }
-// }
-
 public record ScriptCompilationError(
     string Id,
     string Message,

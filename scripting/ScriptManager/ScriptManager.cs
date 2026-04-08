@@ -205,11 +205,11 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
         Guid scriptId = await GetScriptId<ScriptType>(name);
         return await ExecuteScriptById(scriptId, context, apiVersion, methodName);
     }
-    public async Task<object> ExecuteUnfinishedScriptBySourceCode(string sourceCode, GeneratorContextSF context, int? apiVersion = null, string? methodName = null)
+    public async Task<object> ExecuteUnfinishedScriptBySourceCode(string sourceCode, GeneratorContextSF context, int? apiVersion = null, string? methodName = null, int? executionTime = null)
     {
         _compiler.BasicValidationBeforeCompiling(sourceCode);
         byte[] comp = _compiler.RunCompilation(sourceCode);
-        return await _executor.RunScriptExecution<object>(compiledScript: comp, genContext: context, executionTime: null, methodName: methodName);
+        return await _executor.RunScriptExecution<object>(compiledScript: comp, genContext: context, executionTime: executionTime, methodName: methodName);
         // return null //todo
     }
     #endregion

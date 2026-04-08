@@ -14,7 +14,8 @@ internal class EmberInternalFacade
     {
         var cf = new ContextManagement(_scriptManager);
         CustomerScript script = await _scriptManager.GetScript(id);
-        GeneratorContextSF context = await cf.CreateByDowngrade(script.SourceCode!, ctx);
+        // script.MinApiVersion
+        GeneratorContextSF context = await cf.CreateByDowngrade(script.MinApiVersion, ctx);
         var result = await _scriptManager.ExecuteScriptById(id, context, methodName: methodName);
         return result;
     }
@@ -54,7 +55,8 @@ internal class EmberInternalFacade
     public async Task<object> ExecuteUnfinishedScriptBySourceCode(string sourceCode, ActiveGeneratorContext context, string? methodName = null)
     {
         var cf = new ContextManagement(_scriptManager);
-        GeneratorContextSF ctx = await cf.CreateByDowngrade(sourceCode, context);
+        ValidationRecord vali = _scriptManager.BasicValidationBeforeCompiling(sourceCode);
+        GeneratorContextSF ctx = await cf.CreateByDowngrade(vali.Version, context);
 
         var result = await _scriptManager.ExecuteUnfinishedScriptBySourceCode(sourceCode, ctx, methodName: methodName);
 
