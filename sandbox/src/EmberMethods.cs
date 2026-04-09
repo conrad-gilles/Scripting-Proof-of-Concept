@@ -98,6 +98,7 @@ public class EmberMethods
     {
         Serilog.Log.Verbose("Entered {MethodName} in {ClassName}.", nameof(CompileAllScriptsInFolderAndSaveToDB), nameof(EmberMethods));
 
+        folderPath = null;
         if (folderPath == null)
         {
             folderPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "src", "Scripts");

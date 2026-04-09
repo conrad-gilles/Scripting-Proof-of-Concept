@@ -62,7 +62,7 @@
         <InternalsVisibleTo Include="Ember" />
         <InternalsVisibleTo Include="BlazorUI" />
     </ItemGroup>
-    
+
     <ItemGroup>
         <Compile Include="..\Ember\GlobalUsings.cs" Link="GlobalUsings.cs" />
     </ItemGroup>
@@ -71,6 +71,10 @@
         <None Update="src\Scripts\**\*.cs">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
+    </ItemGroup>
+
+    <ItemGroup>
+        <EmbeddedResource Include="src\Scripts\**\*.cs" />
     </ItemGroup>
 
 
