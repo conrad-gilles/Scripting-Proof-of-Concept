@@ -90,7 +90,7 @@ namespace ReadOnlyContextV1
         {
             try
             {
-                ActiveDataClass mockData = (ActiveDataClass)data;
+                RecentDataClass mockData = (RecentDataClass)data;
                 if (mockData.LabOrder == null || mockData.Patient == null || mockData.ConsoleLogger == null || mockData.DataAccess == null)
                 {
                     throw new Exception(message: "One of the inserted Parameters in Data was null");
@@ -145,7 +145,7 @@ namespace RWContextV2
         {
             try
             {
-                ActiveDataClass mockData = (ActiveDataClass)data;
+                RecentDataClass mockData = (RecentDataClass)data;
                 if (mockData.LabOrder == null || mockData.Patient == null || mockData.ConsoleLogger == null || mockData.DataAccess == null)
                 {
                     throw new Exception(message: "One of the inserted Parameters in Data was null");
@@ -202,7 +202,7 @@ namespace GeneratorContextV3
         {
             try
             {
-                ActiveDataClass mockData = (ActiveDataClass)data;
+                RecentDataClass mockData = (RecentDataClass)data;
                 if (mockData.LabOrder == null || mockData.Patient == null || mockData.ConsoleLogger == null || mockData.DataAccess == null)
                 {
                     throw new Exception(message: "One of the inserted Parameters in Data was null");
@@ -260,7 +260,7 @@ namespace GeneratorContextV4
         {
             try
             {
-                ActiveDataClass mockData = (ActiveDataClass)data;
+                RecentDataClass mockData = (RecentDataClass)data;
                 if (mockData.LabOrder == null || mockData.Patient == null || mockData.ConsoleLogger == null || mockData.DataAccess == null)
                 {
                     throw new Exception(message: "One of the inserted Parameters in Data was null");
@@ -312,7 +312,7 @@ namespace GeneratorContextNoInherVaccineV5
         {
             try
             {
-                ActiveDataClass mockData = (ActiveDataClass)data;
+                RecentDataClass mockData = (RecentDataClass)data;
                 if (mockData.LabOrder == null || mockData.Vaccine == null)
                 {
                     throw new Exception(message: "One of the inserted Parameters in Data was null");

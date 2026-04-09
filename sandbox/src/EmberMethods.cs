@@ -398,7 +398,7 @@ public class EmberMethods
         }
 
     }
-    internal ActiveDataClass GetTestData()
+    internal RecentDataClass GetTestData()
     {
         LabOrder labOrder = new LabOrder("1", "Pediatrics");
         Patient patient = new Patient("1", "TestFirst", "TestLast", new DateTime(2010, 6, 1, 7, 47, 0), "M");   //mfu
@@ -406,7 +406,7 @@ public class EmberMethods
         DataAccess testDataAccess = new DataAccess();
         Vaccine vaccine = new Vaccine("Polio", 1, DateTime.UtcNow);
 
-        return new ActiveDataClass(labOrder: labOrder, patient: patient, consoleLogger: logger,
+        return new RecentDataClass(labOrder: labOrder, patient: patient, consoleLogger: logger,
           dataAccess: testDataAccess, vaccine: vaccine);
     }
 }

@@ -15,7 +15,7 @@ public class ContextManagementDemos
         _scriptManager = scriptManager;
     }
 
-    public Ember.Scripting.GeneratorContextSF CreateContextForApiV(ActiveDataClass data, int? apiV = null)
+    public Ember.Scripting.GeneratorContextSF CreateContextForApiV(RecentDataClass data, int? apiV = null)
     {
         if (apiV == null)
         {
@@ -28,9 +28,9 @@ public class ContextManagementDemos
 
         return ctx;
     }
-    public static Ember.Scripting.GeneratorContextSF CreateUsingData(int version, ActiveDataClass data)
+    public static Ember.Scripting.GeneratorContextSF CreateUsingData(int version, RecentDataClass data)
     {
-        ActiveDataClass mockData = (ActiveDataClass)data;
+        RecentDataClass mockData = (RecentDataClass)data;
 
         Dictionary<int, Type> retrievedDict = ContextVersionScanner.GetClassDictionary();
         if (retrievedDict.Keys.Contains(version) == false)

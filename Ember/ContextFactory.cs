@@ -8,15 +8,15 @@ namespace GeneratorContextNoInherVaccineV5
 {
     public class ContextFactory : IGeneratorContextFactory
     {
-        public ActiveGeneratorContext Create(ILabOrderInterfaceV4NoInheritence labOrder, IVaccineInterface vaccine)
+        public RecentGeneratorContext Create(ILabOrderInterfaceV4NoInheritence labOrder, IVaccineInterface vaccine)
         {
-            return new ActiveGeneratorContext(labOrder, vaccine);
+            return new RecentGeneratorContext(labOrder, vaccine);
         }
     }
 
     public interface IGeneratorContextFactory
     {
-        public ActiveGeneratorContext Create(ILabOrderInterfaceV4NoInheritence labOrder, IVaccineInterface vaccine);
+        public RecentGeneratorContext Create(ILabOrderInterfaceV4NoInheritence labOrder, IVaccineInterface vaccine);
     }
 }
 
@@ -32,7 +32,7 @@ namespace Ember.Simulation
             services.AddSingleton(testDataAccess);
 
             // Register the factory
-            services.AddTransient<ActiveContextFactory.IGeneratorContextFactory, ActiveContextFactory.ContextFactory>();
+            services.AddTransient<RecentContextFactory.IGeneratorContextFactory, RecentContextFactory.ContextFactory>();
             return services;
         }
     }

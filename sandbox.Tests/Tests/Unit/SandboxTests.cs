@@ -233,7 +233,7 @@ public class SanboxTests
     public async Task CreateContextByDowngradeTest()
     {
 
-        ActiveGeneratorContext data = new ActiveGeneratorContext(labOrder: _obj!.labOrder, vaccine: _obj.vaccine);
+        RecentGeneratorContext data = new RecentGeneratorContext(labOrder: _obj!.labOrder, vaccine: _obj.vaccine);
 
         CustomerScript script;
         ContextManagement sf;

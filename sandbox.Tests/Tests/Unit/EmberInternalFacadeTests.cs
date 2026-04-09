@@ -61,7 +61,7 @@ public class EmberInternalFacadeTests
         // var ctx = InternalScriptManager.CreateContext(_obj.labOrder, _obj.vaccine);
         var ctx = TestHelper.GetContext();
 
-        ar = (ActiveActionResult)await InternalScriptManager.ExecuteScript(id, ctx!);
+        ar = (RecentActionResult)await InternalScriptManager.ExecuteScript(id, ctx!);
 
 
 
@@ -83,7 +83,7 @@ public class EmberInternalFacadeTests
         // var ctx = _internalScriptManager!.CreateContext(_obj!.labOrder, _obj.vaccine);
         var ctx = TestHelper.GetContext();
         // Type scriptType=script.GetScriptType();
-        ActiveActionResult ar = (ActiveActionResult)await _internalScriptManager.ExecuteScript<IGeneratorActionScript>(script.ScriptName!, ctx);
+        RecentActionResult ar = (RecentActionResult)await _internalScriptManager.ExecuteScript<IGeneratorActionScript>(script.ScriptName!, ctx);
 
         Console.WriteLine("Name: " + script.ScriptName + ", ScriptType: " + script.GetScriptType().Name);
         Console.WriteLine("Type name: " + ar.GetType().FullName);
@@ -102,7 +102,7 @@ public class EmberInternalFacadeTests
         script = await _scriptManager!.CreateScript(_sourceCodeActionV3!);
         // ctx = _internalScriptManager!.CreateContext(_obj.labOrder, _obj.vaccine);
         ctx = TestHelper.GetContext();
-        ar = (ActiveActionResult)await _internalScriptManager.ExecuteScript<IGeneratorActionScript>(script.ScriptName!, ctx);
+        ar = (RecentActionResult)await _internalScriptManager.ExecuteScript<IGeneratorActionScript>(script.ScriptName!, ctx);
 
         Console.WriteLine("Name: " + script.ScriptName + ", ScriptType: " + script.GetScriptType());
         Console.WriteLine("Type name: " + ar.GetType().FullName);
@@ -126,10 +126,10 @@ public class EmberInternalFacadeTests
         (services, _obj!.logger, _obj.testDataAccess);
         using var provider = services.BuildServiceProvider();
 
-        ActiveContextFactory.IGeneratorContextFactory factory = provider.GetRequiredService<ActiveContextFactory.IGeneratorContextFactory>();
-        ActiveGeneratorContext ctx = factory.Create(_obj.labOrder, _obj.vaccine);
+        RecentContextFactory.IGeneratorContextFactory factory = provider.GetRequiredService<RecentContextFactory.IGeneratorContextFactory>();
+        RecentGeneratorContext ctx = factory.Create(_obj.labOrder, _obj.vaccine);
 
-        ActiveActionResult ar = (ActiveActionResult)await _internalScriptManager!.ExecuteScript<IGeneratorActionScript>(scrip.ScriptName!, ctx);
+        RecentActionResult ar = (RecentActionResult)await _internalScriptManager!.ExecuteScript<IGeneratorActionScript>(scrip.ScriptName!, ctx);
 
         Console.WriteLine("Name: " + scrip.ScriptName! + ", ScriptType: " + scrip.GetScriptType());
         Console.WriteLine("Type name: " + ar.GetType().FullName);

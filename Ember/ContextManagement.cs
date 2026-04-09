@@ -14,7 +14,7 @@ namespace Ember.Simulation
             _scriptManager = scriptManager;
         }
 
-        public async Task<GeneratorContextSF> CreateByDowngrade(int desiredVersion, ActiveGeneratorContext ctx)
+        public async Task<GeneratorContextSF> CreateByDowngrade(int desiredVersion, RecentGeneratorContext ctx)
         {
             // if (sourceCode == null)
             // {

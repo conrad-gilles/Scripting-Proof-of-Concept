@@ -419,7 +419,7 @@ public class ScriptManagerFacadeTests
     public async Task ExecuteUnfinishedScriptBySourceCodeTest()
     {
         string sourceCode = TestHelper.GetSC().sourceCodeActionV3;
-        ActiveGeneratorContext ctx = TestHelper.GetContext();
+        RecentGeneratorContext ctx = TestHelper.GetContext();
         EmberInternalFacade eif = new EmberInternalFacade(_scriptManager!);
         object ar = await eif.ExecuteUnfinishedScriptBySourceCode(sourceCode, ctx);
 

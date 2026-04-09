@@ -280,7 +280,7 @@ public class EmberVersioningTests
         string shouldReturn = _actionResultVersionSpecific + "Pediatric tests added";
         Assert.IsInstanceOfType(result, typeof(ActionResultSF));
         Assert.IsInstanceOfType(result, typeof(ActionResultV3.ActionResult));
-        Assert.IsInstanceOfType(result, typeof(ActiveActionResult));
+        Assert.IsInstanceOfType(result, typeof(RecentActionResult));
         Assert.IsTrue(result.ToString()!.Contains(shouldReturn));
 
         // Assert.IsTrue(false);

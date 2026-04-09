@@ -1,8 +1,8 @@
-global using ActiveActionResult = ActionResultV3.ActionResult;
-global using ActiveIGeneratorContext = IGeneratorContextNoInheritance_V5.IGeneratorContext;
-global using ActiveGeneratorContext = GeneratorContextNoInherVaccineV5.GeneratorContext;
-global using ActiveIGeneratorConditionScript = GeneratorScriptsGenericSimple.IGeneratorConditionScript<IGeneratorReadOnlyContextV1.IGeneratorContext>;
-global using ActiveIGeneratorActionScript = GeneratorScriptsV4.IGeneratorActionScript;
-global using ActiveDataClass = DataV2.DataV2;
-global using ActiveContextFactory = GeneratorContextNoInherVaccineV5;
+global using RecentActionResult = ActionResultV3.ActionResult;
+global using RecentIGeneratorContext = IGeneratorContextNoInheritance_V5.IGeneratorContext;
+global using RecentGeneratorContext = GeneratorContextNoInherVaccineV5.GeneratorContext;
+global using RecentIGeneratorConditionScript = GeneratorScriptsGenericSimple.IGeneratorConditionScript<IGeneratorReadOnlyContextV1.IGeneratorContext>;
+global using RecentIGeneratorActionScript = GeneratorScriptsV4.IGeneratorActionScript;
+global using RecentDataClass = DataV2.DataV2;
+global using RecentContextFactory = GeneratorContextNoInherVaccineV5;
 // global using ActiveMultiersionActionScript = Mu/
