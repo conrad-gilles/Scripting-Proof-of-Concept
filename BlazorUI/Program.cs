@@ -48,10 +48,10 @@ var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
 {
-    var db = scope.ServiceProvider.GetRequiredService<EFModeling.EntityProperties.FluentAPI.Required.ScriptDbContext>();
+    // var db = scope.ServiceProvider.GetRequiredService<EFModeling.EntityProperties.FluentAPI.Required.ScriptDbContext>();
 
-    // This will look for the Migrations folder and apply them to Neon automatically
-    db.Database.Migrate();
+    // // This will look for the Migrations folder and apply them to Neon automatically
+    // db.Database.Migrate();
 }
 
 // Configure the HTTP request pipeline.
@@ -70,5 +70,23 @@ app.UseAntiforgery();
 app.MapStaticAssets();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
+
+
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    try
+    {
+        var context = services.GetRequiredService<EFModeling.EntityProperties.FluentAPI.Required.ScriptDbContext>();
+
+        // This ensures the database exists, then applies pending migrations safely
+        context.Database.Migrate();
+    }
+    catch (Exception ex)
+    {
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "An error occurred while migrating the database.");
+    }
+}
 
 app.Run();
