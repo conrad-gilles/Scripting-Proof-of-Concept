@@ -143,7 +143,9 @@ public class EmberMethods
         }
         if (failedInserted != "")
         {
-            throw new CompileAllScriptsInFolderException(message: "Could not insert scripts : " + failedInserted + ", Successfully inserted script: " + successfullyInserted);
+            string message = "Could not insert scripts : " + failedInserted + ", Successfully inserted script: " + successfullyInserted;
+            Console.WriteLine(message);
+            throw new CompileAllScriptsInFolderException(message: message);
         }
     }
 

@@ -13,6 +13,12 @@ services:
     environment:
       # Pass your connection string to your C# app
       - DATABASE_URL=Host=db;Port=5432;Database=script_registry;Username=admin;Password=your_secure_password
+      - DOTNET_gcServer=0     # Disables Server GC in favor of Workstation GC
+      - DOTNET_gcConcurrent=1
+    deploy:
+      resources:
+        limits:
+          memory: 4096M
 
   db:
     image: postgres:16-alpine
