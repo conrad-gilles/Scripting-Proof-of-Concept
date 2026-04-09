@@ -81,7 +81,8 @@ using (var scope = app.Services.CreateScope())
 
         // This ensures the database exists, then applies pending migrations safely
         // context.Database.Migrate();
-        context.Database.EnsureCreated();
+        await context.Database.EnsureDeletedAsync();
+        await context.Database.EnsureCreatedAsync();
     }
     catch (Exception ex)
     {
