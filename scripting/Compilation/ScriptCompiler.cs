@@ -288,7 +288,7 @@ internal class ScriptCompiler
                 }
                 else
                 {
-                    Console.WriteLine("Method from Assembly that wasnt found: " + meth2);
+                    // Console.WriteLine("Method from Assembly that wasnt found: " + meth2);
                 }
             }
             if (isInside == false)
@@ -297,7 +297,7 @@ internal class ScriptCompiler
                 && meth1.Name != nameof(Ember.Scripting.IGeneratorConditionScript.EvaluateAsync)
                 )
                 {
-                    Console.WriteLine("Method from Roslyn: " + meth1);
+                    // Console.WriteLine("Method from Roslyn: " + meth1);
                     // Console.WriteLine("Method from Roslyn: "+meth2);
                     throw new UndefinedMethodException(message: "No new methods allowed that are not predefinded!", meth1);
                 }

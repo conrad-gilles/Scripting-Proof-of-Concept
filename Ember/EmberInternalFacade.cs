@@ -20,11 +20,15 @@ internal class EmberInternalFacade
     }
     private object CheckUpgradeActionResult(object result)
     {
-        if (result.GetType() != typeof(bool))
+        if (result is ActionResultSF)
         {
             return (RecentActionResult)EmberMethods.UpgradeActionResult(result);
         }
-        return result;
+        if (result.GetType() == typeof(bool))
+        {
+            return (bool)result;
+        }
+        throw new Exception(message: "Type was" + result.GetType().Name);
     }
     internal async Task<object> ExecuteScript(Guid id, RecentGeneratorContext ctx, string? methodName = null)
     {

@@ -27,6 +27,7 @@ internal class ScriptExecutor
         if (executionTime != null)
         {
             _scriptTimeout = (int)executionTime;
+            Console.WriteLine("excecutionTime was null set to: " + _scriptTimeout);
         }
 
         Assembly assembly = Assembly.Load(compiledScript);
@@ -131,7 +132,7 @@ internal class ScriptExecutor
                 method = type.GetMethod(methodName)!;
             }
             using var cts = new CancellationTokenSource(_scriptTimeout);
-            // using var cts = new CancellationTokenSource(3000);
+            // using var cts = new CancellationTokenSource(30000);
             ScriptEnvironment.CurrentToken.Value = cts.Token;
             System.Threading.Tasks.Task? resultTask;
             try
@@ -145,10 +146,7 @@ internal class ScriptExecutor
 
             try
             {
-                // TimeSpan timeSpan = new TimeSpan(days: 0, hours: 0, minutes: 0, seconds: 0, milliseconds: 10000000);
                 await resultTask.WaitAsync(cts.Token);
-                // throw new Exception();
-                // await resultTask.WaitAsync(timeSpan);
             }
             catch (OperationCanceledException ex)
             {

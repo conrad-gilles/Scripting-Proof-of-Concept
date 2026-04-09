@@ -187,6 +187,54 @@ public class ArchitechtureTests
         long elapsedMs = stopwatch.ElapsedMilliseconds;
         ExceptionHelper.PrintExceptionListToConsole(e);
         Console.WriteLine("execution took: " + elapsedMs);
-        Assert.IsTrue(elapsedMs == 100);
+        int realMS = (int)ScriptManager.BasicValidationBeforeCompiling(sourceCode5000).ExecutionTime;
+        Console.WriteLine("exoected: " + realMS);
+
+        Assert.IsTrue(elapsedMs > 4999 && elapsedMs < 7000);
+
+        stopwatch = System.Diagnostics.Stopwatch.StartNew();
+        e = await Assert.ThrowsExceptionAsync<Ember.Scripting.ActionScriptExecutionException>(async () =>
+       {
+           await InternalScriptManager.ExecuteUnfinishedScriptBySourceCode(sourceCode100, TestHelper.GetContext());
+       });
+        stopwatch.Stop();
+
+        elapsedMs = stopwatch.ElapsedMilliseconds;
+        Console.WriteLine("execution took: " + elapsedMs);
+        Assert.IsTrue(elapsedMs > 99 && elapsedMs < 400);
+
+        stopwatch = System.Diagnostics.Stopwatch.StartNew();
+        e = await Assert.ThrowsExceptionAsync<Ember.Scripting.ActionScriptExecutionException>(async () =>
+       {
+           await InternalScriptManager.ExecuteUnfinishedScriptBySourceCode(sourceCode500, TestHelper.GetContext());
+       });
+        stopwatch.Stop();
+
+        elapsedMs = stopwatch.ElapsedMilliseconds;
+        Console.WriteLine("execution took: " + elapsedMs);
+        Assert.IsTrue(elapsedMs > 499 && elapsedMs < 650);
+
+        stopwatch = System.Diagnostics.Stopwatch.StartNew();
+        e = await Assert.ThrowsExceptionAsync<Ember.Scripting.ActionScriptExecutionException>(async () =>
+       {
+           await InternalScriptManager.ExecuteUnfinishedScriptBySourceCode(sourceCode1000, TestHelper.GetContext());
+       });
+        stopwatch.Stop();
+
+        elapsedMs = stopwatch.ElapsedMilliseconds;
+        Console.WriteLine("execution took: " + elapsedMs);
+        Assert.IsTrue(elapsedMs > 900 && elapsedMs < 1200);
+
+
+        stopwatch = System.Diagnostics.Stopwatch.StartNew();
+        e = await Assert.ThrowsExceptionAsync<Ember.Scripting.ActionScriptExecutionException>(async () =>
+       {
+           await InternalScriptManager.ExecuteUnfinishedScriptBySourceCode(sourceCode5000, TestHelper.GetContext());
+       });
+        stopwatch.Stop();
+
+        elapsedMs = stopwatch.ElapsedMilliseconds;
+        Console.WriteLine("execution took: " + elapsedMs);
+        Assert.IsTrue(elapsedMs > 4900 && elapsedMs < 5100);
     }
 }

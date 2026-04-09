@@ -183,7 +183,9 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
         int? executionTime = null;
         try
         {
-            var temp = await _db.GetCompiledScripCache(scriptId, apiVersion);
+            CompiledScript temp = await _db.GetCompiledScripCache(scriptId, apiVersion);
+            executionTime = temp.CustomerScript!.ExecutionTimeInMS;
+            // Console.WriteLine("execution time was in 188 set to: " + executionTime);
             compiledScript = temp.AssemblyBytes;
         }
         catch (Exception e)
@@ -194,6 +196,7 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
             CompiledScript script = await _db.GetCompiledScripCache(scriptId, apiVersion);
             compiledScript = script.AssemblyBytes;
             executionTime = script.CustomerScript!.ExecutionTimeInMS;
+            // Console.WriteLine("execution time was in 199 set to: " + executionTime);
         }
         object result = await _executor.RunScriptExecution<object>(compiledScript!, context, executionTime, methodName);  //returns either bool or action result todo maybe add checks if thats the case but normally should be
         return result;
@@ -207,7 +210,12 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
     }
     public async Task<object> ExecuteUnfinishedScriptBySourceCode(string sourceCode, GeneratorContextSF context, int? apiVersion = null, string? methodName = null, int? executionTime = null)
     {
-        _compiler.BasicValidationBeforeCompiling(sourceCode);
+        ValidationRecord vali = _compiler.BasicValidationBeforeCompiling(sourceCode);
+        if (executionTime == null)
+        {
+            executionTime = vali.ExecutionTime;
+            // Console.WriteLine("execution time was in 217 set to: " + executionTime);
+        }
         byte[] comp = _compiler.RunCompilation(sourceCode);
         return await _executor.RunScriptExecution<object>(compiledScript: comp, genContext: context, executionTime: executionTime, methodName: methodName);
         // return null //todo

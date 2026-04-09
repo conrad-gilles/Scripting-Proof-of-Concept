@@ -51,7 +51,7 @@ using (var scope = app.Services.CreateScope())
     var db = scope.ServiceProvider.GetRequiredService<EFModeling.EntityProperties.FluentAPI.Required.ScriptDbContext>();
 
     // This will look for the Migrations folder and apply them to Neon automatically
-    // db.Database.Migrate();
+    db.Database.Migrate();
 }
 
 // Configure the HTTP request pipeline.
