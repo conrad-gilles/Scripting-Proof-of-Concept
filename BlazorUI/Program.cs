@@ -80,7 +80,8 @@ using (var scope = app.Services.CreateScope())
         var context = services.GetRequiredService<EFModeling.EntityProperties.FluentAPI.Required.ScriptDbContext>();
 
         // This ensures the database exists, then applies pending migrations safely
-        context.Database.Migrate();
+        // context.Database.Migrate();
+        context.Database.EnsureCreated();
     }
     catch (Exception ex)
     {
