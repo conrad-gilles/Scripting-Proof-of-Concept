@@ -1,3 +1,10 @@
+- get rid of the default methods
+- get ric of the IActionScript and so on in the scripting library
+- get rid 
+- rename the RecentActionResult and RecentConditionresult
+- have to allow other returns
+- extract Upgrade and downgrade into seperate interfaces so in checkupgradeactionresult you dont need to check specifically for this return type
+- extract the above function mayeb into seperate component
 remove all occurences of generator in namings
 MultiMethod: 
 old methods gets changed from string SetX(context) to void SetX(context), we now want the old version to always receive a default string, where to define this behaviour?

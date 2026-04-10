@@ -1,5 +1,6 @@
 using Ember.Scripting;
 using IGeneratorContext_V4;
+using Microsoft.CodeAnalysis.Scripting;
 
 namespace Ember.Simulation;
 
@@ -15,7 +16,7 @@ internal class EmberInternalFacade
     {
         var cf = new ContextManagement(_scriptManager);
         CustomerScript script = await _scriptManager.GetScript(id);
-        methodName = MethodNameFactory.GetOldMethodName(methodName, script.MinApiVersion);
+        methodName = MethodNameFactory.GetOldMethodName(methodName, script.MinApiVersion, script.GetScriptType());
         Context context = await cf.CreateByDowngrade(script.MinApiVersion, ctx);
         return await _scriptManager.ExecuteScriptById(id, context, methodName: methodName);
     }
@@ -27,7 +28,7 @@ internal class EmberInternalFacade
         }
         if (result.GetType() == typeof(bool))
         {
-            return (bool)result;
+            return result;
         }
         throw new Exception(message: "Type was" + result.GetType().Name);
     }
@@ -54,13 +55,14 @@ internal class EmberInternalFacade
     }
 
     public TScript GetScript<TScript>(string name) where TScript : IScript
+        // public TScript GetScript<TScript>(string name) where TScript : RecentIActionScript
     {
-        if (typeof(TScript) == typeof(IConditionScript))
+        if (typeof(IConditionScript).IsAssignableFrom(typeof(TScript)))
         {
             var toReturn = (IConditionScript)new ConditionScriptFacade(_scriptManager, name);
             return (TScript)toReturn;
         }
-        else if (typeof(TScript) == typeof(IActionScript))
+        else if (typeof(IActionScript).IsAssignableFrom(typeof(TScript)))
         {
             var toReturn = (IActionScript)new ActionScriptFacade(_scriptManager, name);
             return (TScript)toReturn;
@@ -103,7 +105,9 @@ internal class ActionScriptFacade : RecentIActionScript
 
     public async Task<RecentActionResult> Execute1(RecentIContext context)
     {
-        string methodName = nameof(Ember.Scripting.AdditionalMethods.IExecute1.Execute1);
+        string? methodName = nameof(Ember.Scripting.AdditionalMethods.IExecute1.Execute1);
+        CustomerScript script = await _scriptManager.GetScriptNT<IActionScript>(_scriptName);
+        methodName = MethodNameFactory.GetOldMethodName(methodName, script.MinApiVersion, script.GetScriptType());  //todo fix this 
         return (RecentActionResult)await _emberScriptManager.ExecuteScript<IActionScript>(_scriptName, (RecentContext)context, methodName);
     }
     public async Task<RecentActionResult> Execute2(RecentIContext context)
@@ -114,27 +118,34 @@ internal class ActionScriptFacade : RecentIActionScript
 }
 internal static class MethodNameFactory
 {
-    public static string? GetOldMethodName(string? methodName, int version)
+    public static string? GetOldMethodName(string? methodName, int version, Type scriptType)
     {
-        if (methodName == nameof(Ember.Scripting.AdditionalMethods.IExecute1.Execute1))
+        if (scriptType == typeof(IActionScript))
         {
-            switch (version)
+            if (methodName == nameof(Ember.Scripting.AdditionalMethods.IExecute1.Execute1))
             {
-                case 10:
-                    return "Execute1";
-                default:
-                    return methodName;
+                switch (version)
+                {
+                    case 10:
+                        return "Execute1";
+                    default:
+                        return methodName;
+                }
+            }
+            if (methodName == nameof(Ember.Scripting.AdditionalMethods.IExecute2.Execute2))
+            {
+                switch (version)
+                {
+                    case 10:
+                        return "ExecuteAction2";
+                    default:
+                        return methodName;
+                }
             }
         }
-        if (methodName == nameof(Ember.Scripting.AdditionalMethods.IExecute2.Execute2))
+        if (scriptType == typeof(IConditionScript))
         {
-            switch (version)
-            {
-                case 10:
-                    return "ExecuteAction2";
-                default:
-                    return methodName;
-            }
+            return methodName;
         }
         return methodName;
     }

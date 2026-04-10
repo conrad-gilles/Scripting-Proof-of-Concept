@@ -7,3 +7,5 @@ global using RecentIActionScript = GeneratorScriptsV4.IActionScript;
 global using RecentDataClass = DataV2.DataV2;
 global using RecentContextFactory = GeneratorContextNoInherVaccineV5;
 // global using ActiveMultiersionActionScript = Mu/
+
+// public interface RecentIScript
