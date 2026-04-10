@@ -185,10 +185,10 @@ public class EmberVersioningTests
     {
         Dictionary<int, Type> contextVersionMap = new()
         {
-            {1, typeof(GeneratorScriptsGenericSimple.IGeneratorConditionScript<>)},
-            {2, typeof(GeneratorScriptsV2.IGeneratorActionScript)},
-            {3, typeof(GeneratorScriptsV3.IGeneratorActionScript)},
-            {4, typeof(GeneratorScriptsV4.IGeneratorActionScript)},
+            {1, typeof(GeneratorScriptsGenericSimple.IConditionScript<>)},
+            {2, typeof(GeneratorScriptsV2.IActionScript)},
+            {3, typeof(GeneratorScriptsV3.IActionScript)},
+            {4, typeof(GeneratorScriptsV4.IActionScript)},
         };
 
         Dictionary<int, Type> retrievedDict = ScriptVersionScanner.GetClassDictionary();
@@ -250,7 +250,7 @@ public class EmberVersioningTests
     public async Task CreateUsingDataTestAsync()
     {
         _data = new DataV2.DataV2();
-        Ember.Scripting.GeneratorContextSF ctx;  //refactor to ContextSF
+        Ember.Scripting.Context ctx;  //refactor to ContextSF
         Guid id;
         id = (await _facade!.CreateScript(_sourceCodeActionV2!)).Id;
         var vali = _facade.BasicValidationBeforeCompiling(_sourceCodeActionV2!);
@@ -288,7 +288,7 @@ public class EmberVersioningTests
 
     public async Task GetTestingContextTest()
     {
-        Ember.Scripting.GeneratorContextSF ctx;
+        Ember.Scripting.Context ctx;
         Guid id;
         id = (await _facade!.CreateScript(_sourceCodeActionV2!)).Id;
         var vali = _facade.BasicValidationBeforeCompiling(_sourceCodeActionV2!);

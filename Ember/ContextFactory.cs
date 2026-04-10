@@ -8,15 +8,15 @@ namespace GeneratorContextNoInherVaccineV5
 {
     public class ContextFactory : IGeneratorContextFactory
     {
-        public RecentGeneratorContext Create(ILabOrderInterfaceV4NoInheritence labOrder, IVaccineInterface vaccine)
+        public RecentContext Create(ILabOrderInterfaceV4NoInheritence labOrder, IVaccineInterface vaccine)
         {
-            return new RecentGeneratorContext(labOrder, vaccine);
+            return new RecentContext(labOrder, vaccine);
         }
     }
 
     public interface IGeneratorContextFactory
     {
-        public RecentGeneratorContext Create(ILabOrderInterfaceV4NoInheritence labOrder, IVaccineInterface vaccine);
+        public RecentContext Create(ILabOrderInterfaceV4NoInheritence labOrder, IVaccineInterface vaccine);
     }
 }
 

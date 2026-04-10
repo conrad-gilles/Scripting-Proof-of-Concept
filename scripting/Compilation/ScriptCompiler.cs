@@ -204,14 +204,14 @@ internal class ScriptCompiler
             Type scriptType;
             switch (baseTypeName)
             {
-                case nameof(IGeneratorActionScript):
-                    scriptType = typeof(IGeneratorActionScript);
+                case nameof(IActionScript):
+                    scriptType = typeof(IActionScript);
                     break;
-                case nameof(IGeneratorConditionScript):
-                    scriptType = typeof(IGeneratorConditionScript);
+                case nameof(IConditionScript):
+                    scriptType = typeof(IConditionScript);
                     break;
                 default:
-                    throw new CouldNotMatchBaseTypeInCompiler(nameof(baseTypeName) + " was not a valid option!");
+                    throw new CouldNotMatchBaseTypeInCompiler(nameof(baseTypeName) + ": " + baseTypeName + " was not a valid option!");
             }
             List<MethodRecord> methods = ValidateOnlyInheritedMethodsAndReturn(tree!, model);
             int? executionTime = GetExecutionTime(tree);
@@ -293,8 +293,8 @@ internal class ScriptCompiler
             }
             if (isInside == false)
             {
-                if (meth1.Name != nameof(Ember.Scripting.IGeneratorActionScript.ExecuteAsync)
-                && meth1.Name != nameof(Ember.Scripting.IGeneratorConditionScript.EvaluateAsync)
+                if (meth1.Name != nameof(Ember.Scripting.IActionScript.ExecuteAsync)
+                && meth1.Name != nameof(Ember.Scripting.IConditionScript.EvaluateAsync)
                 )
                 {
                     // Console.WriteLine("Method from Roslyn: " + meth1);

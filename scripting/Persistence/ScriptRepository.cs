@@ -321,13 +321,13 @@ internal class ScriptRepository
 
 
             string scriptType;
-            if (validationRecord.ScriptType == typeof(IGeneratorActionScript))
+            if (validationRecord.ScriptType == typeof(IActionScript))
             {
-                scriptType = nameof(IGeneratorActionScript);
+                scriptType = nameof(IActionScript);
             }
-            else if (validationRecord.ScriptType == typeof(IGeneratorConditionScript))
+            else if (validationRecord.ScriptType == typeof(IConditionScript))
             {
-                scriptType = nameof(IGeneratorConditionScript);
+                scriptType = nameof(IConditionScript);
             }
             else
             {
@@ -580,13 +580,13 @@ internal class ScriptRepository
         _logger.LogTrace("Entered {MethodName} in {ClassName} with Name: {ScriptId}.", nameof(GetCustomerScript), nameof(ScriptRepository), scriptName);
 
         string sScriptType;
-        if (typeof(ScriptType) == typeof(IGeneratorActionScript))
+        if (typeof(ScriptType) == typeof(IActionScript))
         {
-            sScriptType = nameof(IGeneratorActionScript);
+            sScriptType = nameof(IActionScript);
         }
-        else if (typeof(ScriptType) == typeof(IGeneratorConditionScript))
+        else if (typeof(ScriptType) == typeof(IConditionScript))
         {
-            sScriptType = nameof(IGeneratorConditionScript);
+            sScriptType = nameof(IConditionScript);
         }
         else
         {

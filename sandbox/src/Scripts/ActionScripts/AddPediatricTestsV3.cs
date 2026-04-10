@@ -31,7 +31,7 @@ using IGeneratorContext_V4;
 //     }
 // }
 
-public class AddPediatricTestsV4 : GeneratorScriptsV3.IGeneratorActionScript
+public class AddPediatricTestsV4 : GeneratorScriptsV3.IActionScript
 {
     // public async Task<ActionResult> ExecuteAsync(IGeneratorContext context)
     public async Task<ActionResultV3.ActionResult> ExecuteAsync(IGeneratorContext_V4.IGeneratorContext context)

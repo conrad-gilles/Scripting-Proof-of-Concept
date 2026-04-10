@@ -59,7 +59,7 @@ public class CrudDemos
     public async Task Read()
     {
         await Create();
-        CustomerScript script = await ScriptManager.GetScriptNT<IGeneratorActionScript>("AddPediatricTestsV2");  //
+        CustomerScript script = await ScriptManager.GetScriptNT<IActionScript>("AddPediatricTestsV2");  //
         Console.WriteLine("Name: " + script.ScriptName + ", ScriptType: " + script.ScriptType);
     }
     [TestMethod]
@@ -67,14 +67,14 @@ public class CrudDemos
     {
         await Create();
         string newSourceCode = TestHelper.GetSC().sourceCodeActionV3;
-        await ScriptManager.UpdateScriptNT<IGeneratorActionScript>("AddPediatricTestsV2", newSourceCode);
+        await ScriptManager.UpdateScriptNT<IActionScript>("AddPediatricTestsV2", newSourceCode);
     }
 
     [TestMethod]
     public async Task Delete()
     {
         await Create();
-        await ScriptManager.DeleteScriptNT<IGeneratorActionScript>("AddPediatricTestsV2");
+        await ScriptManager.DeleteScriptNT<IActionScript>("AddPediatricTestsV2");
     }
     [TestMethod]
     public async Task Execute()
@@ -97,9 +97,9 @@ public class CrudDemos
         RecentContextFactory.IGeneratorContextFactory factory = provider.GetRequiredService<RecentContextFactory.IGeneratorContextFactory>();
 
 
-        RecentGeneratorContext ctx = factory.Create(labOrder, vaccine);
+        RecentContext ctx = factory.Create(labOrder, vaccine);
 
-        RecentActionResult ar = (RecentActionResult)await InternalScriptManager!.ExecuteScript<IGeneratorActionScript>
+        RecentActionResult ar = (RecentActionResult)await InternalScriptManager!.ExecuteScript<IActionScript>
         ("AddPediatricTestsV2", ctx);
 
 

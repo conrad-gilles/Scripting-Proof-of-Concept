@@ -4,7 +4,7 @@ using System.Collections.Generic;   //todo same for them
 using Ember.Scripting;
 using GeneratorScriptsGeneric;
 using IGeneratorContext_V2;
-public class Script1 : GeneratorScriptsGeneric.IGeneratorActionScript<IGeneratorContext_V2.IGeneratorContext, ActionResultV1.ActionResult>
+public class Script1 : GeneratorScriptsGeneric.IActionScript<IGeneratorContext_V2.IGeneratorContext, ActionResultV1.ActionResult>
 {
     public async Task<ActionResultV1.ActionResult> ExecuteAsync(IGeneratorContext_V2.IGeneratorContext context)
     {
@@ -12,7 +12,7 @@ public class Script1 : GeneratorScriptsGeneric.IGeneratorActionScript<IGenerator
     }
 }
 
-public class Script2 : GeneratorScriptsGeneric.IGeneratorActionScript<IGeneratorContext_V2.IGeneratorContext, ActionResultV1.ActionResult>
+public class Script2 : GeneratorScriptsGeneric.IActionScript<IGeneratorContext_V2.IGeneratorContext, ActionResultV1.ActionResult>
 {
     public async Task<ActionResultV1.ActionResult> ExecuteAsync(IGeneratorContext_V2.IGeneratorContext context)
     {

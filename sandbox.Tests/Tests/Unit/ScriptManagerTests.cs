@@ -117,7 +117,7 @@ public class ScriptManagerFacadeTests
         await _scriptManager.UpdateScriptAndCompile(script.Id, TestHelper.GetSC().sourceCodePedia);
         retrievedScript = await _scriptManager.GetScript(script.Id);
         Assert.IsTrue(retrievedScript.ScriptName == nameof(PediatricCondition));
-        Assert.IsTrue(retrievedScript.GetScriptType() == typeof(IGeneratorConditionScript));
+        Assert.IsTrue(retrievedScript.GetScriptType() == typeof(IConditionScript));
     }
 
     [TestMethod]
@@ -428,7 +428,7 @@ public class ScriptManagerFacadeTests
     public async Task ExecuteUnfinishedScriptBySourceCodeTest()
     {
         string sourceCode = TestHelper.GetSC().sourceCodeActionV3;
-        RecentGeneratorContext ctx = TestHelper.GetContext();
+        RecentContext ctx = TestHelper.GetContext();
         EmberInternalFacade eif = new EmberInternalFacade(_scriptManager!);
         object ar = await eif.ExecuteUnfinishedScriptBySourceCode(sourceCode, ctx);
 

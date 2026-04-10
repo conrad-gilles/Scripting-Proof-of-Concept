@@ -5,7 +5,7 @@ using Ember.Scripting;
 using GeneratorScriptsV3;
 using IGeneratorContext_V4;
 
-public class WhileTrueScript : GeneratorScriptsV3.IGeneratorActionScript
+public class WhileTrueScript : GeneratorScriptsV3.IActionScript
 {
     public async Task<ActionResultV3.ActionResult> ExecuteAsync(IGeneratorContext_V4.IGeneratorContext context)
     {

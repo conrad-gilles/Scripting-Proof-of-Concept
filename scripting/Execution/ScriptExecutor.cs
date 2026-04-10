@@ -16,7 +16,7 @@ internal class ScriptExecutor
         _logger = logger;
     }
 
-    public async Task<T> RunScriptExecution<T>(byte[] compiledScript, GeneratorContextSF genContext, int? executionTime, string? methodName = null)
+    public async Task<T> RunScriptExecution<T>(byte[] compiledScript, Context genContext, int? executionTime, string? methodName = null)
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(RunScriptExecution), nameof(ScriptExecutor));
 
@@ -36,11 +36,11 @@ internal class ScriptExecutor
         List<Type> typeArrayList = [];
         for (int i = 0; i < unfilteredTypeArray.Length; i++)
         {
-            if (typeof(IGeneratorActionScript).IsAssignableFrom(unfilteredTypeArray[i]))
+            if (typeof(IActionScript).IsAssignableFrom(unfilteredTypeArray[i]))
             {
                 typeArrayList.Add(unfilteredTypeArray[i]);
             }
-            if (typeof(IGeneratorConditionScript).IsAssignableFrom(unfilteredTypeArray[i]))
+            if (typeof(IConditionScript).IsAssignableFrom(unfilteredTypeArray[i]))
             {
                 typeArrayList.Add(unfilteredTypeArray[i]);
             }
@@ -62,12 +62,12 @@ internal class ScriptExecutor
         object scriptInstance = Activator.CreateInstance(type)!;     //if null here probably typo in file name somewhere, like pedriatic instead of pediatic :(
 
         // if (typeof(IGeneratorConditionScript).IsAssignableFrom(type))
-        if (typeof(IGeneratorConditionScript).IsAssignableFrom(type))    //checks if type implements the generator specific interface  //check if runs
+        if (typeof(IConditionScript).IsAssignableFrom(type))    //checks if type implements the generator specific interface  //check if runs
         {
             var result = await RunConditionScript(type, scriptInstance, genContext);
             return (T)(object)result;
         }
-        else if (typeof(IGeneratorActionScript).IsAssignableFrom(type))
+        else if (typeof(IActionScript).IsAssignableFrom(type))
         {
             var result = await RunActionScript(type, scriptInstance, genContext, methodName);
             return (T)(object)result;
@@ -79,12 +79,12 @@ internal class ScriptExecutor
         }
     }
 
-    public async Task<bool> RunConditionScript(Type type, object scriptInstance, GeneratorContextSF genContext)
+    public async Task<bool> RunConditionScript(Type type, object scriptInstance, Context genContext)
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(RunConditionScript), nameof(ScriptExecutor));
         try
         {
-            MethodInfo method = type.GetMethod(nameof(IGeneratorConditionScript.EvaluateAsync))!;
+            MethodInfo method = type.GetMethod(nameof(IConditionScript.EvaluateAsync))!;
 
             using var cts = new CancellationTokenSource(_scriptTimeout);
             ScriptEnvironment.CurrentToken.Value = cts.Token;
@@ -117,7 +117,7 @@ internal class ScriptExecutor
         }
 
     }
-    public async Task<ActionResultSF> RunActionScript(Type type, object scriptInstance, GeneratorContextSF genContext, string? methodName = null)  //todo pass Method name as string or enum and also pass arguments maybe as List<args>
+    public async Task<ActionResultSF> RunActionScript(Type type, object scriptInstance, Context genContext, string? methodName = null)  //todo pass Method name as string or enum and also pass arguments maybe as List<args>
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(RunActionScript), nameof(ScriptExecutor));
         try
@@ -125,7 +125,7 @@ internal class ScriptExecutor
             MethodInfo method;
             if (methodName == null)
             {
-                method = type.GetMethod(nameof(IGeneratorActionScript.ExecuteAsync))!;
+                method = type.GetMethod(nameof(IActionScript.ExecuteAsync))!;
             }
             else    //todo error handling id method name is bogus
             {

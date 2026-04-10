@@ -15,7 +15,7 @@ public class ContextManagementDemos
         _scriptManager = scriptManager;
     }
 
-    public Ember.Scripting.GeneratorContextSF CreateContextForApiV(RecentDataClass data, int? apiV = null)
+    public Context CreateContextForApiV(RecentDataClass data, int? apiV = null)
     {
         if (apiV == null)
         {
@@ -24,11 +24,11 @@ public class ContextManagementDemos
 
         // MockData data = new MockData(labOrder: obj.labOrder, patient: obj.patient, consoleLogger: obj.logger,
         // dataAccess: obj.testDataAccess, vaccine: obj.vaccine);
-        Ember.Scripting.GeneratorContextSF ctx = CreateUsingData((int)apiV, data);
+        Context ctx = CreateUsingData((int)apiV, data);
 
         return ctx;
     }
-    public static Ember.Scripting.GeneratorContextSF CreateUsingData(int version, RecentDataClass data)
+    public static Context CreateUsingData(int version, RecentDataClass data)
     {
         RecentDataClass mockData = (RecentDataClass)data;
 
@@ -39,7 +39,7 @@ public class ContextManagementDemos
         }
         Type neededType = retrievedDict[version];
         Ember.Scripting.GeneratorContextSF uninitializedContext = (Ember.Scripting.GeneratorContextSF)RuntimeHelpers.GetUninitializedObject(neededType);
-        var ctx = uninitializedContext.CreateUsingData(data);
+        Context ctx = uninitializedContext.CreateUsingData(data);
         return ctx;
     }
 

@@ -70,8 +70,8 @@ public class SecurityTests
 
             using var provider = services.BuildServiceProvider();
             RecentContextFactory.IGeneratorContextFactory factory = provider.GetRequiredService<RecentContextFactory.IGeneratorContextFactory>();
-            RecentGeneratorContext ctx = factory.Create(obj.labOrder, obj.vaccine);
-            RecentActionResult ar = (RecentActionResult)await InternalScriptManager!.ExecuteScript<IGeneratorActionScript>("WhileTrueScript", ctx);
+            RecentContext ctx = factory.Create(obj.labOrder, obj.vaccine);
+            RecentActionResult ar = (RecentActionResult)await InternalScriptManager!.ExecuteScript<IActionScript>("WhileTrueScript", ctx);
 
             Console.WriteLine("Name: " + script.ScriptName + ", ScriptType: " + script.ScriptType);
             Console.WriteLine("Type name: " + ar.GetType().FullName);
@@ -169,7 +169,7 @@ public class SecurityTests
 
         // [ExecutionTime(ExecutionTimeGroups.Long)]
         [ExecutionTime(1333)]
-        public class ExecutionTimeTest : GeneratorScriptsGeneric.IGeneratorActionScript<IGeneratorContext_V2.IGeneratorContext, ActionResultV1.ActionResult>
+        public class ExecutionTimeTest : GeneratorScriptsGeneric.IActionScript<IGeneratorContext_V2.IGeneratorContext, ActionResultV1.ActionResult>
         {
         public async Task<ActionResultV1.ActionResult> ExecuteAsync(IGeneratorContext_V2.IGeneratorContext context)    //error is here in Basyns
         {
@@ -191,7 +191,7 @@ public class SecurityTests
         using IGeneratorContext_V2;
 
         [ExecutionTime(6000)]
-        public class ExecutionTimeTest : GeneratorScriptsGeneric.IGeneratorActionScript<IGeneratorContext_V2.IGeneratorContext, ActionResultV1.ActionResult>
+        public class ExecutionTimeTest : GeneratorScriptsGeneric.IActionScript<IGeneratorContext_V2.IGeneratorContext, ActionResultV1.ActionResult>
         {
         public async Task<ActionResultV1.ActionResult> ExecuteAsync(IGeneratorContext_V2.IGeneratorContext context)    //error is here in Basyns
         {
@@ -213,7 +213,7 @@ public class SecurityTests
         using IGeneratorContext_V2;
 
         [ExecutionTime(1)]
-        public class ExecutionTimeTest : GeneratorScriptsGeneric.IGeneratorActionScript<IGeneratorContext_V2.IGeneratorContext, ActionResultV1.ActionResult>
+        public class ExecutionTimeTest : GeneratorScriptsGeneric.IActionScript<IGeneratorContext_V2.IGeneratorContext, ActionResultV1.ActionResult>
         {
         public async Task<ActionResultV1.ActionResult> ExecuteAsync(IGeneratorContext_V2.IGeneratorContext context)    //error is here in Basyns
         {

@@ -6,7 +6,7 @@ using GeneratorScriptsGeneric;
 using IGeneratorContext_V2;
 
 // using static System.Threading.Mutex; //if uncomment it wont run which is good
-public class AddPediatricTestsV2 : GeneratorScriptsGeneric.IGeneratorActionScript<IGeneratorContext_V2.IGeneratorContext, ActionResultV1.ActionResult>
+public class AddPediatricTestsV2 : GeneratorScriptsGeneric.IActionScript<IGeneratorContext_V2.IGeneratorContext, ActionResultV1.ActionResult>
 {
     public async Task<ActionResultV1.ActionResult> ExecuteAsync(IGeneratorContext_V2.IGeneratorContext context)    //error is here in Basyns
     {

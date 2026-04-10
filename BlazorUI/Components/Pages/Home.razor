@@ -17,14 +17,14 @@
 </div> *@
 <!-- Statistics Cards -->
 <div class="row mb-4">
-    <div class="col-lg-3 col-md-6 mb-3">
+    <div class="col-lg-4 col-md-12 mb-3">
         <div class="stat-card" id="total-scripts-card">
             <i class="bi bi-file-code-fill"></i>
             <h3>@_totalScripts</h3>
             <p>Total Scripts</p>
         </div>
     </div>
-    <div class="col-lg-3 col-md-6 mb-3">
+    <div class="col-lg-4 col-md-12 mb-3">
         <div class="stat-card success">
             <i class="bi bi-check-circle-fill"></i>
             <h3>
@@ -33,20 +33,20 @@
             <p>Compiled Scripts</p>
         </div>
     </div>
-    <div class="col-lg-3 col-md-6 mb-3">
+    <div class="col-lg-4 col-md-12 mb-3">
         <div class="stat-card warning">
             <i class="bi bi-exclamation-triangle-fill"></i>
             <h3>@_pendingScripts</h3>
             <p>Pending Compilation</p>
         </div>
     </div>
-    <div class="col-lg-3 col-md-6 mb-3">
+    @* <div class="col-lg-3 col-md-6 mb-3">
         <div class="stat-card info">
             <i class="bi bi-clock-history"></i>
             <h3>@(TotalExecutions.GetTotalExecutions())</h3>
             <p>Total Executions</p>
         </div>
-    </div>
+    </div> *@
 </div>
 <!-- Add this below the <div class="row mt-4">
 block in Home.razor -->
@@ -193,7 +193,7 @@ block in Home.razor -->
                                     }
                                     <span class="status-dot @dotClass"></span>
                                     <strong>@(string.IsNullOrEmpty(instance.InstanceName) ? (instance.Hostname ??
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     instance.InstanceId.ToString().Substring(0, 8)) : instance.InstanceName)</strong>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     instance.InstanceId.ToString().Substring(0, 8)) : instance.InstanceName)</strong>
                                     </div>
                                     <span class="badge bg-primary">v@(instance.EmberVersion ?? "Unknown") (API
                                         v@(instance.SdkVersion))</span>
@@ -472,6 +472,11 @@ EmberMethods.GetEmberApiVersion(), folderPath: path);
             _isWorking = false;
             StateHasChanged();
 
+            await LoadDashBoardData();
+        }
+        catch (CompileAllScriptsInFolderException)
+        {
+            _isWorking = false;
             await LoadDashBoardData();
         }
         catch (Ember.Scripting.ScriptRepositoryException e)

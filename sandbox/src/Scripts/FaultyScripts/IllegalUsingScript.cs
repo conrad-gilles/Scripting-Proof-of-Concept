@@ -6,7 +6,7 @@ using GeneratorScriptsGeneric;
 using IGeneratorContext_V2;
 
 using static System.Threading.Mutex; //this using is banned and will prevent the script from passing BasicValidation and therefore compiling
-public class IllegalUsingScript : GeneratorScriptsGeneric.IGeneratorActionScript<IGeneratorContext_V2.IGeneratorContext, ActionResultV1.ActionResult>
+public class IllegalUsingScript : GeneratorScriptsGeneric.IActionScript<IGeneratorContext_V2.IGeneratorContext, ActionResultV1.ActionResult>
 {
     public async Task<ActionResultV1.ActionResult> ExecuteAsync(IGeneratorContext_V2.IGeneratorContext context)
     {

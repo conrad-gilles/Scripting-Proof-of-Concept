@@ -47,11 +47,11 @@ public class CustomerScript
         Type sType;
         switch (ScriptType)
         {
-            case nameof(IGeneratorActionScript):
-                sType = typeof(IGeneratorActionScript);
+            case nameof(IActionScript):
+                sType = typeof(IActionScript);
                 break;
-            case nameof(IGeneratorConditionScript):
-                sType = typeof(IGeneratorConditionScript);
+            case nameof(IConditionScript):
+                sType = typeof(IConditionScript);
                 break;
             default:
                 throw new CouldNotAssignBaseTypeException(message: "Could not assign baseTypeName");

@@ -175,7 +175,7 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
     #region Execution Operations
 
     // Generic execution 
-    public async Task<object> ExecuteScriptById(Guid scriptId, GeneratorContextSF context, int? apiVersion = null, string? methodName = null)
+    public async Task<object> ExecuteScriptById(Guid scriptId, Context context, int? apiVersion = null, string? methodName = null)
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName} with scriptId: {ScriptId}.", nameof(ExecuteScriptById), nameof(ScriptManagerFacade), scriptId);
 
@@ -202,13 +202,13 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
         return result;
     }
 
-    public async Task<object> ExecuteScriptByNameAndType<ScriptType>(string name, GeneratorContextSF context, int? apiVersion = null, string? methodName = null) where ScriptType : IScript
+    public async Task<object> ExecuteScriptByNameAndType<ScriptType>(string name, Context context, int? apiVersion = null, string? methodName = null) where ScriptType : IScript
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName} with scriptName: {ScriptId}.", nameof(ExecuteScriptByNameAndType), nameof(ScriptManagerFacade), name);
         Guid scriptId = await GetScriptId<ScriptType>(name);
         return await ExecuteScriptById(scriptId, context, apiVersion, methodName);
     }
-    public async Task<object> ExecuteUnfinishedScriptBySourceCode(string sourceCode, GeneratorContextSF context, int? apiVersion = null, string? methodName = null, int? executionTime = null)
+    public async Task<object> ExecuteUnfinishedScriptBySourceCode(string sourceCode, Context context, int? apiVersion = null, string? methodName = null, int? executionTime = null)
     {
         ValidationRecord vali = _compiler.BasicValidationBeforeCompiling(sourceCode);
         if (executionTime == null)

@@ -287,7 +287,7 @@ public class EmberMethods
     }
     private static List<MetadataReference> _references = [
         MetadataReference.CreateFromFile(typeof(object).Assembly.Location), // System.Private.CoreLib
-                        MetadataReference.CreateFromFile(typeof(IGeneratorConditionScript).Assembly.Location),
+                        MetadataReference.CreateFromFile(typeof(IConditionScript).Assembly.Location),
                 MetadataReference.CreateFromFile(typeof(IGeneratorReadOnlyContextV1.IGeneratorContext).Assembly.Location),//try removing if works good i guess but still need to pass from sandbox];
                           ];
     public static List<MetadataReference> GetReferences()
@@ -300,13 +300,13 @@ public class EmberMethods
         // GeneratorContext ctx = GetTestingContext();
         return "Gilles";
     }
-    public async Task<Ember.Scripting.GeneratorContextSF> GetTestingContext<T>(CustomerScript? autoDetectFromScript = null) where T : Ember.Scripting.GeneratorContextSF
+    public async Task<Ember.Scripting.Context> GetTestingContext<T>(CustomerScript? autoDetectFromScript = null) where T : Ember.Scripting.GeneratorContextSF
     {
         Serilog.Log.Verbose("Entered {MethodName} in {ClassName}.", nameof(GetTestingContext), nameof(EmberMethods));
         try
         {
             Sandbox.ContextManagementDemos sf = new Sandbox.ContextManagementDemos(_facade);
-            Ember.Scripting.GeneratorContextSF ctx;
+            Context ctx;
             if (autoDetectFromScript == null)
             {
                 var dict = ContextVersionScanner.GetClassDictionary();

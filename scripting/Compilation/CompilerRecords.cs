@@ -16,13 +16,13 @@ public record ValidationRecord
     public string BaseTypeAsString()
     {
         string sScriptType;
-        if (ScriptType == typeof(IGeneratorActionScript))
+        if (ScriptType == typeof(IActionScript))
         {
-            sScriptType = nameof(IGeneratorActionScript);
+            sScriptType = nameof(IActionScript);
         }
-        else if (ScriptType == typeof(IGeneratorConditionScript))
+        else if (ScriptType == typeof(IConditionScript))
         {
-            sScriptType = nameof(IGeneratorConditionScript);
+            sScriptType = nameof(IConditionScript);
         }
         else
         {

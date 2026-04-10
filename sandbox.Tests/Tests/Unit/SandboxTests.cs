@@ -40,7 +40,7 @@ public class SanboxTests
     public async Task CreateContextTest()
     {
         Sandbox.ContextManagementDemos sf;
-        Ember.Scripting.GeneratorContextSF ctx;
+        Ember.Scripting.Context ctx;
 
         _facade = EmberMethods.GetNewScriptManagerInstance(1);
         sf = new Sandbox.ContextManagementDemos(_facade);
@@ -128,7 +128,7 @@ public class SanboxTests
         Console.WriteLine(nameof(valResult.ClassName) + " : " + valResult.ClassName);
         Console.WriteLine(nameof(valResult.Version) + " : " + valResult.Version);
 
-        Assert.IsTrue(valResult.ScriptType == typeof(IGeneratorActionScript));
+        Assert.IsTrue(valResult.ScriptType == typeof(IActionScript));
         Assert.IsTrue(valResult.ClassName == "AddPediatricTestsV3");
         Assert.IsTrue(valResult.Version == 3);
 
@@ -138,7 +138,7 @@ public class SanboxTests
         Console.WriteLine(nameof(valResult.ClassName) + " : " + valResult.ClassName);
         Console.WriteLine(nameof(valResult.Version) + " : " + valResult.Version);
 
-        Assert.IsTrue(valResult.ScriptType == typeof(IGeneratorActionScript));
+        Assert.IsTrue(valResult.ScriptType == typeof(IActionScript));
         Assert.IsTrue(valResult.ClassName == "AddPediatricTestsV2");
         Assert.IsTrue(valResult.Version == 2);
 
@@ -148,7 +148,7 @@ public class SanboxTests
         Console.WriteLine(nameof(valResult.ClassName) + " : " + valResult.ClassName);
         Console.WriteLine(nameof(valResult.Version) + " : " + valResult.Version);
 
-        Assert.IsTrue(valResult.ScriptType == typeof(IGeneratorActionScript));
+        Assert.IsTrue(valResult.ScriptType == typeof(IActionScript));
         Assert.IsTrue(valResult.ClassName == "AddPediatricTestsV4");
         Assert.IsTrue(valResult.Version == 4);
 
@@ -158,7 +158,7 @@ public class SanboxTests
         Console.WriteLine(nameof(valResult.ClassName) + " : " + valResult.ClassName);
         Console.WriteLine(nameof(valResult.Version) + " : " + valResult.Version);
 
-        Assert.IsTrue(valResult.ScriptType == typeof(IGeneratorActionScript));
+        Assert.IsTrue(valResult.ScriptType == typeof(IActionScript));
         Assert.IsTrue(valResult.ClassName == "VaccineScript");
         Assert.IsTrue(valResult.Version == 5);
 
@@ -168,7 +168,7 @@ public class SanboxTests
         Console.WriteLine(nameof(valResult.ClassName) + " : " + valResult.ClassName);
         Console.WriteLine(nameof(valResult.Version) + " : " + valResult.Version);
 
-        Assert.IsTrue(valResult.ScriptType == typeof(IGeneratorConditionScript));
+        Assert.IsTrue(valResult.ScriptType == typeof(IConditionScript));
         Assert.IsTrue(valResult.ClassName == "PediatricCondition");
         Assert.IsTrue(valResult.Version == 1);
 
@@ -233,7 +233,7 @@ public class SanboxTests
     public async Task CreateContextByDowngradeTest()
     {
 
-        RecentGeneratorContext data = new RecentGeneratorContext(labOrder: _obj!.labOrder, vaccine: _obj.vaccine);
+        RecentContext data = new RecentContext(labOrder: _obj!.labOrder, vaccine: _obj.vaccine);
 
         CustomerScript script;
         ContextManagement sf;

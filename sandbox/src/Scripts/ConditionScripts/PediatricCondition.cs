@@ -9,7 +9,7 @@ using GeneratorScriptsGenericSimple;   //todo same for them
 // namespace MyCustomScripts //todo change get rid idk
 // {
 
-public class PediatricCondition : IGeneratorConditionScript<IGeneratorReadOnlyContextV1.IGeneratorContext>
+public class PediatricCondition : IConditionScript<IGeneratorReadOnlyContextV1.IGeneratorContext>
 {
 
     public async Task<bool> EvaluateAsync(IGeneratorReadOnlyContextV1.IGeneratorContext context)
