@@ -15,6 +15,7 @@ internal class EmberInternalFacade
     {
         var cf = new ContextManagement(_scriptManager);
         CustomerScript script = await _scriptManager.GetScript(id);
+        methodName = MethodNameFactory.GetOldMethodName(methodName, script.MinApiVersion);
         Context context = await cf.CreateByDowngrade(script.MinApiVersion, ctx);
         return await _scriptManager.ExecuteScriptById(id, context, methodName: methodName);
     }
@@ -102,39 +103,39 @@ internal class ActionScriptFacade : RecentIActionScript
 
     public async Task<RecentActionResult> Execute1(RecentIContext context)
     {
-        // return (RecentActionResult)await _emberScriptManager.Execute1<IGeneratorActionScript>(_scriptName, (RecentContext)context);
-
         string methodName = nameof(Ember.Scripting.AdditionalMethods.IExecute1.Execute1);
-        methodName = MethodNameFactory.GetSafeMethodName(methodName);
-        Guid id = await _scriptManager.GetScriptId<IActionScript>(_scriptName);
-        return (RecentActionResult)await _emberScriptManager.ExecuteScript(id, (RecentContext)context, methodName);
+        return (RecentActionResult)await _emberScriptManager.ExecuteScript<IActionScript>(_scriptName, (RecentContext)context, methodName);
     }
     public async Task<RecentActionResult> Execute2(RecentIContext context)
     {
-        // return (RecentActionResult)await _emberScriptManager.Execute2<IGeneratorActionScript>(_scriptName, (RecentContext)context);
-
         string methodName = nameof(Ember.Scripting.AdditionalMethods.IExecute2.Execute2);
-        methodName = MethodNameFactory.GetSafeMethodName(methodName);
-        Guid id = await _scriptManager.GetScriptId<IActionScript>(_scriptName);
-        return (RecentActionResult)await _emberScriptManager.ExecuteScript(id, (RecentContext)context, methodName);
+        return (RecentActionResult)await _emberScriptManager.ExecuteScript<IActionScript>(_scriptName, (RecentContext)context, methodName);
     }
 }
 internal static class MethodNameFactory
 {
-    public static string GetSafeMethodName(string methodName)
+    public static string? GetOldMethodName(string? methodName, int version)
     {
-        switch (methodName)
+        if (methodName == nameof(Ember.Scripting.AdditionalMethods.IExecute1.Execute1))
         {
-            case "ExecuteAction1":
-                return "Execute1";
-
-            case "ExecuteAction2":
-                return "Execute2";
-
-            case "ExecuteSomething1":
-                return "Execute1";
-            default:
-                return methodName;
+            switch (version)
+            {
+                case 10:
+                    return "Execute1";
+                default:
+                    return methodName;
+            }
         }
+        if (methodName == nameof(Ember.Scripting.AdditionalMethods.IExecute2.Execute2))
+        {
+            switch (version)
+            {
+                case 10:
+                    return "ExecuteAction2";
+                default:
+                    return methodName;
+            }
+        }
+        return methodName;
     }
 }

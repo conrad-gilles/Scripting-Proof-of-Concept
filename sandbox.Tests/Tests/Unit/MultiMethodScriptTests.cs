@@ -214,49 +214,68 @@ public class MultiMethodScriptTests
     [TestMethod]
     public async Task GetScriptAndExecuteSpecificMethodTest()
     {
+        //Setting up the script anc context and inserting it into the DB
         string sourceCode = TestHelper.GetSC().sourceCodeMultiMethodScripts;
         var context = TestHelper.GetContext();
         CustomerScript scriptDB = await ScriptManager.CreateScript(sourceCode);
 
-        // ScriptFacade<IGeneratorActionScript> script = InternalScriptManager.GetScript<IGeneratorActionScript>(scriptDB.ScriptName!);
-        // var script = InternalScriptManager.GetScript<IGeneratorActionScript>(scriptDB.ScriptName!); //same as above just using var instead
-        RecentIActionScript script = (RecentIActionScript)InternalScriptManager.GetScript<IActionScript>(scriptDB.ScriptName!); //same as above just using var instead
+        //Getting the Script
+        RecentIActionScript script = (RecentIActionScript)InternalScriptManager.GetScript<IActionScript>(scriptDB.ScriptName!);
 
+        //Executing the first function
         RecentActionResult ar = (RecentActionResult)await script.ExecuteAsync(context);
         Assert.IsTrue(ar.ToString().Contains("Default method ExecuteAsync was called"));
 
+        //Executing the second function
         ar = (RecentActionResult)await script.Execute1(context);
         Assert.IsTrue(ar.ToString().Contains("ExecuteAction1 was called"));
 
         Exception ex = await Assert.ThrowsExceptionAsync<Ember.Scripting.ActionScriptExecutionException>(async () =>
         {
+            //Executing the third function (normal that it throws an exception)
             ar = (RecentActionResult)await script.Execute2(context);
         });
 
+        //Setting up a new script that does not implement the extra Methods
         sourceCode = TestHelper.GetSC().sourceCodeVaccineAction;
         scriptDB = await ScriptManager.CreateScript(sourceCode);
 
         script = (RecentIActionScript)InternalScriptManager.GetScript<IActionScript>(scriptDB.ScriptName!);
+
+        //Executing the first function that exists
         ar = (RecentActionResult)await script.ExecuteAsync(context);
         Assert.IsTrue(ar.ToString().Contains("Vaccine added"));
 
-        script = (RecentIActionScript)InternalScriptManager.GetScript<IActionScript>(scriptDB.ScriptName!);
+        //Trying to execute a function that is not implemented in the Script
         ex = await Assert.ThrowsExceptionAsync<Ember.Scripting.CouldNotFindMethodException>(async () =>
        {
            ar = (RecentActionResult)await script.Execute1(context);
        });
 
+        //Trying to call a condition method on an action script wont even compile
         // ex = await Assert.ThrowsExceptionAsync<System.InvalidCastException>(async () =>
         // {
-        //     var result1 = await script.EvaluateAsync(context);
+        // var result1 = await script.EvaluateAsync(context);   //uncomment
         // });
 
+        //Setting up a condition Script
         sourceCode = TestHelper.GetSC().sourceCodePedia;
         scriptDB = await ScriptManager.CreateScript(sourceCode);
         var condScript = InternalScriptManager.GetScript<IConditionScript>(scriptDB.ScriptName!);
+
+        //Executing the evaluate function
         bool result = await condScript.EvaluateAsync(context);
 
         Console.WriteLine("Result: " + result);
         Assert.IsTrue(result);
+
+        //Trying to execute an action method on an Condition Script wont compile
+        // result=await condScript.Execute1(context);   //uncomment
     }
+
+    // [TestMethod]
+    // public void NegativeTest2()
+    // {
+
+    // }
 }
