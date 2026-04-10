@@ -50,16 +50,16 @@ public class GeneratorScriptFacade : IMultiMethodBase
         _scriptManager = scriptManager;
         _emberScriptManager = new EmberInternalFacade(_scriptManager);
     }
-    public Task<ActionResultSF> ExecuteAsync(IGeneratorBaseInterfaceSF context)
+    public Task<ActionResultSF> ExecuteAsync(IContext context)
     {
         throw new NotImplementedException();
     }
-    public Task<ActionResultSF> Execute1(IGeneratorBaseInterfaceSF context)
+    public Task<ActionResultSF> Execute1(IContext context)
     {
         throw new NotImplementedException();
     }
 
-    public Task<ActionResultSF> Execute2(IGeneratorBaseInterfaceSF context)
+    public Task<ActionResultSF> Execute2(IContext context)
     {
         throw new NotImplementedException();
     }

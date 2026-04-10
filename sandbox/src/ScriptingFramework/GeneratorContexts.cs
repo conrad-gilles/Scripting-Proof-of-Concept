@@ -7,7 +7,7 @@ using IGeneratorReadOnlyContextV1;
 namespace IGeneratorReadOnlyContextV1
 {
     [MetaDataIGeneratorIntrfc(version: 1)]
-    public interface IGeneratorContext : IGeneratorBaseInterfaceSF
+    public interface IGeneratorContext : IGeneratorContextBaseInterfaceSF
     {
         ILabOrderInterface LabOrder { get; }      // Read current order data
         IPatientInterface Patient2 { get; }     // Read patient data
@@ -49,7 +49,7 @@ namespace IGeneratorContext_V4
 namespace IGeneratorContextNoInheritance_V5
 {
     [MetaDataIGeneratorIntrfc(version: 5)]
-    public interface IGeneratorContext : IGeneratorBaseInterfaceSF
+    public interface IGeneratorContext : IGeneratorContextBaseInterfaceSF
     {
         ILabOrderInterfaceV4NoInheritence LabOrder { get; }
         IVaccineInterface Vaccine { get; }

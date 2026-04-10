@@ -17,7 +17,7 @@ public static class ContextVersionScanner
 
     public static Dictionary<int, Type> GetInterfaceDictionary()
     {
-        Type baseType = typeof(Ember.Scripting.IGeneratorBaseInterfaceSF);
+        Type baseType = typeof(Ember.Scripting.IContext);
         return GetBaseTypeDictionaryIntrfc(baseType);
     }
 

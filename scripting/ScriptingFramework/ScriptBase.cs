@@ -10,10 +10,9 @@ namespace Ember.Scripting
 
 namespace Ember.Scripting.AdditionalMethods
 {
-    // [MetaDataIGeneratorScript(version: 1, returnType: IGeneratorScriptReturnType.Action, type: IGeneratorScriptType.AbstractBaseInSF)]
     public interface IExecute1 : IScript
     {
-        Task<ActionResultSF> Execute1(IGeneratorBaseInterfaceSF context);    //type of construcotr changes per version
+        Task<ActionResultSF> Execute1(IContext context);    //type of construcotr changes per version
         // {
         //     throw new MethodNotImplementedException();
         // }
@@ -21,14 +20,14 @@ namespace Ember.Scripting.AdditionalMethods
 
     public interface IExecute2 : IScript
     {
-        Task<ActionResultSF> Execute2(IGeneratorBaseInterfaceSF context);
+        Task<ActionResultSF> Execute2(IContext context);
         // {
         //     throw new MethodNotImplementedException();
         // }
     }
     public interface IExecute3 : IScript
     {
-        Task<string> Execute3(IGeneratorBaseInterfaceSF context);
+        Task<string> Execute3(IContext context);
         // {
         //     throw new MethodNotImplementedException();
         // }

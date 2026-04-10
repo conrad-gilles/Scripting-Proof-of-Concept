@@ -248,7 +248,7 @@ public class SanboxTests
         script = (await _facade.CreateScript(src!));
 
         sf = new ContextManagement(_facade);
-        GeneratorContextSF ctx = await sf.CreateByDowngrade(script.MinApiVersion, data!);
+        Context ctx = await sf.CreateByDowngrade(script.MinApiVersion, data!);
         Console.WriteLine("Type name: " + ctx.GetType().FullName);
 
         result = await _facade.ExecuteScriptById(script.Id, ctx);
