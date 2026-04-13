@@ -38,7 +38,7 @@ internal class EmberInternalFacade
         return CheckUpgradeActionResult(result);
     }
     internal async Task<object> ExecuteScript<ScriptType>(string name, RecentContext ctx, string? methodName = null)
-    where ScriptType : IScript
+    where ScriptType : IScriptType
     {
         Guid id = await _scriptManager.GetScriptId<ScriptType>(name);
         return await ExecuteScript(id, ctx, methodName);
@@ -54,7 +54,7 @@ internal class EmberInternalFacade
         return CheckUpgradeActionResult(result);
     }
 
-    public TScript GetScript<TScript>(string name) where TScript : IScript
+    public TScript GetScript<TScript>(string name) where TScript : IScriptMethod
     {
         if (typeof(Ember.Scripting.IScriptMethodsCondition).IsAssignableFrom(typeof(TScript)))
         {

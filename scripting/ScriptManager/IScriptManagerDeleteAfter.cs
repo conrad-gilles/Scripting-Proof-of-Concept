@@ -164,7 +164,7 @@ public interface IScriptManagerDeleteAfter : IScriptManagerExtended
   /// <returns></returns>
   Task<string> GetScriptMetadata(Guid scriptId);
 
-  Task<Guid> GetScriptId<ScriptType>(string scriptName) where ScriptType : IScript;
+  Task<Guid> GetScriptId<ScriptType>(string scriptName) where ScriptType : IScriptType;
 
   /// <summary>
   /// 

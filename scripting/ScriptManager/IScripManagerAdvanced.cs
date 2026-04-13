@@ -23,9 +23,9 @@ public interface IScriptManagerExtended : IScriptManager
 
     Task UpdateScriptAndCompile(Guid scriptId, string newSourceCode, int? apiVersion = null);
 
-    Task UpdateScriptNT<ScriptType>(string name, string newSourceCode, int? apiVersion = null) where ScriptType : IScript;
+    Task UpdateScriptNT<ScriptType>(string name, string newSourceCode, int? apiVersion = null) where ScriptType : IScriptType;
 
-    Task UpdateScriptAndCompileNT<ScriptType>(string name, string newSourceCode, int? apiVersion = null) where ScriptType : IScript;
+    Task UpdateScriptAndCompileNT<ScriptType>(string name, string newSourceCode, int? apiVersion = null) where ScriptType : IScriptType;
 
     /// <summary>
     /// Removes script and all associated compiled caches
@@ -34,7 +34,7 @@ public interface IScriptManagerExtended : IScriptManager
     /// <returns></returns>
     Task DeleteScript(Guid scriptId);
 
-    Task DeleteScriptNT<ScriptType>(string scriptName) where ScriptType : IScript;
+    Task DeleteScriptNT<ScriptType>(string scriptName) where ScriptType : IScriptType;
 
     /// <summary>
     /// Retrieves script metadata and source code
@@ -44,7 +44,7 @@ public interface IScriptManagerExtended : IScriptManager
     /// <returns></returns>
     Task<CustomerScript> GetScript(Guid scriptId, bool includeCaches = false);
 
-    Task<CustomerScript> GetScriptNT<ScriptType>(string name, bool includeCaches = false) where ScriptType : IScript;
+    Task<CustomerScript> GetScriptNT<ScriptType>(string name, bool includeCaches = false) where ScriptType : IScriptType;
 
     #endregion
 }

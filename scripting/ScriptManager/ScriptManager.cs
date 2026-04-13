@@ -45,7 +45,7 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
         await _db.UpdateScript(script, newSourceCode, allowFaultySave, apiVersion: apiVersion);
     }
 
-    public async Task UpdateScriptNT<ScriptType>(string name, string newSourceCode, int? apiVersion = null) where ScriptType : IScript
+    public async Task UpdateScriptNT<ScriptType>(string name, string newSourceCode, int? apiVersion = null) where ScriptType : IScriptType
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName} with Name: {name}.", nameof(UpdateScriptNT), nameof(ScriptManagerFacade), name);
 
@@ -60,7 +60,7 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
         await _db.UpdateScriptAndRecompile(scriptId, newSourceCode, apiVersion);
     }
 
-    public async Task UpdateScriptAndCompileNT<ScriptType>(string name, string newSourceCode, int? apiVersion = null) where ScriptType : IScript
+    public async Task UpdateScriptAndCompileNT<ScriptType>(string name, string newSourceCode, int? apiVersion = null) where ScriptType : IScriptType
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName} with Name: {name}.", nameof(UpdateScriptAndCompileNT), nameof(ScriptManagerFacade), name);
         Guid scriptId = await GetScriptId<ScriptType>(name);
@@ -74,7 +74,7 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
         await _db.DeleteCustomerScript(scriptId);    //todo check if this also deletes the caches
     }
 
-    public async Task DeleteScriptNT<ScriptType>(string scriptName) where ScriptType : IScript
+    public async Task DeleteScriptNT<ScriptType>(string scriptName) where ScriptType : IScriptType
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName} with scriptName: {scriptName}.", nameof(DeleteScriptNT), nameof(ScriptManagerFacade), scriptName);
         Guid id = await GetScriptId<ScriptType>(scriptName);
@@ -87,7 +87,7 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
         return await _db.GetCustomerScript(scriptId, includeCaches);
     }
 
-    public async Task<CustomerScript> GetScriptNT<ScriptType>(string name, bool includeCaches = false) where ScriptType : IScript
+    public async Task<CustomerScript> GetScriptNT<ScriptType>(string name, bool includeCaches = false) where ScriptType : IScriptType
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName} with Name: {name}.", nameof(GetScriptNT), nameof(ScriptManagerFacade), name);
         Guid scriptId = await GetScriptId<ScriptType>(name);
@@ -202,7 +202,7 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
         return result;
     }
 
-    public async Task<object> ExecuteScriptByNameAndType<ScriptType>(string name, Context context, int? apiVersion = null, string? methodName = null) where ScriptType : IScript
+    public async Task<object> ExecuteScriptByNameAndType<ScriptType>(string name, Context context, int? apiVersion = null, string? methodName = null) where ScriptType : IScriptType
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName} with scriptName: {ScriptId}.", nameof(ExecuteScriptByNameAndType), nameof(ScriptManagerFacade), name);
         Guid scriptId = await GetScriptId<ScriptType>(name);
@@ -337,7 +337,7 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
         return str;
     }
 
-    public async Task<Guid> GetScriptId<ScriptType>(string scriptName) where ScriptType : IScript
+    public async Task<Guid> GetScriptId<ScriptType>(string scriptName) where ScriptType : IScriptType
     {
         return await _db.GetScriptId<ScriptType>(scriptName);
     }

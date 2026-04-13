@@ -2,6 +2,11 @@ namespace Ember.Scripting
 {
     using Ember.Scripting.ScriptMethods;
 
+    public interface IScriptMethod
+    {
+
+    }
+
     public interface IScriptMethodsAction : IExecuteAsync, IExecute1, IExecute2, IExecute3
     {
 
@@ -15,7 +20,7 @@ namespace Ember.Scripting
 namespace Ember.Scripting.ScriptMethods
 
 {
-    public interface IEvaluateAsync : IScript
+    public interface IEvaluateAsync : IScriptMethod
     {
         Task<bool> EvaluateAsync(IContext context)
         {
@@ -23,7 +28,7 @@ namespace Ember.Scripting.ScriptMethods
         }
     }
 
-    public interface IExecuteAsync : IScript
+    public interface IExecuteAsync : IScriptMethod
     {
         Task<ActionResultSF> ExecuteAsync(IContext context)
         {
@@ -31,7 +36,7 @@ namespace Ember.Scripting.ScriptMethods
         }
     }
 
-    public interface IExecute1 : IScript
+    public interface IExecute1 : IScriptMethod
     {
         Task<ActionResultSF> Execute1(IContext context)    //type of construcotr changes per version
         {
@@ -39,14 +44,14 @@ namespace Ember.Scripting.ScriptMethods
         }
     }
 
-    public interface IExecute2 : IScript
+    public interface IExecute2 : IScriptMethod
     {
         Task<ActionResultSF> Execute2(IContext context)
         {
             throw new MethodNotImplementedException(message: "Method: " + nameof(Execute2) + " was not implemented.");
         }
     }
-    public interface IExecute3 : IScript
+    public interface IExecute3 : IScriptMethod
     {
         Task<string> Execute3(IContext context)
         {
