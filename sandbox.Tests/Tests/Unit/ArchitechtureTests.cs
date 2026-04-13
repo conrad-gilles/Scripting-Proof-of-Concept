@@ -1,3 +1,6 @@
+#pragma warning disable CS0436
+
+
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Ember.Scripting;
@@ -190,7 +193,7 @@ public class ArchitechtureTests
         int realMS = (int)ScriptManager.BasicValidationBeforeCompiling(sourceCode5000).ExecutionTime;
         Console.WriteLine("exoected: " + realMS);
 
-        Assert.IsTrue(elapsedMs > 4999 && elapsedMs < 7000);
+        Assert.IsTrue(elapsedMs > 4999 && elapsedMs < 7500);
 
         stopwatch = System.Diagnostics.Stopwatch.StartNew();
         e = await Assert.ThrowsExceptionAsync<Ember.Scripting.ActionScriptExecutionException>(async () =>

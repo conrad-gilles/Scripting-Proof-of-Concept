@@ -1,3 +1,5 @@
+#pragma warning disable CS0436
+
 using Ember.Scripting;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 

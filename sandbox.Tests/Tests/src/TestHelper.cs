@@ -1,3 +1,6 @@
+#pragma warning disable CS0436
+
+
 using Ember.Scripting;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;

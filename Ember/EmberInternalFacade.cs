@@ -30,6 +30,10 @@ internal class EmberInternalFacade
         {
             return result;
         }
+        if (result.GetType() == typeof(string))
+        {
+            return result;
+        }
         throw new Exception(message: "Type was" + result.GetType().Name);
     }
     internal async Task<object> ExecuteScript(Guid id, RecentContext ctx, string methodName)
@@ -106,7 +110,7 @@ internal class ActionScriptFacade : RecentIActionScript
 
     public async Task<RecentActionResult> Execute1(RecentIContext context)
     {
-        string? methodName = nameof(Ember.Scripting.ScriptMethods.IExecute1.Execute1);
+        string methodName = nameof(Ember.Scripting.ScriptMethods.IExecute1.Execute1);
         CustomerScript script = await _scriptManager.GetScriptNT<IActionScript>(_scriptName);
         methodName = MethodNameFactory.GetOldMethodName(methodName, script.MinApiVersion, script.GetScriptType());  //todo fix this 
         return (RecentActionResult)await _emberScriptManager.ExecuteScript<IActionScript>(_scriptName, (RecentContext)context, methodName);
@@ -119,7 +123,7 @@ internal class ActionScriptFacade : RecentIActionScript
 }
 internal static class MethodNameFactory
 {
-    public static string? GetOldMethodName(string methodName, int version, Type scriptType)
+    public static string GetOldMethodName(string methodName, int version, Type scriptType)
     {
         if (scriptType == typeof(IActionScript))
         {
