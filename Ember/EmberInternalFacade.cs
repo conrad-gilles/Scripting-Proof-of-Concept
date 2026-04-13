@@ -55,16 +55,15 @@ internal class EmberInternalFacade
     }
 
     public TScript GetScript<TScript>(string name) where TScript : IScript
-        // public TScript GetScript<TScript>(string name) where TScript : RecentIActionScript
     {
-        if (typeof(IConditionScript).IsAssignableFrom(typeof(TScript)))
+        if (typeof(Ember.Scripting.IScriptMethodsCondition).IsAssignableFrom(typeof(TScript)))
         {
-            var toReturn = (IConditionScript)new ConditionScriptFacade(_scriptManager, name);
+            var toReturn = (Ember.Scripting.IScriptMethodsCondition)new ConditionScriptFacade(_scriptManager, name);
             return (TScript)toReturn;
         }
-        else if (typeof(IActionScript).IsAssignableFrom(typeof(TScript)))
+        else if (typeof(Ember.Scripting.IScriptMethodsAction).IsAssignableFrom(typeof(TScript)))
         {
-            var toReturn = (IActionScript)new ActionScriptFacade(_scriptManager, name);
+            var toReturn = (Ember.Scripting.IScriptMethodsAction)new ActionScriptFacade(_scriptManager, name);
             return (TScript)toReturn;
         }
         throw new Exception();

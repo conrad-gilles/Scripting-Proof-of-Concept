@@ -36,11 +36,11 @@ internal class ScriptExecutor
         List<Type> typeArrayList = [];
         for (int i = 0; i < unfilteredTypeArray.Length; i++)
         {
-            if (typeof(IActionScript).IsAssignableFrom(unfilteredTypeArray[i]))
+            if (typeof(Ember.Scripting.IScriptMethodsAction).IsAssignableFrom(unfilteredTypeArray[i]))
             {
                 typeArrayList.Add(unfilteredTypeArray[i]);
             }
-            if (typeof(IConditionScript).IsAssignableFrom(unfilteredTypeArray[i]))
+            if (typeof(Ember.Scripting.IScriptMethodsCondition).IsAssignableFrom(unfilteredTypeArray[i]))
             {
                 typeArrayList.Add(unfilteredTypeArray[i]);
             }
@@ -61,13 +61,12 @@ internal class ScriptExecutor
 
         object scriptInstance = Activator.CreateInstance(type)!;     //if null here probably typo in file name somewhere, like pedriatic instead of pediatic :(
 
-        // if (typeof(IGeneratorConditionScript).IsAssignableFrom(type))
-        if (typeof(IConditionScript).IsAssignableFrom(type))    //checks if type implements the generator specific interface  //check if runs
+        if (typeof(Ember.Scripting.IScriptMethodsCondition).IsAssignableFrom(type))    //checks if type implements the generator specific interface  //check if runs
         {
             var result = await RunConditionScript(type, scriptInstance, genContext);
             return (T)(object)result;
         }
-        else if (typeof(IActionScript).IsAssignableFrom(type))
+        else if (typeof(Ember.Scripting.IScriptMethodsAction).IsAssignableFrom(type))
         {
             var result = await RunActionScript(type, scriptInstance, genContext, methodName);
             return (T)(object)result;

@@ -9,8 +9,9 @@ namespace GeneratorScriptsGenericSimple
     /// Implementation using 1 generic for Context
     /// </summary>
     [MetaDataIGeneratorScript(version: 1, returnType: IGeneratorScriptReturnType.Condition, type: IGeneratorScriptType.GenericSimple)]
-    public interface IConditionScript<TContext> : Ember.Scripting.IConditionScript, Ember.Scripting.ScriptMethods.IEvaluateAsync    //todo this needs to get tested still
-                                                                                                                                    // where TContext : IGeneratorReadOnlyContextV1.IGeneratorContext
+    public interface IConditionScript<TContext> :
+      Ember.Scripting.IScriptMethodsCondition  //todo this needs to get tested still
+                                               // where TContext : IGeneratorReadOnlyContextV1.IGeneratorContext
         where TContext : IContext
     {
         Task<bool> EvaluateAsync(TContext context);
@@ -22,8 +23,7 @@ namespace GeneratorScriptsGenericSimple
     }
     [MetaDataIGeneratorScript(version: 1, returnType: IGeneratorScriptReturnType.Action, type: IGeneratorScriptType.GenericSimple)]
     public interface IActionScript<TContext> :
-     Ember.Scripting.IActionScript,
-     Ember.Scripting.ScriptMethods.IExecuteAsync
+     Ember.Scripting.IScriptMethodsAction
     where TContext : IGeneratorContext_V2.IGeneratorContext
     {
 
@@ -45,8 +45,7 @@ namespace GeneratorScriptsGeneric
     /// </summary>
     [MetaDataIGeneratorScript(version: 1, returnType: IGeneratorScriptReturnType.Action, type: IGeneratorScriptType.Generic)]
     public interface IActionScript<TContext, TActionResult> :
-     Ember.Scripting.IActionScript,
-     Ember.Scripting.ScriptMethods.IExecuteAsync
+     Ember.Scripting.IScriptMethodsAction
         where TContext : IContext    //changed from IGeneratorContext
         where TActionResult : ActionResultSF
     {
@@ -68,7 +67,8 @@ namespace GeneratorScriptsGeneric
 namespace GeneratorScriptsV2
 {
     [MetaDataIGeneratorScript(version: 2)]
-    public interface IActionScript : Ember.Scripting.IActionScript, Ember.Scripting.ScriptMethods.IExecuteAsync
+    public interface IActionScript :
+      Ember.Scripting.IScriptMethodsAction
     {
         Task<ActionResultV2.ActionResult> ExecuteAsync(IGeneratorContext_V3.IGeneratorContext context);
 
@@ -82,7 +82,8 @@ namespace GeneratorScriptsV3
 {
     [MetaDataIGeneratorScript(version: 3)]
     // public interface IGeneratorActionScript : Ember.Scripting.IGeneratorActionScript
-    public interface IActionScript : Ember.Scripting.IActionScript, Ember.Scripting.IScriptMethodsAction
+    public interface IActionScript :
+      Ember.Scripting.IScriptMethodsAction
     {
         Task<ActionResultV3.ActionResult> ExecuteAsync(IGeneratorContext_V4.IGeneratorContext context);
         Task<ActionResultV3.ActionResult> Execute1(IGeneratorContext_V4.IGeneratorContext context)
@@ -119,7 +120,8 @@ namespace GeneratorScriptsV3
 namespace GeneratorScriptsV4
 {
     [MetaDataIGeneratorScript(version: 4)]
-    public interface IActionScript : Ember.Scripting.IActionScript, Ember.Scripting.IScriptMethodsAction
+    public interface IActionScript :
+     Ember.Scripting.IScriptMethodsAction
     {
         Task<ActionResultV3.ActionResult> ExecuteAsync(IGeneratorContextNoInheritance_V5.IGeneratorContext context);
         Task<ActionResultV3.ActionResult> Execute1(IGeneratorContextNoInheritance_V5.IGeneratorContext context)
