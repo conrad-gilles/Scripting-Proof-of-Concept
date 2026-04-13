@@ -2,18 +2,28 @@ namespace Ember.Scripting
 {
     using Ember.Scripting.ScriptMethods;
 
-    public interface IScriptMethodsAction : IExecute1, IExecute2, IExecute3
+    public interface IScriptMethodsAction : IExecuteAsync, IExecute1, IExecute2, IExecute3
     {
 
     }
-    public interface IScriptMethodscondition
+    public interface IScriptMethodscondition : IEvaluateAsync
     {
 
     }
 }
 
 namespace Ember.Scripting.ScriptMethods
+
 {
+    public interface IEvaluateAsync : IScript
+    {
+        Task<bool> EvaluateAsync(IContext context);
+    }
+
+    public interface IExecuteAsync : IScript
+    {
+        Task<ActionResultSF> ExecuteAsync(IContext context);
+    }
 
     public interface IExecute1 : IScript
     {

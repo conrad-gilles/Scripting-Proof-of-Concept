@@ -84,7 +84,7 @@ internal class ScriptExecutor
         _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(RunConditionScript), nameof(ScriptExecutor));
         try
         {
-            MethodInfo method = type.GetMethod(nameof(IConditionScript.EvaluateAsync))!;
+            MethodInfo method = type.GetMethod(nameof(Ember.Scripting.ScriptMethods.IEvaluateAsync.EvaluateAsync))!;
 
             using var cts = new CancellationTokenSource(_scriptTimeout);
             ScriptEnvironment.CurrentToken.Value = cts.Token;
@@ -125,7 +125,7 @@ internal class ScriptExecutor
             MethodInfo method;
             if (methodName == null)
             {
-                method = type.GetMethod(nameof(IActionScript.ExecuteAsync))!;
+                method = type.GetMethod(nameof(Ember.Scripting.ScriptMethods.IExecuteAsync.ExecuteAsync))!;
             }
             else    //todo error handling id method name is bogus
             {

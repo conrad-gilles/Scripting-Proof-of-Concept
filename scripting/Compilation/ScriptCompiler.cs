@@ -270,9 +270,8 @@ internal class ScriptCompiler
         List<MethodRecord> methodsRoslyn = GetMethodsRoslyn(methods, semanticModel);
 
         Assembly myAssembly = Assembly.GetExecutingAssembly();
-        // string targetNamespace = nameof(Ember.Scripting.ScriptMethods);
         // string targetNamespace = "Ember.Scripting.ScriptMethods";
-        string targetNamespace = typeof(Ember.Scripting.ScriptMethods.IExecute1).Namespace!;
+        string targetNamespace = typeof(Ember.Scripting.ScriptMethods.IExecute1).Namespace!;    //maybe create a marker class?
         IEnumerable<Type> types = myAssembly.GetTypes().Where(type => type.Namespace == targetNamespace && type.IsInterface
                 // && !type.Name.StartsWith("<") //last line to exclude compiler generated 
                 );
@@ -295,8 +294,8 @@ internal class ScriptCompiler
             }
             if (isInside == false)
             {
-                if (meth1.Name != nameof(Ember.Scripting.IActionScript.ExecuteAsync)
-                && meth1.Name != nameof(Ember.Scripting.IConditionScript.EvaluateAsync)
+                if (meth1.Name != nameof(Ember.Scripting.ScriptMethods.IExecuteAsync.ExecuteAsync)
+                && meth1.Name != nameof(Ember.Scripting.ScriptMethods.IEvaluateAsync.EvaluateAsync)
                 )
                 {
                     // Console.WriteLine("Method from Roslyn: " + meth1);
