@@ -338,7 +338,7 @@ Console, myPopup)
     {
         try
         {
-            object ar = await EmberInternalFacade.ExecuteScript(id, TestHelper.GetContext());
+            object ar = await EmberInternalFacade.ExecuteScript(id, TestHelper.GetContext(), "Default");
             Console.Log(ar.ToString()!);
             myPopup.CreateNormalPopup("Success", ar.ToString()!);
         }

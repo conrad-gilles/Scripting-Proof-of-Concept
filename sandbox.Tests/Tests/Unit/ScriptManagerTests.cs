@@ -50,7 +50,7 @@ public class ScriptManagerFacadeTests
         Guid id = (await _scriptManager!.CreateScript(_sourceCodePedia!, apiVersion: 2)).Id;
         CustomerScript retrievedScript = await _scriptManager.GetScript(id);
         var context = await _em!.GetTestingContext<GeneratorContextNoInherVaccineV5.GeneratorContext>(retrievedScript);
-        await _scriptManager.ExecuteScriptById(retrievedScript.Id, context);
+        await _scriptManager.ExecuteScriptById(retrievedScript.Id, context, "Default");
 
         Assert.AreEqual(retrievedScript.SourceCode, _sourceCodePedia);
     }
@@ -374,7 +374,7 @@ public class ScriptManagerFacadeTests
         Guid id = (await _scriptManager!.CreateScript(_sourceCodeActionV1!)).Id;
         var testingContext = await _em!.GetTestingContext<GeneratorContextV4.GeneratorContext>();
 
-        ActionResultSF result = (ActionResultSF)await _scriptManager.ExecuteScriptById(id, testingContext);
+        ActionResultSF result = (ActionResultSF)await _scriptManager.ExecuteScriptById(id, testingContext, "Default");
 
         Assert.IsNotNull(result);
         // Assert.IsTrue(result.IsSuccess);
@@ -385,7 +385,7 @@ public class ScriptManagerFacadeTests
         Guid id2 = (await _scriptManager.CreateScript(_sourceCodePedia!)).Id;
         await Assert.ThrowsExceptionAsync<System.InvalidCastException>(async () =>
         {
-            ActionResultSF result2 = (ActionResultSF)await _scriptManager.ExecuteScriptById(id2, testingContext);
+            ActionResultSF result2 = (ActionResultSF)await _scriptManager.ExecuteScriptById(id2, testingContext, "Default");
         });
 
     }
@@ -396,7 +396,7 @@ public class ScriptManagerFacadeTests
         Guid id = (await _scriptManager!.CreateScript(_sourceCodePedia!)).Id;
         var testingContext = await _em!.GetTestingContext<GeneratorContextV4.GeneratorContext>();
 
-        bool result = (bool)await _scriptManager.ExecuteScriptById(id, testingContext);
+        bool result = (bool)await _scriptManager.ExecuteScriptById(id, testingContext, "Default");
 
         Assert.IsNotNull(result);
         Assert.IsTrue(result.GetType().ToString() == "System.Boolean");
@@ -404,7 +404,7 @@ public class ScriptManagerFacadeTests
         Guid id2 = (await _scriptManager.CreateScript(_sourceCodeActionV1!)).Id;
         await Assert.ThrowsExceptionAsync<System.InvalidCastException>(async () =>
         {
-            bool result2 = (bool)await _scriptManager.ExecuteScriptById(id2, testingContext);
+            bool result2 = (bool)await _scriptManager.ExecuteScriptById(id2, testingContext, "Default");
         });
     }
 
@@ -414,12 +414,12 @@ public class ScriptManagerFacadeTests
         var context = await _em!.GetTestingContext<GeneratorContextV4.GeneratorContext>();
 
         Guid condId = (await _scriptManager!.CreateScript(_sourceCodePedia!)).Id;
-        object condResult = await _scriptManager.ExecuteScriptById(condId, context);
+        object condResult = await _scriptManager.ExecuteScriptById(condId, context, "Default");
         Assert.IsInstanceOfType(condResult, typeof(bool));
         Assert.AreEqual(true, (bool)condResult);
 
         Guid actId = (await _scriptManager.CreateScript(_sourceCodeActionV1!)).Id;
-        object actResult = await _scriptManager.ExecuteScriptById(actId, context);
+        object actResult = await _scriptManager.ExecuteScriptById(actId, context, "Default");
         Assert.IsInstanceOfType(actResult, typeof(ActionResultSF));
         // Assert.IsTrue(((ActionResultBaseClass)actResult).IsSuccess);
     }
@@ -430,7 +430,7 @@ public class ScriptManagerFacadeTests
         string sourceCode = TestHelper.GetSC().sourceCodeActionV3;
         RecentContext ctx = TestHelper.GetContext();
         EmberInternalFacade eif = new EmberInternalFacade(_scriptManager!);
-        object ar = await eif.ExecuteUnfinishedScriptBySourceCode(sourceCode, ctx);
+        object ar = await eif.ExecuteUnfinishedScriptBySourceCode(sourceCode, ctx, "Default");
 
 
         Assert.IsTrue(ar != null);

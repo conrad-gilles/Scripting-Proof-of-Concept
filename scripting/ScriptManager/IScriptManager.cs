@@ -9,9 +9,9 @@ public interface IScriptManager
     /// <param name="context"></param>
     /// <param name="currentApiVersion"></param>
     /// <returns></returns>
-    Task<object> ExecuteScriptById(Guid scriptId, Context context, int? currentApiVersion = null, string? methodName = null);
+    Task<object> ExecuteScriptById(Guid scriptId, Context context, string methodName, int? currentApiVersion = null);
 
-    Task<object> ExecuteScriptByNameAndType<ScriptType>(string name, Context context, int? currentApiVersion = null, string? methodName = null) where ScriptType : IScriptType;
+    Task<object> ExecuteScriptByNameAndType<ScriptType>(string name, Context context, string methodName, int? currentApiVersion = null) where ScriptType : IScriptType;
 }
 
 

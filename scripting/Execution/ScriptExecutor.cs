@@ -16,7 +16,7 @@ internal class ScriptExecutor
         _logger = logger;
     }
 
-    public async Task<T> RunScriptExecution<T>(byte[] compiledScript, Context genContext, int? executionTime, string? methodName = null)
+    public async Task<T> RunScriptExecution<T>(byte[] compiledScript, Context genContext, int? executionTime, string methodName)
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(RunScriptExecution), nameof(ScriptExecutor));
 
@@ -63,7 +63,7 @@ internal class ScriptExecutor
 
         if (typeof(Ember.Scripting.IScriptMethodsCondition).IsAssignableFrom(type))    //checks if type implements the generator specific interface  //check if runs
         {
-            var result = await RunConditionScript(type, scriptInstance, genContext);
+            var result = await RunConditionScript(type, scriptInstance, genContext, methodName);
             return (T)(object)result;
         }
         else if (typeof(Ember.Scripting.IScriptMethodsAction).IsAssignableFrom(type))
@@ -78,13 +78,21 @@ internal class ScriptExecutor
         }
     }
 
-    public async Task<bool> RunConditionScript(Type type, object scriptInstance, Context genContext)
+    public async Task<bool> RunConditionScript(Type type, object scriptInstance, Context genContext, string methodName)
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(RunConditionScript), nameof(ScriptExecutor));
         try
         {
-            MethodInfo method = type.GetMethod(nameof(Ember.Scripting.ScriptMethods.IEvaluateAsync.EvaluateAsync))!;
+            MethodInfo method;
 
+            if (methodName == "Default")
+            {
+                method = type.GetMethod(nameof(Ember.Scripting.ScriptMethods.IEvaluateAsync.EvaluateAsync))!;
+            }
+            else
+            {
+                method = type.GetMethod(methodName)!;
+            }
             using var cts = new CancellationTokenSource(_scriptTimeout);
             ScriptEnvironment.CurrentToken.Value = cts.Token;
 
@@ -116,17 +124,26 @@ internal class ScriptExecutor
         }
 
     }
-    public async Task<ActionResultSF> RunActionScript(Type type, object scriptInstance, Context genContext, string? methodName = null)  //todo pass Method name as string or enum and also pass arguments maybe as List<args>
+    public async Task<ActionResultSF> RunActionScript(Type type, object scriptInstance, Context genContext, string methodName)  //todo pass Method name as string or enum and also pass arguments maybe as List<args>
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(RunActionScript), nameof(ScriptExecutor));
         try
         {
             MethodInfo method;
-            if (methodName == null)
+            // if (methodName == null)
+            // {
+            //     method = type.GetMethod(nameof(Ember.Scripting.ScriptMethods.IExecuteAsync.ExecuteAsync))!;
+            // }
+            // else    //todo error handling id method name is bogus
+            // {
+            // method = type.GetMethod(methodName)!;
+            // }
+
+            if (methodName == "Default")
             {
                 method = type.GetMethod(nameof(Ember.Scripting.ScriptMethods.IExecuteAsync.ExecuteAsync))!;
             }
-            else    //todo error handling id method name is bogus
+            else
             {
                 method = type.GetMethod(methodName)!;
             }

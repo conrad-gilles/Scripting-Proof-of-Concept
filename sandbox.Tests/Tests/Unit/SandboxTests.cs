@@ -182,6 +182,7 @@ public class SanboxTests
         Guid id;
         Sandbox.ContextManagementDemos sf;
         ValidationRecord valResult;
+        // string methodName = TestHelper.GetMethodNameAction();
 
         _facade = EmberMethods.GetNewScriptManagerInstance();
 
@@ -191,7 +192,7 @@ public class SanboxTests
         sf = new Sandbox.ContextManagementDemos(_facade);
 
 
-        await _facade.ExecuteScriptById(id, sf.CreateContextForApiV(_data!, valResult.Version));
+        await _facade.ExecuteScriptById(id, sf.CreateContextForApiV(_data!, valResult.Version), "Default");
         valResult = _facade.BasicValidationBeforeCompiling(_sourceCodeActionV2!);
 
         id = (await _facade.CreateScript(_sourceCodeActionV2!)).Id;
@@ -207,7 +208,7 @@ public class SanboxTests
             sf = new Sandbox.ContextManagementDemos(_facade);
             // await facade.ExecuteScriptById(id, sf.CreateContextForApiV(data!, valResult.versionInt));
             Console.WriteLine("Running API version: " + _facade.GetRunningApiVersion());
-            await _facade.ExecuteScriptById(id, sf.CreateContextForApiV(_data!, valResult.Version));
+            await _facade.ExecuteScriptById(id, sf.CreateContextForApiV(_data!, valResult.Version), "Default");
         }
 
         valResult = _facade.BasicValidationBeforeCompiling(_sourceCodeVaccineAction!);
@@ -216,7 +217,7 @@ public class SanboxTests
         {
             _facade = EmberMethods.GetNewScriptManagerInstance(i);
             sf = new Sandbox.ContextManagementDemos(_facade);
-            await _facade.ExecuteScriptById(id, sf.CreateContextForApiV(_data!, valResult.Version));
+            await _facade.ExecuteScriptById(id, sf.CreateContextForApiV(_data!, valResult.Version), "Default");
         }
 
         valResult = _facade.BasicValidationBeforeCompiling(_sourceCodePedia!);
@@ -225,7 +226,7 @@ public class SanboxTests
         {
             _facade = EmberMethods.GetNewScriptManagerInstance(i);
             sf = new Sandbox.ContextManagementDemos(_facade);
-            await _facade.ExecuteScriptById(id, sf.CreateContextForApiV(_data!, valResult.Version));
+            await _facade.ExecuteScriptById(id, sf.CreateContextForApiV(_data!, valResult.Version), "Default");
         }
     }
 
@@ -251,7 +252,7 @@ public class SanboxTests
         Context ctx = await sf.CreateByDowngrade(script.MinApiVersion, data!);
         Console.WriteLine("Type name: " + ctx.GetType().FullName);
 
-        result = await _facade.ExecuteScriptById(script.Id, ctx);
+        result = await _facade.ExecuteScriptById(script.Id, ctx, "Default");
         ar = (ActionResultV3.ActionResult)EmberMethods.UpgradeActionResult(result);
         Console.WriteLine(ar.ToString());
         Assert.IsInstanceOfType(ar, typeof(ActionResultV3.ActionResult));
@@ -264,7 +265,7 @@ public class SanboxTests
         ctx = await sf.CreateByDowngrade(script.MinApiVersion, data!);
         Console.WriteLine("Type name: " + ctx.GetType().FullName);
 
-        result = await _facade.ExecuteScriptById(script.Id, ctx);
+        result = await _facade.ExecuteScriptById(script.Id, ctx, "Default");
         ar = (ActionResultV3.ActionResult)EmberMethods.UpgradeActionResult(result);
         Console.WriteLine(ar.ToString());
         Assert.IsInstanceOfType(ar, typeof(ActionResultV3.ActionResult));
@@ -277,7 +278,7 @@ public class SanboxTests
         ctx = await sf.CreateByDowngrade(script.MinApiVersion, data!);
         Console.WriteLine("Type name: " + ctx.GetType().FullName);
 
-        result = await _facade.ExecuteScriptById(script.Id, ctx);
+        result = await _facade.ExecuteScriptById(script.Id, ctx, "Default");
         ar = (ActionResultV3.ActionResult)EmberMethods.UpgradeActionResult(result);
         Console.WriteLine(ar.ToString());
         Assert.IsInstanceOfType(ar, typeof(ActionResultV3.ActionResult));
@@ -290,7 +291,7 @@ public class SanboxTests
         ctx = await sf.CreateByDowngrade(script.MinApiVersion, data!);
         Console.WriteLine("Type name: " + ctx.GetType().FullName);
 
-        result = await _facade.ExecuteScriptById(script.Id, ctx);
+        result = await _facade.ExecuteScriptById(script.Id, ctx, "Default");
         // ar = EmberMethods.UpgradeActionResult(result);
         Console.WriteLine(result.ToString());
 
@@ -299,7 +300,7 @@ public class SanboxTests
 
         ////////////////////////////////////////////
         ctx = await sf.CreateByDowngrade(script.MinApiVersion, data!);
-        result = await _facade.ExecuteScriptById(script.Id, ctx);
+        result = await _facade.ExecuteScriptById(script.Id, ctx, "Default");
 
 
         // Assert.IsTrue(false);

@@ -84,7 +84,7 @@ public class EmberVersioningTests
         {
             CustomerScript retrievedScript = await facade!.GetScript(id);
             var context = await em!.GetTestingContext<GeneratorContextNoInherVaccineV5.GeneratorContext>(autoDetectFromScript: retrievedScript);
-            object resultBeforeUpgrade = await facade.ExecuteScriptById(id, context);   //here somehow figure out how to get the version that is being executed todo
+            object resultBeforeUpgrade = await facade.ExecuteScriptById(id, context, "Default");   //here somehow figure out how to get the version that is being executed todo
 
             if (resultBeforeUpgrade is ActionResultSF)
             {
@@ -100,7 +100,7 @@ public class EmberVersioningTests
             }
             else
             {
-                object result = await facade.ExecuteScriptById(id, context);
+                object result = await facade.ExecuteScriptById(id, context, "Default");
                 string shouldReturn = "True";
                 Assert.IsInstanceOfType(result, typeof(bool));
                 Assert.IsTrue(result.ToString()!.Contains(shouldReturn));
@@ -269,7 +269,7 @@ public class EmberVersioningTests
                                 dataAccess: obj.testDataAccess, vaccine: obj.vaccine);
 
         ctx = Sandbox.ContextManagementDemos.CreateUsingData(desiredContextVersion, _data!);
-        var result1 = await _facade.ExecuteScriptById(id, ctx);
+        var result1 = await _facade.ExecuteScriptById(id, ctx, "Default");
 
         var result = EmberMethods.UpgradeActionResult(result1);
 
@@ -297,11 +297,11 @@ public class EmberVersioningTests
         await Assert.ThrowsExceptionAsync<Exception>(async () =>
         {
             ctx = await _em!.GetTestingContext<GeneratorContextV3.GeneratorContext>();
-            var result1 = await _facade.ExecuteScriptById(id, ctx);
+            var result1 = await _facade.ExecuteScriptById(id, ctx, "Default");
         });
 
         ctx = await _em!.GetTestingContext<RWContextV2.GeneratorContext>();
-        var result1 = await _facade.ExecuteScriptById(id, ctx);
+        var result1 = await _facade.ExecuteScriptById(id, ctx, "Default");
         var result = EmberMethods.UpgradeActionResult(result1);
 
         string shouldReturn = _actionResultVersionSpecific + "Pediatric tests added";

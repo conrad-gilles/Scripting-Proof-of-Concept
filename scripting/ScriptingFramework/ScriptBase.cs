@@ -58,6 +58,14 @@ namespace Ember.Scripting.ScriptMethods
             throw new MethodNotImplementedException(message: "Method: " + nameof(Execute3) + " was not implemented.");
         }
     }
+
+    // public static class DefaultMethods
+    // {
+    //     public static readonly string Condition = nameof(IExecuteAsync.ExecuteAsync);
+    //     public static readonly string Action = nameof(IEvaluateAsync.EvaluateAsync);
+
+    // }
+    // public static readonly String DefaultMethod = "Default";
 }
 
 

@@ -235,6 +235,15 @@ public class TestHelper
         return ctx;
     }
 
+    public static string GetMethodNameAction()
+    {
+        return nameof(Ember.Scripting.IScriptMethodsAction.ExecuteAsync);
+    }
+    public static string GetMethodNameCond()
+    {
+        return nameof(Ember.Scripting.IScriptMethodsCondition.EvaluateAsync);
+    }
+
 }
 
 public record TestHelperRecord

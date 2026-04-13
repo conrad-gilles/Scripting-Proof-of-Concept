@@ -12,7 +12,7 @@ internal class EmberInternalFacade
         _scriptManager = scriptManager;
     }
 
-    private async Task<object> BaseExecute(Guid id, RecentContext ctx, string? methodName = null)
+    private async Task<object> BaseExecute(Guid id, RecentContext ctx, string methodName)
     {
         var cf = new ContextManagement(_scriptManager);
         CustomerScript script = await _scriptManager.GetScript(id);
@@ -32,18 +32,18 @@ internal class EmberInternalFacade
         }
         throw new Exception(message: "Type was" + result.GetType().Name);
     }
-    internal async Task<object> ExecuteScript(Guid id, RecentContext ctx, string? methodName = null)
+    internal async Task<object> ExecuteScript(Guid id, RecentContext ctx, string methodName)
     {
         var result = await BaseExecute(id, ctx, methodName);
         return CheckUpgradeActionResult(result);
     }
-    internal async Task<object> ExecuteScript<ScriptType>(string name, RecentContext ctx, string? methodName = null)
+    internal async Task<object> ExecuteScript<ScriptType>(string name, RecentContext ctx, string methodName)
     where ScriptType : IScriptType
     {
         Guid id = await _scriptManager.GetScriptId<ScriptType>(name);
         return await ExecuteScript(id, ctx, methodName);
     }
-    public async Task<object> ExecuteUnfinishedScriptBySourceCode(string sourceCode, RecentContext context, string? methodName = null)
+    public async Task<object> ExecuteUnfinishedScriptBySourceCode(string sourceCode, RecentContext context, string methodName)
     {
         var cf = new ContextManagement(_scriptManager);
         ValidationRecord vali = _scriptManager.BasicValidationBeforeCompiling(sourceCode);
@@ -81,7 +81,8 @@ internal class ConditionScriptFacade : RecentIConditionScript
     }
     public async Task<bool> EvaluateAsync(RecentIContext context)
     {
-        return (bool)await _emberScriptManager.ExecuteScript<IConditionScript>(_scriptName, (RecentContext)context, null);
+        string methodName = nameof(Ember.Scripting.ScriptMethods.IEvaluateAsync.EvaluateAsync);
+        return (bool)await _emberScriptManager.ExecuteScript<IConditionScript>(_scriptName, (RecentContext)context, methodName);
     }
 }
 
@@ -99,7 +100,8 @@ internal class ActionScriptFacade : RecentIActionScript
     }
     public async Task<RecentActionResult> ExecuteAsync(RecentIContext context)
     {
-        return (RecentActionResult)await _emberScriptManager.ExecuteScript<IActionScript>(_scriptName, (RecentContext)context, null);
+        string methodName = nameof(Ember.Scripting.ScriptMethods.IExecuteAsync.ExecuteAsync);
+        return (RecentActionResult)await _emberScriptManager.ExecuteScript<IActionScript>(_scriptName, (RecentContext)context, methodName);
     }
 
     public async Task<RecentActionResult> Execute1(RecentIContext context)
@@ -117,7 +119,7 @@ internal class ActionScriptFacade : RecentIActionScript
 }
 internal static class MethodNameFactory
 {
-    public static string? GetOldMethodName(string? methodName, int version, Type scriptType)
+    public static string? GetOldMethodName(string methodName, int version, Type scriptType)
     {
         if (scriptType == typeof(IActionScript))
         {

@@ -51,7 +51,7 @@ public class MultiMethodScriptTests
 
         // if no specific method defined fall back to default
         ar = (RecentActionResult)await InternalScriptManager!.ExecuteScript<IActionScript>
-        (script.ScriptName!, TestHelper.GetContext());
+        (script.ScriptName!, TestHelper.GetContext(), "Default");
 
         Console.WriteLine(ar.ToString());
         Assert.IsTrue(ar.ToString().Contains("Default method ExecuteAsync was called"));
