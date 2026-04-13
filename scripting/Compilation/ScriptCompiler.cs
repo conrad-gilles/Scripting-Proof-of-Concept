@@ -270,7 +270,9 @@ internal class ScriptCompiler
         List<MethodRecord> methodsRoslyn = GetMethodsRoslyn(methods, semanticModel);
 
         Assembly myAssembly = Assembly.GetExecutingAssembly();
-        string targetNamespace = "Ember.Scripting.AdditionalMethods";
+        // string targetNamespace = nameof(Ember.Scripting.ScriptMethods);
+        // string targetNamespace = "Ember.Scripting.ScriptMethods";
+        string targetNamespace = typeof(Ember.Scripting.ScriptMethods.IExecute1).Namespace!;
         IEnumerable<Type> types = myAssembly.GetTypes().Where(type => type.Namespace == targetNamespace && type.IsInterface
                 // && !type.Name.StartsWith("<") //last line to exclude compiler generated 
                 );
@@ -299,7 +301,7 @@ internal class ScriptCompiler
                 {
                     // Console.WriteLine("Method from Roslyn: " + meth1);
                     // Console.WriteLine("Method from Roslyn: "+meth2);
-                    throw new UndefinedMethodException(message: "No new methods allowed that are not predefinded!", meth1);
+                    throw new UndefinedMethodException(message: "No new methods allowed that are not predefinded!" + meth1, meth1);
                 }
             }
         }

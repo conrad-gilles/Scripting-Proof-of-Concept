@@ -1,7 +1,7 @@
 using Ember.Scripting;
 using Ember.Simulation;
 using IGeneratorContext_V4;
-using Ember.Scripting.AdditionalMethods;
+using Ember.Scripting.ScriptMethods;
 
 
 namespace ScriptMethodManager;
@@ -38,7 +38,7 @@ public class MultipleMethodsScriptHelper
     }
 }
 
-public class GeneratorScriptFacade : IMultiMethodBase
+public class GeneratorScriptFacade : IScriptMethodsAction
 // public class GeneratorScriptFacade : Ember.Scripting.IGeneratorActionScript, IExecute1, IExecute2
 {
     private CustomerScript _script;
@@ -64,7 +64,10 @@ public class GeneratorScriptFacade : IMultiMethodBase
         throw new NotImplementedException();
     }
 
-
+    public Task<string> Execute3(IContext context)
+    {
+        throw new NotImplementedException();
+    }
 
     // public async Task<ActionResultSF> ExecuteAsync(IGeneratorBaseInterfaceSF context)
     // {

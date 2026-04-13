@@ -105,14 +105,14 @@ internal class ActionScriptFacade : RecentIActionScript
 
     public async Task<RecentActionResult> Execute1(RecentIContext context)
     {
-        string? methodName = nameof(Ember.Scripting.AdditionalMethods.IExecute1.Execute1);
+        string? methodName = nameof(Ember.Scripting.ScriptMethods.IExecute1.Execute1);
         CustomerScript script = await _scriptManager.GetScriptNT<IActionScript>(_scriptName);
         methodName = MethodNameFactory.GetOldMethodName(methodName, script.MinApiVersion, script.GetScriptType());  //todo fix this 
         return (RecentActionResult)await _emberScriptManager.ExecuteScript<IActionScript>(_scriptName, (RecentContext)context, methodName);
     }
     public async Task<RecentActionResult> Execute2(RecentIContext context)
     {
-        string methodName = nameof(Ember.Scripting.AdditionalMethods.IExecute2.Execute2);
+        string methodName = nameof(Ember.Scripting.ScriptMethods.IExecute2.Execute2);
         return (RecentActionResult)await _emberScriptManager.ExecuteScript<IActionScript>(_scriptName, (RecentContext)context, methodName);
     }
 }
@@ -122,7 +122,7 @@ internal static class MethodNameFactory
     {
         if (scriptType == typeof(IActionScript))
         {
-            if (methodName == nameof(Ember.Scripting.AdditionalMethods.IExecute1.Execute1))
+            if (methodName == nameof(Ember.Scripting.ScriptMethods.IExecute1.Execute1))
             {
                 switch (version)
                 {
@@ -132,7 +132,7 @@ internal static class MethodNameFactory
                         return methodName;
                 }
             }
-            if (methodName == nameof(Ember.Scripting.AdditionalMethods.IExecute2.Execute2))
+            if (methodName == nameof(Ember.Scripting.ScriptMethods.IExecute2.Execute2))
             {
                 switch (version)
                 {

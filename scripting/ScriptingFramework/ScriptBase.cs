@@ -1,15 +1,20 @@
 namespace Ember.Scripting
 {
-    using Ember.Scripting.AdditionalMethods;
+    using Ember.Scripting.ScriptMethods;
 
-    public interface IMultiMethodBase : IExecute1, IExecute2
+    public interface IScriptMethodsAction : IExecute1, IExecute2, IExecute3
+    {
+
+    }
+    public interface IScriptMethodscondition
     {
 
     }
 }
 
-namespace Ember.Scripting.AdditionalMethods
+namespace Ember.Scripting.ScriptMethods
 {
+
     public interface IExecute1 : IScript
     {
         Task<ActionResultSF> Execute1(IContext context);    //type of construcotr changes per version

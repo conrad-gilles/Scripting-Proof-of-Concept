@@ -78,7 +78,7 @@ namespace GeneratorScriptsV3
 {
     [MetaDataIGeneratorScript(version: 3)]
     // public interface IGeneratorActionScript : Ember.Scripting.IGeneratorActionScript
-    public interface IActionScript : Ember.Scripting.IActionScript, Ember.Scripting.IMultiMethodBase
+    public interface IActionScript : Ember.Scripting.IActionScript, Ember.Scripting.IScriptMethodsAction
     {
         Task<ActionResultV3.ActionResult> ExecuteAsync(IGeneratorContext_V4.IGeneratorContext context);
         Task<ActionResultV3.ActionResult> Execute1(IGeneratorContext_V4.IGeneratorContext context)
@@ -89,25 +89,33 @@ namespace GeneratorScriptsV3
         {
             throw new MethodNotImplementedException(message: nameof(Execute2) + " was not implemented.");
         }
+        Task<string> Execute3(IGeneratorContextNoInheritance_V5.IGeneratorContext context)
+        {
+            throw new MethodNotImplementedException(message: nameof(Execute3) + " was not implemented.");
+        }
 
         Task<ActionResultSF> Ember.Scripting.IActionScript.ExecuteAsync(IContext context)     //if bugs maybe put as async and await ExecuteAsync
         {
             return ExecuteAsync(context);
         }
-        Task<ActionResultSF> Ember.Scripting.AdditionalMethods.IExecute1.Execute1(IContext context)     //if bugs maybe put as async and await ExecuteAsync
+        Task<ActionResultSF> Ember.Scripting.ScriptMethods.IExecute1.Execute1(IContext context)     //if bugs maybe put as async and await ExecuteAsync
         {
             return Execute1(context);
         }
-        Task<ActionResultSF> Ember.Scripting.AdditionalMethods.IExecute2.Execute2(IContext context)     //if bugs maybe put as async and await ExecuteAsync
+        Task<ActionResultSF> Ember.Scripting.ScriptMethods.IExecute2.Execute2(IContext context)     //if bugs maybe put as async and await ExecuteAsync
         {
             return Execute2(context);
+        }
+        Task<string> Ember.Scripting.ScriptMethods.IExecute3.Execute3(IContext context)     //if bugs maybe put as async and await ExecuteAsync
+        {
+            return Execute3(context);
         }
     }
 }
 namespace GeneratorScriptsV4
 {
     [MetaDataIGeneratorScript(version: 4)]
-    public interface IActionScript : Ember.Scripting.IActionScript, Ember.Scripting.IMultiMethodBase
+    public interface IActionScript : Ember.Scripting.IActionScript, Ember.Scripting.IScriptMethodsAction
     {
         Task<ActionResultV3.ActionResult> ExecuteAsync(IGeneratorContextNoInheritance_V5.IGeneratorContext context);
         Task<ActionResultV3.ActionResult> Execute1(IGeneratorContextNoInheritance_V5.IGeneratorContext context)
@@ -119,17 +127,26 @@ namespace GeneratorScriptsV4
             throw new MethodNotImplementedException(message: nameof(Execute2) + " was not implemented.");
         }
 
+        Task<string> Execute3(IGeneratorContextNoInheritance_V5.IGeneratorContext context)
+        {
+            throw new MethodNotImplementedException(message: nameof(Execute3) + " was not implemented.");
+        }
+
         Task<ActionResultSF> Ember.Scripting.IActionScript.ExecuteAsync(IContext context)     //if bugs maybe put as async and await ExecuteAsync
         {
             return ExecuteAsync(context);
         }
-        Task<ActionResultSF> Ember.Scripting.AdditionalMethods.IExecute1.Execute1(IContext context)     //if bugs maybe put as async and await ExecuteAsync
+        Task<ActionResultSF> Ember.Scripting.ScriptMethods.IExecute1.Execute1(IContext context)     //if bugs maybe put as async and await ExecuteAsync
         {
             return Execute1(context);
         }
-        Task<ActionResultSF> Ember.Scripting.AdditionalMethods.IExecute2.Execute2(IContext context)     //if bugs maybe put as async and await ExecuteAsync
+        Task<ActionResultSF> Ember.Scripting.ScriptMethods.IExecute2.Execute2(IContext context)     //if bugs maybe put as async and await ExecuteAsync
         {
             return Execute2(context);
+        }
+        Task<string> Ember.Scripting.ScriptMethods.IExecute3.Execute3(IContext context)     //if bugs maybe put as async and await ExecuteAsync
+        {
+            return Execute3(context);
         }
     }
 }
