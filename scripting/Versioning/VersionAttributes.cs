@@ -6,11 +6,23 @@ public class MetaDataIGeneratorScript : Attribute
     public int Version { get; }
     public IGeneratorScriptType Type { get; }
     public IGeneratorScriptReturnType ReturnType { get; }
+    public Type ActionResultVersion { get; } //todo maybe pass type string idk
+    public Type ContextVersion { get; }
     public MetaDataIGeneratorScript(int version, IGeneratorScriptReturnType returnType, IGeneratorScriptType type)
     {
         Version = version;
         ReturnType = returnType;
         Type = type;
+        ContextVersion = typeof(IContext);
+        ActionResultVersion = typeof(ActionResultSF);
+    }
+    public MetaDataIGeneratorScript(int version, IGeneratorScriptReturnType returnType, IGeneratorScriptType type, Type contextVersion, Type actionResultVersion)
+    {
+        Version = version;
+        ReturnType = returnType;
+        Type = type;
+        ContextVersion = contextVersion;
+        ActionResultVersion = actionResultVersion;
     }
 
     public MetaDataIGeneratorScript(int version)
@@ -18,6 +30,16 @@ public class MetaDataIGeneratorScript : Attribute
         Version = version;
         ReturnType = IGeneratorScriptReturnType.Action;
         Type = IGeneratorScriptType.DefaultVersioned;
+        ContextVersion = typeof(IContext);
+        ActionResultVersion = typeof(ActionResultSF);
+    }
+    public MetaDataIGeneratorScript(int version, Type contextVersion, Type actionResultVersion)
+    {
+        Version = version;
+        ReturnType = IGeneratorScriptReturnType.Action;
+        Type = IGeneratorScriptType.DefaultVersioned;
+        ContextVersion = contextVersion;
+        ActionResultVersion = actionResultVersion;
     }
 }
 

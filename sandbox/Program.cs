@@ -44,7 +44,7 @@ try
     services.AddDbContextFactory<EFModeling.EntityProperties.FluentAPI.Required.ScriptDbContext>();
     services.AddSingleton<IUserSession, SandBoxUserSession>();
 
-    ScriptingServiceCollectionExtensions.AddEmberScripting(services, EmberMethods.GetReferences(), EmberMethods.GetEmberApiVersion());
+    ScriptingServiceCollectionExtensions.AddEmberScripting(services, EmberMethods.GetReferences(), EmberMethods.GetEmberApiVersion(), RecentTypeHelper.GetRecentTypes());
 
     var provider = services.BuildServiceProvider();
     await MainProgramSwitch(provider);

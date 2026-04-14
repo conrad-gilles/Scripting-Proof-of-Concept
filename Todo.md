@@ -1,3 +1,7 @@
+- get rid of duplicate code in validation
+- namely the getroslyn method and the check if it is implementing the wrong type and so on is too similar
+- prevent customer from writing script with no methods at all
+
 - get rid of the default methods
 - get ric of the IActionScript and so on in the scripting library
 - get rid 

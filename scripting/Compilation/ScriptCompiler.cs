@@ -12,6 +12,7 @@ internal class ScriptCompiler
 {
     private readonly List<MetadataReference>? _referencesRO = null;
     private readonly ILogger<ScriptCompiler> _logger;
+    private readonly List<Type> _recentTypes;
 
     private readonly List<MetadataReference> _standardRefrencesForAllScripts = [MetadataReference.CreateFromFile(typeof(object).Assembly.Location),
                         MetadataReference.CreateFromFile(typeof(Console).Assembly.Location),
@@ -25,11 +26,12 @@ internal class ScriptCompiler
                         MetadataReference.CreateFromFile(Assembly.Load("System.Threading.Tasks").Location),
                         MetadataReference.CreateFromFile(Assembly.Load("netstandard").Location)
                         ];
-    public ScriptCompiler(List<MetadataReference> referencesRO, ILogger<ScriptCompiler> logger)
+    public ScriptCompiler(List<MetadataReference> referencesRO, ILogger<ScriptCompiler> logger, List<Type> recentTypes)
     {
         _referencesRO = referencesRO;
         _referencesRO!.AddRange(_standardRefrencesForAllScripts);
         _logger = logger;
+        _recentTypes = recentTypes;
     }
     public byte[] RunCompilation(string script, int? apiVersion = null, ValidationRecord? metaData = null) //references param there to enable later on users to define custom references
     {
@@ -139,7 +141,7 @@ internal class ScriptCompiler
 
         try
         {
-            var baseTypeName = myClassSymbol!.BaseType!.Name;
+            INamedTypeSymbol baseType = myClassSymbol!.BaseType!;
             var className = myClassSymbol.ToString();
             var parentSymbol = myClassSymbol!.Interfaces.FirstOrDefault() ?? myClassSymbol.BaseType;
             int? versionInt = null;
@@ -190,19 +192,19 @@ internal class ScriptCompiler
             {
                 throw new VersionIntNotAssignedException("Version Int was not assigned probably because the foeach loop faliled maybe because the Context name of the script was not in the dictionary.");
             }
-            if (baseTypeName == null || className == null)
+            if (baseType == null || className == null)
             {
                 _logger.LogError("BaseTypeName or classname null in BasicValidationBeforeCompiling.");
                 throw new ClassNameOrBaseNameNullException("BaseTypeName or classname null in BasicValidationBeforeCompiling. in if (baseTypeName == null || className == null)");
             }
             _logger.LogTrace("Class Name = " + className);
-            _logger.LogTrace("BaseClass Name = " + baseTypeName);
+            _logger.LogTrace("BaseClass Name = " + baseType);
             _logger.LogTrace("Version Int = " + versionInt);
 
 
             // ScriptTypes scriptType;
             Type scriptType;
-            switch (baseTypeName)
+            switch (baseType.Name)
             {
                 case nameof(IActionScript):
                     scriptType = typeof(IActionScript);
@@ -211,8 +213,9 @@ internal class ScriptCompiler
                     scriptType = typeof(IConditionScript);
                     break;
                 default:
-                    throw new CouldNotMatchBaseTypeInCompiler(nameof(baseTypeName) + ": " + baseTypeName + " was not a valid option!");
+                    throw new CouldNotMatchBaseTypeInCompiler(nameof(baseType) + ": " + baseType + " was not a valid option!");
             }
+            ValidateScriptMethods(tree!, model, baseType);
             List<MethodRecord> methods = ValidateOnlyInheritedMethodsAndReturn(tree!, model);
             int? executionTime = GetExecutionTime(tree);
             ValidateLoopsHavingCancellation(tree!);
@@ -238,7 +241,130 @@ internal class ScriptCompiler
             throw new ScriptFieldNullException("The script very likely did not implement one of the predefined interfaces.", e);
         }
     }
+    public void ValidateScriptMethods(SyntaxTree tree, SemanticModel semanticModel, INamedTypeSymbol baseType)
+    {
+        SyntaxNode root = tree.GetRoot();
+        IEnumerable<MethodDeclarationSyntax> methods = root.DescendantNodes().OfType<MethodDeclarationSyntax>();
+        string fullName = baseType.ToDisplayString();
 
+        var scriptRecords = ScriptVersionScanner.GetClassRecords();
+
+        string? contextTypeString = null;
+        string? arTypeString = null;
+
+        // we find the associated Record to our script Class
+        foreach (var record in scriptRecords)
+        {
+            ScriptMetaDataRecord? associatedRec = null;
+            if (fullName == record.ScriptType.FullName)
+            {
+                associatedRec = record;
+                contextTypeString = associatedRec.ContextType.FullName;
+                arTypeString = associatedRec.ActionResultType.FullName;
+            }
+        }
+
+        if (baseType.IsGenericType)
+        {
+            if (baseType.Name == nameof(IConditionScript))
+            {
+                if (baseType.TypeArguments.Length == 1)
+                {
+                    ITypeSymbol contextType = baseType.TypeArguments[0];
+                    contextTypeString = GetFullyQualifiedName(contextType);
+                    arTypeString = nameof(ActionResultSF);
+                }
+            }
+            else if (baseType.Name == nameof(IActionScript))
+            {
+                if (baseType.TypeArguments.Length == 2)
+                {
+                    ITypeSymbol contextType = baseType.TypeArguments[0];
+                    ITypeSymbol resultType = baseType.TypeArguments[1];
+
+                    contextTypeString = GetFullyQualifiedName(contextType);
+                    arTypeString = GetFullyQualifiedName(resultType);
+                }
+            }
+        }
+
+        if (contextTypeString == null || arTypeString == null)
+        {
+            throw new Exception("fullname: " + fullName);
+        }
+
+        foreach (var method in methods)
+        {
+            if (method.Modifiers.Any(SyntaxKind.PrivateKeyword))
+            {
+                continue;   //skips private methods
+            }
+            if (method.Modifiers.Any(SyntaxKind.InternalKeyword))
+            {
+                // continue;   //skips internal methods
+            }
+            if (method.Modifiers.Any(SyntaxKind.ProtectedKeyword))
+            {
+                // continue;   //skips protected methods
+            }
+
+            IMethodSymbol methodSymbol = semanticModel.GetDeclaredSymbol(method)!;
+            string methodName = methodSymbol.Name;
+
+            // first we check if each method has the correct return type
+            ITypeSymbol returnType = methodSymbol.ReturnType;
+
+            string returnTypeString = returnType.MetadataName;
+
+            if (returnType is INamedTypeSymbol namedType &&     //to extract for example string from Task<string>
+                namedType.IsGenericType &&
+                namedType.Name == "Task"
+                )
+            {
+                ITypeSymbol innerType = namedType.TypeArguments[0];
+                returnTypeString = innerType.ToDisplayString();
+            }
+
+            if (returnTypeString != arTypeString)
+            {
+                if (baseType.Name != nameof(IConditionScript))
+                {
+                    if (returnTypeString != "string")   //todo fix get rid off
+                    {
+                        throw new WrongReturnTypeException(message: methodName + " has the wrong return Type: " + returnTypeString + ", it should be: " + arTypeString + ".", method);
+                    }
+                }
+            }
+
+            // we go through each param (should always be 1) and check if it is the correct one
+            foreach (IParameterSymbol paramSymbol in methodSymbol.Parameters)
+            {
+                string paramName = paramSymbol.Name;
+                string paramType = paramSymbol.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+
+                if (paramType.StartsWith("global::"))
+                {
+                    paramType = paramType.Substring("global::".Length);
+                }
+
+                if (paramType != contextTypeString
+                && paramType != "CustomerScript"    //todo get rid of
+                )
+                {
+                    throw new WrongParameterTypeException(message: methodName + " has a wrong Parameter Type: " + paramType + ", it should be: " + contextTypeString + ".", method);
+                }
+            }
+        }
+    }
+    private string GetFullyQualifiedName(ITypeSymbol symbol)
+    {
+        string name = symbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+        if (name.StartsWith("global::"))
+        {
+            return name.Substring("global::".Length);
+        }
+        return name;
+    }
     public int? GetExecutionTime(SyntaxTree syntaxTree)
     {
         int? executionTime = null;
@@ -329,23 +455,37 @@ internal class ScriptCompiler
             IMethodSymbol methodSymbol = semanticModel.GetDeclaredSymbol(method)!;
 
             string methodName = methodSymbol.Name;
-            string returnType = methodSymbol.ReturnType.MetadataName;
+            ITypeSymbol returnType = methodSymbol.ReturnType;
 
-
+            // int iterations = 0;
+            // while (returnType is INamedTypeSymbol namedTypeSymbol && namedTypeSymbol.IsGenericType && iterations < 100)
+            // {
+            //     // Match against the open generic type definition of Task<T>
+            //     if (namedTypeSymbol.OriginalDefinition.ToDisplayString() == "System.Threading.Tasks.Task<TResult>")
+            //     {
+            //         // Extract the inner type T
+            //         returnType = namedTypeSymbol.TypeArguments[0];
+            //     }
+            // }
+            // if (iterations > 98)
+            // {
+            //     throw new Exception();
+            // }
+            string returnTypeString = returnType.MetadataName;
             List<ParameterRecord> resultParams = [];
 
             foreach (IParameterSymbol paramSymbol in methodSymbol.Parameters)
             {
-                try
-                {
-                    string paramName = paramSymbol.Name;
-                    string paramType = paramSymbol.Type.MetadataName;
+                // try
+                // {
+                string paramName = paramSymbol.Name;
+                string paramType = paramSymbol.Type.MetadataName;
 
-                    resultParams.Add(new ParameterRecord { Name = paramName, ReturnType = paramType });
-                }
-                catch { continue; }
+                resultParams.Add(new ParameterRecord { Name = paramName, ReturnType = paramType });
+                // }
+                // catch { continue; }
             }
-            result.Add(new MethodRecord { Name = methodName, ReturnType = returnType, Parameters = resultParams });
+            result.Add(new MethodRecord { Name = methodName, ReturnType = returnTypeString, Parameters = resultParams });
         }
 
         return result;

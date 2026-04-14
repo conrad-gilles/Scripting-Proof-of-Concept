@@ -42,7 +42,7 @@ public class CrudDemos
         });
         services.AddSingleton<IUserSession, SandBoxUserSession>();
         services.AddDbContextFactory<EFModeling.EntityProperties.FluentAPI.Required.ScriptDbContext>();
-        ScriptingServiceCollectionExtensions.AddEmberScripting(services, EmberMethods.GetReferences(), EmberMethods.GetEmberApiVersion());
+        ScriptingServiceCollectionExtensions.AddEmberScripting(services, EmberMethods.GetReferences(), EmberMethods.GetEmberApiVersion(), RecentTypeHelper.GetRecentTypes());
 
         var provider = services.BuildServiceProvider();
 

@@ -145,9 +145,11 @@ public class MultiMethodScriptTests
     {
         string sourceCode = TestHelper.GetSC().undefinedMethodsScriptPublic;
 
-        UndefinedMethodException ex = await Assert.ThrowsExceptionAsync<UndefinedMethodException>(async () =>
+        UndefinedMethodException ex = new UndefinedMethodException();
+
+        ex = await Assert.ThrowsExceptionAsync<UndefinedMethodException>(async () =>
              {
-                 ValidationRecord vr = ScriptManager.BasicValidationBeforeCompiling(sourceCode);
+                 ValidationRecord vr2 = ScriptManager.BasicValidationBeforeCompiling(sourceCode);
              });
 
         Console.WriteLine(ex.Method);
@@ -280,4 +282,19 @@ public class MultiMethodScriptTests
     // {
 
     // }
+
+    [TestMethod]
+    public async Task DiffrentReturnTest()
+    {
+        string sourceCode = TestHelper.GetSC().sourceCodeMultiMethodScripts;
+        var context = TestHelper.GetContext();
+        CustomerScript scriptDB = await ScriptManager.CreateScript(sourceCode);
+
+        //Getting the Script
+        RecentIActionScript script = InternalScriptManager.GetScript<RecentIActionScript>(scriptDB.ScriptName!);
+
+        //Executing the first function
+        RecentActionResult ar = (RecentActionResult)await script.ExecuteAsync(context);
+        Assert.IsTrue(ar.ToString().Contains("Default method ExecuteAsync was called"));
+    }
 }

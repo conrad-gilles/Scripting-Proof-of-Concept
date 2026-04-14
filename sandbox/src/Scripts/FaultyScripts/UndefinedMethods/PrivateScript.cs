@@ -12,11 +12,11 @@ public class PrivateScript : GeneratorScriptsV3.IActionScript
         return ActionResultV3.ActionResult.Success("Default method ExecuteAsync was called");
     }
 
-    public async Task<ActionResultSF> Execute1(IContext context)
+    public async Task<ActionResultV3.ActionResult> Execute1(IGeneratorContext_V4.IGeneratorContext context)
     {
         return ActionResultV3.ActionResult.Success("ExecuteAction1 was called");
     }
-    public async Task<ActionResultSF> Execute2(IContext context)
+    public async Task<ActionResultV3.ActionResult> Execute2(IGeneratorContext_V4.IGeneratorContext context)
     {
         throw new MethodNotImplementedException(message: "error was thrown");
     }

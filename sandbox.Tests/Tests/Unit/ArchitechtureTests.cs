@@ -240,4 +240,17 @@ public class ArchitechtureTests
         Console.WriteLine("execution took: " + elapsedMs);
         Assert.IsTrue(elapsedMs > 4900 && elapsedMs < 5100);
     }
+
+    [TestMethod]
+    public void TestRecentUsingTOString()
+    {
+        Console.WriteLine("Recent ActionResult: " + typeof(RecentActionResult).FullName);
+
+        foreach (var item in RecentTypeHelper.GetRecentTypes())
+        {
+            Console.WriteLine("Type: " + item.Name + ", FullName: " + item.FullName);
+        }
+
+        Assert.IsTrue(false);
+    }
 }

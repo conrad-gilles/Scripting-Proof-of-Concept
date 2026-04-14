@@ -100,6 +100,32 @@ public class UndefinedMethodException : ValidationBeforeCompilationException
         Method = method;
     }
 }
+public class WrongReturnTypeException : ValidationBeforeCompilationException
+{
+    public Microsoft.CodeAnalysis.CSharp.Syntax.MethodDeclarationSyntax? Method { get; }
+
+    public WrongReturnTypeException() : base() { }
+    public WrongReturnTypeException(string message) : base(message) { }
+    public WrongReturnTypeException(string message, Exception innerException) : base(message, innerException) { }
+
+    public WrongReturnTypeException(string message, Microsoft.CodeAnalysis.CSharp.Syntax.MethodDeclarationSyntax? method) : base(message)
+    {
+        Method = method;
+    }
+}
+public class WrongParameterTypeException : ValidationBeforeCompilationException
+{
+    public Microsoft.CodeAnalysis.CSharp.Syntax.MethodDeclarationSyntax? Method { get; }
+
+    public WrongParameterTypeException() : base() { }
+    public WrongParameterTypeException(string message) : base(message) { }
+    public WrongParameterTypeException(string message, Exception innerException) : base(message, innerException) { }
+
+    public WrongParameterTypeException(string message, Microsoft.CodeAnalysis.CSharp.Syntax.MethodDeclarationSyntax? method) : base(message)
+    {
+        Method = method;
+    }
+}
 public class ForbiddenTypeAccessException : ForbiddenNamespaceException
 {
     public new string? AttemptedNamespace { get; }

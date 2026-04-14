@@ -9,10 +9,11 @@ namespace Ember.Scripting;
 //Ai Generated
 public static class ScriptingServiceCollectionExtensions
 {
-    public static IServiceCollection AddEmberScripting(this IServiceCollection services, List<MetadataReference> references, int maxSupportedApiVersion)
+    public static IServiceCollection AddEmberScripting(this IServiceCollection services, List<MetadataReference> references, int maxSupportedApiVersion, List<Type> recentTypes)
     {
         // 1. Register the references so they can be injected into constructors
         services.AddSingleton(references);
+        services.AddSingleton(recentTypes);
 
         // 2. Register the internal classes
         // DI can instantiate internal classes as long as their constructors are marked 'public'

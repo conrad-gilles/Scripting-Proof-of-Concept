@@ -20,4 +20,8 @@ public class MultipleMethodsScript : GeneratorScriptsV3.IActionScript
     {
         throw new MethodNotImplementedException(message: "error was thrown");
     }
+    public async Task<string> Execute3(IGeneratorContext_V4.IGeneratorContext context)
+    {
+        return "successfully returned";
+    }
 }

@@ -22,7 +22,7 @@ var references = EmberMethods.GetReferences();
 builder.Services.AddDbContextFactory<EFModeling.EntityProperties.FluentAPI.Required.ScriptDbContext>();
 builder.Services.AddScoped<IUserSession, Sandbox.SandBoxUserSession>();
 
-builder.Services.AddEmberScripting(references, AppSettings.EmberApiVersion);
+builder.Services.AddEmberScripting(references, AppSettings.EmberApiVersion, RecentTypeHelper.GetRecentTypes());
 builder.Services.AddDbContext<EFModeling.EntityProperties.FluentAPI.Required.ScriptDbContext>();
 
 // builder.Services.AddDataProtection().PersistKeysToDbContext<EFModeling.EntityProperties.FluentAPI.Required.MyContext>();

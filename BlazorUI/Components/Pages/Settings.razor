@@ -73,7 +73,7 @@
             services2.AddScoped<IUserSession, Sandbox.SandBoxUserSession>();
             services2.AddScoped<EmberInternalFacade>();
             ScriptingServiceCollectionExtensions.AddEmberScripting(services2, EmberMethods.GetReferences(),
-                EmberMethods.GetEmberApiVersion(testingDiffrentVersion: _selectedApiVersion));
+                EmberMethods.GetEmberApiVersion(testingDiffrentVersion: _selectedApiVersion), RecentTypeHelper.GetRecentTypes());
 
             var provider2 = services2.BuildServiceProvider();
 

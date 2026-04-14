@@ -1,5 +1,6 @@
 using System.Net.Http.Headers;
 using System.Reflection;
+using System.Security.Cryptography.X509Certificates;
 
 namespace Ember.Scripting;
 
@@ -8,12 +9,17 @@ public static class ScriptVersionScanner
     public static Dictionary<int, Type> GetClassDictionary()
     {
         Type baseType = typeof(Ember.Scripting.MetaDataIGeneratorScript);
-        return GetBaseTypeDictionary(baseType);
+        return GetBaseTypeDictionary(baseType).Item1;
     }
-
-    private static Dictionary<int, Type> GetBaseTypeDictionary(Type baseType)
+    public static List<ScriptMetaDataRecord> GetClassRecords()
+    {
+        Type baseType = typeof(Ember.Scripting.MetaDataIGeneratorScript);
+        return GetBaseTypeDictionary(baseType).Item2;
+    }
+    private static (Dictionary<int, Type>, List<ScriptMetaDataRecord>) GetBaseTypeDictionary(Type baseType)
     {
         Dictionary<int, Type> contextVersionMap = new();
+        List<ScriptMetaDataRecord> records = [];
 
         //The following six lines were ai generated
         var subClasses = AppDomain.CurrentDomain.GetAssemblies()
@@ -50,6 +56,9 @@ public static class ScriptVersionScanner
             }
 
             int version = metaDataAttribute.Version;
+            Type scriptType = currentType;
+            Type contextType = metaDataAttribute.ContextVersion;
+            Type arType = metaDataAttribute.ActionResultVersion;
 
             if (contextVersionMap.Values.Contains(currentType))
             {
@@ -62,7 +71,30 @@ public static class ScriptVersionScanner
 
             // Console.WriteLine("Version: " + version + ", CurrentType: " + currentType.Name + " , Type: " + metaDataAttribute.Type + " , ReturnType: " + metaDataAttribute.ReturnType);
             contextVersionMap.Add(version, currentType);
+            ScriptMetaDataRecord temp = new ScriptMetaDataRecord
+            {
+                Version = version,
+                ScriptType = currentType,
+                ContextType = contextType,
+                ActionResultType = arType
+            };
+            records.Add(temp);
+
         }
-        return contextVersionMap;
+
+        return (contextVersionMap, records);
+    }
+}
+
+public record ScriptMetaDataRecord
+{
+    public required int Version { get; init; }
+    public required Type ScriptType { get; init; }
+    public required Type ContextType { get; init; }
+    public required Type ActionResultType { get; init; }
+
+    public override string ToString()
+    {
+        return "V" + Version + ", Type: " + ScriptType.FullName + ", Context: " + ContextType.FullName + ", AR: " + ActionResultType.FullName;
     }
 }

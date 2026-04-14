@@ -24,7 +24,8 @@ public static class TestHelperBUnit
         ScriptingServiceCollectionExtensions.AddEmberScripting(
             Services,
             EmberMethods.GetReferences(),
-            EmberMethods.GetEmberApiVersion()
+            EmberMethods.GetEmberApiVersion(),
+            RecentTypeHelper.GetRecentTypes()
         );
 
     }

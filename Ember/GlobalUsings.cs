@@ -9,3 +9,34 @@ global using RecentContextFactory = GeneratorContextNoInherVaccineV5;
 // global using ActiveMultiersionActionScript = Mu/
 
 // public interface RecentIScript
+
+
+public record RecentTypeHelper
+{
+    // public readonly string TypeName;
+    // public readonly string Recent;
+    public static Dictionary<string, string> GetRecentTypeDictionary()
+    {
+        Dictionary<string, string> returnedDict = [];
+        returnedDict.Add(typeof(RecentActionResult).Name, typeof(RecentActionResult).FullName!);
+        returnedDict.Add(typeof(RecentIContext).Name, typeof(RecentIContext).FullName!);
+        returnedDict.Add(typeof(RecentContext).Name, typeof(RecentContext).FullName!);
+        returnedDict.Add(typeof(RecentIConditionScript).Name, typeof(RecentIConditionScript).FullName!);
+        returnedDict.Add(typeof(RecentIActionScript).Name, typeof(RecentIActionScript).FullName!);
+        // returnedDict.Add(typeof(RecentDataClass).Name, typeof(RecentDataClass).FullName!);
+        // returnedDict.Add(typeof(RecentContextFactory.IGeneratorContextFactory).Name, typeof(RecentContextFactory.IGeneratorContextFactory).FullName!);
+        return returnedDict;
+    }
+    public static List<Type> GetRecentTypes()
+    {
+        List<Type> returnedDict = [];
+        returnedDict.Add(typeof(RecentActionResult));
+        returnedDict.Add(typeof(RecentIContext));
+        returnedDict.Add(typeof(RecentContext));
+        returnedDict.Add(typeof(RecentIConditionScript));
+        returnedDict.Add(typeof(RecentIActionScript));
+        // returnedDict.Add(typeof(RecentDataClass));
+        // returnedDict.Add(typeof(RecentContextFactory.ContextFactory));
+        return returnedDict;
+    }
+}
