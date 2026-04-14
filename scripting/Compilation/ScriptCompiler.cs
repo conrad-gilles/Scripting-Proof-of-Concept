@@ -272,7 +272,7 @@ internal class ScriptCompiler
                 {
                     ITypeSymbol contextType = baseType.TypeArguments[0];
                     contextTypeString = GetFullyQualifiedName(contextType);
-                    arTypeString = nameof(ActionResultSF);
+                    arTypeString = "bool";
                 }
             }
             else if (baseType.Name == nameof(IActionScript))
@@ -327,12 +327,9 @@ internal class ScriptCompiler
 
             if (returnTypeString != arTypeString)
             {
-                if (baseType.Name != nameof(IConditionScript))
+                if (returnTypeString != "string" && methodName != nameof(Ember.Scripting.ScriptMethods.IExecute3.Execute3))   //todo fix get rid off
                 {
-                    if (returnTypeString != "string")   //todo fix get rid off
-                    {
-                        throw new WrongReturnTypeException(message: methodName + " has the wrong return Type: " + returnTypeString + ", it should be: " + arTypeString + ".", method);
-                    }
+                    throw new WrongReturnTypeException(message: methodName + " has the wrong return Type: " + returnTypeString + ", it should be: " + arTypeString + ".", method);
                 }
             }
 
@@ -348,7 +345,7 @@ internal class ScriptCompiler
                 }
 
                 if (paramType != contextTypeString
-                && paramType != "CustomerScript"    //todo get rid of
+                && paramType != "CustomerScript" && methodName != "SomeUndefindedMethod"    //todo get rid of
                 )
                 {
                     throw new WrongParameterTypeException(message: methodName + " has a wrong Parameter Type: " + paramType + ", it should be: " + contextTypeString + ".", method);

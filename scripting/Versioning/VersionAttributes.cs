@@ -15,6 +15,10 @@ public class MetaDataIGeneratorScript : Attribute
         Type = type;
         ContextVersion = typeof(IContext);
         ActionResultVersion = typeof(ActionResultSF);
+        if (ReturnType == IGeneratorScriptReturnType.Condition)
+        {
+            ActionResultVersion = typeof(bool);
+        }
     }
     public MetaDataIGeneratorScript(int version, IGeneratorScriptReturnType returnType, IGeneratorScriptType type, Type contextVersion, Type actionResultVersion)
     {
@@ -23,6 +27,10 @@ public class MetaDataIGeneratorScript : Attribute
         Type = type;
         ContextVersion = contextVersion;
         ActionResultVersion = actionResultVersion;
+        if (ReturnType == IGeneratorScriptReturnType.Condition)
+        {
+            ActionResultVersion = typeof(bool);
+        }
     }
 
     public MetaDataIGeneratorScript(int version)
@@ -32,6 +40,10 @@ public class MetaDataIGeneratorScript : Attribute
         Type = IGeneratorScriptType.DefaultVersioned;
         ContextVersion = typeof(IContext);
         ActionResultVersion = typeof(ActionResultSF);
+        if (ReturnType == IGeneratorScriptReturnType.Condition)
+        {
+            ActionResultVersion = typeof(bool);
+        }
     }
     public MetaDataIGeneratorScript(int version, Type contextVersion, Type actionResultVersion)
     {
@@ -40,6 +52,10 @@ public class MetaDataIGeneratorScript : Attribute
         Type = IGeneratorScriptType.DefaultVersioned;
         ContextVersion = contextVersion;
         ActionResultVersion = actionResultVersion;
+        if (ReturnType == IGeneratorScriptReturnType.Condition)
+        {
+            ActionResultVersion = typeof(bool);
+        }
     }
 }
 
