@@ -16,7 +16,7 @@ internal class EmberInternalFacade
     {
         var cf = new ContextManagement(_scriptManager);
         CustomerScript script = await _scriptManager.GetScript(id);
-        methodName = MethodNameFactory.GetOldMethodName(methodName, script.MinApiVersion, script.GetScriptType());
+        // methodName = MethodNameFactory.GetOldMethodName(methodName, script.MinApiVersion, script.GetScriptType());
         Context context = await cf.CreateByDowngrade(script.MinApiVersion, ctx);
         return await _scriptManager.ExecuteScriptById(id, context, methodName: methodName);
     }
@@ -111,8 +111,11 @@ internal class ActionScriptFacade : RecentIActionScript
     public async Task<RecentActionResult> Execute1(RecentIContext context)
     {
         string methodName = nameof(Ember.Scripting.ScriptMethods.IExecute1.Execute1);
-        CustomerScript script = await _scriptManager.GetScriptNT<IActionScript>(_scriptName);
-        methodName = MethodNameFactory.GetOldMethodName(methodName, script.MinApiVersion, script.GetScriptType());  //todo fix this 
+        CustomerScript script = await _scriptManager.GetScriptNT<IActionScript>(_scriptName);   // this is being called twice, also in ExecuteScript i can move it down but then i also need to move the old MethodName check down into ExecuteScript 
+        if (script.MinApiVersion == 10)
+        {
+            methodName = "ExecuteOldName1";
+        }
         return (RecentActionResult)await _emberScriptManager.ExecuteScript<IActionScript>(_scriptName, (RecentContext)context, methodName);
     }
     public async Task<RecentActionResult> Execute2(RecentIContext context)
@@ -121,37 +124,38 @@ internal class ActionScriptFacade : RecentIActionScript
         return (RecentActionResult)await _emberScriptManager.ExecuteScript<IActionScript>(_scriptName, (RecentContext)context, methodName);
     }
 }
-internal static class MethodNameFactory
-{
-    public static string GetOldMethodName(string methodName, int version, Type scriptType)
-    {
-        if (scriptType == typeof(IActionScript))
-        {
-            if (methodName == nameof(Ember.Scripting.ScriptMethods.IExecute1.Execute1))
-            {
-                switch (version)
-                {
-                    case 10:
-                        return "Execute1";
-                    default:
-                        return methodName;
-                }
-            }
-            if (methodName == nameof(Ember.Scripting.ScriptMethods.IExecute2.Execute2))
-            {
-                switch (version)
-                {
-                    case 10:
-                        return "ExecuteAction2";
-                    default:
-                        return methodName;
-                }
-            }
-        }
-        if (scriptType == typeof(IConditionScript))
-        {
-            return methodName;
-        }
-        return methodName;
-    }
-}
+
+// internal static class MethodNameFactory //todo delete
+// {
+//     public static string GetOldMethodName(string methodName, int version, Type scriptType)
+//     {
+//         if (scriptType == typeof(IActionScript))
+//         {
+//             if (methodName == nameof(Ember.Scripting.ScriptMethods.IExecute1.Execute1))
+//             {
+//                 switch (version)
+//                 {
+//                     case 10:
+//                         return "Execute1";
+//                     default:
+//                         return methodName;
+//                 }
+//             }
+//             if (methodName == nameof(Ember.Scripting.ScriptMethods.IExecute2.Execute2))
+//             {
+//                 switch (version)
+//                 {
+//                     case 10:
+//                         return "ExecuteAction2";
+//                     default:
+//                         return methodName;
+//                 }
+//             }
+//         }
+//         if (scriptType == typeof(IConditionScript))
+//         {
+//             return methodName;
+//         }
+//         return methodName;
+//     }
+// }
