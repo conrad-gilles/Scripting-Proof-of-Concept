@@ -230,4 +230,108 @@ public class SecurityTests
         Assert.IsTrue(expectedMS == realMS);
     }
 
+    [TestMethod]
+    public void TestBasicValiCorrectTypes()
+    {
+        string sourceCode = """
+        using System;
+        using System.Threading.Tasks;
+        using System.Collections.Generic;
+        using Ember.Scripting;
+        using GeneratorScriptsV3;
+        using IGeneratorContext_V4;
+
+        public class MultipleMethodsScript : GeneratorScriptsV3.IActionScript
+        {
+        public async Task<ActionResultV3.ActionResult> ExecuteAsync(IGeneratorContext_V4.IGeneratorContext context)
+        {
+        return ActionResultV3.ActionResult.Success("Default method ExecuteAsync was called");
+        }
+
+        public async Task<ActionResultV3.ActionResult> Execute1(IGeneratorContext_V4.IGeneratorContext context)
+        {
+        return ActionResultV3.ActionResult.Success("ExecuteAction1 was called");
+        }
+        public async Task<ActionResultV3.ActionResult> Execute2(IGeneratorContext_V4.IGeneratorContext context)
+        {
+        throw new MethodNotImplementedException(message: "error was thrown");
+        }
+        public async Task<string> Execute3(IGeneratorContext_V4.IGeneratorContext context)
+        {
+            return "successfully returned";
+        }
+        }
+        """;
+        ScriptManager.BasicValidationBeforeCompiling(sourceCode);   //shouldnt throw
+
+        //changed first return type to V2
+        sourceCode = """
+        using System;
+        using System.Threading.Tasks;
+        using System.Collections.Generic;
+        using Ember.Scripting;
+        using GeneratorScriptsV3;
+        using IGeneratorContext_V4;
+
+        public class MultipleMethodsScript : GeneratorScriptsV3.IActionScript
+        {
+        public async Task<ActionResultV2.ActionResult> ExecuteAsync(IGeneratorContext_V4.IGeneratorContext context)
+        {
+        return ActionResultV3.ActionResult.Success("Default method ExecuteAsync was called");
+        }
+
+        public async Task<ActionResultV3.ActionResult> Execute1(IGeneratorContext_V4.IGeneratorContext context)
+        {
+        return ActionResultV3.ActionResult.Success("ExecuteAction1 was called");
+        }
+        public async Task<ActionResultV3.ActionResult> Execute2(IGeneratorContext_V4.IGeneratorContext context)
+        {
+        throw new MethodNotImplementedException(message: "error was thrown");
+        }
+        public async Task<string> Execute3(IGeneratorContext_V4.IGeneratorContext context)
+        {
+            return "successfully returned";
+        }
+        }
+        """;
+        Assert.ThrowsException<Ember.Scripting.WrongReturnTypeException>(() =>
+        {
+            ScriptManager.BasicValidationBeforeCompiling(sourceCode);   //should throw
+        });
+
+        //changed first parameter return type to V2
+        sourceCode = """
+        using System;
+        using System.Threading.Tasks;
+        using System.Collections.Generic;
+        using Ember.Scripting;
+        using GeneratorScriptsV3;
+        using IGeneratorContext_V4;
+
+        public class MultipleMethodsScript : GeneratorScriptsV3.IActionScript
+        {
+        public async Task<ActionResultV3.ActionResult> ExecuteAsync(IGeneratorContext_V3.IGeneratorContext context)
+        {
+        return ActionResultV3.ActionResult.Success("Default method ExecuteAsync was called");
+        }
+
+        public async Task<ActionResultV3.ActionResult> Execute1(IGeneratorContext_V4.IGeneratorContext context)
+        {
+        return ActionResultV3.ActionResult.Success("ExecuteAction1 was called");
+        }
+        public async Task<ActionResultV3.ActionResult> Execute2(IGeneratorContext_V4.IGeneratorContext context)
+        {
+        throw new MethodNotImplementedException(message: "error was thrown");
+        }
+        public async Task<string> Execute3(IGeneratorContext_V4.IGeneratorContext context)
+        {
+            return "successfully returned";
+        }
+        }
+        """;
+        Assert.ThrowsException<Ember.Scripting.WrongParameterTypeException>(() =>
+        {
+            ScriptManager.BasicValidationBeforeCompiling(sourceCode);   //should throw
+        });
+    }
 }
