@@ -50,8 +50,8 @@ public interface IScriptManagerDeleteAfter : IScriptManagerExtended
   /// <param name="scriptId"></param>
   /// <param name="apiVersion"></param>
   /// <returns></returns>
-  Task<string> GetCompilationErrors(Guid scriptId, int? apiVersion = null);
-  Task<List<ScriptCompilationError>> GetCompilationErrors(string sourceCode, int? apiVersion = null);
+  Task<string> GetCompilationErrors(Guid scriptId);
+  Task<List<ScriptCompilationError>> GetCompilationErrors(string sourceCode);
 
   Task<bool> ThrowCompilationErrors(string script);
 

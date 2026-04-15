@@ -207,7 +207,6 @@ internal class ScriptRepository
 
         try
         {
-            ValidationRecord? metaData = null;
             CustomerScript script;
             string sourceCode;
 
@@ -223,14 +222,14 @@ internal class ScriptRepository
             }
             try
             {
-                metaData = _compiler.BasicValidationBeforeCompiling(sourceCode);
+                _compiler.BasicValidationBeforeCompiling(sourceCode);
             }
             catch (Exception e)
             {
                 _logger.LogError("Validation in GetCompilationErrors failed but will still try to compile." + e.ToString());
             }
 
-            _compiler.RunCompilation(sourceCode, metaData: metaData);
+            _compiler.RunCompilation(sourceCode);
 
             return "Successful Compilation!";
         }
@@ -241,7 +240,7 @@ internal class ScriptRepository
             // throw new FacadeException(e.ToString(), e);
         }
     }
-    public async Task<List<ScriptCompilationError>> GetCompilationErrors(string sourceCode, int? apiVersion = null)
+    public async Task<List<ScriptCompilationError>> GetCompilationErrors(string sourceCode)
     {
         ValidationRecord? metaData = null;
         try
@@ -254,7 +253,7 @@ internal class ScriptRepository
             {
                 _logger.LogError("Validation in GetCompilationErrors failed but will still try to compile." + e.ToString());
             }
-            _compiler.RunCompilation(sourceCode, apiVersion: apiVersion);
+            _compiler.RunCompilation(sourceCode);
             // throw new NoErrorsInScriptException("No error was in the Source Code.");
             List<ScriptCompilationError> returnList = [];
             return returnList;
@@ -392,7 +391,7 @@ internal class ScriptRepository
             else
             {
                 byte[] tempComp;
-                tempComp = _compiler.RunCompilation(script.SourceCode!, metaData: getTupleFromVal);
+                tempComp = _compiler.RunCompilation(script.SourceCode!);
 
                 CompiledScript tempCache = new CompiledScript
                 {
@@ -504,7 +503,7 @@ internal class ScriptRepository
                     await DeleteScriptCache(scriptId, (int)apiVersion);
                 }
                 byte[] compilation;
-                compilation = _compiler.RunCompilation(newSourceCode, metaData: validationRecord);
+                compilation = _compiler.RunCompilation(newSourceCode);
 
                 CompiledScript cache = new CompiledScript
                 {

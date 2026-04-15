@@ -10,11 +10,12 @@ namespace Ember.Scripting.Compilation;
 
 internal class ScriptCompiler
 {
-    private readonly List<MetadataReference>? _referencesRO = null;
+    private readonly List<MetadataReference>? _hostReferences = null;
+    private readonly List<MetadataReference> _allReferences = [];
     private readonly ILogger<ScriptCompiler> _logger;
     private readonly List<Type> _recentTypes;
 
-    private readonly List<MetadataReference> _standardRefrencesForAllScripts = [MetadataReference.CreateFromFile(typeof(object).Assembly.Location),
+    private readonly List<MetadataReference> _standardReferencesForAllScripts = [MetadataReference.CreateFromFile(typeof(object).Assembly.Location),
                         MetadataReference.CreateFromFile(typeof(Console).Assembly.Location),
                         MetadataReference.CreateFromFile(Assembly.Load("System.Runtime").Location),
                         MetadataReference.CreateFromFile(typeof(Task<>).Assembly.Location),
@@ -26,36 +27,24 @@ internal class ScriptCompiler
                         MetadataReference.CreateFromFile(Assembly.Load("System.Threading.Tasks").Location),
                         MetadataReference.CreateFromFile(Assembly.Load("netstandard").Location)
                         ];
-    public ScriptCompiler(List<MetadataReference> referencesRO, ILogger<ScriptCompiler> logger, List<Type> recentTypes)
+    public ScriptCompiler(List<MetadataReference> hostReferences, ILogger<ScriptCompiler> logger, List<Type> recentTypes)
     {
-        _referencesRO = referencesRO;
-        _referencesRO!.AddRange(_standardRefrencesForAllScripts);
+        _hostReferences = hostReferences;   //is now kinda useless
+        _allReferences.AddRange(_standardReferencesForAllScripts);
+        _allReferences.AddRange(_hostReferences);
         _logger = logger;
         _recentTypes = recentTypes;
     }
-    public byte[] RunCompilation(string script, int? apiVersion = null, ValidationRecord? metaData = null) //references param there to enable later on users to define custom references
+    public byte[] RunCompilation(string script)
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(RunCompilation), nameof(ScriptCompiler));
-        if (metaData != null)
-        {
-            _logger.LogTrace("Trying to compile script:" + metaData.ClassName);
-        }
-        // _referencesRO!.AddRange(_standardRefrencesForAllScripts);
-
-        List<MetadataReference>? references = [];
 
         //Takes C# source string and turns it into a "Roslyn parsed syntax tree representation" of a normal C# file
         SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(script);
-        if (_referencesRO != null)
-        {
-            _logger.LogInformation("References 2 added references in {MethodName}.", nameof(RunCompilation));
-            references = _referencesRO;
-        }
-        if (apiVersion != null)
-        {
-            _logger.LogInformation("Added custom references in {MethodName}.", nameof(RunCompilation));  //if this works remove the if references is null if stat above
-            references = GetReferencesForOldVersion((int)apiVersion);
-        }
+
+        List<MetadataReference>? references = [];
+        references = _allReferences;
+
         //this initiates the process of the compilation (does not produce bytes yet), it binds the source code with the refrences and the config options
         CSharpCompilation compilation = CSharpCompilation.Create(
             "MyDynamicAssembly",
@@ -68,47 +57,54 @@ internal class ScriptCompiler
         using var ms = new MemoryStream();
         var emitResult = compilation.Emit(ms);  //this line is the line that uses a lot of resources and time
 
-        //The following if statement was AI Generated
         if (!emitResult.Success)
         {
-            List<ScriptCompilationError> compilerErrors = emitResult.Diagnostics
-    .Where(d => d.IsWarningAsError || d.Severity == Microsoft.CodeAnalysis.DiagnosticSeverity.Error)
-    .Select(d =>
-    {
-        var hasLocation = d.Location != Location.None;
-        var lineSpan = hasLocation ? d.Location.GetLineSpan() : default;
-
-        int startLine = hasLocation ? lineSpan.StartLinePosition.Line + 1 : 1;
-        int startCol = hasLocation ? lineSpan.StartLinePosition.Character + 1 : 1;
-        int endLine = hasLocation ? lineSpan.EndLinePosition.Line + 1 : 1;
-        int endCol = hasLocation ? lineSpan.EndLinePosition.Character + 1 : 1;
-
-        // Force a minimum width of 1 character so Monaco actually draws a squiggly line.
-        // For CS0161 (missing return), Roslyn sometimes gives the exact method name location.
-        if (startLine == endLine && startCol == endCol)
-        {
-            endCol = startCol + 1; // Minimum 1 char width
-        }
-
-        return new ScriptCompilationError(
-            Id: d.Id,
-            Message: d.GetMessage(),
-            Line: startLine,
-            Column: startCol,
-            EndLine: endLine,
-            EndColumn: endCol,
-            IsError: d.Severity == Microsoft.CodeAnalysis.DiagnosticSeverity.Error
-        );
-    }).ToList();
-
-            _logger.LogError("Compilation failed with {ErrorCount} errors.", compilerErrors.Count);
-
-            // Throw passing the clean DTOs
-            throw new CompilationFailedException("Compilation failed.", compilerErrors);
+            FailedToCompile(emitResult);
         }
 
         byte[] assemblyBytes = ms.ToArray();
         return assemblyBytes;
+    }
+
+    //The following method statement was AI Generated
+    private void FailedToCompile(Microsoft.CodeAnalysis.Emit.EmitResult emitResult)
+    {
+
+        List<ScriptCompilationError> compilerErrors = emitResult.Diagnostics
+.Where(d => d.IsWarningAsError || d.Severity == Microsoft.CodeAnalysis.DiagnosticSeverity.Error)
+.Select(d =>
+{
+    var hasLocation = d.Location != Location.None;
+    var lineSpan = hasLocation ? d.Location.GetLineSpan() : default;
+
+    int startLine = hasLocation ? lineSpan.StartLinePosition.Line + 1 : 1;
+    int startCol = hasLocation ? lineSpan.StartLinePosition.Character + 1 : 1;
+    int endLine = hasLocation ? lineSpan.EndLinePosition.Line + 1 : 1;
+    int endCol = hasLocation ? lineSpan.EndLinePosition.Character + 1 : 1;
+
+    // Force a minimum width of 1 character so Monaco actually draws a squiggly line.
+    // For CS0161 (missing return), Roslyn sometimes gives the exact method name location.
+    if (startLine == endLine && startCol == endCol)
+    {
+        endCol = startCol + 1; // Minimum 1 char width
+    }
+
+    return new ScriptCompilationError(
+        Id: d.Id,
+        Message: d.GetMessage(),
+        Line: startLine,
+        Column: startCol,
+        EndLine: endLine,
+        EndColumn: endCol,
+        IsError: d.Severity == Microsoft.CodeAnalysis.DiagnosticSeverity.Error
+    );
+}).ToList();
+
+        _logger.LogError("Compilation failed with {ErrorCount} errors.", compilerErrors.Count);
+
+        // Throw passing the clean DTOs
+        throw new CompilationFailedException("Compilation failed.", compilerErrors);
+
     }
     public ValidationRecord BasicValidationBeforeCompiling(string script)//record
     {
@@ -626,7 +622,7 @@ internal class ScriptCompiler
 
     public List<MetadataReference> GetReferencesForOldVersion(int version, List<string>? customDlls = null, bool loadCurrentRT = true)  //todo fix this
     {
-        var stdReferences = _standardRefrencesForAllScripts;
+        var stdReferences = _standardReferencesForAllScripts;
         _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(GetReferencesForOldVersion), nameof(ScriptCompiler));
         var references = new List<MetadataReference>();
 

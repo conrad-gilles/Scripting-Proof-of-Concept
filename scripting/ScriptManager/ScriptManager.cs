@@ -148,16 +148,16 @@ internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, ISc
     }
 
     // Retrieves compilation error details
-    public async Task<string> GetCompilationErrors(Guid scriptId, int? apiVersion = null)
+    public async Task<string> GetCompilationErrors(Guid scriptId)
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName} with scriptId: {ScriptId}.", nameof(GetCompilationErrors), nameof(ScriptManagerFacade), scriptId);
-        return await _db.GetCompilationErrors(scriptId, apiVersion);
+        return await _db.GetCompilationErrors(scriptId);
     }
 
-    public async Task<List<ScriptCompilationError>> GetCompilationErrors(string sourceCode, int? apiVersion = null)
+    public async Task<List<ScriptCompilationError>> GetCompilationErrors(string sourceCode)
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName} with sourceCode: {sourceCode}.", nameof(GetCompilationErrors), nameof(ScriptManagerFacade), sourceCode);
-        return await _db.GetCompilationErrors(sourceCode, apiVersion);
+        return await _db.GetCompilationErrors(sourceCode);
     }
 
     public async Task<bool> ThrowCompilationErrors(string script)

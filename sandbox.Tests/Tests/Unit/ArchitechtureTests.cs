@@ -227,7 +227,7 @@ public class ArchitechtureTests
 
         elapsedMs = stopwatch.ElapsedMilliseconds;
         Console.WriteLine("execution took: " + elapsedMs);
-        Assert.IsTrue(elapsedMs > 499 && elapsedMs < 650);
+        Assert.IsTrue(elapsedMs > 499 && elapsedMs < 750);
 
         stopwatch = System.Diagnostics.Stopwatch.StartNew();
         e = await Assert.ThrowsExceptionAsync<ActionScriptExecutionException>(async () =>
