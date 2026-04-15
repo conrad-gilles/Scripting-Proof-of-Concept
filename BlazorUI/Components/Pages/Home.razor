@@ -3,7 +3,7 @@
 @using BlazorUI.Services
 @using BlazorUI.TotalExecutions
 @using Ember.Scripting
-@using Ember.Scripting.ScriptMethods
+@* @using Ember.Scripting.ScriptMethods *@
 @using Microsoft.EntityFrameworkCore
 <PageTitle>Dashboard</PageTitle>
 <PageTitle>Dashboard</PageTitle>
@@ -194,7 +194,7 @@ block in Home.razor -->
                                     }
                                     <span class="status-dot @dotClass"></span>
                                     <strong>@(string.IsNullOrEmpty(instance.InstanceName) ? (instance.Hostname ??
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     instance.InstanceId.ToString().Substring(0, 8)) : instance.InstanceName)</strong>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     instance.InstanceId.ToString().Substring(0, 8)) : instance.InstanceName)</strong>
                                     </div>
                                     <span class="badge bg-primary">v@(instance.EmberVersion ?? "Unknown") (API
                                         v@(instance.SdkVersion))</span>
@@ -480,7 +480,7 @@ EmberMethods.GetEmberApiVersion(), folderPath: path);
             _isWorking = false;
             await LoadDashBoardData();
         }
-        catch (Ember.Scripting.ScriptRepositoryException e)
+        catch (ScriptRepositoryException e)
         {
             _isWorking = false;
             _errorMessage = e.Message;

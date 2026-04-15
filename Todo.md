@@ -1,3 +1,5 @@
+- write tests for old name changed of method
+- wrtie test for stuff like this
 - get rid of duplicate code in validation
 - namely the getroslyn method and the check if it is implementing the wrong type and so on is too similar
 - prevent customer from writing script with no methods at all

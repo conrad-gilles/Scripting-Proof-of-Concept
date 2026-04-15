@@ -1,4 +1,4 @@
-namespace Ember.Scripting;
+namespace Ember.Scripting.Versioning;
 
 public abstract class VersioningExceptions : ScriptingFrameworkException
 {

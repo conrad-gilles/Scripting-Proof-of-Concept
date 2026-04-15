@@ -1,6 +1,9 @@
 using Microsoft.CodeAnalysis;
+using Ember.Scripting.Compilation;
+using Ember.Scripting.Execution;
+using Ember.Scripting.Persistence;
 
-namespace Ember.Scripting;
+namespace Ember.Scripting.ScriptManager;
 
 public interface IScriptManagerDeleteAfter : IScriptManagerExtended
 {

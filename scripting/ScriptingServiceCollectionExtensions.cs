@@ -1,8 +1,9 @@
-using EFModeling.EntityProperties.FluentAPI.Required;
+// using EFModeling.EntityProperties.FluentAPI.Required;
 using Microsoft.CodeAnalysis;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Ember.Scripting.Compilation;
 
 namespace Ember.Scripting;
 

@@ -252,7 +252,7 @@ public class EmberVersioningTests
     public async Task CreateUsingDataTestAsync()
     {
         _data = new DataV2.DataV2();
-        Ember.Scripting.Context ctx;  //refactor to ContextSF
+        Context ctx;  //refactor to ContextSF
         Guid id;
         id = (await _facade!.CreateScript(_sourceCodeActionV2!)).Id;
         var vali = _facade.BasicValidationBeforeCompiling(_sourceCodeActionV2!);
@@ -290,7 +290,7 @@ public class EmberVersioningTests
 
     public async Task GetTestingContextTest()
     {
-        Ember.Scripting.Context ctx;
+        Context ctx;
         Guid id;
         id = (await _facade!.CreateScript(_sourceCodeActionV2!)).Id;
         var vali = _facade.BasicValidationBeforeCompiling(_sourceCodeActionV2!);

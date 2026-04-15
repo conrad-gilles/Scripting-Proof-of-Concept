@@ -1,6 +1,7 @@
 using Ember.Scripting;
 using IGeneratorContext_V4;
 using Microsoft.CodeAnalysis.Scripting;
+using Ember.Scripting.Compilation;
 
 namespace Ember.Simulation;
 
@@ -60,14 +61,14 @@ internal class EmberInternalFacade
 
     public TScript GetScript<TScript>(string name) where TScript : IScriptMethod
     {
-        if (typeof(Ember.Scripting.IScriptMethodsCondition).IsAssignableFrom(typeof(TScript)))
+        if (typeof(IScriptMethodsCondition).IsAssignableFrom(typeof(TScript)))
         {
-            var toReturn = (Ember.Scripting.IScriptMethodsCondition)new ConditionScriptFacade(_scriptManager, name);
+            var toReturn = (IScriptMethodsCondition)new ConditionScriptFacade(_scriptManager, name);
             return (TScript)toReturn;
         }
-        else if (typeof(Ember.Scripting.IScriptMethodsAction).IsAssignableFrom(typeof(TScript)))
+        else if (typeof(IScriptMethodsAction).IsAssignableFrom(typeof(TScript)))
         {
-            var toReturn = (Ember.Scripting.IScriptMethodsAction)new ActionScriptFacade(_scriptManager, name);
+            var toReturn = (IScriptMethodsAction)new ActionScriptFacade(_scriptManager, name);
             return (TScript)toReturn;
         }
         throw new Exception();
@@ -85,7 +86,7 @@ internal class ConditionScriptFacade : RecentIConditionScript
     }
     public async Task<bool> EvaluateAsync(RecentIContext context)
     {
-        string methodName = nameof(Ember.Scripting.ScriptMethods.IEvaluateAsync.EvaluateAsync);
+        string methodName = nameof(Scripting.ScriptingFramework.ScriptMethods.IEvaluateAsync.EvaluateAsync);
         return (bool)await _emberScriptManager.ExecuteScript<IConditionScript>(_scriptName, (RecentContext)context, methodName);
     }
 }
@@ -104,13 +105,13 @@ internal class ActionScriptFacade : RecentIActionScript
     }
     public async Task<RecentActionResult> ExecuteAsync(RecentIContext context)
     {
-        string methodName = nameof(Ember.Scripting.ScriptMethods.IExecuteAsync.ExecuteAsync);
+        string methodName = nameof(IExecuteAsync.ExecuteAsync);
         return (RecentActionResult)await _emberScriptManager.ExecuteScript<IActionScript>(_scriptName, (RecentContext)context, methodName);
     }
 
     public async Task<RecentActionResult> Execute1(RecentIContext context)
     {
-        string methodName = nameof(Ember.Scripting.ScriptMethods.IExecute1.Execute1);
+        string methodName = nameof(IExecute1.Execute1);
         CustomerScript script = await _scriptManager.GetScriptNT<IActionScript>(_scriptName);   // this is being called twice, also in ExecuteScript i can move it down but then i also need to move the old MethodName check down into ExecuteScript 
         if (script.MinApiVersion == 10)
         {
@@ -120,7 +121,7 @@ internal class ActionScriptFacade : RecentIActionScript
     }
     public async Task<RecentActionResult> Execute2(RecentIContext context)
     {
-        string methodName = nameof(Ember.Scripting.ScriptMethods.IExecute2.Execute2);
+        string methodName = nameof(IExecute2.Execute2);
         return (RecentActionResult)await _emberScriptManager.ExecuteScript<IActionScript>(_scriptName, (RecentContext)context, methodName);
     }
 }

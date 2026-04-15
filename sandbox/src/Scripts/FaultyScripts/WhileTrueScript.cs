@@ -2,6 +2,7 @@ using System;   //todo this is possible to default in compiler
 using System.Threading.Tasks;
 using System.Collections.Generic;   //todo same for them
 using Ember.Scripting;
+using Ember.Scripting.Execution;
 using GeneratorScriptsV3;
 using IGeneratorContext_V4;
 
@@ -12,7 +13,7 @@ public class WhileTrueScript : GeneratorScriptsV3.IActionScript
         int i = 0;
         while (i >= 0)
         {
-            Ember.Scripting.ScriptEnvironment.CurrentToken.Value.ThrowIfCancellationRequested();
+            ScriptEnvironment.CurrentToken.Value.ThrowIfCancellationRequested();
             // Console.WriteLine("Infinite Loop, iteration N." + i);
             i++;
             if (i <= 0) //for integer overflow

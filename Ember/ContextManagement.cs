@@ -39,7 +39,7 @@ namespace Ember.Simulation
             // Type desiredType = contextVersionMap[vali.Version];
             Type desiredType = contextVersionMap[desiredVersion];
             // Ember.Scripting.GeneratorContextSF context = CreateContextForApiV(data);
-            Ember.Scripting.Context context = ctx;
+            Context context = ctx;
             int iterations = 0;
             int maxIterations = ContextVersionScanner.GetClassDictionary().Keys.Count() + 3;
 

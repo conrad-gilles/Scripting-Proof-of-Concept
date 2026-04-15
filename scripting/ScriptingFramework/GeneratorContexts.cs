@@ -1,7 +1,8 @@
 using Microsoft.Extensions.Logging;
 using Ember.Scripting;
 using System.Runtime.InteropServices;
-namespace Ember.Scripting;
+using TypeInfo = Ember.Scripting.Versioning.TypeInfo;
+namespace Ember.Scripting.ScriptingFramework;
 
 public abstract class Context : Downgradeable, Data
 {

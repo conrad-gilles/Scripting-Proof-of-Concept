@@ -2,7 +2,7 @@ using System.Diagnostics;
 using System.Reflection.PortableExecutable;
 using System.Text;
 using System.Threading.Tasks;
-using EFModeling.EntityProperties.FluentAPI.Required;
+// using EFModeling.EntityProperties.FluentAPI.Required;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.EntityFrameworkCore;
@@ -11,6 +11,7 @@ using Ember.Scripting;
 using System.Reflection;
 using Serilog.Extensions.Logging;
 using Microsoft.Extensions.Logging;
+using Ember.Scripting.Compilation;
 
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.DependencyInjection;
@@ -41,7 +42,7 @@ try
         builder.AddSerilog(dispose: true);
     });
 
-    services.AddDbContextFactory<EFModeling.EntityProperties.FluentAPI.Required.ScriptDbContext>();
+    services.AddDbContextFactory<ScriptDbContext>();
     services.AddSingleton<IUserSession, SandBoxUserSession>();
 
     ScriptingServiceCollectionExtensions.AddEmberScripting(services, EmberMethods.GetReferences(), EmberMethods.GetEmberApiVersion(), RecentTypeHelper.GetRecentTypes());

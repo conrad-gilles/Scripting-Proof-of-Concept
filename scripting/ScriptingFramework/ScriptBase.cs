@@ -1,6 +1,6 @@
-namespace Ember.Scripting
+namespace Ember.Scripting.ScriptingFramework
 {
-    using Ember.Scripting.ScriptMethods;
+    using Ember.Scripting.ScriptingFramework.ScriptMethods;
 
     public interface IScriptMethod
     {
@@ -17,7 +17,7 @@ namespace Ember.Scripting
     }
 }
 
-namespace Ember.Scripting.ScriptMethods
+namespace Ember.Scripting.ScriptingFramework.ScriptMethods
 
 {
     public interface IEvaluateAsync : IScriptMethod

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Ember.Scripting;
 using GeneratorScriptsV3;
 using IGeneratorContext_V4;
+using Ember.Scripting.ScriptingFramework;
 
 public class MultipleMethodsScript : GeneratorScriptsV3.IActionScript
 {

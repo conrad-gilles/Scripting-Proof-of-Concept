@@ -19,11 +19,11 @@ var references = EmberMethods.GetReferences();
 // int version = EmberMethods.GetEmberApiVersion();
 // string connectionString = "Host=localhost;Port=5432;Database=script_registry;Username=admin;Password=your_secure_password";
 
-builder.Services.AddDbContextFactory<EFModeling.EntityProperties.FluentAPI.Required.ScriptDbContext>();
+builder.Services.AddDbContextFactory<ScriptDbContext>();
 builder.Services.AddScoped<IUserSession, Sandbox.SandBoxUserSession>();
 
 builder.Services.AddEmberScripting(references, AppSettings.EmberApiVersion, RecentTypeHelper.GetRecentTypes());
-builder.Services.AddDbContext<EFModeling.EntityProperties.FluentAPI.Required.ScriptDbContext>();
+builder.Services.AddDbContext<ScriptDbContext>();
 
 // builder.Services.AddDataProtection().PersistKeysToDbContext<EFModeling.EntityProperties.FluentAPI.Required.MyContext>();
 // builder.Services.AddDataProtection()
@@ -77,7 +77,7 @@ using (var scope = app.Services.CreateScope())
     var services = scope.ServiceProvider;
     try
     {
-        var context = services.GetRequiredService<EFModeling.EntityProperties.FluentAPI.Required.ScriptDbContext>();
+        var context = services.GetRequiredService<ScriptDbContext>();
 
         // This ensures the database exists, then applies pending migrations safely
         // context.Database.Migrate();

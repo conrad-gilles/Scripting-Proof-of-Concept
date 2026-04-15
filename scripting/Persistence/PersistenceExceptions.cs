@@ -1,4 +1,4 @@
-namespace Ember.Scripting;
+namespace Ember.Scripting.Persistence;
 
 public abstract class PersistenceException : ScriptingFrameworkException
 {

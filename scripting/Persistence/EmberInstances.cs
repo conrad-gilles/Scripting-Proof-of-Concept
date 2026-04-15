@@ -2,7 +2,7 @@ using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Ember.Scripting;
+namespace Ember.Scripting.Persistence;
 
 [Table("ember_instances")]
 public class EmberInstance

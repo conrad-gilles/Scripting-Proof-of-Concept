@@ -9,6 +9,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Ember.Simulation;
 using Sandbox;
+using Ember.Scripting.Compilation;
+
 
 [TestClass]
 public class ArchitechtureTests
@@ -22,8 +24,11 @@ public class ArchitechtureTests
         using System.Threading.Tasks;
         using System.Collections.Generic;   //todo same for them
         using Ember.Scripting;
+        using Ember.Scripting.Execution;
         using GeneratorScriptsGeneric;
         using IGeneratorContext_V2;
+        using Ember.Scripting.Compilation;
+
 
         [ExecutionTime(ExecutionTimeGroups.Short)]
         public class ExecutionTimeTest : GeneratorScriptsGeneric.IActionScript<IGeneratorContext_V2.IGeneratorContext, ActionResultV1.ActionResult>
@@ -32,7 +37,7 @@ public class ArchitechtureTests
         {
         while (true)
         {
-            Ember.Scripting.ScriptEnvironment.CurrentToken.Value.ThrowIfCancellationRequested();
+            ScriptEnvironment.CurrentToken.Value.ThrowIfCancellationRequested();
         }
             return ActionResultV1.ActionResult.Success("Pediatric tests added");
         }
@@ -45,6 +50,8 @@ public class ArchitechtureTests
         using Ember.Scripting;
         using GeneratorScriptsGeneric;
         using IGeneratorContext_V2;
+        using Ember.Scripting.Compilation;
+        using Ember.Scripting.Execution;
 
         [ExecutionTime(ExecutionTimeGroups.Medium)]
         public class ExecutionTimeTest : GeneratorScriptsGeneric.IActionScript<IGeneratorContext_V2.IGeneratorContext, ActionResultV1.ActionResult>
@@ -53,7 +60,7 @@ public class ArchitechtureTests
         {
         while (true)
         {
-            Ember.Scripting.ScriptEnvironment.CurrentToken.Value.ThrowIfCancellationRequested();
+            ScriptEnvironment.CurrentToken.Value.ThrowIfCancellationRequested();
         }
             return ActionResultV1.ActionResult.Success("Pediatric tests added");
         }
@@ -66,6 +73,8 @@ public class ArchitechtureTests
         using Ember.Scripting;
         using GeneratorScriptsGeneric;
         using IGeneratorContext_V2;
+        using Ember.Scripting.Compilation;
+        using Ember.Scripting.Execution;
 
         [ExecutionTime(ExecutionTimeGroups.Long)]
         public class ExecutionTimeTest : GeneratorScriptsGeneric.IActionScript<IGeneratorContext_V2.IGeneratorContext, ActionResultV1.ActionResult>
@@ -74,7 +83,7 @@ public class ArchitechtureTests
         {
         while (true)
         {
-            Ember.Scripting.ScriptEnvironment.CurrentToken.Value.ThrowIfCancellationRequested();
+            ScriptEnvironment.CurrentToken.Value.ThrowIfCancellationRequested();
         }
             return ActionResultV1.ActionResult.Success("Pediatric tests added");
         }
@@ -85,8 +94,11 @@ public class ArchitechtureTests
         using System.Threading.Tasks;
         using System.Collections.Generic;   //todo same for them
         using Ember.Scripting;
+        using Ember.Scripting.Compilation;
         using GeneratorScriptsGeneric;
         using IGeneratorContext_V2;
+        using Ember.Scripting.Compilation;
+        using Ember.Scripting.Execution;
 
         [ExecutionTime(ExecutionTimeGroups.ExtraLong)]
         public class ExecutionTimeTest : GeneratorScriptsGeneric.IActionScript<IGeneratorContext_V2.IGeneratorContext, ActionResultV1.ActionResult>
@@ -95,7 +107,7 @@ public class ArchitechtureTests
         {
         while (true)
         {
-            Ember.Scripting.ScriptEnvironment.CurrentToken.Value.ThrowIfCancellationRequested();
+            ScriptEnvironment.CurrentToken.Value.ThrowIfCancellationRequested();
         }
             return ActionResultV1.ActionResult.Success("Pediatric tests added");
         }
@@ -182,7 +194,7 @@ public class ArchitechtureTests
     public async Task CheckTimeout()
     {
         var stopwatch = System.Diagnostics.Stopwatch.StartNew();
-        Exception e = await Assert.ThrowsExceptionAsync<Ember.Scripting.ActionScriptExecutionException>(async () =>
+        Exception e = await Assert.ThrowsExceptionAsync<ActionScriptExecutionException>(async () =>
         {
             await InternalScriptManager.ExecuteUnfinishedScriptBySourceCode(sourceCode5000, TestHelper.GetContext(), "Default");
         });
@@ -196,7 +208,7 @@ public class ArchitechtureTests
         Assert.IsTrue(elapsedMs > 4999 && elapsedMs < 7500);
 
         stopwatch = System.Diagnostics.Stopwatch.StartNew();
-        e = await Assert.ThrowsExceptionAsync<Ember.Scripting.ActionScriptExecutionException>(async () =>
+        e = await Assert.ThrowsExceptionAsync<ActionScriptExecutionException>(async () =>
        {
            await InternalScriptManager.ExecuteUnfinishedScriptBySourceCode(sourceCode100, TestHelper.GetContext(), "Default");
        });
@@ -207,7 +219,7 @@ public class ArchitechtureTests
         Assert.IsTrue(elapsedMs > 99 && elapsedMs < 400);
 
         stopwatch = System.Diagnostics.Stopwatch.StartNew();
-        e = await Assert.ThrowsExceptionAsync<Ember.Scripting.ActionScriptExecutionException>(async () =>
+        e = await Assert.ThrowsExceptionAsync<ActionScriptExecutionException>(async () =>
        {
            await InternalScriptManager.ExecuteUnfinishedScriptBySourceCode(sourceCode500, TestHelper.GetContext(), "Default");
        });
@@ -218,7 +230,7 @@ public class ArchitechtureTests
         Assert.IsTrue(elapsedMs > 499 && elapsedMs < 650);
 
         stopwatch = System.Diagnostics.Stopwatch.StartNew();
-        e = await Assert.ThrowsExceptionAsync<Ember.Scripting.ActionScriptExecutionException>(async () =>
+        e = await Assert.ThrowsExceptionAsync<ActionScriptExecutionException>(async () =>
        {
            await InternalScriptManager.ExecuteUnfinishedScriptBySourceCode(sourceCode1000, TestHelper.GetContext(), "Default");
        });
@@ -230,7 +242,7 @@ public class ArchitechtureTests
 
 
         stopwatch = System.Diagnostics.Stopwatch.StartNew();
-        e = await Assert.ThrowsExceptionAsync<Ember.Scripting.ActionScriptExecutionException>(async () =>
+        e = await Assert.ThrowsExceptionAsync<ActionScriptExecutionException>(async () =>
        {
            await InternalScriptManager.ExecuteUnfinishedScriptBySourceCode(sourceCode5000, TestHelper.GetContext(), "Default");
        });

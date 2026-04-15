@@ -21,7 +21,7 @@ public static class TestAssemblyInit
     public static async Task Init(TestContext _)
     {
         //this block is ecessary at least once in the code everytime you modify the init.sql else the db wont be initialized somehow
-        using (var db = new EFModeling.EntityProperties.FluentAPI.Required.ScriptDbContext())
+        using (var db = new ScriptDbContext())
         {
             await db.Database.EnsureDeletedAsync();
             await db.Database.EnsureCreatedAsync();

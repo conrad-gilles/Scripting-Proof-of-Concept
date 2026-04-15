@@ -9,6 +9,7 @@ using BlazorUI.Services;
 using Ember.Scripting;
 using Ember.Simulation;
 using Microsoft.JSInterop;
+using Ember.Scripting.Compilation;
 
 namespace BlazorUI.Helpers
 {

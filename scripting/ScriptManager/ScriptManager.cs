@@ -2,8 +2,9 @@ using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.CodeAnalysis;
 using Microsoft.EntityFrameworkCore.Infrastructure.Internal;
 using Microsoft.Extensions.Logging;
+using Ember.Scripting.Compilation;
 
-namespace Ember.Scripting;
+namespace Ember.Scripting.ScriptManager;
 
 internal class ScriptManagerFacade : IScriptManager, IScriptManagerExtended, IScriptManagerDeleteAfter
 {

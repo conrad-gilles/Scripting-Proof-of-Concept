@@ -4,20 +4,20 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 
-namespace Ember.Scripting;
+namespace Ember.Scripting.Versioning;
 
 public static class ContextVersionScanner
 {
     // Moved exactly as it was from ScriptFactory
     public static Dictionary<int, Type> GetClassDictionary()
     {
-        Type baseType = typeof(Ember.Scripting.GeneratorContextSF);
+        Type baseType = typeof(GeneratorContextSF);
         return GetBaseTypeDictionary(baseType);
     }
 
     public static Dictionary<int, Type> GetInterfaceDictionary()
     {
-        Type baseType = typeof(Ember.Scripting.IContext);
+        Type baseType = typeof(IContext);
         return GetBaseTypeDictionaryIntrfc(baseType);
     }
 
@@ -34,7 +34,7 @@ public static class ContextVersionScanner
         for (int i = 0; i < subClasses.Count(); i++)
         {
             Type currentType = subClasses[i];
-            var uninitializedContext = (Ember.Scripting.GeneratorContextSF)RuntimeHelpers.GetUninitializedObject(currentType);
+            var uninitializedContext = (GeneratorContextSF)RuntimeHelpers.GetUninitializedObject(currentType);
 
             System.Reflection.TypeInfo typeInfo = uninitializedContext.GetType().GetTypeInfo();
 

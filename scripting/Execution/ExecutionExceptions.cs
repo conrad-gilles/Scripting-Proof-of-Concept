@@ -1,4 +1,4 @@
-namespace Ember.Scripting;
+namespace Ember.Scripting.Execution;
 
 public abstract class ExecutionException : ScriptingFrameworkException
 {

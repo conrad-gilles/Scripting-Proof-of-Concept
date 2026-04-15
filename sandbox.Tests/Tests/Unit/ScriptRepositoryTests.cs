@@ -7,6 +7,7 @@ using Serilog;
 using Microsoft.Extensions.DependencyInjection;
 using sandbox.Tests;
 using Sandbox;
+using Ember.Scripting.Compilation;
 
 namespace FirstTests;
 
@@ -52,7 +53,7 @@ public class ScriptRepositoryTests
         Assert.IsTrue(getCache != null && (getCache.ApiVersion == EmberMethods.GetEmberApiVersion()));
         Assert.IsTrue(after.CompiledCaches.Any(c => c.AssemblyBytes != null && c.AssemblyBytes.Length >= 1));
 
-        var e = await Assert.ThrowsExceptionAsync<Ember.Scripting.CreateAndInsertCompiledScriptException>(async () =>
+        var e = await Assert.ThrowsExceptionAsync<CreateAndInsertCompiledScriptException>(async () =>
          {
              await _facade.CompileScript(id, EmberMethods.GetEmberApiVersion());
              var after3 = await _facade.GetScript(id, includeCaches: true);
@@ -85,7 +86,7 @@ public class ScriptRepositoryTests
             CustomerScript script2 = await _facade.GetScript(id2);
 
             Assert.IsTrue(script1.Equals(script2));
-            var e = await Assert.ThrowsExceptionAsync<Ember.Scripting.ScriptRepositoryException>(async () =>
+            var e = await Assert.ThrowsExceptionAsync<ScriptRepositoryException>(async () =>
             {
                 Guid id3 = (await _facade!.CreateScript(_sourceCodePedia!)).Id;
             });
@@ -139,7 +140,7 @@ public class ScriptRepositoryTests
                     catch (Exception e)
                     {
 
-                        throw new Ember.Scripting.CompiledScriptWasTooLargeException("random message2", e);
+                        throw new CompiledScriptWasTooLargeException("random message2", e);
                     }
                 }
                 catch (Exception e)

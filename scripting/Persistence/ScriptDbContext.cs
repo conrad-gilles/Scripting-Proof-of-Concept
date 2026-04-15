@@ -2,7 +2,8 @@ using Ember.Scripting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
 
-namespace EFModeling.EntityProperties.FluentAPI.Required;
+// namespace EFModeling.EntityProperties.FluentAPI.Required;
+namespace Ember.Scripting.Persistence;
 
 public class ScriptDbContext : DbContext //, IDataProtectionKeyContext
 {

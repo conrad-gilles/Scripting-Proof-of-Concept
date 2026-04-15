@@ -206,7 +206,7 @@ public class TestHelper
         });
         services.AddSingleton<IUserSession, Sandbox.SandBoxUserSession>();
 
-        services.AddDbContextFactory<EFModeling.EntityProperties.FluentAPI.Required.ScriptDbContext>();
+        services.AddDbContextFactory<ScriptDbContext>();
         ScriptingServiceCollectionExtensions.AddEmberScripting(services, EmberMethods.GetReferences(), EmberMethods.GetEmberApiVersion(), RecentTypeHelper.GetRecentTypes());
 
         var provider = services.BuildServiceProvider();
@@ -240,11 +240,11 @@ public class TestHelper
 
     public static string GetMethodNameAction()
     {
-        return nameof(Ember.Scripting.IScriptMethodsAction.ExecuteAsync);
+        return nameof(IScriptMethodsAction.ExecuteAsync);
     }
     public static string GetMethodNameCond()
     {
-        return nameof(Ember.Scripting.IScriptMethodsCondition.EvaluateAsync);
+        return nameof(IScriptMethodsCondition.EvaluateAsync);
     }
 
 }

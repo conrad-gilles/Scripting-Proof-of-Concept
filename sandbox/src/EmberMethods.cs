@@ -48,7 +48,7 @@ public class EmberMethods
         });
         services2.AddSingleton<IUserSession, SandBoxUserSession>();
 
-        services2.AddDbContextFactory<EFModeling.EntityProperties.FluentAPI.Required.ScriptDbContext>();
+        services2.AddDbContextFactory<ScriptDbContext>();
         ScriptingServiceCollectionExtensions.AddEmberScripting(services2, EmberMethods.GetReferences(), EmberMethods.GetEmberApiVersion(testingDiffrentVersion: apiVersion), RecentTypeHelper.GetRecentTypes());
         var provider2 = services2.BuildServiceProvider();
         return facade = provider2.GetRequiredService<IScriptManagerDeleteAfter>();
@@ -300,7 +300,7 @@ public class EmberMethods
         // GeneratorContext ctx = GetTestingContext();
         return "Gilles";
     }
-    public async Task<Ember.Scripting.Context> GetTestingContext<T>(CustomerScript? autoDetectFromScript = null) where T : Ember.Scripting.GeneratorContextSF
+    public async Task<Context> GetTestingContext<T>(CustomerScript? autoDetectFromScript = null) where T : GeneratorContextSF
     {
         Serilog.Log.Verbose("Entered {MethodName} in {ClassName}.", nameof(GetTestingContext), nameof(EmberMethods));
         try

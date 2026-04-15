@@ -4,6 +4,7 @@ using System.Collections.Generic;   //todo same for them
 using Ember.Scripting;
 using GeneratorScriptsGeneric;
 using IGeneratorContext_V2;
+using Ember.Scripting.Compilation;
 
 [ExecutionTime(ExecutionTimeGroups.Long)]
 public class ExecutionTimeTest : GeneratorScriptsGeneric.IActionScript<IGeneratorContext_V2.IGeneratorContext, ActionResultV1.ActionResult>

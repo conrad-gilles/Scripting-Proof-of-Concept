@@ -9,6 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Ember.Simulation;
 using Sandbox;
+using Ember.Scripting.Compilation;
 
 [TestClass]
 public class SecurityTests
@@ -26,7 +27,7 @@ public class SecurityTests
     public async Task IllegalUsingTest()
     {
         string sourceCode = TestHelper.GetSC().sourceCodeIllegalUsings;
-        Exception ex = await Assert.ThrowsExceptionAsync<Ember.Scripting.ForbiddenNamespaceException>(async () =>
+        Exception ex = await Assert.ThrowsExceptionAsync<Ember.Scripting.Compilation.ForbiddenNamespaceException>(async () =>
         {
             CustomerScript script = await ScriptManager.CreateScript(sourceCode);
         });
@@ -35,7 +36,7 @@ public class SecurityTests
     public async Task MissingUsingTest()
     {
         string sourceCode = TestHelper.GetSC().sourceCodeMissingUsing;
-        Ember.Scripting.CompilationFailedException ex = await Assert.ThrowsExceptionAsync<Ember.Scripting.CompilationFailedException>(async () =>
+        Ember.Scripting.Compilation.CompilationFailedException ex = await Assert.ThrowsExceptionAsync<Ember.Scripting.Compilation.CompilationFailedException>(async () =>
         {
             CustomerScript script = await ScriptManager.CreateScript(sourceCode);
         });
@@ -51,7 +52,7 @@ public class SecurityTests
     public async Task PreventUsageTest()
     {
         string sourceCode = TestHelper.GetSC().sourceCodePreventUsage;
-        Exception ex = await Assert.ThrowsExceptionAsync<Ember.Scripting.ForbiddenTypeAccessException>(async () =>
+        Exception ex = await Assert.ThrowsExceptionAsync<Ember.Scripting.Compilation.ForbiddenTypeAccessException>(async () =>
         {
             CustomerScript script = await ScriptManager.CreateScript(sourceCode);
         });
@@ -59,7 +60,7 @@ public class SecurityTests
     [TestMethod]
     public async Task WhileTrueScript()
     {
-        await Assert.ThrowsExceptionAsync<Ember.Scripting.ActionScriptExecutionException>(async () =>
+        await Assert.ThrowsExceptionAsync<ActionScriptExecutionException>(async () =>
         {
             string sourceCode = TestHelper.GetSC().sourceCodeWhileTrue;
             // ScriptNameType scriptRecord = await ScriptManager!.CreateScriptUsingNameType(sourceCode!);
@@ -88,7 +89,7 @@ public class SecurityTests
         string sourceCode = "";
 
         // Exception when Source code is empty
-        Exception ex = Assert.ThrowsException<Ember.Scripting.ScriptWasEmptyOrNullException>(() =>
+        Exception ex = Assert.ThrowsException<Ember.Scripting.Compilation.ScriptWasEmptyOrNullException>(() =>
         {
             ScriptManager.BasicValidationBeforeCompiling(sourceCode);
         });
@@ -97,7 +98,7 @@ public class SecurityTests
         sourceCode = "public class ShouldFail{}";
 
         //Exception when Script doesnt inherit from the predefined classes      
-        ex = Assert.ThrowsException<Ember.Scripting.ScriptFieldNullException>(() =>
+        ex = Assert.ThrowsException<Ember.Scripting.Compilation.ScriptFieldNullException>(() =>
        {
            ScriptManager.BasicValidationBeforeCompiling(sourceCode);
        });
@@ -107,7 +108,7 @@ public class SecurityTests
         sourceCode = TestHelper.GetSC().sourceCodeIllegalUsings;
 
         //Exception when the scripts has a using at the top that is defined ass illegal, source code: file=IllegalUsingScript.cs
-        ex = Assert.ThrowsException<Ember.Scripting.ForbiddenNamespaceException>(() =>
+        ex = Assert.ThrowsException<Ember.Scripting.Compilation.ForbiddenNamespaceException>(() =>
                {
                    ScriptManager.BasicValidationBeforeCompiling(sourceCode);
                });
@@ -116,7 +117,7 @@ public class SecurityTests
         sourceCode = TestHelper.GetSC().sourceCodePreventUsage;
 
         //Exception when there is a forbidden Type access like System.IO.BufferedStream? stream for example, source code: file=PreventUsageScript.cs
-        ex = Assert.ThrowsException<Ember.Scripting.ForbiddenTypeAccessException>(() =>
+        ex = Assert.ThrowsException<Ember.Scripting.Compilation.ForbiddenTypeAccessException>(() =>
                {
                    ScriptManager.BasicValidationBeforeCompiling(sourceCode);
                });
@@ -125,7 +126,7 @@ public class SecurityTests
         sourceCode = TestHelper.GetSC().sourceCodeWhileTrueUnsafe;
 
         //Exception when there is a loop that does not contain a check for the cancellation token, source code: file=WhileTrueScript.cs
-        ex = Assert.ThrowsException<Ember.Scripting.ConcellationTokenUncheckedException>(() =>
+        ex = Assert.ThrowsException<Ember.Scripting.Compilation.ConcellationTokenUncheckedException>(() =>
            {
                ScriptManager.BasicValidationBeforeCompiling(sourceCode);
            });
@@ -135,7 +136,7 @@ public class SecurityTests
         sourceCode = TestHelper.GetSC().sourceCodeMultipleClasses;
 
         //Exception when there is a more than one class (script) defined in a file (or db entry), source code: file=MultipleClassesScript.cs
-        ex = Assert.ThrowsException<Ember.Scripting.MoreThanOneClassFoundInScriptException>(() =>
+        ex = Assert.ThrowsException<Ember.Scripting.Compilation.MoreThanOneClassFoundInScriptException>(() =>
            {
                ScriptManager.BasicValidationBeforeCompiling(sourceCode);
            });
@@ -294,7 +295,7 @@ public class SecurityTests
         }
         }
         """;
-        Assert.ThrowsException<Ember.Scripting.WrongReturnTypeException>(() =>
+        Assert.ThrowsException<WrongReturnTypeException>(() =>
         {
             ScriptManager.BasicValidationBeforeCompiling(sourceCode);   //should throw
         });
@@ -329,7 +330,7 @@ public class SecurityTests
         }
         }
         """;
-        Assert.ThrowsException<Ember.Scripting.WrongParameterTypeException>(() =>
+        Assert.ThrowsException<WrongParameterTypeException>(() =>
         {
             ScriptManager.BasicValidationBeforeCompiling(sourceCode);   //should throw
         });
@@ -414,7 +415,7 @@ public class SecurityTests
         }
         }
         """;
-        Assert.ThrowsException<Ember.Scripting.WrongParameterTypeException>(() =>
+        Assert.ThrowsException<WrongParameterTypeException>(() =>
         {
             ScriptManager.BasicValidationBeforeCompiling(sourceCode);   //should throw
         });

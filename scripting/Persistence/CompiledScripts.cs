@@ -2,7 +2,7 @@ using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Ember.Scripting;
+namespace Ember.Scripting.Persistence;
 
 [Microsoft.EntityFrameworkCore.PrimaryKey(nameof(ScriptId), nameof(ApiVersion))]    //composite key because one script id can link multiple compiled
 [Table("compiled_scripts")]

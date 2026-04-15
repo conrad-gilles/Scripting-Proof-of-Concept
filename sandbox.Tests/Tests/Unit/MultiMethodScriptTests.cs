@@ -1,5 +1,6 @@
 #pragma warning disable CS0436
 
+using Ember.Scripting.Compilation;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Ember.Scripting;
@@ -38,7 +39,7 @@ public class MultiMethodScriptTests
         Console.WriteLine(ar.ToString());
         Assert.IsTrue(ar.ToString().Contains("ExecuteAction1 was called"));
 
-        Exception ex = await Assert.ThrowsExceptionAsync<Ember.Scripting.ActionScriptExecutionException>(async () =>
+        Exception ex = await Assert.ThrowsExceptionAsync<ActionScriptExecutionException>(async () =>
         {
             ar = (RecentActionResult)await InternalScriptManager!.ExecuteScript<IActionScript>
            (script.ScriptName!, TestHelper.GetContext(), methodName: "Execute2");
@@ -78,7 +79,7 @@ public class MultiMethodScriptTests
         Console.WriteLine(ar.ToString());
         Assert.IsTrue(ar.ToString().Contains("ExecuteAction1 was called"));
 
-        Exception ex = await Assert.ThrowsExceptionAsync<Ember.Scripting.ActionScriptExecutionException>(async () =>
+        Exception ex = await Assert.ThrowsExceptionAsync<ActionScriptExecutionException>(async () =>
         {
             ar = await script.Execute2(TestHelper.GetContext());
         });
@@ -98,7 +99,7 @@ public class MultiMethodScriptTests
         string sourceCode = TestHelper.GetSC().sourceCodeMultiMethodScripts;
         CustomerScript scriptDB = await ScriptManager.CreateScript(sourceCode);
 
-        Exception ex = await Assert.ThrowsExceptionAsync<Ember.Scripting.CouldNotFindMethodException>(async () =>
+        Exception ex = await Assert.ThrowsExceptionAsync<CouldNotFindMethodException>(async () =>
         {
             RecentActionResult ar = (RecentActionResult)await InternalScriptManager!.ExecuteScript<IActionScript>
             (scriptDB.ScriptName!, TestHelper.GetContext(), methodName: "MethodDoesntExist");
@@ -109,7 +110,7 @@ public class MultiMethodScriptTests
         sourceCode = TestHelper.GetSC().sourceCodeActionV3;
         scriptDB = await ScriptManager.CreateScript(sourceCode);
 
-        ex = await Assert.ThrowsExceptionAsync<Ember.Scripting.CouldNotFindMethodException>(async () =>
+        ex = await Assert.ThrowsExceptionAsync<CouldNotFindMethodException>(async () =>
        {
            RecentActionResult ar = (RecentActionResult)await InternalScriptManager!.ExecuteScript<IActionScript>
                (scriptDB.ScriptName!, TestHelper.GetContext(), methodName: "ExecuteAction1");
@@ -208,7 +209,7 @@ public class MultiMethodScriptTests
         ar = await script.Execute1(TestHelper.GetContext());
         Assert.IsTrue(ar.ToString().Contains("ExecuteAction1 was called"));
 
-        Exception ex = await Assert.ThrowsExceptionAsync<Ember.Scripting.ActionScriptExecutionException>(async () =>
+        Exception ex = await Assert.ThrowsExceptionAsync<ActionScriptExecutionException>(async () =>
      {
          //  ar = (RecentActionResult)await InternalScriptManager.Execute2<IGeneratorActionScript>(scriptDB.ScriptName!, TestHelper.GetContext());
          ar = await script.Execute2(TestHelper.GetContext());
@@ -221,6 +222,14 @@ public class MultiMethodScriptTests
         //Setting up the script anc context and inserting it into the DB
         string sourceCode = TestHelper.GetSC().sourceCodeMultiMethodScripts;
         var context = TestHelper.GetContext();
+        // CompilationFailedException ex5 = await Assert.ThrowsExceptionAsync<CompilationFailedException>(async () =>
+        //          {
+        //              CustomerScript scriptDB = await ScriptManager.CreateScript(sourceCode);
+        //          });
+        // foreach (var item in ex5.Errors)
+        // {
+        //     Console.WriteLine(item);
+        // }
         CustomerScript scriptDB = await ScriptManager.CreateScript(sourceCode);
 
         //Getting the Script
@@ -234,7 +243,7 @@ public class MultiMethodScriptTests
         ar = (RecentActionResult)await script.Execute1(context);
         Assert.IsTrue(ar.ToString().Contains("ExecuteAction1 was called"));
 
-        Exception ex = await Assert.ThrowsExceptionAsync<Ember.Scripting.ActionScriptExecutionException>(async () =>
+        Exception ex = await Assert.ThrowsExceptionAsync<ActionScriptExecutionException>(async () =>
         {
             //Executing the third function (normal that it throws an exception)
             ar = (RecentActionResult)await script.Execute2(context);
@@ -251,7 +260,7 @@ public class MultiMethodScriptTests
         Assert.IsTrue(ar.ToString().Contains("Vaccine added"));
 
         //Trying to execute a function that is not implemented in the Script
-        ex = await Assert.ThrowsExceptionAsync<Ember.Scripting.CouldNotFindMethodException>(async () =>
+        ex = await Assert.ThrowsExceptionAsync<CouldNotFindMethodException>(async () =>
        {
            ar = (RecentActionResult)await script.Execute1(context);
        });

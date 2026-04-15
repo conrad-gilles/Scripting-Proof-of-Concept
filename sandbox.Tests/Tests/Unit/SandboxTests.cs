@@ -8,6 +8,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using System.ComponentModel.DataAnnotations;
 using Sandbox;
+using Ember.Scripting.Compilation;
+
 using Ember.Simulation;
 
 [TestClass]
@@ -42,7 +44,7 @@ public class SanboxTests
     public async Task CreateContextTest()
     {
         Sandbox.ContextManagementDemos sf;
-        Ember.Scripting.Context ctx;
+        Context ctx;
 
         _facade = EmberMethods.GetNewScriptManagerInstance(1);
         sf = new Sandbox.ContextManagementDemos(_facade);

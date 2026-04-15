@@ -1,4 +1,4 @@
-namespace Ember.Scripting;
+namespace Ember.Scripting.Versioning;
 
 [AttributeUsage(AttributeTargets.Interface)]
 public class MetaDataIGeneratorScript : Attribute

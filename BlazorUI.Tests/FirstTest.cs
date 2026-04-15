@@ -4,7 +4,7 @@ using BlazorUI.Components.Pages;
 using Ember.Scripting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
-using EFModeling.EntityProperties.FluentAPI.Required;
+// using EFModeling.EntityProperties.FluentAPI.Required;
 using Moq;
 using Serilog;
 using Sandbox;
@@ -117,7 +117,7 @@ public class MyTestScript : GeneratorScriptsV3.IGeneratorActionScript
 
         cut.WaitForAssertion(() =>
         {
-            var contextFactory = Services.GetRequiredService<IDbContextFactory<EFModeling.EntityProperties.FluentAPI.Required.ScriptDbContext>>();
+            var contextFactory = Services.GetRequiredService<IDbContextFactory<ScriptDbContext>>();
             using var context = contextFactory.CreateDbContext();
 
             var savedScript = context.CustomerScripts.FirstOrDefault(s => s.ScriptName == "MyTestScript");

@@ -2,18 +2,18 @@ using System.Net.Http.Headers;
 using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
 
-namespace Ember.Scripting;
+namespace Ember.Scripting.Versioning;
 
 public static class ScriptVersionScanner
 {
     public static Dictionary<int, Type> GetClassDictionary()
     {
-        Type baseType = typeof(Ember.Scripting.MetaDataIGeneratorScript);
+        Type baseType = typeof(MetaDataIGeneratorScript);
         return GetBaseTypeDictionary(baseType).Item1;
     }
     public static List<ScriptMetaDataRecord> GetClassRecords()
     {
-        Type baseType = typeof(Ember.Scripting.MetaDataIGeneratorScript);
+        Type baseType = typeof(MetaDataIGeneratorScript);
         return GetBaseTypeDictionary(baseType).Item2;
     }
     private static (Dictionary<int, Type>, List<ScriptMetaDataRecord>) GetBaseTypeDictionary(Type baseType)

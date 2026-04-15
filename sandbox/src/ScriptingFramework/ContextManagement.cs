@@ -38,7 +38,7 @@ public class ContextManagementDemos
             throw new Exception(message: "The version was not found in the Dictionary");
         }
         Type neededType = retrievedDict[version];
-        Ember.Scripting.GeneratorContextSF uninitializedContext = (Ember.Scripting.GeneratorContextSF)RuntimeHelpers.GetUninitializedObject(neededType);
+        GeneratorContextSF uninitializedContext = (GeneratorContextSF)RuntimeHelpers.GetUninitializedObject(neededType);
         Context ctx = uninitializedContext.CreateUsingData(data);
         return ctx;
     }

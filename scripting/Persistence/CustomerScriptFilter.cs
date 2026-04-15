@@ -1,3 +1,5 @@
+namespace Ember.Scripting.Persistence;
+
 public class CustomerScriptFilter
 {
     public string? ScriptName;

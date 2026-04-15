@@ -2,7 +2,7 @@
 @rendermode InteractiveServer
 
 @using BlazorUI.Settings
-@using Ember.Scripting.ScriptMethods
+@* @using Ember.Scripting.ScriptMethods *@
 @using Serilog
 <PageTitle>Settings</PageTitle>
 
@@ -69,7 +69,7 @@
                 builder.AddSerilog(dispose: true);
             });
 
-            services2.AddDbContextFactory<EFModeling.EntityProperties.FluentAPI.Required.ScriptDbContext>();
+            services2.AddDbContextFactory<ScriptDbContext>();
             services2.AddScoped<IUserSession, Sandbox.SandBoxUserSession>();
             services2.AddScoped<EmberInternalFacade>();
             ScriptingServiceCollectionExtensions.AddEmberScripting(services2, EmberMethods.GetReferences(),

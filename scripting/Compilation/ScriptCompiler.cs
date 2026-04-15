@@ -6,7 +6,7 @@ using Microsoft.Extensions.Logging;
 using Npgsql.Internal;
 using System.Reflection;
 
-namespace Ember.Scripting;
+namespace Ember.Scripting.Compilation;
 
 internal class ScriptCompiler
 {
@@ -71,7 +71,7 @@ internal class ScriptCompiler
         //The following if statement was AI Generated
         if (!emitResult.Success)
         {
-            var compilerErrors = emitResult.Diagnostics
+            List<ScriptCompilationError> compilerErrors = emitResult.Diagnostics
     .Where(d => d.IsWarningAsError || d.Severity == Microsoft.CodeAnalysis.DiagnosticSeverity.Error)
     .Select(d =>
     {
@@ -327,7 +327,7 @@ internal class ScriptCompiler
 
             if (returnTypeString != arTypeString)
             {
-                if (returnTypeString != "string" && methodName != nameof(Ember.Scripting.ScriptMethods.IExecute3.Execute3))   //todo fix get rid off
+                if (returnTypeString != "string" && methodName != nameof(ScriptingFramework.ScriptMethods.IExecute3.Execute3))   //todo fix get rid off
                 {
                     throw new WrongReturnTypeException(message: methodName + " has the wrong return Type: " + returnTypeString + ", it should be: " + arTypeString + ".", method);
                 }
@@ -394,7 +394,7 @@ internal class ScriptCompiler
 
         Assembly myAssembly = Assembly.GetExecutingAssembly();
         // string targetNamespace = "Ember.Scripting.ScriptMethods";
-        string targetNamespace = typeof(Ember.Scripting.ScriptMethods.IExecute1).Namespace!;    //maybe create a marker class?
+        string targetNamespace = typeof(ScriptingFramework.ScriptMethods.IExecute1).Namespace!;    //maybe create a marker class?
         IEnumerable<Type> types = myAssembly.GetTypes().Where(type => type.Namespace == targetNamespace && type.IsInterface
                 // && !type.Name.StartsWith("<") //last line to exclude compiler generated 
                 );
@@ -417,8 +417,8 @@ internal class ScriptCompiler
             }
             if (isInside == false)
             {
-                if (meth1.Name != nameof(Ember.Scripting.ScriptMethods.IExecuteAsync.ExecuteAsync)
-                && meth1.Name != nameof(Ember.Scripting.ScriptMethods.IEvaluateAsync.EvaluateAsync)
+                if (meth1.Name != nameof(ScriptingFramework.ScriptMethods.IExecuteAsync.ExecuteAsync)
+                && meth1.Name != nameof(ScriptingFramework.ScriptMethods.IEvaluateAsync.EvaluateAsync)
                 )
                 {
                     // Console.WriteLine("Method from Roslyn: " + meth1);
@@ -527,7 +527,6 @@ internal class ScriptCompiler
         return result;
     }
 
-    // Todo test Checks if the Cancellation Token is being checked within each Loop if not throws error.
     private void ValidateLoopsHavingCancellation(SyntaxTree tree)
     {
         var root = tree.GetRoot();
@@ -538,14 +537,21 @@ internal class ScriptCompiler
             n is DoStatementSyntax ||
             n is ForEachStatementSyntax);
 
-        // Result: "Ember.Scripting.ScriptEnvironment.CurrentToken.Value.ThrowIfCancellationRequested"
-        string requiredCall = $"{typeof(Ember.Scripting.ScriptEnvironment).Namespace}.{nameof(Ember.Scripting.ScriptEnvironment)}.{nameof(Ember.Scripting.ScriptEnvironment.CurrentToken)}.Value.{nameof(System.Threading.CancellationToken.ThrowIfCancellationRequested)}";
+        // Short form: exactly as written in your script
+        string shortCall = $"{nameof(ScriptEnvironment)}.{nameof(ScriptEnvironment.CurrentToken)}.Value.{nameof(System.Threading.CancellationToken.ThrowIfCancellationRequested)}";
+
+        // Fully qualified form: in case the user writes the full namespace out
+        string fullyQualifiedCall = $"{typeof(ScriptEnvironment).Namespace}.{nameof(ScriptEnvironment)}.{nameof(ScriptEnvironment.CurrentToken)}.Value.{nameof(System.Threading.CancellationToken.ThrowIfCancellationRequested)}";
 
         foreach (var loop in loops)
         {
             bool hasCancellation = loop.DescendantNodes()
                 .OfType<InvocationExpressionSyntax>()
-                .Any(inv => inv.Expression.ToString() == requiredCall);
+                .Any(inv =>
+                {
+                    string expressionString = inv.Expression.ToString();
+                    return expressionString == shortCall || expressionString == fullyQualifiedCall;
+                });
 
             if (!hasCancellation)
             {

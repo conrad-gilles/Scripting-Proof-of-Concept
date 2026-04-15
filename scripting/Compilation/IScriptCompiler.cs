@@ -1,2 +1,2 @@
 //todo
-namespace Ember.Scripting;
+namespace Ember.Scripting.Compilation;

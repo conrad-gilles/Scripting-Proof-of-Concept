@@ -4,8 +4,9 @@ using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.Extensions.Logging;
 using System.Reflection;
 using System.Threading.Tasks;
+using Ember.Scripting.Compilation;
 
-namespace Ember.Scripting;
+namespace Ember.Scripting.Execution;
 
 internal class ScriptExecutor
 {
@@ -36,11 +37,11 @@ internal class ScriptExecutor
         List<Type> typeArrayList = [];
         for (int i = 0; i < unfilteredTypeArray.Length; i++)
         {
-            if (typeof(Ember.Scripting.IScriptMethodsAction).IsAssignableFrom(unfilteredTypeArray[i]))
+            if (typeof(IScriptMethodsAction).IsAssignableFrom(unfilteredTypeArray[i]))
             {
                 typeArrayList.Add(unfilteredTypeArray[i]);
             }
-            if (typeof(Ember.Scripting.IScriptMethodsCondition).IsAssignableFrom(unfilteredTypeArray[i]))
+            if (typeof(IScriptMethodsCondition).IsAssignableFrom(unfilteredTypeArray[i]))
             {
                 typeArrayList.Add(unfilteredTypeArray[i]);
             }
@@ -61,12 +62,12 @@ internal class ScriptExecutor
 
         object scriptInstance = Activator.CreateInstance(type)!;     //if null here probably typo in file name somewhere, like pedriatic instead of pediatic :(
 
-        if (typeof(Ember.Scripting.IScriptMethodsCondition).IsAssignableFrom(type))    //checks if type implements the generator specific interface  //check if runs
+        if (typeof(IScriptMethodsCondition).IsAssignableFrom(type))    //checks if type implements the generator specific interface  //check if runs
         {
             var result = await RunConditionScript(type, scriptInstance, genContext, methodName);
             return (T)(object)result;
         }
-        else if (typeof(Ember.Scripting.IScriptMethodsAction).IsAssignableFrom(type))
+        else if (typeof(IScriptMethodsAction).IsAssignableFrom(type))
         {
             var result = await RunActionScript(type, scriptInstance, genContext, methodName);
             return (T)(object)result;
@@ -87,7 +88,7 @@ internal class ScriptExecutor
 
             if (methodName == "Default")
             {
-                method = type.GetMethod(nameof(Ember.Scripting.ScriptMethods.IEvaluateAsync.EvaluateAsync))!;
+                method = type.GetMethod(nameof(ScriptingFramework.ScriptMethods.IEvaluateAsync.EvaluateAsync))!;
             }
             else
             {
@@ -141,7 +142,7 @@ internal class ScriptExecutor
 
             if (methodName == "Default")
             {
-                method = type.GetMethod(nameof(Ember.Scripting.ScriptMethods.IExecuteAsync.ExecuteAsync))!;
+                method = type.GetMethod(nameof(ScriptingFramework.ScriptMethods.IExecuteAsync.ExecuteAsync))!;
             }
             else
             {

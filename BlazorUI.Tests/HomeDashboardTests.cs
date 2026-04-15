@@ -5,7 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
 using BlazorUI.Components.Pages;
 using Ember.Scripting;
-using EFModeling.EntityProperties.FluentAPI.Required;
+// using EFModeling.EntityProperties.FluentAPI.Required;
 using System.Collections.Generic;
 using System.Threading;
 

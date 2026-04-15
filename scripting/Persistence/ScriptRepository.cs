@@ -1,4 +1,4 @@
-using EFModeling.EntityProperties.FluentAPI.Required;
+// using EFModeling.EntityProperties.FluentAPI.Required;
 using Microsoft.CodeAnalysis;
 using Microsoft.EntityFrameworkCore;
 using Ember.Scripting;
@@ -6,7 +6,9 @@ using Microsoft.Extensions.Logging;
 using Microsoft.CodeAnalysis.Scripting;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
-namespace Ember.Scripting;
+using Ember.Scripting.Compilation;
+
+namespace Ember.Scripting.Persistence;
 
 internal class ScriptRepository
 {

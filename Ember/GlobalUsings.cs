@@ -1,3 +1,13 @@
+global using Microsoft.CodeAnalysis;
+global using Ember.Scripting.Compilation;
+global using Ember.Scripting.Execution;
+global using Ember.Scripting.Persistence;
+global using Ember.Scripting.ScriptingFramework;
+global using Ember.Scripting.ScriptManager;
+global using Ember.Scripting.Versioning;
+global using Ember.Scripting.ScriptingFramework.ScriptMethods;
+
+
 global using RecentActionResult = ActionResultV3.ActionResult;
 global using RecentIContext = IGeneratorContextNoInheritance_V5.IGeneratorContext;
 global using RecentContext = GeneratorContextNoInherVaccineV5.GeneratorContext;

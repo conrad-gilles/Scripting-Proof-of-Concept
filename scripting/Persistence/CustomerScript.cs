@@ -2,7 +2,7 @@ using System;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.Extensions.Logging;
 
-namespace Ember.Scripting;
+namespace Ember.Scripting.Persistence;
 
 // [Microsoft.EntityFrameworkCore.PrimaryKey(nameof(ScriptName), nameof(ScriptType))]
 [Table("customer_scripts")]

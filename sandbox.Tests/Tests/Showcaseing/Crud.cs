@@ -41,7 +41,7 @@ public class CrudDemos
             builder.AddSerilog(dispose: true);
         });
         services.AddSingleton<IUserSession, SandBoxUserSession>();
-        services.AddDbContextFactory<EFModeling.EntityProperties.FluentAPI.Required.ScriptDbContext>();
+        services.AddDbContextFactory<ScriptDbContext>();
         ScriptingServiceCollectionExtensions.AddEmberScripting(services, EmberMethods.GetReferences(), EmberMethods.GetEmberApiVersion(), RecentTypeHelper.GetRecentTypes());
 
         var provider = services.BuildServiceProvider();
