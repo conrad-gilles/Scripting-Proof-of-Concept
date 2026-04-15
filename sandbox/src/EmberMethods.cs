@@ -220,6 +220,21 @@ public class EmberMethods
         }
 
     }
+    public static object UpgradeObject(object resultValue)
+    {
+        Serilog.Log.Verbose("Entered {MethodName} in {ClassName}.", nameof(UpgradeObject), nameof(EmberMethods));
+        if (resultValue is ActionResultSF)
+        {
+            return UpgradeActionResult(resultValue);
+        }
+        // else if(){
+        // return UpgradeOtherType();
+        // }
+        else
+        {
+            throw new Exception("Result was not part of a predefined type.");
+        }
+    }
     public static ActionResultSF UpgradeActionResult(object resultValue)   //todo change to base class return and cast in tests and so on
     {
         Serilog.Log.Verbose("Entered {MethodName} in {ClassName}.", nameof(UpgradeActionResult), nameof(EmberMethods));
@@ -255,7 +270,7 @@ public class EmberMethods
 
             try
             {
-                currentActionResult = uninitializedNextVersion.Upgrade(currentActionResult);
+                currentActionResult = (ActionResultSF)uninitializedNextVersion.Upgrade(currentActionResult);
             }
             catch (TargetInvocationException ex)
             {

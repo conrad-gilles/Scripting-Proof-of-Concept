@@ -1,9 +1,11 @@
-using Ember.Scripting;
-using IGeneratorContext_V4;
-using Microsoft.CodeAnalysis.Scripting;
-using Ember.Scripting.Compilation;
+// using Ember.Scripting;
+// using IGeneratorContext_V4;
+// using Microsoft.CodeAnalysis.Scripting;
+// using Ember.Scripting.Compilation;
 
 namespace Ember.Simulation;
+
+
 
 internal class EmberInternalFacade
 {
@@ -23,19 +25,25 @@ internal class EmberInternalFacade
     }
     private object CheckUpgradeActionResult(object result)
     {
-        if (result is ActionResultSF)
+        if (result is UpgradeableReturnValue upgradeableReturnValue)
         {
-            return (RecentActionResult)EmberMethods.UpgradeActionResult(result);
+            // return upgradeableReturnValue.Upgrade(result);
+            return EmberMethods.UpgradeObject(result);
         }
-        if (result.GetType() == typeof(bool))
-        {
-            return result;
-        }
-        if (result.GetType() == typeof(string))
-        {
-            return result;
-        }
-        throw new Exception(message: "Type was" + result.GetType().Name);
+        return result;
+        // if (result is ActionResultSF)
+        // {
+        //     return (RecentActionResult)EmberMethods.UpgradeActionResult(result);
+        // }
+        // if (result.GetType() == typeof(bool))
+        // {
+        //     return result;
+        // }
+        // if (result.GetType() == typeof(string))
+        // {
+        //     return result;
+        // }
+        // throw new Exception(message: "Type was" + result.GetType().Name);
     }
     internal async Task<object> ExecuteScript(Guid id, RecentContext ctx, string methodName)
     {

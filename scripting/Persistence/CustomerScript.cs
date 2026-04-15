@@ -54,7 +54,7 @@ public class CustomerScript
                 sType = typeof(IConditionScript);
                 break;
             default:
-                throw new CouldNotAssignBaseTypeException(message: "Could not assign baseTypeName");
+                throw new CouldNotAssignBaseTypeException(message: "Could not assign baseTypeName it ScriptType was: " + ScriptType);
         }
         return sType;
     }

@@ -16,29 +16,19 @@ namespace Ember.Simulation
 
         public async Task<Context> CreateByDowngrade(int desiredVersion, RecentContext ctx)
         {
-            // if (sourceCode == null)
-            // {
-            //     throw new SourceCodeNullWhenDowngradeException();
-            // }
-            // var vali = _scriptManager.BasicValidationBeforeCompiling(sourceCode!);
-            int? apiV = null;
-            if (apiV == null)
-            {
-                apiV = _scriptManager.GetRunningApiVersion();
-            }
+            int apiV = _scriptManager.GetRunningApiVersion();
+
             Type recentType;
             Dictionary<int, Type> contextVersionMap = ContextVersionScanner.GetClassDictionary();
 
-            if (contextVersionMap.Keys.Contains((int)apiV) == false)
+            if (contextVersionMap.Keys.Contains(apiV) == false)
             {
                 throw new NoContextClassDefinedForApiVException("No Context class defined in " + nameof(contextVersionMap) + " for the passed API version.");
                 // might be better to instead return latest version?
                 // recentType = contextVersionMap.Last().Value;
             }
-            recentType = contextVersionMap[(int)apiV];
-            // Type desiredType = contextVersionMap[vali.Version];
+            recentType = contextVersionMap[apiV];
             Type desiredType = contextVersionMap[desiredVersion];
-            // Ember.Scripting.GeneratorContextSF context = CreateContextForApiV(data);
             Context context = ctx;
             int iterations = 0;
             int maxIterations = ContextVersionScanner.GetClassDictionary().Keys.Count() + 3;
@@ -63,8 +53,7 @@ namespace Ember.Simulation
                 }
                 iterations++;
             }
-            // return (ActiveGeneratorContext)context;
-            return (Context)context;
+            return context;
         }
     }
 }

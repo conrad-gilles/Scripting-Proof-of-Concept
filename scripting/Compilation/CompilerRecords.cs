@@ -16,19 +16,20 @@ public record ValidationRecord
     public string BaseTypeAsString()
     {
         string sScriptType;
-        if (ScriptType == typeof(IActionScript))
-        {
-            sScriptType = nameof(IActionScript);
-        }
-        else if (ScriptType == typeof(IConditionScript))
-        {
-            sScriptType = nameof(IConditionScript);
-        }
-        else
-        {
-            throw new CouldNotMatchBaseTypeInRecord("Could not match the BaseTypeNAme to a String this should never happen!");
-        }
+        // if (ScriptType == typeof(IActionScript))
+        // {
+        //     sScriptType = nameof(IActionScript);
+        // }
+        // else if (ScriptType == typeof(IConditionScript))
+        // {
+        //     sScriptType = nameof(IConditionScript);
+        // }
+        // else
+        // {
+        //     throw new CouldNotMatchBaseTypeInRecord("Could not match the BaseTypeNAme to a String this should never happen!");
+        // }
 
+        sScriptType = ScriptType.Name;
         return sScriptType;
     }
 }

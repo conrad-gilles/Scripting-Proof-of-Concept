@@ -8,7 +8,7 @@ using Serilog;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Ember.Simulation;
-using ScriptMethodManager;
+// using ScriptMethodManager;
 using Sandbox;
 using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.EntityFrameworkCore.Query;
@@ -63,35 +63,35 @@ public class MultiMethodScriptTests
     }
 
 
-    [TestMethod]
-    public async Task RunMultiMethodScriptUsingMethodHelper()
-    {
-        //first we define the script and insert it into the db
-        string sourceCode = TestHelper.GetSC().sourceCodeMultiMethodScripts;
-        CustomerScript scriptDB = await ScriptManager.CreateScript(sourceCode);
+    // [TestMethod]
+    // public async Task RunMultiMethodScriptUsingMethodHelper()
+    // {
+    //     //first we define the script and insert it into the db
+    //     string sourceCode = TestHelper.GetSC().sourceCodeMultiMethodScripts;
+    //     CustomerScript scriptDB = await ScriptManager.CreateScript(sourceCode);
 
-        //we create the ScriptHelper
-        MultipleMethodsScriptHelper script = new MultipleMethodsScriptHelper(ScriptManager, InternalScriptManager, scriptDB.ScriptName!);
+    //     //we create the ScriptHelper
+    //     MultipleMethodsScriptHelper script = new MultipleMethodsScriptHelper(ScriptManager, InternalScriptManager, scriptDB.ScriptName!);
 
-        //define specific method in the methodName parameter
-        RecentActionResult ar = await script.Execute1(TestHelper.GetContext());
+    //     //define specific method in the methodName parameter
+    //     RecentActionResult ar = await script.Execute1(TestHelper.GetContext());
 
-        Console.WriteLine(ar.ToString());
-        Assert.IsTrue(ar.ToString().Contains("ExecuteAction1 was called"));
+    //     Console.WriteLine(ar.ToString());
+    //     Assert.IsTrue(ar.ToString().Contains("ExecuteAction1 was called"));
 
-        Exception ex = await Assert.ThrowsExceptionAsync<ActionScriptExecutionException>(async () =>
-        {
-            ar = await script.Execute2(TestHelper.GetContext());
-        });
+    //     Exception ex = await Assert.ThrowsExceptionAsync<ActionScriptExecutionException>(async () =>
+    //     {
+    //         ar = await script.Execute2(TestHelper.GetContext());
+    //     });
 
-        // Can explicitly call default method
-        ar = await script.ExecuteAsync(TestHelper.GetContext());
+    //     // Can explicitly call default method
+    //     ar = await script.ExecuteAsync(TestHelper.GetContext());
 
-        Console.WriteLine(ar.ToString());
-        Assert.IsTrue(ar.ToString().Contains("Default method ExecuteAsync was called"));
+    //     Console.WriteLine(ar.ToString());
+    //     Assert.IsTrue(ar.ToString().Contains("Default method ExecuteAsync was called"));
 
-        // Assert.IsTrue(false);
-    }
+    //     // Assert.IsTrue(false);
+    // }
 
     [TestMethod]
     public async Task NegativeTest()

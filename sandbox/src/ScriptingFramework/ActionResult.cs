@@ -32,7 +32,12 @@ namespace ActionResultV1
             return IsSuccess ? $"[Success] {Message}" : $"[Error: {ErrorCode}] {Message}";
         }
 
-        public override ActionResultSF Upgrade(ActionResultSF actionResult)
+        // public override ActionResultSF Upgrade(ActionResultSF actionResult)
+        // {
+        //     throw new NotImplementedException(message: "This can not be implemented because and also should never be called since the verson below this one is abstract.");
+        // }
+
+        public override ActionResultSF Upgrade(object actionResult)
         {
             throw new NotImplementedException(message: "This can not be implemented because and also should never be called since the verson below this one is abstract.");
         }
@@ -78,7 +83,7 @@ namespace ActionResultV2
             // return new ActionResultV2(isSuccess, message, errorCode, loggedActions);
         }
 
-        public override ActionResultSF Upgrade(ActionResultSF actionResult)
+        public override ActionResultSF Upgrade(object actionResult)
         {
             List<string> loggedActions = [];
 
@@ -136,7 +141,7 @@ namespace ActionResultV3
             return new ActionResult(actionResult.IsSuccess, tempMessage);
         }
 
-        public override ActionResultSF Upgrade(ActionResultSF actionResult)
+        public override ActionResultSF Upgrade(object actionResult)
         {
             if (actionResult is ActionResultV2.ActionResult)
             {
