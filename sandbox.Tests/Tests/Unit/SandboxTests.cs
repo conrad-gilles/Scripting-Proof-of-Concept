@@ -19,7 +19,7 @@ public class SanboxTests
     private EmberMethods? _em;
     private ObjectsRecord? _obj;
     // DataV1.MockData? data;
-    private DataV2.DataV2? _data;
+    // private DataV2.DataV2? _data;
     private string? _sourceCodeActionV1 = TestHelper.GetSC().sourceCodeActionV1;
     private string? _sourceCodeActionV2 = TestHelper.GetSC().sourceCodeActionV2;
     private string? _sourceCodeActionV3 = TestHelper.GetSC().sourceCodeActionV3;
@@ -37,43 +37,43 @@ public class SanboxTests
         _obj = TestHelper.ScriptObjects();
         // data = new DataV1.MockData(labOrder: obj.labOrder, patient: obj.patient, consoleLogger: obj.logger,
         // dataAccess: obj.testDataAccess, vaccine: obj.vaccine);
-        _data = new DataV2.DataV2(labOrder: _obj.labOrder, patient: _obj.patient, consoleLogger: _obj.logger,
-                               dataAccess: _obj.testDataAccess, vaccine: _obj.vaccine);
+        // _data = new DataV2.DataV2(labOrder: _obj.labOrder, patient: _obj.patient, consoleLogger: _obj.logger,
+        //    dataAccess: _obj.testDataAccess, vaccine: _obj.vaccine);
     }
-    [TestMethod]
-    public async Task CreateContextTest()
-    {
-        Sandbox.ContextManagementDemos sf;
-        Context ctx;
+    // [TestMethod]
+    // public async Task CreateContextTest()
+    // {
+    //     Sandbox.ContextManagementDemos sf;
+    //     Context ctx;
 
-        _facade = EmberMethods.GetNewScriptManagerInstance(1);
-        sf = new Sandbox.ContextManagementDemos(_facade);
-        ctx = sf.CreateContextForApiV(_data!);
+    //     _facade = EmberMethods.GetNewScriptManagerInstance(1);
+    //     sf = new Sandbox.ContextManagementDemos(_facade);
+    //     ctx = sf.CreateContextForApiV(_data!);
 
-        Assert.IsTrue(ctx.GetType() == typeof(ReadOnlyContextV1.GeneratorContext));
+    //     Assert.IsTrue(ctx.GetType() == typeof(ReadOnlyContextV1.GeneratorContext));
 
-        _facade = EmberMethods.GetNewScriptManagerInstance(2);
-        sf = new Sandbox.ContextManagementDemos(_facade);
-        ctx = sf.CreateContextForApiV(_data!);
+    //     _facade = EmberMethods.GetNewScriptManagerInstance(2);
+    //     sf = new Sandbox.ContextManagementDemos(_facade);
+    //     ctx = sf.CreateContextForApiV(_data!);
 
-        Assert.IsTrue(ctx.GetType() == typeof(RWContextV2.GeneratorContext));
+    //     Assert.IsTrue(ctx.GetType() == typeof(RWContextV2.GeneratorContext));
 
-        _facade = EmberMethods.GetNewScriptManagerInstance(6);
-        sf = new Sandbox.ContextManagementDemos(_facade);
+    //     _facade = EmberMethods.GetNewScriptManagerInstance(6);
+    //     sf = new Sandbox.ContextManagementDemos(_facade);
 
-        Exception ex = await Assert.ThrowsExceptionAsync<Exception>(async () =>  //todo check this one
-         {
-             ctx = sf.CreateContextForApiV(_data!);
-         });
-        // Assert.IsTrue(ex.Message.Contains("No Context class defined in") && ex.Message.Contains("for the passed API version."));
-        Assert.IsTrue(ex.Message.Contains("The version was not found in the Dictionary"));
+    //     Exception ex = await Assert.ThrowsExceptionAsync<Exception>(async () =>  //todo check this one
+    //      {
+    //          ctx = sf.CreateContextForApiV(_data!);
+    //      });
+    //     // Assert.IsTrue(ex.Message.Contains("No Context class defined in") && ex.Message.Contains("for the passed API version."));
+    //     Assert.IsTrue(ex.Message.Contains("The version was not found in the Dictionary"));
 
-        Console.WriteLine(ex.Message);
-        var ls = ExceptionHelper.GetExceptionList(ex);
-        ExceptionHelper.PrintExceptionListToConsole(ex);
+    //     Console.WriteLine(ex.Message);
+    //     var ls = ExceptionHelper.GetExceptionList(ex);
+    //     ExceptionHelper.PrintExceptionListToConsole(ex);
 
-        // Assert.IsTrue(false);
-    }
+    //     // Assert.IsTrue(false);
+    // }
 
     [TestMethod]
     public void GetDictionaryTest()
@@ -180,59 +180,59 @@ public class SanboxTests
 
     }
 
-    [TestMethod]
-    public async Task CreateContextForApiTest()
-    {
-        Guid id;
-        Sandbox.ContextManagementDemos sf;
-        ValidationRecord valResult;
-        // string methodName = TestHelper.GetMethodNameAction();
+    // [TestMethod]
+    // public async Task CreateContextForApiTest()
+    // {
+    //     Guid id;
+    //     Sandbox.ContextManagementDemos sf;
+    //     ValidationRecord valResult;
+    //     // string methodName = TestHelper.GetMethodNameAction();
 
-        _facade = EmberMethods.GetNewScriptManagerInstance();
+    //     _facade = EmberMethods.GetNewScriptManagerInstance();
 
-        valResult = _facade.BasicValidationBeforeCompiling(_sourceCodeActionV1!);
-        id = (await _facade.CreateScript(_sourceCodeActionV1!)).Id;
+    //     valResult = _facade.BasicValidationBeforeCompiling(_sourceCodeActionV1!);
+    //     id = (await _facade.CreateScript(_sourceCodeActionV1!)).Id;
 
-        sf = new Sandbox.ContextManagementDemos(_facade);
+    //     sf = new Sandbox.ContextManagementDemos(_facade);
 
 
-        await _facade.ExecuteScriptById(id, sf.CreateContextForApiV(_data!, valResult.Version), nameof(IExecuteAsync.ExecuteAsync));
-        valResult = _facade.BasicValidationBeforeCompiling(_sourceCodeActionV2!);
+    //     await _facade.ExecuteScriptById(id, sf.CreateContextForApiV(_data!, valResult.Version), nameof(IExecuteAsync.ExecuteAsync));
+    //     valResult = _facade.BasicValidationBeforeCompiling(_sourceCodeActionV2!);
 
-        id = (await _facade.CreateScript(_sourceCodeActionV2!)).Id;
-        Console.WriteLine("Class dict start i: " + ContextVersionScanner.GetClassDictionary().Keys.Min() + ", Calss dict max: " + ContextVersionScanner.GetClassDictionary().Keys.Max());
-        for (int i = 1; i < ContextVersionScanner.GetClassDictionary().Count(); i++)
-        {
+    //     id = (await _facade.CreateScript(_sourceCodeActionV2!)).Id;
+    //     Console.WriteLine("Class dict start i: " + ContextVersionScanner.GetClassDictionary().Keys.Min() + ", Calss dict max: " + ContextVersionScanner.GetClassDictionary().Keys.Max());
+    //     for (int i = 1; i < ContextVersionScanner.GetClassDictionary().Count(); i++)
+    //     {
 
-            _facade = EmberMethods.GetNewScriptManagerInstance(i);
-            await _facade.CompileScript(id);
-            // valResult = facade.BasicValidationBeforeCompiling(sourceCodeActionV2!);
-            // id = await facade.CreateScript(sourceCodeActionV2!);
+    //         _facade = EmberMethods.GetNewScriptManagerInstance(i);
+    //         await _facade.CompileScript(id);
+    //         // valResult = facade.BasicValidationBeforeCompiling(sourceCodeActionV2!);
+    //         // id = await facade.CreateScript(sourceCodeActionV2!);
 
-            sf = new Sandbox.ContextManagementDemos(_facade);
-            // await facade.ExecuteScriptById(id, sf.CreateContextForApiV(data!, valResult.versionInt));
-            Console.WriteLine("Running API version: " + _facade.GetRunningApiVersion());
-            await _facade.ExecuteScriptById(id, sf.CreateContextForApiV(_data!, valResult.Version), nameof(IExecuteAsync.ExecuteAsync));
-        }
+    //         sf = new Sandbox.ContextManagementDemos(_facade);
+    //         // await facade.ExecuteScriptById(id, sf.CreateContextForApiV(data!, valResult.versionInt));
+    //         Console.WriteLine("Running API version: " + _facade.GetRunningApiVersion());
+    //         await _facade.ExecuteScriptById(id, sf.CreateContextForApiV(_data!, valResult.Version), nameof(IExecuteAsync.ExecuteAsync));
+    //     }
 
-        valResult = _facade.BasicValidationBeforeCompiling(_sourceCodeVaccineAction!);
-        id = (await _facade.CreateScript(_sourceCodeVaccineAction!)).Id;
-        for (int i = 1; i < ContextVersionScanner.GetClassDictionary().Count(); i++)
-        {
-            _facade = EmberMethods.GetNewScriptManagerInstance(i);
-            sf = new Sandbox.ContextManagementDemos(_facade);
-            await _facade.ExecuteScriptById(id, sf.CreateContextForApiV(_data!, valResult.Version), nameof(IExecuteAsync.ExecuteAsync));
-        }
+    //     valResult = _facade.BasicValidationBeforeCompiling(_sourceCodeVaccineAction!);
+    //     id = (await _facade.CreateScript(_sourceCodeVaccineAction!)).Id;
+    //     for (int i = 1; i < ContextVersionScanner.GetClassDictionary().Count(); i++)
+    //     {
+    //         _facade = EmberMethods.GetNewScriptManagerInstance(i);
+    //         sf = new Sandbox.ContextManagementDemos(_facade);
+    //         await _facade.ExecuteScriptById(id, sf.CreateContextForApiV(_data!, valResult.Version), nameof(IExecuteAsync.ExecuteAsync));
+    //     }
 
-        valResult = _facade.BasicValidationBeforeCompiling(_sourceCodePedia!);
-        id = (await _facade.CreateScript(_sourceCodePedia!)).Id;
-        for (int i = 1; i < ContextVersionScanner.GetClassDictionary().Count(); i++)
-        {
-            _facade = EmberMethods.GetNewScriptManagerInstance(i);
-            sf = new Sandbox.ContextManagementDemos(_facade);
-            await _facade.ExecuteScriptById(id, sf.CreateContextForApiV(_data!, valResult.Version), nameof(IEvaluateAsync.EvaluateAsync));
-        }
-    }
+    //     valResult = _facade.BasicValidationBeforeCompiling(_sourceCodePedia!);
+    //     id = (await _facade.CreateScript(_sourceCodePedia!)).Id;
+    //     for (int i = 1; i < ContextVersionScanner.GetClassDictionary().Count(); i++)
+    //     {
+    //         _facade = EmberMethods.GetNewScriptManagerInstance(i);
+    //         sf = new Sandbox.ContextManagementDemos(_facade);
+    //         await _facade.ExecuteScriptById(id, sf.CreateContextForApiV(_data!, valResult.Version), nameof(IEvaluateAsync.EvaluateAsync));
+    //     }
+    // }
 
     [TestMethod]
     public async Task CreateContextByDowngradeTest()

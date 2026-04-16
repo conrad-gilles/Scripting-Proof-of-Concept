@@ -5,6 +5,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Ember.Scripting;
 using Serilog;
 using Microsoft.Extensions.DependencyInjection;
+using Ember.Simulation;
 
 [TestClass]
 public class ScriptTests
@@ -12,6 +13,7 @@ public class ScriptTests
 
 
     private IScriptManagerDeleteAfter? _facade;
+    private EmberInternalFacade? _eif;
     private EmberMethods? _em;
     private string? _actionResultVersionSpecific;
     private string? _sourceCodeActionV1 = TestHelper.GetSC().sourceCodeActionV1;
@@ -26,6 +28,7 @@ public class ScriptTests
 async Task SetupAsync()
     {
         _facade = EmberMethods.GetNewScriptManagerInstance();
+        _eif = new EmberInternalFacade(_facade);
         _em = new EmberMethods(_facade);
         await _facade.DeleteAllData();
 
@@ -40,8 +43,8 @@ async Task SetupAsync()
         await _facade!.DeleteAllData();
         Guid id = (await _facade!.CreateScript(_sourceCodeActionV1!)).Id;
         CustomerScript retrievedScript = await _facade.GetScript(id);
-        var context = await _em!.GetTestingContext<GeneratorContextNoInherVaccineV5.GeneratorContext>(autoDetectFromScript: retrievedScript);
-        object resultBeforeUpgrade = await _facade.ExecuteScriptById(id, context, nameof(IExecuteAsync.ExecuteAsync));
+        var context = TestHelper.GetContext();
+        object resultBeforeUpgrade = await _eif!.ExecuteScript(id, context, nameof(IExecuteAsync.ExecuteAsync));
         ActionResultV3.ActionResult result = (ActionResultV3.ActionResult)EmberMethods.UpgradeActionResult(resultBeforeUpgrade);
         string shouldReturn = _actionResultVersionSpecific + "Pediatric tests added";
         Assert.IsInstanceOfType(result, typeof(ActionResultSF));
@@ -55,8 +58,8 @@ async Task SetupAsync()
     {
         Guid id = (await _facade!.CreateScript(_sourceCodeActionV2!)).Id;
         CustomerScript retrievedScript = await _facade.GetScript(id);
-        var context = await _em!.GetTestingContext<GeneratorContextNoInherVaccineV5.GeneratorContext>(autoDetectFromScript: retrievedScript);
-        object resultBeforeUpgrade = await _facade.ExecuteScriptById(id, context, nameof(IExecuteAsync.ExecuteAsync));
+        var context = TestHelper.GetContext();
+        object resultBeforeUpgrade = await _eif!.ExecuteScript(id, context, nameof(IExecuteAsync.ExecuteAsync));
         ActionResultV3.ActionResult result = (ActionResultV3.ActionResult)EmberMethods.UpgradeActionResult(resultBeforeUpgrade);
         string shouldReturn = _actionResultVersionSpecific + "Pediatric tests added";
         Assert.IsInstanceOfType(result, typeof(ActionResultSF));
@@ -70,8 +73,8 @@ async Task SetupAsync()
     {
         Guid id = (await _facade!.CreateScript(_sourceCodeActionV3!)).Id;
         CustomerScript retrievedScript = await _facade.GetScript(id);
-        var context = await _em!.GetTestingContext<GeneratorContextNoInherVaccineV5.GeneratorContext>(autoDetectFromScript: retrievedScript);
-        object resultBeforeUpgrade = await _facade.ExecuteScriptById(id, context, nameof(IExecuteAsync.ExecuteAsync));
+        var context = TestHelper.GetContext();
+        object resultBeforeUpgrade = await _eif!.ExecuteScript(id, context, nameof(IExecuteAsync.ExecuteAsync));
         ActionResultV3.ActionResult result = (ActionResultV3.ActionResult)EmberMethods.UpgradeActionResult(resultBeforeUpgrade);
         string shouldReturn = _actionResultVersionSpecific + "Pediatric tests added V3";
         Assert.IsInstanceOfType(result, typeof(ActionResultSF));
@@ -85,7 +88,7 @@ async Task SetupAsync()
     {
         Guid id = (await _facade!.CreateScript(_sourceCodeVaccineAction!)).Id;
         CustomerScript retrievedScript = await _facade.GetScript(id);
-        var context = await _em!.GetTestingContext<GeneratorContextNoInherVaccineV5.GeneratorContext>(autoDetectFromScript: retrievedScript);
+        var context = TestHelper.GetContext();
         object result = await _facade.ExecuteScriptById(id, context, nameof(IExecuteAsync.ExecuteAsync));
         string shouldReturn = _actionResultVersionSpecific + "Polio Vaccine added";
         Assert.IsInstanceOfType(result, typeof(ActionResultSF));
@@ -100,8 +103,8 @@ async Task SetupAsync()
     {
         Guid id = (await _facade!.CreateScript(_sourceCodePedia!)).Id;
         CustomerScript retrievedScript = await _facade.GetScript(id);
-        var context = await _em!.GetTestingContext<GeneratorContextNoInherVaccineV5.GeneratorContext>(autoDetectFromScript: retrievedScript);
-        object result = await _facade.ExecuteScriptById(id, context, nameof(IEvaluateAsync.EvaluateAsync));
+        var context = TestHelper.GetContext();
+        object result = await _eif!.ExecuteScript(id, context, nameof(IEvaluateAsync.EvaluateAsync));
         string shouldReturn = "True";
         Assert.IsInstanceOfType(result, typeof(bool));
         Assert.IsTrue(result.ToString()!.Contains(shouldReturn));
@@ -139,8 +142,8 @@ async Task SetupAsync()
         DateTime? beforeUpdateCA = retrievedScript.CreatedAt;
         DateTime? beforeUpdateMA = retrievedScript.ModifiedAt;
 
-        var context = await _em!.GetTestingContext<GeneratorContextNoInherVaccineV5.GeneratorContext>(autoDetectFromScript: retrievedScript);
-        object result = await _facade.ExecuteScriptById(id, context, nameof(IEvaluateAsync.EvaluateAsync));
+        var context = TestHelper.GetContext();
+        object result = await _eif!.ExecuteScript(id, context, nameof(IEvaluateAsync.EvaluateAsync));
 
         await Task.Delay(2000);
         await _facade!.UpdateScriptSC(retrievedScript.Id, "new source code doesnt matter if wrong shoudl save to db", allowFaultySave: true);

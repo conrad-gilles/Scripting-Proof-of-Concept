@@ -17,6 +17,7 @@ namespace FirstTests;
 public class ScriptManagerFacadeTests
 {
     private IScriptManagerDeleteAfter? _scriptManager;
+    private EmberInternalFacade? _emberScriptManager;
     string? _sourceCodePedia = TestHelper.GetSC().sourceCodePedia;
     private string? _sourceCodeActionV1 = TestHelper.GetSC().sourceCodeActionV1;
     private string? _sourceCodeActionV3 = TestHelper.GetSC().sourceCodeActionV3;
@@ -26,6 +27,7 @@ public class ScriptManagerFacadeTests
     public async Task Setup()
     {
         _scriptManager = EmberMethods.GetNewScriptManagerInstance();
+        _emberScriptManager = new EmberInternalFacade(_scriptManager);
         _em = new EmberMethods(_scriptManager);
 
         await _scriptManager.DeleteAllData();
@@ -53,8 +55,8 @@ public class ScriptManagerFacadeTests
 
         Guid id = (await _scriptManager!.CreateScript(_sourceCodePedia!, apiVersion: 2)).Id;
         CustomerScript retrievedScript = await _scriptManager.GetScript(id);
-        var context = await _em!.GetTestingContext<GeneratorContextNoInherVaccineV5.GeneratorContext>(retrievedScript);
-        await _scriptManager.ExecuteScriptById(retrievedScript.Id, context, nameof(IEvaluateAsync.EvaluateAsync));
+        var context = TestHelper.GetContext();
+        await _emberScriptManager!.ExecuteScript(retrievedScript.Id, context, nameof(IEvaluateAsync.EvaluateAsync));
 
         Assert.AreEqual(retrievedScript.SourceCode, _sourceCodePedia);
     }
@@ -376,9 +378,9 @@ public class ScriptManagerFacadeTests
     public async Task ExecuteActionScriptTest()
     {
         Guid id = (await _scriptManager!.CreateScript(_sourceCodeActionV1!)).Id;
-        var testingContext = await _em!.GetTestingContext<GeneratorContextV4.GeneratorContext>();
+        var testingContext = TestHelper.GetContext();
 
-        ActionResultSF result = (ActionResultSF)await _scriptManager.ExecuteScriptById(id, testingContext, nameof(IExecuteAsync.ExecuteAsync));
+        ActionResultSF result = (ActionResultSF)await _emberScriptManager!.ExecuteScript(id, testingContext, nameof(IExecuteAsync.ExecuteAsync));
 
         Assert.IsNotNull(result);
         // Assert.IsTrue(result.IsSuccess);
@@ -389,7 +391,7 @@ public class ScriptManagerFacadeTests
         Guid id2 = (await _scriptManager.CreateScript(_sourceCodePedia!)).Id;
         await Assert.ThrowsExceptionAsync<System.InvalidCastException>(async () =>
         {
-            ActionResultSF result2 = (ActionResultSF)await _scriptManager.ExecuteScriptById(id2, testingContext, nameof(IEvaluateAsync.EvaluateAsync));
+            ActionResultSF result2 = (ActionResultSF)await _emberScriptManager.ExecuteScript(id2, testingContext, nameof(IEvaluateAsync.EvaluateAsync));
         });
 
     }
@@ -398,9 +400,9 @@ public class ScriptManagerFacadeTests
     public async Task ExecuteConditionScriptTest()
     {
         Guid id = (await _scriptManager!.CreateScript(_sourceCodePedia!)).Id;
-        var testingContext = await _em!.GetTestingContext<GeneratorContextV4.GeneratorContext>();
+        var testingContext = TestHelper.GetContext();
 
-        bool result = (bool)await _scriptManager.ExecuteScriptById(id, testingContext, nameof(IEvaluateAsync.EvaluateAsync));
+        bool result = (bool)await _emberScriptManager!.ExecuteScript(id, testingContext, nameof(IEvaluateAsync.EvaluateAsync));
 
         Assert.IsNotNull(result);
         Assert.IsTrue(result.GetType().ToString() == "System.Boolean");
@@ -408,22 +410,22 @@ public class ScriptManagerFacadeTests
         Guid id2 = (await _scriptManager.CreateScript(_sourceCodeActionV1!)).Id;
         await Assert.ThrowsExceptionAsync<System.InvalidCastException>(async () =>
         {
-            bool result2 = (bool)await _scriptManager.ExecuteScriptById(id2, testingContext, nameof(IExecuteAsync.ExecuteAsync));
+            bool result2 = (bool)await _emberScriptManager.ExecuteScript(id2, testingContext, nameof(IExecuteAsync.ExecuteAsync));
         });
     }
 
     [TestMethod]
     public async Task ExecuteScriptByIdTest()
     {
-        var context = await _em!.GetTestingContext<GeneratorContextV4.GeneratorContext>();
+        var context = TestHelper.GetContext();
 
         Guid condId = (await _scriptManager!.CreateScript(_sourceCodePedia!)).Id;
-        object condResult = await _scriptManager.ExecuteScriptById(condId, context, nameof(IEvaluateAsync.EvaluateAsync));
+        object condResult = await _emberScriptManager!.ExecuteScript(condId, context, nameof(IEvaluateAsync.EvaluateAsync));
         Assert.IsInstanceOfType(condResult, typeof(bool));
         Assert.AreEqual(true, (bool)condResult);
 
         Guid actId = (await _scriptManager.CreateScript(_sourceCodeActionV1!)).Id;
-        object actResult = await _scriptManager.ExecuteScriptById(actId, context, nameof(IExecuteAsync.ExecuteAsync));
+        object actResult = await _emberScriptManager!.ExecuteScript(actId, context, nameof(IExecuteAsync.ExecuteAsync));
         Assert.IsInstanceOfType(actResult, typeof(ActionResultSF));
         // Assert.IsTrue(((ActionResultBaseClass)actResult).IsSuccess);
     }

@@ -16,7 +16,7 @@ public class EmberInternalFacadeTests
     private EmberInternalFacade? _internalScriptManager;
     private EmberMethods? _em;
     private ObjectsRecord? _obj;
-    private DataV1.MockData? _data;
+    // private DataV1.MockData? _data;
     private string? _sourceCodeActionV1 = TestHelper.GetSC().sourceCodeActionV1;
     private string? _sourceCodeActionV2 = TestHelper.GetSC().sourceCodeActionV2;
     private string? _sourceCodeActionV3 = TestHelper.GetSC().sourceCodeActionV3;
@@ -33,8 +33,8 @@ public class EmberInternalFacadeTests
         _scriptManager.DeleteAllData();
         _em = new EmberMethods(_scriptManager!);
         _obj = TestHelper.ScriptObjects();
-        _data = new DataV1.MockData(labOrder: _obj.labOrder, patient: _obj.patient, consoleLogger: _obj.logger,
-        dataAccess: _obj.testDataAccess, vaccine: _obj.vaccine);
+        // _data = new DataV1.MockData(labOrder: _obj.labOrder, patient: _obj.patient, consoleLogger: _obj.logger,
+        // dataAccess: _obj.testDataAccess, vaccine: _obj.vaccine);
     }
 
     [TestMethod]
@@ -54,8 +54,8 @@ public class EmberInternalFacadeTests
         // DataV1.MockData data = new DataV1.MockData(labOrder: obj.labOrder, patient: obj.patient, consoleLogger: obj.logger,
         //                 dataAccess: obj.testDataAccess, vaccine: obj.vaccine);
 
-        DataV2.DataV2 data = new DataV2.DataV2(labOrder: _obj.labOrder, patient: _obj.patient, consoleLogger: _obj.logger,
-                                dataAccess: _obj.testDataAccess, vaccine: _obj.vaccine);
+        // DataV2.DataV2 data = new DataV2.DataV2(labOrder: _obj.labOrder, patient: _obj.patient, consoleLogger: _obj.logger,
+        //                         dataAccess: _obj.testDataAccess, vaccine: _obj.vaccine);
 
 
         // ActiveGeneratorContext ctx = new ActiveGeneratorContext(labOrder: obj.labOrder, vaccine: obj.vaccine);

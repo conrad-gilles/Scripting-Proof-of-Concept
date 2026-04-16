@@ -98,24 +98,6 @@ namespace ReadOnlyContextV1
         IPatientInterface IGeneratorReadOnlyContextV1.IGeneratorContext.Patient2 => Patient;
         IConsoleLoggerInterface IGeneratorReadOnlyContextV1.IGeneratorContext.Logger2 => Logger;
         IDataAccessInterface IGeneratorReadOnlyContextV1.IGeneratorContext.Data2 => Data;
-
-        public override GeneratorContextSF CreateUsingData(DataAbstractClass data)
-        {
-            try
-            {
-                RecentDataClass mockData = (RecentDataClass)data;
-                if (mockData.LabOrder == null || mockData.Patient == null || mockData.ConsoleLogger == null || mockData.DataAccess == null)
-                {
-                    throw new Exception(message: "One of the inserted Parameters in Data was null");
-                }
-                return new GeneratorContext(mockData.LabOrder, mockData.Patient, mockData.ConsoleLogger, mockData.DataAccess);
-            }
-            catch (Exception e)
-            {
-                throw new Exception(message: "Something went wrong trying to CreateUsing Data", e);
-            }
-        }
-
         public override GeneratorContextSF Downgrade()
         {
             // return null;
@@ -154,22 +136,6 @@ namespace RWContextV2
         public IDataAccessInterface Data2 => Data;
 
         ILabOrderInterface IGeneratorReadOnlyContextV1.IGeneratorContext.LabOrder => LabOrder2;
-        public override GeneratorContextSF CreateUsingData(DataAbstractClass data)
-        {
-            try
-            {
-                RecentDataClass mockData = (RecentDataClass)data;
-                if (mockData.LabOrder == null || mockData.Patient == null || mockData.ConsoleLogger == null || mockData.DataAccess == null)
-                {
-                    throw new Exception(message: "One of the inserted Parameters in Data was null");
-                }
-                return new GeneratorContext(mockData.LabOrder, mockData.Patient, mockData.ConsoleLogger, mockData.DataAccess);
-            }
-            catch (Exception e)
-            {
-                throw new Exception(message: "Something went wrong trying to CreateUsing Data", e);
-            }
-        }
         public override GeneratorContextSF Downgrade()
         {
             try
@@ -210,23 +176,6 @@ namespace GeneratorContextV3
 
         }
         ILabOrderInterfaceV2 IGeneratorContext_V3.IGeneratorContext.LabOrder => LabOrderV2;
-
-        public override GeneratorContextSF CreateUsingData(DataAbstractClass data)
-        {
-            try
-            {
-                RecentDataClass mockData = (RecentDataClass)data;
-                if (mockData.LabOrder == null || mockData.Patient == null || mockData.ConsoleLogger == null || mockData.DataAccess == null)
-                {
-                    throw new Exception(message: "One of the inserted Parameters in Data was null");
-                }
-                return new GeneratorContext(mockData.LabOrder, mockData.Patient, mockData.ConsoleLogger, mockData.DataAccess);
-            }
-            catch (Exception e)
-            {
-                throw new Exception(message: "Something went wrong trying to CreateUsing Data", e);
-            }
-        }
 
         public override GeneratorContextSF Downgrade()
         {
@@ -269,23 +218,6 @@ namespace GeneratorContextV4
         }
         ILabOrderInterfaceV3 IGeneratorContext_V4.IGeneratorContext.LabOrder => LabOrderV3;
 
-        public override GeneratorContextSF CreateUsingData(DataAbstractClass data)
-        {
-            try
-            {
-                RecentDataClass mockData = (RecentDataClass)data;
-                if (mockData.LabOrder == null || mockData.Patient == null || mockData.ConsoleLogger == null || mockData.DataAccess == null)
-                {
-                    throw new Exception(message: "One of the inserted Parameters in Data was null");
-                }
-                return new GeneratorContext(mockData.LabOrder, mockData.Patient, mockData.ConsoleLogger, mockData.DataAccess);
-            }
-            catch (Exception e)
-            {
-                throw new Exception(message: "Something went wrong trying to CreateUsing Data", e);
-            }
-        }
-
         public override GeneratorContextSF Downgrade()
         {
             try
@@ -320,23 +252,6 @@ namespace GeneratorContextNoInherVaccineV5
         ILabOrderInterfaceV4NoInheritence IGeneratorContextNoInheritance_V5.IGeneratorContext.LabOrder => LabOrder;
 
         IVaccineInterface IGeneratorContextNoInheritance_V5.IGeneratorContext.Vaccine => Vaccine;
-
-        public override GeneratorContextSF CreateUsingData(DataAbstractClass data)
-        {
-            try
-            {
-                RecentDataClass mockData = (RecentDataClass)data;
-                if (mockData.LabOrder == null || mockData.Vaccine == null)
-                {
-                    throw new Exception(message: "One of the inserted Parameters in Data was null");
-                }
-                return new GeneratorContext(mockData.LabOrder, mockData.Vaccine);
-            }
-            catch (Exception e)
-            {
-                throw new Exception(message: "Something went wrong trying to CreateUsing Data", e);
-            }
-        }
 
         public override GeneratorContextSF Downgrade()
         {

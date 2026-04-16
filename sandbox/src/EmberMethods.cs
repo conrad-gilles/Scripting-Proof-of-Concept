@@ -316,53 +316,12 @@ public class EmberMethods
         // GeneratorContext ctx = GetTestingContext();
         return "Gilles";
     }
-    public async Task<Context> GetTestingContext<T>(CustomerScript? autoDetectFromScript = null) where T : GeneratorContextSF
+
+    public static RecentContext GetContext()
     {
-        Serilog.Log.Verbose("Entered {MethodName} in {ClassName}.", nameof(GetTestingContext), nameof(EmberMethods));
-        try
-        {
-            Sandbox.ContextManagementDemos sf = new Sandbox.ContextManagementDemos(_facade);
-            Context ctx;
-            if (autoDetectFromScript == null)
-            {
-                var dict = ContextVersionScanner.GetClassDictionary();
-                int? v = null;
-
-                foreach (KeyValuePair<int, Type> kvp in dict)
-                {
-                    if (kvp.Value == typeof(T))
-                    {
-                        if (v != null)
-                        {
-                            throw new Exception(message: "version int should be null here else it was assigned twice which is weird.");
-                        }
-                        v = kvp.Key;
-                    }
-                }
-                if (v == null)
-                {
-                    throw new Exception(message: "Version int was null, this should not happen.");
-                }
-                ctx = sf.CreateContextForApiV(GetTestData(), v);
-            }
-            else
-            {
-
-                int v = _facade.BasicValidationBeforeCompiling(autoDetectFromScript.SourceCode!).Version;
-                ctx = sf.CreateContextForApiV(GetTestData(), v);
-
-            }
-            return ctx;
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine("GetTestingContext failed");
-            Console.WriteLine(e.ToString());
-            throw new Exception("GetTestingContext failed", e);
-        }
-
+        //todo if resupporting
+        return new RecentContext(labOrder: null, vaccine: null);
     }
-
 
     public static string CreateStringFromCsFile(string scriptPath)
     {
@@ -416,16 +375,5 @@ public class EmberMethods
             throw new GetScriptPathFromFolderException("getScriptPathFromFolder method failed", e);
         }
 
-    }
-    internal RecentDataClass GetTestData()
-    {
-        LabOrder labOrder = new LabOrder("1", "Pediatrics");
-        Patient patient = new Patient("1", "TestFirst", "TestLast", new DateTime(2010, 6, 1, 7, 47, 0), "M");   //mfu
-        ConsoleLogger logger = new ConsoleLogger();
-        DataAccess testDataAccess = new DataAccess();
-        Vaccine vaccine = new Vaccine("Polio", 1, DateTime.UtcNow);
-
-        return new RecentDataClass(labOrder: labOrder, patient: patient, consoleLogger: logger,
-          dataAccess: testDataAccess, vaccine: vaccine);
     }
 }
