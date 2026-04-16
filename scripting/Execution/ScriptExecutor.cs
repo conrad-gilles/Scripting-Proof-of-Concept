@@ -60,73 +60,14 @@ internal class ScriptExecutor
 
         Type type = typeArray[0];
 
-        object scriptInstance = Activator.CreateInstance(type)!;     //if null here probably typo in file name somewhere, like pedriatic instead of pediatic :(
+        object scriptInstance = Activator.CreateInstance(type)!;
 
-        if (typeof(IScriptMethodsCondition).IsAssignableFrom(type))    //checks if type implements the generator specific interface  //check if runs
-        {
-            var result = await RunConditionScript(type, scriptInstance, genContext, methodName);
-            return (T)(object)result;
-        }
-        else if (typeof(IScriptMethodsAction).IsAssignableFrom(type))
-        {
-            var result = await RunActionScript(type, scriptInstance, genContext, methodName);
-            return (T)(object)result;
-        }
-        else
-        {
-            _logger.LogInformation("Could not run your script because it is neither a ActionScript nor a ConditionScript.");
-            throw new ScriptWasNotOfCorrectTypeException("Could not run your script because it is neither a ActionScript nor a ConditionScript.");
-        }
-    }
-
-    public async Task<bool> RunConditionScript(Type type, object scriptInstance, Context genContext, string methodName)
-    {
-        _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(RunConditionScript), nameof(ScriptExecutor));
         try
         {
             MethodInfo method;
             method = type.GetMethod(methodName)!;
 
             using var cts = new CancellationTokenSource(_scriptTimeout);
-            ScriptEnvironment.CurrentToken.Value = cts.Token;
-
-            var resultTask = (Task)method.Invoke(scriptInstance, new object[] { genContext })!;
-
-            try
-            {
-                await resultTask.WaitAsync(cts.Token);
-            }
-            catch (OperationCanceledException)
-            {
-                throw new ConditionScriptTimeoutException(nameof(RunConditionScript) + " script exceeded time limit and was safely terminated.");
-            }
-            finally
-            {
-                ScriptEnvironment.CurrentToken.Value = CancellationToken.None;
-            }
-
-            var resultProperty = resultTask.GetType().GetProperty("Result");
-            var resultValue = resultProperty!.GetValue(resultTask);
-
-            _logger.LogInformation($"Result: {resultValue}");
-            return (bool)resultValue!;
-        }
-        catch (Exception e)
-        {
-            _logger.LogInformation(e.ToString());
-            throw new ConditionScriptExecutionException("RunConditionScrptFailed.", e);
-        }
-
-    }
-    public async Task<ActionResultSF> RunActionScript(Type type, object scriptInstance, Context genContext, string methodName)  //todo pass Method name as string or enum and also pass arguments maybe as List<args>
-    {
-        _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(RunActionScript), nameof(ScriptExecutor));
-        try
-        {
-            MethodInfo method;
-            method = type.GetMethod(methodName)!;
-            using var cts = new CancellationTokenSource(_scriptTimeout);
-            // using var cts = new CancellationTokenSource(30000);
             ScriptEnvironment.CurrentToken.Value = cts.Token;
             System.Threading.Tasks.Task? resultTask;
             try
@@ -144,7 +85,7 @@ internal class ScriptExecutor
             }
             catch (OperationCanceledException ex)
             {
-                throw new ActionScriptTimeoutException(nameof(RunConditionScript) + " script exceeded time limit and was safely terminated.", ex);
+                throw new ActionScriptTimeoutException(nameof(RunScriptExecution) + " script exceeded time limit and was safely terminated.", ex);
             }
             finally
             {
@@ -156,7 +97,7 @@ internal class ScriptExecutor
 
             _logger.LogInformation($"Result in 86 sExecuter: {resultValue}");
 
-            return (ActionResultSF)resultValue!;  //this might fail because not baseclass idk, if it does maybe change whole structure to only one function
+            return (T)resultValue!;
         }
 
         catch (Exception e)
@@ -172,10 +113,66 @@ internal class ScriptExecutor
                 throw;
             }
         }
-
     }
-}
 
+
+    // public async Task<object> RunScript(Type type, object scriptInstance, Context genContext, string methodName)
+    // {
+    //     _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(RunScript), nameof(ScriptExecutor));
+    //     try
+    //     {
+    //         MethodInfo method;
+    //         method = type.GetMethod(methodName)!;
+
+    //         using var cts = new CancellationTokenSource(_scriptTimeout);
+    //         ScriptEnvironment.CurrentToken.Value = cts.Token;
+    //         System.Threading.Tasks.Task? resultTask;
+    //         try
+    //         {
+    //             resultTask = (Task)method.Invoke(scriptInstance, new object[] { genContext })!;
+    //         }
+    //         catch (NullReferenceException ex)
+    //         {
+    //             throw new CouldNotFindMethodException(message: "", innerException: ex);
+    //         }
+
+    //         try
+    //         {
+    //             await resultTask.WaitAsync(cts.Token);
+    //         }
+    //         catch (OperationCanceledException ex)
+    //         {
+    //             throw new ActionScriptTimeoutException(nameof(RunScript) + " script exceeded time limit and was safely terminated.", ex);
+    //         }
+    //         finally
+    //         {
+    //             ScriptEnvironment.CurrentToken.Value = CancellationToken.None;
+    //         }
+
+    //         var resultProperty = resultTask.GetType().GetProperty("Result");
+    //         var resultValue = resultProperty!.GetValue(resultTask);
+
+    //         _logger.LogInformation($"Result in 86 sExecuter: {resultValue}");
+
+    //         return resultValue!;
+    //     }
+
+    //     catch (Exception e)
+    //     {
+    //         _logger.LogError(e.ToString());
+    //         _logger.LogWarning("You might have passed the wrong GeneratorContext class, ex V1 instead of V2");
+    //         if (e.GetType() != typeof(CouldNotFindMethodException))
+    //         {
+    //             throw new ActionScriptExecutionException("You might have passed the wrong GeneratorContext class, ex V1 instead of V2", e);
+    //         }
+    //         else
+    //         {
+    //             throw;
+    //         }
+    //     }
+
+    // }
+}
 
 public static class ScriptEnvironment
 {
