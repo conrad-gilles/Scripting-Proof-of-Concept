@@ -1,8 +1,21 @@
+using TypeInfo = Ember.Scripting.Versioning.TypeInfo;
 using Microsoft.Extensions.Logging;
 using Ember.Scripting;
 using IGeneratorReadOnlyContextV1;
+using ContextBases;
 
-//todo version the Interfaces IGenerator bla bla
+namespace ContextBases
+{
+    [MetaDataIGeneratorIntrfc(version: 0, type: TypeInfo.AbstractBaseInSF)]
+    public interface IGeneratorContextBaseInterfaceSF : IContext
+    {
+    }
+    [MetaDataGeneratorClass(version: 0, type: TypeInfo.AbstractBaseInSF)]
+    public abstract class GeneratorContextSF : Context
+    {
+
+    }
+}
 
 namespace IGeneratorReadOnlyContextV1
 {

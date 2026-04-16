@@ -11,7 +11,7 @@ public static class ContextVersionScanner
     // Moved exactly as it was from ScriptFactory
     public static Dictionary<int, Type> GetClassDictionary()
     {
-        Type baseType = typeof(GeneratorContextSF);
+        Type baseType = typeof(Context);
         return GetBaseTypeDictionary(baseType);
     }
 
@@ -34,7 +34,7 @@ public static class ContextVersionScanner
         for (int i = 0; i < subClasses.Count(); i++)
         {
             Type currentType = subClasses[i];
-            var uninitializedContext = (GeneratorContextSF)RuntimeHelpers.GetUninitializedObject(currentType);
+            var uninitializedContext = (Context)RuntimeHelpers.GetUninitializedObject(currentType);
 
             System.Reflection.TypeInfo typeInfo = uninitializedContext.GetType().GetTypeInfo();
 

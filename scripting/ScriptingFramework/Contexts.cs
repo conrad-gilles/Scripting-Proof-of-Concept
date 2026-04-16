@@ -12,17 +12,9 @@ public abstract class Context : Downgradeable, Data
 
 public interface IContext
 {
-}
-
-[MetaDataIGeneratorIntrfc(version: 0, type: TypeInfo.AbstractBaseInSF)]
-public interface IGeneratorContextBaseInterfaceSF : IContext
-{
-}
-[MetaDataGeneratorClass(version: 0, type: TypeInfo.AbstractBaseInSF)]
-public abstract class GeneratorContextSF : Context
-{
 
 }
+
 public interface Downgradeable
 {
     public Context Downgrade();
