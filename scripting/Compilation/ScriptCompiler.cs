@@ -121,17 +121,17 @@ internal class ScriptCompiler
 
         SyntaxTree tree = CSharpSyntaxTree.ParseText(script);   //being called twice also in RunCompilation() might be better for performance to remove twice but also you want to be able to compile without having to parse always
         var mscorlib = MetadataReference.CreateFromFile(typeof(object).Assembly.Location);
-        IEnumerable<MetadataReference>? referencesBT = [mscorlib];
+        IEnumerable<MetadataReference>? minimalReferences = [mscorlib];
         var compilation = CSharpCompilation.Create("MyCompilation",
-            syntaxTrees: new[] { tree }, references: referencesBT);   // i might be able to use this method to init the refrences also above?
+            syntaxTrees: new[] { tree }, references: minimalReferences);   // i might be able to use this method to init the refrences also above?
         var model = compilation.GetSemanticModel(tree);
-        var classesInTree = tree.GetRoot().DescendantNodes().OfType<ClassDeclarationSyntax>();
-        if (classesInTree.Count() > 1)
+        var classesInTree = tree.GetRoot().DescendantNodes().OfType<ClassDeclarationSyntax>().ToList();
+        if (classesInTree.Count > 1)
         {
             _logger.LogError("More Than one class found in Script string.");
             throw new MoreThanOneClassFoundInScriptException("More Than one class found in Script string. in if (classesInTree.Count() > 1)"); //this might throw even if there is one class in script if compiler adds classes or something like that, so if it does maybe change this if statement
         }
-        var myClass = classesInTree.Last();
+        var myClass = classesInTree.Single();
         var myClassSymbol = model.GetDeclaredSymbol(myClass) as ITypeSymbol;
 
 
@@ -163,31 +163,7 @@ internal class ScriptCompiler
             _logger.LogTrace("BaseClass Name = " + baseType);
             _logger.LogTrace("Version Int = " + versionInt);
 
-            Type? scriptType = null;
-
-            Dictionary<string, Type> validScriptTypes = AppDomain.CurrentDomain.GetAssemblies()
-               .SelectMany(a => a.GetTypes())
-               .Where(t => t.IsInterface
-                        && typeof(IScriptType).IsAssignableFrom(t)
-                        && t != typeof(IScriptType))
-               .ToDictionary(t => t.Name, t => t);
-
-            foreach (var sType in validScriptTypes)
-            {
-                // if (baseType.ToDisplayString() == sType.Key)
-                if (baseType.Name == sType.Key)
-                {
-                    if (scriptType != null)
-                    {
-                        throw new Exception("Collision occured");
-                    }
-                    scriptType = sType.Value;
-                }
-            }
-            if (scriptType == null)
-            {
-                throw new Exception("ScriptType not set");
-            }
+            Type scriptType = scriptType = CustomerScript.GetScriptType(baseType.Name);
 
             ValidateScriptMethods(tree!, model, baseType);
             List<MethodRecord> methods = ValidateOnlyInheritedMethodsAndReturn(tree!, model);
@@ -201,7 +177,6 @@ internal class ScriptCompiler
                 Version = (int)versionInt,
                 ExecutionTime = executionTime,
                 methods = methods
-                // methods = []
             };
             return returnedRecord;
         }
@@ -389,13 +364,14 @@ internal class ScriptCompiler
         IEnumerable<MethodDeclarationSyntax> methods = root.DescendantNodes().OfType<MethodDeclarationSyntax>();
         List<MethodRecord> methodsRoslyn = GetMethodsRoslyn(methods, semanticModel);
 
-        Assembly myAssembly = Assembly.GetExecutingAssembly();
-        // string targetNamespace = "Ember.Scripting.ScriptMethods";
-        string targetNamespace = typeof(ScriptingFramework.ScriptMethods.IExecute1).Namespace!;    //maybe create a marker class?
-        IEnumerable<Type> types = myAssembly.GetTypes().Where(type => type.Namespace == targetNamespace && type.IsInterface
-                // && !type.Name.StartsWith("<") //last line to exclude compiler generated 
-                );
-        List<MethodRecord> methodsAssembly = GetMethodsAssembly(types);
+        IEnumerable<Type> validScriptMethods = AppDomain.CurrentDomain.GetAssemblies()
+                   .SelectMany(a => a.GetTypes())
+                   .Where(t => t.IsInterface
+                            && typeof(IScriptMethod).IsAssignableFrom(t)
+                            && t != typeof(IScriptMethod)).ToList();
+
+
+        List<MethodRecord> methodsAssembly = GetMethodsAssembly(validScriptMethods);
 
         foreach (var meth1 in methodsRoslyn)
         {
@@ -414,14 +390,9 @@ internal class ScriptCompiler
             }
             if (isInside == false)
             {
-                if (meth1.Name != nameof(ScriptingFramework.ScriptMethods.IExecuteAsync.ExecuteAsync)
-                && meth1.Name != nameof(ScriptingFramework.ScriptMethods.IEvaluateAsync.EvaluateAsync)
-                )
-                {
-                    // Console.WriteLine("Method from Roslyn: " + meth1);
-                    // Console.WriteLine("Method from Roslyn: "+meth2);
-                    throw new UndefinedMethodException(message: "No new methods allowed that are not predefinded!" + meth1, meth1);
-                }
+                // Console.WriteLine("Method from Roslyn: " + meth1);
+                // Console.WriteLine("Method from Roslyn: "+meth2);
+                throw new UndefinedMethodException(message: "No new methods allowed that are not predefinded!" + meth1, meth1);
             }
         }
         return result;

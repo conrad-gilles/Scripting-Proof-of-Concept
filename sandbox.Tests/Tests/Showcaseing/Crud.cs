@@ -102,7 +102,7 @@ public class CrudDemos
         RecentContext ctx = factory.Create(labOrder, vaccine);
 
         RecentActionResult ar = (RecentActionResult)await InternalScriptManager!.ExecuteScript<IActionScript>
-        ("AddPediatricTestsV2", ctx, "Default");
+        ("AddPediatricTestsV2", ctx, nameof(IExecuteAsync.ExecuteAsync));
 
 
         // ar = (ActiveActionResult)await InternalScriptManager.Execute1<IGeneratorActionScript>

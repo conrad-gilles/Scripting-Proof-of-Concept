@@ -44,6 +44,10 @@ public class CustomerScript
 
     public Type GetScriptType()
     {
+        return GetScriptType(ScriptType!);
+    }
+    public static Type GetScriptType(string scriptTypeString)
+    {
         Type? scriptType = null;
 
         Dictionary<string, Type> validScriptTypes = AppDomain.CurrentDomain.GetAssemblies()
@@ -51,12 +55,13 @@ public class CustomerScript
            .Where(t => t.IsInterface
                     && typeof(IScriptType).IsAssignableFrom(t)
                     && t != typeof(IScriptType))
-           .ToDictionary(t => t.Name, t => t);
+           .ToDictionary(t => t.Name!, t => t);
+
 
         foreach (var sType in validScriptTypes)
         {
-            // if (baseType.ToDisplayString() == sType.Key)
-            if (ScriptType == sType.Key)
+            Console.WriteLine("Key: " + sType + ", Value: " + sType.Value.FullName);
+            if (scriptTypeString == sType.Key)
             {
                 if (scriptType != null)
                 {
@@ -67,7 +72,7 @@ public class CustomerScript
         }
         if (scriptType == null)
         {
-            throw new Exception("ScriptType not set");
+            throw new Exception("ScriptType not set baseType.ToDisplayString(): ");
         }
         return scriptType;
     }
@@ -119,4 +124,3 @@ public class CustomerScript
         return false;
     }
 }
-

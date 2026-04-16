@@ -86,7 +86,7 @@ public class EmberVersioningTests
         {
             CustomerScript retrievedScript = await facade!.GetScript(id);
             var context = await em!.GetTestingContext<GeneratorContextNoInherVaccineV5.GeneratorContext>(autoDetectFromScript: retrievedScript);
-            object resultBeforeUpgrade = await facade.ExecuteScriptById(id, context, "Default");   //here somehow figure out how to get the version that is being executed todo
+            object resultBeforeUpgrade = await facade.ExecuteScriptById(id, context, nameof(IExecuteAsync.ExecuteAsync));   //here somehow figure out how to get the version that is being executed todo
 
             if (resultBeforeUpgrade is ActionResultSF)
             {
@@ -271,7 +271,7 @@ public class EmberVersioningTests
                                 dataAccess: obj.testDataAccess, vaccine: obj.vaccine);
 
         ctx = Sandbox.ContextManagementDemos.CreateUsingData(desiredContextVersion, _data!);
-        var result1 = await _facade.ExecuteScriptById(id, ctx, "Default");
+        var result1 = await _facade.ExecuteScriptById(id, ctx, nameof(IExecuteAsync.ExecuteAsync));
 
         var result = EmberMethods.UpgradeActionResult(result1);
 

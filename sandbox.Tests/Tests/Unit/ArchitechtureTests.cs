@@ -196,7 +196,7 @@ public class ArchitechtureTests
         var stopwatch = System.Diagnostics.Stopwatch.StartNew();
         Exception e = await Assert.ThrowsExceptionAsync<ActionScriptExecutionException>(async () =>
         {
-            await InternalScriptManager.ExecuteUnfinishedScriptBySourceCode(sourceCode5000, TestHelper.GetContext(), "Default");
+            await InternalScriptManager.ExecuteUnfinishedScriptBySourceCode(sourceCode5000, TestHelper.GetContext(), nameof(IExecuteAsync.ExecuteAsync));
         });
         stopwatch.Stop();
         long elapsedMs = stopwatch.ElapsedMilliseconds;
@@ -210,7 +210,7 @@ public class ArchitechtureTests
         stopwatch = System.Diagnostics.Stopwatch.StartNew();
         e = await Assert.ThrowsExceptionAsync<ActionScriptExecutionException>(async () =>
        {
-           await InternalScriptManager.ExecuteUnfinishedScriptBySourceCode(sourceCode100, TestHelper.GetContext(), "Default");
+           await InternalScriptManager.ExecuteUnfinishedScriptBySourceCode(sourceCode100, TestHelper.GetContext(), nameof(IExecuteAsync.ExecuteAsync));
        });
         stopwatch.Stop();
 
@@ -221,7 +221,7 @@ public class ArchitechtureTests
         stopwatch = System.Diagnostics.Stopwatch.StartNew();
         e = await Assert.ThrowsExceptionAsync<ActionScriptExecutionException>(async () =>
        {
-           await InternalScriptManager.ExecuteUnfinishedScriptBySourceCode(sourceCode500, TestHelper.GetContext(), "Default");
+           await InternalScriptManager.ExecuteUnfinishedScriptBySourceCode(sourceCode500, TestHelper.GetContext(), nameof(IExecuteAsync.ExecuteAsync));
        });
         stopwatch.Stop();
 
@@ -232,7 +232,7 @@ public class ArchitechtureTests
         stopwatch = System.Diagnostics.Stopwatch.StartNew();
         e = await Assert.ThrowsExceptionAsync<ActionScriptExecutionException>(async () =>
        {
-           await InternalScriptManager.ExecuteUnfinishedScriptBySourceCode(sourceCode1000, TestHelper.GetContext(), "Default");
+           await InternalScriptManager.ExecuteUnfinishedScriptBySourceCode(sourceCode1000, TestHelper.GetContext(), nameof(IExecuteAsync.ExecuteAsync));
        });
         stopwatch.Stop();
 
@@ -244,7 +244,7 @@ public class ArchitechtureTests
         stopwatch = System.Diagnostics.Stopwatch.StartNew();
         e = await Assert.ThrowsExceptionAsync<ActionScriptExecutionException>(async () =>
        {
-           await InternalScriptManager.ExecuteUnfinishedScriptBySourceCode(sourceCode5000, TestHelper.GetContext(), "Default");
+           await InternalScriptManager.ExecuteUnfinishedScriptBySourceCode(sourceCode5000, TestHelper.GetContext(), nameof(IExecuteAsync.ExecuteAsync));
        });
         stopwatch.Stop();
 

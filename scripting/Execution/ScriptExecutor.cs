@@ -85,15 +85,8 @@ internal class ScriptExecutor
         try
         {
             MethodInfo method;
+            method = type.GetMethod(methodName)!;
 
-            if (methodName == "Default")
-            {
-                method = type.GetMethod(nameof(ScriptingFramework.ScriptMethods.IEvaluateAsync.EvaluateAsync))!;
-            }
-            else
-            {
-                method = type.GetMethod(methodName)!;
-            }
             using var cts = new CancellationTokenSource(_scriptTimeout);
             ScriptEnvironment.CurrentToken.Value = cts.Token;
 
@@ -131,23 +124,7 @@ internal class ScriptExecutor
         try
         {
             MethodInfo method;
-            // if (methodName == null)
-            // {
-            //     method = type.GetMethod(nameof(Ember.Scripting.ScriptMethods.IExecuteAsync.ExecuteAsync))!;
-            // }
-            // else    //todo error handling id method name is bogus
-            // {
-            // method = type.GetMethod(methodName)!;
-            // }
-
-            if (methodName == "Default")
-            {
-                method = type.GetMethod(nameof(ScriptingFramework.ScriptMethods.IExecuteAsync.ExecuteAsync))!;
-            }
-            else
-            {
-                method = type.GetMethod(methodName)!;
-            }
+            method = type.GetMethod(methodName)!;
             using var cts = new CancellationTokenSource(_scriptTimeout);
             // using var cts = new CancellationTokenSource(30000);
             ScriptEnvironment.CurrentToken.Value = cts.Token;
