@@ -138,51 +138,17 @@ internal class ScriptCompiler
         try
         {
             INamedTypeSymbol baseType = myClassSymbol!.BaseType!;
+
+            if (baseType.Name == "Object")
+            {
+                throw new VersionIntNotAssignedException("Version Int was not assigned probably because the foeach loop faliled maybe because the Context name of the script was not in the dictionary.");
+            }
+
             var className = myClassSymbol.ToString();
             var parentSymbol = myClassSymbol!.Interfaces.FirstOrDefault() ?? myClassSymbol.BaseType;
             int? versionInt = null;
-            string implementedIntrf = parentSymbol.Name;
 
-            string? contextParameterTypeName = null;
-
-            var executeMethod = myClass!.DescendantNodes()
-                                       .OfType<MethodDeclarationSyntax>()
-                                       .FirstOrDefault(m => m.Identifier.Text == "ExecuteAsync" || m.Identifier.Text == "EvaluateAsync");
-
-            if (executeMethod != null)
-            {
-                var firstParameter = executeMethod.ParameterList.Parameters.FirstOrDefault();
-                if (firstParameter != null && firstParameter.Type != null)
-                {
-                    contextParameterTypeName = firstParameter.Type.ToString();
-                }
-            }
-
-            // Console.WriteLine("Extracted Context Parameter Type: " + contextParameterTypeName);
-            _logger.LogTrace("Extracted Context Parameter Type: " + contextParameterTypeName);
-
-            Dictionary<int, Type> activeContexts = ContextVersionScanner.GetInterfaceDictionary();
-            // Console.WriteLine("Start of dict String:");
-            _logger.LogTrace("Start of dict String:");
-            foreach (var pair in activeContexts)
-            {
-                // Console.WriteLine("Key: " + pair.Key + ", Value: " + pair.Value);
-                _logger.LogTrace("Key: " + pair.Key + ", Value: " + pair.Value);
-            }
-
-            foreach (var ctx in activeContexts)
-            {
-                string dictTypeFullName = ctx.Value.FullName ?? "";
-
-                if (ctx.Value.FullName == contextParameterTypeName)
-                {
-                    if (versionInt != null)
-                    {
-                        throw new ContextNameOccuredMoreThanOnceException("Context name occured more than once for some reason that should not happen.");
-                    }
-                    versionInt = ctx.Key;
-                }
-            }
+            versionInt = GetMetaDataRecord(baseType).Version;
 
             if (versionInt == null)
             {
@@ -197,20 +163,32 @@ internal class ScriptCompiler
             _logger.LogTrace("BaseClass Name = " + baseType);
             _logger.LogTrace("Version Int = " + versionInt);
 
+            Type? scriptType = null;
 
-            // ScriptTypes scriptType;
-            Type scriptType;
-            switch (baseType.Name)
+            Dictionary<string, Type> validScriptTypes = AppDomain.CurrentDomain.GetAssemblies()
+               .SelectMany(a => a.GetTypes())
+               .Where(t => t.IsInterface
+                        && typeof(IScriptType).IsAssignableFrom(t)
+                        && t != typeof(IScriptType))
+               .ToDictionary(t => t.Name, t => t);
+
+            foreach (var sType in validScriptTypes)
             {
-                case nameof(IActionScript):
-                    scriptType = typeof(IActionScript);
-                    break;
-                case nameof(IConditionScript):
-                    scriptType = typeof(IConditionScript);
-                    break;
-                default:
-                    throw new CouldNotMatchBaseTypeInCompiler(nameof(baseType) + ": " + baseType + " was not a valid option!");
+                // if (baseType.ToDisplayString() == sType.Key)
+                if (baseType.Name == sType.Key)
+                {
+                    if (scriptType != null)
+                    {
+                        throw new Exception("Collision occured");
+                    }
+                    scriptType = sType.Value;
+                }
             }
+            if (scriptType == null)
+            {
+                throw new Exception("ScriptType not set");
+            }
+
             ValidateScriptMethods(tree!, model, baseType);
             List<MethodRecord> methods = ValidateOnlyInheritedMethodsAndReturn(tree!, model);
             int? executionTime = GetExecutionTime(tree);
@@ -219,7 +197,7 @@ internal class ScriptCompiler
             ValidationRecord returnedRecord = new ValidationRecord
             {
                 ClassName = className,
-                ScriptType = scriptType,
+                ScriptType = scriptType!,
                 Version = (int)versionInt,
                 ExecutionTime = executionTime,
                 methods = methods
@@ -237,12 +215,9 @@ internal class ScriptCompiler
             throw new ScriptFieldNullException("The script very likely did not implement one of the predefined interfaces.", e);
         }
     }
-    public void ValidateScriptMethods(SyntaxTree tree, SemanticModel semanticModel, INamedTypeSymbol baseType)
+    private ScriptMetaDataRecord GetMetaDataRecord(INamedTypeSymbol baseType)
     {
-        SyntaxNode root = tree.GetRoot();
-        IEnumerable<MethodDeclarationSyntax> methods = root.DescendantNodes().OfType<MethodDeclarationSyntax>();
         string fullName = baseType.ToDisplayString();
-
         var scriptRecords = ScriptVersionScanner.GetClassRecords();
 
         string? contextTypeString = null;
@@ -252,39 +227,65 @@ internal class ScriptCompiler
         foreach (var record in scriptRecords)
         {
             ScriptMetaDataRecord? associatedRec = null;
-            if (fullName == record.ScriptType.FullName)
+            if (fullName == record.ScriptType)
             {
                 associatedRec = record;
-                contextTypeString = associatedRec.ContextType.FullName;
-                arTypeString = associatedRec.ActionResultType.FullName;
+                contextTypeString = associatedRec.ContextType;
+                arTypeString = associatedRec.ActionResultType;
             }
         }
 
         if (baseType.IsGenericType)
         {
-            if (baseType.Name == nameof(IConditionScript))
+            if (baseType.TypeArguments.Length == 1)
             {
-                if (baseType.TypeArguments.Length == 1)
-                {
-                    ITypeSymbol contextType = baseType.TypeArguments[0];
-                    contextTypeString = GetFullyQualifiedName(contextType);
-                    arTypeString = "bool";
-                }
+                ITypeSymbol contextType = baseType.TypeArguments[0];
+                contextTypeString = GetFullyQualifiedName(contextType);
+                arTypeString = "bool";
             }
-            else if (baseType.Name == nameof(IActionScript))
+            else if (baseType.TypeArguments.Length == 2)
             {
-                if (baseType.TypeArguments.Length == 2)
-                {
-                    ITypeSymbol contextType = baseType.TypeArguments[0];
-                    ITypeSymbol resultType = baseType.TypeArguments[1];
+                ITypeSymbol contextType = baseType.TypeArguments[0];
+                ITypeSymbol resultType = baseType.TypeArguments[1];
 
-                    contextTypeString = GetFullyQualifiedName(contextType);
-                    arTypeString = GetFullyQualifiedName(resultType);
+                contextTypeString = GetFullyQualifiedName(contextType);
+                arTypeString = GetFullyQualifiedName(resultType);
+            }
+        }
+        int? ctxVersion = null;
+        Dictionary<int, Type> activeContexts = ContextVersionScanner.GetInterfaceDictionary();
+
+        foreach (var ctx in activeContexts)
+        {
+            string dictTypeFullName = ctx.Value.FullName ?? "";
+
+            if (ctx.Value.FullName == contextTypeString)
+            {
+                if (ctxVersion != null)
+                {
+                    throw new ContextNameOccuredMoreThanOnceException("Context name occured more than once for some reason that should not happen.");
                 }
+                ctxVersion = ctx.Key;
             }
         }
 
-        if (contextTypeString == null || arTypeString == null)
+        return new ScriptMetaDataRecord
+        {
+            Version = (int)ctxVersion!,
+            ScriptType = baseType.Name,
+            ContextType = contextTypeString!,
+            ActionResultType = arTypeString!
+        };
+    }
+    public void ValidateScriptMethods(SyntaxTree tree, SemanticModel semanticModel, INamedTypeSymbol baseType)
+    {
+        SyntaxNode root = tree.GetRoot();
+        IEnumerable<MethodDeclarationSyntax> methods = root.DescendantNodes().OfType<MethodDeclarationSyntax>();
+        string fullName = baseType.ToDisplayString();
+
+        ScriptMetaDataRecord finalRec = GetMetaDataRecord(baseType);
+
+        if (finalRec.ContextType == null || finalRec.ActionResultType == null)
         {
             throw new Exception("fullname: " + fullName);
         }
@@ -321,11 +322,11 @@ internal class ScriptCompiler
                 returnTypeString = innerType.ToDisplayString();
             }
 
-            if (returnTypeString != arTypeString)
+            if (returnTypeString != finalRec.ActionResultType)
             {
                 if (returnTypeString != "string" && methodName != nameof(ScriptingFramework.ScriptMethods.IExecute3.Execute3))   //todo fix get rid off
                 {
-                    throw new WrongReturnTypeException(message: methodName + " has the wrong return Type: " + returnTypeString + ", it should be: " + arTypeString + ".", method);
+                    throw new WrongReturnTypeException(message: methodName + " has the wrong return Type: " + returnTypeString + ", it should be: " + finalRec.ActionResultType + ".", method);
                 }
             }
 
@@ -340,11 +341,11 @@ internal class ScriptCompiler
                     paramType = paramType.Substring("global::".Length);
                 }
 
-                if (paramType != contextTypeString
+                if (paramType != finalRec.ContextType
                 && paramType != "CustomerScript" && methodName != "SomeUndefindedMethod"    //todo get rid of
                 )
                 {
-                    throw new WrongParameterTypeException(message: methodName + " has a wrong Parameter Type: " + paramType + ", it should be: " + contextTypeString + ".", method);
+                    throw new WrongParameterTypeException(message: methodName + " has a wrong Parameter Type: " + paramType + ", it should be: " + finalRec.ContextType + ".", method);
                 }
             }
         }

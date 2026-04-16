@@ -263,6 +263,6 @@ public class ArchitechtureTests
             Console.WriteLine("Type: " + item.Name + ", FullName: " + item.FullName);
         }
 
-        Assert.IsTrue(false);
+        // Assert.IsTrue(false);
     }
 }

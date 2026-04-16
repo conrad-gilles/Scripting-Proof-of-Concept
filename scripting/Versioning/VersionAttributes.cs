@@ -57,6 +57,10 @@ public class MetaDataIGeneratorScript : Attribute
             ActionResultVersion = typeof(bool);
         }
     }
+    //     private int GetVersionFromContext()
+    //     {
+    // retu
+    //     }
 }
 
 public enum IGeneratorScriptType

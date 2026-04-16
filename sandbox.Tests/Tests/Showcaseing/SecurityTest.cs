@@ -99,9 +99,9 @@ public class SecurityTests
 
         //Exception when Script doesnt inherit from the predefined classes      
         ex = Assert.ThrowsException<Ember.Scripting.Compilation.ScriptFieldNullException>(() =>
-       {
-           ScriptManager.BasicValidationBeforeCompiling(sourceCode);
-       });
+           {
+               ScriptManager.BasicValidationBeforeCompiling(sourceCode);
+           });
         Assert.IsTrue(ExceptionHelper.GetExceptionFromChainReversed(ex, 0).GetType() == typeof(VersionIntNotAssignedException));
         ExceptionHelper.PrintExceptionListToConsole(ex);
 

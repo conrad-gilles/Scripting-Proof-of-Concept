@@ -319,27 +319,11 @@ internal class ScriptRepository
             }
             var validationRecord = _compiler.BasicValidationBeforeCompiling(scriptString);
 
-
-
-            string scriptType;
-            if (validationRecord.ScriptType == typeof(IActionScript))
-            {
-                scriptType = nameof(IActionScript);
-            }
-            else if (validationRecord.ScriptType == typeof(IConditionScript))
-            {
-                scriptType = nameof(IConditionScript);
-            }
-            else
-            {
-                throw new CouldNotMatchBaseTypeInPersistence("No valid type");
-            }
-
             CustomerScript script = new CustomerScript
             {
                 Id = (Guid)randomGUID,
                 ScriptName = validationRecord.ClassName,
-                ScriptType = scriptType,
+                ScriptType = validationRecord.ScriptType.Name,
                 SourceCode = scriptString,
                 MinApiVersion = validationRecord.Version,
                 CreatedAt = createdAt,
@@ -580,36 +564,9 @@ internal class ScriptRepository
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName} with Name: {ScriptId}.", nameof(GetCustomerScript), nameof(ScriptRepository), scriptName);
 
-        string sScriptType;
-        if (typeof(ScriptType) == typeof(IActionScript))
-        {
-            sScriptType = nameof(IActionScript);
-        }
-        else if (typeof(ScriptType) == typeof(IConditionScript))
-        {
-            sScriptType = nameof(IConditionScript);
-        }
-        else
-        {
-            throw new GetScriptIdException(message: "Could not convert Script type enum to string");
-        }
-
-        // string sScriptType;
-        // switch (scriptType)
-        // {
-        //     case ScriptTypes.GeneratorActionScript:
-        //         // sScriptType = "IGeneratorActionScript";
-        //         sScriptType = nameof(IGeneratorActionScript);
-        //         break;
-        //     case ScriptTypes.GeneratorConditionScript:
-        //         sScriptType = nameof(IGeneratorConditionScript);
-        //         break;
-        //     default:
-        //         throw new GetScriptIdException(message: "Could not convert Script type enum to string");
-        // }
         using (var db = await _contextFactory.CreateDbContextAsync())
         {
-            var script = await db.CustomerScripts.SingleAsync(b => b.ScriptName == scriptName && b.ScriptType == sScriptType);
+            var script = await db.CustomerScripts.SingleAsync(b => b.ScriptName == scriptName && b.ScriptType == typeof(ScriptType).Name);
             return script.Id;
         }
     }

@@ -74,9 +74,9 @@ public static class ScriptVersionScanner
             ScriptMetaDataRecord temp = new ScriptMetaDataRecord
             {
                 Version = version,
-                ScriptType = currentType,
-                ContextType = contextType,
-                ActionResultType = arType
+                ScriptType = currentType.FullName!,
+                ContextType = contextType.FullName!,
+                ActionResultType = arType.FullName!
             };
             records.Add(temp);
 
@@ -89,12 +89,12 @@ public static class ScriptVersionScanner
 public record ScriptMetaDataRecord
 {
     public required int Version { get; init; }
-    public required Type ScriptType { get; init; }
-    public required Type ContextType { get; init; }
-    public required Type ActionResultType { get; init; }
+    public required string ScriptType { get; init; }
+    public required string ContextType { get; init; }
+    public required string ActionResultType { get; init; }
 
     public override string ToString()
     {
-        return "V" + Version + ", Type: " + ScriptType.FullName + ", Context: " + ContextType.FullName + ", AR: " + ActionResultType.FullName;
+        return "V" + Version + ", Type: " + ScriptType + ", Context: " + ContextType + ", AR: " + ActionResultType;
     }
 }

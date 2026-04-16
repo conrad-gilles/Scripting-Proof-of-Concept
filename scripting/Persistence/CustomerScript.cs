@@ -44,19 +44,32 @@ public class CustomerScript
 
     public Type GetScriptType()
     {
-        Type sType;
-        switch (ScriptType)
+        Type? scriptType = null;
+
+        Dictionary<string, Type> validScriptTypes = AppDomain.CurrentDomain.GetAssemblies()
+           .SelectMany(a => a.GetTypes())
+           .Where(t => t.IsInterface
+                    && typeof(IScriptType).IsAssignableFrom(t)
+                    && t != typeof(IScriptType))
+           .ToDictionary(t => t.Name, t => t);
+
+        foreach (var sType in validScriptTypes)
         {
-            case nameof(IActionScript):
-                sType = typeof(IActionScript);
-                break;
-            case nameof(IConditionScript):
-                sType = typeof(IConditionScript);
-                break;
-            default:
-                throw new CouldNotAssignBaseTypeException(message: "Could not assign baseTypeName it ScriptType was: " + ScriptType);
+            // if (baseType.ToDisplayString() == sType.Key)
+            if (ScriptType == sType.Key)
+            {
+                if (scriptType != null)
+                {
+                    throw new Exception("Collision occured");
+                }
+                scriptType = sType.Value;
+            }
         }
-        return sType;
+        if (scriptType == null)
+        {
+            throw new Exception("ScriptType not set");
+        }
+        return scriptType;
     }
     public override string ToString()
     {
