@@ -37,14 +37,14 @@ internal class ScriptExecutor
         List<Type> typeArrayList = [];
         for (int i = 0; i < unfilteredTypeArray.Length; i++)
         {
-            if (typeof(IScriptMethodsAction).IsAssignableFrom(unfilteredTypeArray[i]))
+            if (typeof(IScriptMethod).IsAssignableFrom(unfilteredTypeArray[i]))
             {
                 typeArrayList.Add(unfilteredTypeArray[i]);
             }
-            if (typeof(IScriptMethodsCondition).IsAssignableFrom(unfilteredTypeArray[i]))
-            {
-                typeArrayList.Add(unfilteredTypeArray[i]);
-            }
+            // if (typeof(IScriptMethodsCondition).IsAssignableFrom(unfilteredTypeArray[i]))
+            // {
+            //     typeArrayList.Add(unfilteredTypeArray[i]);
+            // }
         }
         Type[] typeArray = typeArrayList.ToArray();
 
@@ -114,64 +114,6 @@ internal class ScriptExecutor
             }
         }
     }
-
-
-    // public async Task<object> RunScript(Type type, object scriptInstance, Context genContext, string methodName)
-    // {
-    //     _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(RunScript), nameof(ScriptExecutor));
-    //     try
-    //     {
-    //         MethodInfo method;
-    //         method = type.GetMethod(methodName)!;
-
-    //         using var cts = new CancellationTokenSource(_scriptTimeout);
-    //         ScriptEnvironment.CurrentToken.Value = cts.Token;
-    //         System.Threading.Tasks.Task? resultTask;
-    //         try
-    //         {
-    //             resultTask = (Task)method.Invoke(scriptInstance, new object[] { genContext })!;
-    //         }
-    //         catch (NullReferenceException ex)
-    //         {
-    //             throw new CouldNotFindMethodException(message: "", innerException: ex);
-    //         }
-
-    //         try
-    //         {
-    //             await resultTask.WaitAsync(cts.Token);
-    //         }
-    //         catch (OperationCanceledException ex)
-    //         {
-    //             throw new ActionScriptTimeoutException(nameof(RunScript) + " script exceeded time limit and was safely terminated.", ex);
-    //         }
-    //         finally
-    //         {
-    //             ScriptEnvironment.CurrentToken.Value = CancellationToken.None;
-    //         }
-
-    //         var resultProperty = resultTask.GetType().GetProperty("Result");
-    //         var resultValue = resultProperty!.GetValue(resultTask);
-
-    //         _logger.LogInformation($"Result in 86 sExecuter: {resultValue}");
-
-    //         return resultValue!;
-    //     }
-
-    //     catch (Exception e)
-    //     {
-    //         _logger.LogError(e.ToString());
-    //         _logger.LogWarning("You might have passed the wrong GeneratorContext class, ex V1 instead of V2");
-    //         if (e.GetType() != typeof(CouldNotFindMethodException))
-    //         {
-    //             throw new ActionScriptExecutionException("You might have passed the wrong GeneratorContext class, ex V1 instead of V2", e);
-    //         }
-    //         else
-    //         {
-    //             throw;
-    //         }
-    //     }
-
-    // }
 }
 
 public static class ScriptEnvironment

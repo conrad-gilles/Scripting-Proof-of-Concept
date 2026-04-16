@@ -9,6 +9,7 @@ public abstract class Context : Downgradeable, Data
     public abstract Context Downgrade();
     public abstract Context CreateUsingData(DataAbstractClass data);
 }
+
 public interface IContext
 {
 }

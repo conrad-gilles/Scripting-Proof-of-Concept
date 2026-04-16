@@ -94,7 +94,7 @@ internal class ConditionScriptFacade : RecentIConditionScript
     }
     public async Task<bool> EvaluateAsync(RecentIContext context)
     {
-        string methodName = nameof(Scripting.ScriptingFramework.ScriptMethods.IEvaluateAsync.EvaluateAsync);
+        string methodName = nameof(Ember.Sandbox.ScriptMethods.IEvaluateAsync.EvaluateAsync);
         return (bool)await _emberScriptManager.ExecuteScript<IConditionScript>(_scriptName, (RecentContext)context, methodName);
     }
 }

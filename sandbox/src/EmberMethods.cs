@@ -302,7 +302,7 @@ public class EmberMethods
     }
     private static List<MetadataReference> _references = [
         MetadataReference.CreateFromFile(typeof(object).Assembly.Location), // System.Private.CoreLib
-                        MetadataReference.CreateFromFile(typeof(IConditionScript).Assembly.Location),
+                        MetadataReference.CreateFromFile(typeof(IScriptType).Assembly.Location),
                 MetadataReference.CreateFromFile(typeof(IGeneratorReadOnlyContextV1.IGeneratorContext).Assembly.Location),//try removing if works good i guess but still need to pass from sandbox];
                           ];
     public static List<MetadataReference> GetReferences()

@@ -1,4 +1,9 @@
+using TypeInfo = Ember.Scripting.Versioning.TypeInfo;
+
 using Ember.Scripting;
+
+
+
 namespace ActionResultV1
 {
     [MetaDataActionResult(version: 1)]

@@ -5,3 +5,4 @@ global using Ember.Scripting.Persistence;
 global using Ember.Scripting.ScriptingFramework;
 global using Ember.Scripting.ScriptManager;
 global using Ember.Scripting.Versioning;
+global using Ember.Sandbox.ScriptingFrameWork.ScriptTypes;

@@ -5,6 +5,7 @@ using Ember.Scripting;
 using GeneratorScriptsV3;
 using IGeneratorContext_V4;
 using Ember.Scripting.ScriptingFramework;
+using Ember.Sandbox.ScriptingFrameWork.ScriptTypes;
 
 public class MultipleMethodsScript : GeneratorScriptsV3.IActionScript
 {

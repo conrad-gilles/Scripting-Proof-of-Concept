@@ -102,9 +102,14 @@ internal class ScriptCompiler
 
         _logger.LogError("Compilation failed with {ErrorCount} errors.", compilerErrors.Count);
 
-        // Throw passing the clean DTOs
-        throw new CompilationFailedException("Compilation failed.", compilerErrors);
+        string errorString = "Errors: ";
+        foreach (var error in compilerErrors)
+        {
+            errorString = errorString + error.ToString() + ", ";
+        }
 
+        // Throw passing the clean DTOs
+        throw new CompilationFailedException("Compilation failed, " + errorString, compilerErrors);
     }
     public ValidationRecord BasicValidationBeforeCompiling(string script)//record
     {
@@ -299,7 +304,7 @@ internal class ScriptCompiler
 
             if (returnTypeString != finalRec.ActionResultType)
             {
-                if (returnTypeString != "string" && methodName != nameof(ScriptingFramework.ScriptMethods.IExecute3.Execute3))   //todo fix get rid off
+                if (returnTypeString != "string" && methodName != "Execute3")   //todo fix get rid off
                 {
                     throw new WrongReturnTypeException(message: methodName + " has the wrong return Type: " + returnTypeString + ", it should be: " + finalRec.ActionResultType + ".", method);
                 }

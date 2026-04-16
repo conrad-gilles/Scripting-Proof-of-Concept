@@ -5,7 +5,8 @@ global using Ember.Scripting.Persistence;
 global using Ember.Scripting.ScriptingFramework;
 global using Ember.Scripting.ScriptManager;
 global using Ember.Scripting.Versioning;
-global using Ember.Scripting.ScriptingFramework.ScriptMethods;
+global using Ember.Sandbox.ScriptMethods;
+global using Ember.Sandbox.ScriptingFrameWork.ScriptTypes;
 
 
 global using RecentActionResult = ActionResultV3.ActionResult;
