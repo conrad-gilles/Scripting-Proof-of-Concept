@@ -1,3 +1,5 @@
+- move everything that generator and so on out of scripting class lib
+- fix ActionResultVersionScanner to make create a generic version and so on also change the attribute so it takes maybe a base Type loikke ActionResultSf
 - write tests for old name changed of method
 - wrtie test for stuff like this
 - get rid of duplicate code in validation

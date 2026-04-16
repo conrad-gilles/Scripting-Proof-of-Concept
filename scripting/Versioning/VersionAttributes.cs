@@ -14,7 +14,7 @@ public class MetaDataIGeneratorScript : Attribute
         ReturnType = returnType;
         Type = type;
         ContextVersion = typeof(IContext);
-        ActionResultVersion = typeof(ActionResultSF);
+        ActionResultVersion = typeof(CustomReturnType);
         if (ReturnType == IGeneratorScriptReturnType.Condition)
         {
             ActionResultVersion = typeof(bool);
@@ -39,7 +39,7 @@ public class MetaDataIGeneratorScript : Attribute
         ReturnType = IGeneratorScriptReturnType.Action;
         Type = IGeneratorScriptType.DefaultVersioned;
         ContextVersion = typeof(IContext);
-        ActionResultVersion = typeof(ActionResultSF);
+        ActionResultVersion = typeof(CustomReturnType);
         if (ReturnType == IGeneratorScriptReturnType.Condition)
         {
             ActionResultVersion = typeof(bool);

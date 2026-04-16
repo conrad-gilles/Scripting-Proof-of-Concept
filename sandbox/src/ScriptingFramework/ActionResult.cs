@@ -2,7 +2,10 @@ using TypeInfo = Ember.Scripting.Versioning.TypeInfo;
 
 using Ember.Scripting;
 
-
+[MetaDataActionResult(version: 0, type: TypeInfo.AbstractBaseInSF)]
+public abstract class ActionResultSF : CustomReturnType, UpgradeableReturnValue
+{
+}
 
 namespace ActionResultV1
 {
