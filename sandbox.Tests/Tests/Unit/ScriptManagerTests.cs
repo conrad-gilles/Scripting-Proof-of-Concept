@@ -374,18 +374,18 @@ public class ScriptManagerFacadeTests
         Guid id = (await _scriptManager!.CreateScript(_sourceCodeActionV1!)).Id;
         var testingContext = TestHelper.GetContext();
 
-        ActionResultSF result = (ActionResultSF)await _emberScriptManager!.ExecuteScript(id, testingContext, nameof(IExecuteAsync.ExecuteAsync));
+        ActionResultBase result = (ActionResultBase)await _emberScriptManager!.ExecuteScript(id, testingContext, nameof(IExecuteAsync.ExecuteAsync));
 
         Assert.IsNotNull(result);
         // Assert.IsTrue(result.IsSuccess);
         // Assert.IsTrue(result.Message.Contains("Pediatric"));
-        result = (ActionResultV3.ActionResult)EmberMethods.UpgradeActionResult(result);
+        result = (ActionResultV3.ActionResult)UpgradeManager.UpgradeCustomReturn(result);
         Assert.IsInstanceOfType(result, typeof(ActionResultV3.ActionResult));
 
         Guid id2 = (await _scriptManager.CreateScript(_sourceCodePedia!)).Id;
         await Assert.ThrowsExceptionAsync<System.InvalidCastException>(async () =>
         {
-            ActionResultSF result2 = (ActionResultSF)await _emberScriptManager.ExecuteScript(id2, testingContext, nameof(IEvaluateAsync.EvaluateAsync));
+            ActionResultBase result2 = (ActionResultBase)await _emberScriptManager.ExecuteScript(id2, testingContext, nameof(IEvaluateAsync.EvaluateAsync));
         });
 
     }
@@ -420,7 +420,7 @@ public class ScriptManagerFacadeTests
 
         Guid actId = (await _scriptManager.CreateScript(_sourceCodeActionV1!)).Id;
         object actResult = await _emberScriptManager!.ExecuteScript(actId, context, nameof(IExecuteAsync.ExecuteAsync));
-        Assert.IsInstanceOfType(actResult, typeof(ActionResultSF));
+        Assert.IsInstanceOfType(actResult, typeof(ActionResultBase));
         // Assert.IsTrue(((ActionResultBaseClass)actResult).IsSuccess);
     }
 

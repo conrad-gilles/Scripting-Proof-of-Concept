@@ -90,11 +90,11 @@ public class EmberVersioningTests
             var context = TestHelper.GetContext();
             object resultBeforeUpgrade = await _eif!.ExecuteScript(id, context, nameof(IExecuteAsync.ExecuteAsync));   //here somehow figure out how to get the version that is being executed todo
 
-            if (resultBeforeUpgrade is ActionResultSF)
+            if (resultBeforeUpgrade is ActionResultBase)
             {
-                ActionResultV3.ActionResult result = (ActionResultV3.ActionResult)EmberMethods.UpgradeActionResult(resultBeforeUpgrade);
+                ActionResultV3.ActionResult result = (ActionResultV3.ActionResult)UpgradeManager.UpgradeCustomReturn(resultBeforeUpgrade);
                 string shouldReturn = _actionResultVersionSpecific + "Pediatric tests added";
-                Assert.IsInstanceOfType(result, typeof(ActionResultSF));
+                Assert.IsInstanceOfType(result, typeof(ActionResultBase));
                 Assert.IsInstanceOfType(result, typeof(ActionResultV3.ActionResult));
                 Console.WriteLine(result.ToString());
                 Assert.IsTrue(result.ToString().Contains(shouldReturn)
@@ -209,24 +209,6 @@ public class EmberVersioningTests
     }
 
     [TestMethod]
-    public void ActionResultVersionScannerTest()
-    {
-        Dictionary<int, Type> contextVersionMap = new()
-        {
-            {1, typeof(ActionResultV1.ActionResult)},
-            {2, typeof(ActionResultV2.ActionResult)},
-            {3, typeof(ActionResultV3.ActionResult)},
-        };
-
-        Dictionary<int, Type> retrievedDict = ActionResultVersionScanner.GetClassDictionary();
-        PrintDictToConsole(retrievedDict);
-
-
-        CollectionAssert.AreEquivalent(contextVersionMap, retrievedDict);
-        // Assert.IsTrue(false);
-    }
-
-    [TestMethod]
     public void ContextVersionScannerTest()
     {
         Dictionary<int, Type> contextVersionMap = new()
@@ -311,10 +293,10 @@ public class EmberVersioningTests
 
         ctx = TestHelper.GetContext();
         var result1 = await _facade.ExecuteScript(id, ctx, "Default");
-        var result = EmberMethods.UpgradeActionResult(result1);
+        var result = UpgradeManager.UpgradeCustomReturn(result1);
 
         string shouldReturn = _actionResultVersionSpecific + "Pediatric tests added";
-        Assert.IsInstanceOfType(result, typeof(ActionResultSF));
+        Assert.IsInstanceOfType(result, typeof(ActionResultBase));
         Assert.IsInstanceOfType(result, typeof(ActionResultV3.ActionResult));
         Assert.IsTrue(result.ToString()!.Contains(shouldReturn));
     }

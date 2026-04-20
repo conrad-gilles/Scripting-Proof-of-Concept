@@ -106,21 +106,50 @@ public class SanboxTests
         }
     }
 
+
+    //the following three tests were partally ai generated
     [TestMethod]
-    public void ActionResultVersionScannerTest()
+    public void UpgradeCustomReturn_UpgradesFromV1ToLatest()
     {
-        Dictionary<int, Type> contextVersionMap = new()
-        {
-            {1, typeof(ActionResultV1.ActionResult)},
-            {2, typeof(ActionResultV2.ActionResult)},
-            {3, typeof(ActionResultV3.ActionResult)},
-        };
+        ActionResultV1.ActionResult v1Failure = ActionResultV1.ActionResult.Failure("it didnt work");
+        ActionResultV1.ActionResult v1Success = ActionResultV1.ActionResult.Success("ye it worked");
 
-        Dictionary<int, Type> retrievedDict = ActionResultVersionScanner.GetClassDictionary();
-        PrintDictToConsole(retrievedDict);
+        ActionResultV3.ActionResult upgradedFailure = (ActionResultV3.ActionResult)UpgradeManager.UpgradeCustomReturn(v1Failure);
+        ActionResultV3.ActionResult upgradedSuccess = (ActionResultV3.ActionResult)UpgradeManager.UpgradeCustomReturn(v1Success);
 
-        CollectionAssert.AreEquivalent(contextVersionMap, retrievedDict);
-        // Assert.IsFalse(true);
+        Assert.IsInstanceOfType(upgradedFailure, typeof(ActionResultV3.ActionResult));
+        Assert.IsInstanceOfType(upgradedSuccess, typeof(ActionResultV3.ActionResult));
+
+        ActionResultV3.ActionResult v3Failure = (ActionResultV3.ActionResult)upgradedFailure;
+        ActionResultV3.ActionResult v3Success = (ActionResultV3.ActionResult)upgradedSuccess;
+
+        Assert.IsFalse(v3Failure.FailedOrNot);
+        Assert.IsTrue(v3Success.FailedOrNot);
+    }
+
+    [TestMethod]
+    public void UpgradeCustomReturn_UpgradesFromV2ToLatest()
+    {
+        ActionResultV2.ActionResult v2 = ActionResultV2.ActionResult.Failure(
+            "something broke", new List<string> { "step1", "step2" });
+
+        ActionResultV3.ActionResult upgraded = (ActionResultV3.ActionResult)UpgradeManager.UpgradeCustomReturn(v2);
+
+        Assert.IsInstanceOfType(upgraded, typeof(ActionResultV3.ActionResult));
+        ActionResultV3.ActionResult v3 = (ActionResultV3.ActionResult)upgraded;
+        Assert.IsFalse(v3.FailedOrNot);
+        StringAssert.Contains(v3.Message, "something broke");
+    }
+
+    [TestMethod]
+    public void UpgradeCustomReturn_AlreadyLatest_ReturnsSameType()
+    {
+        ActionResultV3.ActionResult v3 = ActionResultV3.ActionResult.Success("already latest");
+
+        ActionResultV3.ActionResult result = (ActionResultV3.ActionResult)UpgradeManager.UpgradeCustomReturn(v3);
+
+        Assert.IsInstanceOfType(result, typeof(ActionResultV3.ActionResult));
+        Assert.AreEqual(v3, result);
     }
     [TestMethod]
     public void BasicValidationTestUsingGetDictionary()
@@ -257,7 +286,7 @@ public class SanboxTests
         Console.WriteLine("Type name: " + ctx.GetType().FullName);
 
         result = await _facade.ExecuteScript(script.Id, ctx, nameof(IExecuteAsync.ExecuteAsync));
-        ar = (ActionResultV3.ActionResult)EmberMethods.UpgradeActionResult(result);
+        ar = (ActionResultV3.ActionResult)UpgradeManager.UpgradeCustomReturn(result);
         Console.WriteLine(ar.ToString());
         Assert.IsInstanceOfType(ar, typeof(ActionResultV3.ActionResult));
 
@@ -270,7 +299,7 @@ public class SanboxTests
         Console.WriteLine("Type name: " + ctx.GetType().FullName);
 
         result = await _facade.ExecuteScript(script.Id, ctx, nameof(IExecuteAsync.ExecuteAsync));
-        ar = (ActionResultV3.ActionResult)EmberMethods.UpgradeActionResult(result);
+        ar = (ActionResultV3.ActionResult)UpgradeManager.UpgradeCustomReturn(result);
         Console.WriteLine(ar.ToString());
         Assert.IsInstanceOfType(ar, typeof(ActionResultV3.ActionResult));
 
@@ -283,7 +312,7 @@ public class SanboxTests
         Console.WriteLine("Type name: " + ctx.GetType().FullName);
 
         result = await _facade.ExecuteScript(script.Id, ctx, nameof(IExecuteAsync.ExecuteAsync));
-        ar = (ActionResultV3.ActionResult)EmberMethods.UpgradeActionResult(result);
+        ar = (ActionResultV3.ActionResult)UpgradeManager.UpgradeCustomReturn(result);
         Console.WriteLine(ar.ToString());
         Assert.IsInstanceOfType(ar, typeof(ActionResultV3.ActionResult));
 

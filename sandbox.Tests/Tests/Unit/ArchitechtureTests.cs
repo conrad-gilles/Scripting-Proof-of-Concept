@@ -265,4 +265,33 @@ public class ArchitechtureTests
 
         // Assert.IsTrue(false);
     }
+
+    [TestMethod]
+    public void GetCustomReturnVersionScannerTest()
+    {
+        Dictionary<Type, List<ScannerRecord>> dict = UpgradeManager.GetClassDictionary();
+
+        foreach (var item in dict)
+        {
+            Console.WriteLine("Key: " + item.Key.FullName + ", Value: " + item.Value);
+            foreach (var item2 in item.Value)
+            {
+                Console.WriteLine(item2);
+            }
+        }
+        ActionResultV1.ActionResult arV1 = ActionResultV2.ActionResult.Failure("it didnt work");
+        ActionResultV2.ActionResult arV2 = ActionResultV2.ActionResult.Success("ye it worked");
+
+        ActionResultV3.ActionResult result = (ActionResultV3.ActionResult)UpgradeManager.UpgradeCustomReturn(arV1);
+        Console.WriteLine("Full Type: " + result.GetType().FullName + ", Mess: " + result.ToString());
+
+        Assert.IsTrue(result.ToString().Contains("[Message contains either failure or succes: ] it didnt workGENERIC_ERROR"));
+
+        result = (ActionResultV3.ActionResult)UpgradeManager.UpgradeCustomReturn(arV2);
+        Console.WriteLine("Full Type: " + result.GetType().FullName + ", Mess: " + result.ToString());
+
+        Assert.IsTrue(result.ToString().Contains("[Message contains either failure or succes: ] ye it worked"));
+
+        // Assert.IsFalse(true);
+    }
 }

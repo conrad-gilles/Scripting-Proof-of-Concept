@@ -2,15 +2,14 @@ using TypeInfo = Ember.Scripting.Versioning.TypeInfo;
 
 using Ember.Scripting;
 
-[MetaDataActionResult(version: 0, type: TypeInfo.AbstractBaseInSF)]
-public abstract class ActionResultSF : CustomReturnType, UpgradeableReturnValue
+public abstract class ActionResultBase : CustomReturnType, IUpgradeableReturnValue
 {
 }
 
 namespace ActionResultV1
 {
-    [MetaDataActionResult(version: 1)]
-    public class ActionResult : ActionResultSF
+    [MetaDataCustomReturn(version: 1)]
+    public class ActionResult : ActionResultBase
     {
         public bool IsSuccess { get; private set; }
         public string Message { get; private set; }
@@ -45,7 +44,7 @@ namespace ActionResultV1
         //     throw new NotImplementedException(message: "This can not be implemented because and also should never be called since the verson below this one is abstract.");
         // }
 
-        public override ActionResultSF Upgrade(object actionResult)
+        public override ActionResultBase Upgrade(object actionResult)
         {
             throw new NotImplementedException(message: "This can not be implemented because and also should never be called since the verson below this one is abstract.");
         }
@@ -54,7 +53,7 @@ namespace ActionResultV1
 
 namespace ActionResultV2
 {
-    [MetaDataActionResult(version: 2)]
+    [MetaDataCustomReturn(version: 2)]
     public class ActionResult : ActionResultV1.ActionResult
     {
         public List<string> LoggedActions { get; private set; }
@@ -91,7 +90,7 @@ namespace ActionResultV2
             // return new ActionResultV2(isSuccess, message, errorCode, loggedActions);
         }
 
-        public override ActionResultSF Upgrade(object actionResult)
+        public override ActionResultBase Upgrade(object actionResult)
         {
             List<string> loggedActions = [];
 
@@ -106,8 +105,8 @@ namespace ActionResultV2
 
 namespace ActionResultV3
 {
-    [MetaDataActionResult(version: 3)]
-    public class ActionResult : ActionResultSF
+    [MetaDataCustomReturn(version: 3)]
+    public class ActionResult : ActionResultBase
     {
         public bool FailedOrNot { get; private set; }
         public string Message { get; private set; }
@@ -149,7 +148,7 @@ namespace ActionResultV3
             return new ActionResult(actionResult.IsSuccess, tempMessage);
         }
 
-        public override ActionResultSF Upgrade(object actionResult)
+        public override ActionResultBase Upgrade(object actionResult)
         {
             if (actionResult is ActionResultV2.ActionResult)
             {

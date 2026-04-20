@@ -45,9 +45,9 @@ async Task SetupAsync()
         CustomerScript retrievedScript = await _facade.GetScript(id);
         var context = TestHelper.GetContext();
         object resultBeforeUpgrade = await _eif!.ExecuteScript(id, context, nameof(IExecuteAsync.ExecuteAsync));
-        ActionResultV3.ActionResult result = (ActionResultV3.ActionResult)EmberMethods.UpgradeActionResult(resultBeforeUpgrade);
+        ActionResultV3.ActionResult result = (ActionResultV3.ActionResult)UpgradeManager.UpgradeCustomReturn(resultBeforeUpgrade);
         string shouldReturn = _actionResultVersionSpecific + "Pediatric tests added";
-        Assert.IsInstanceOfType(result, typeof(ActionResultSF));
+        Assert.IsInstanceOfType(result, typeof(ActionResultBase));
         Assert.IsInstanceOfType(result, typeof(ActionResultV3.ActionResult));
         Assert.IsTrue(result.ToString().Contains(shouldReturn));
 
@@ -60,9 +60,9 @@ async Task SetupAsync()
         CustomerScript retrievedScript = await _facade.GetScript(id);
         var context = TestHelper.GetContext();
         object resultBeforeUpgrade = await _eif!.ExecuteScript(id, context, nameof(IExecuteAsync.ExecuteAsync));
-        ActionResultV3.ActionResult result = (ActionResultV3.ActionResult)EmberMethods.UpgradeActionResult(resultBeforeUpgrade);
+        ActionResultV3.ActionResult result = (ActionResultV3.ActionResult)UpgradeManager.UpgradeCustomReturn(resultBeforeUpgrade);
         string shouldReturn = _actionResultVersionSpecific + "Pediatric tests added";
-        Assert.IsInstanceOfType(result, typeof(ActionResultSF));
+        Assert.IsInstanceOfType(result, typeof(ActionResultBase));
         Assert.IsInstanceOfType(result, typeof(ActionResultV3.ActionResult));
         Assert.IsTrue(result.ToString().Contains(shouldReturn));
 
@@ -75,9 +75,9 @@ async Task SetupAsync()
         CustomerScript retrievedScript = await _facade.GetScript(id);
         var context = TestHelper.GetContext();
         object resultBeforeUpgrade = await _eif!.ExecuteScript(id, context, nameof(IExecuteAsync.ExecuteAsync));
-        ActionResultV3.ActionResult result = (ActionResultV3.ActionResult)EmberMethods.UpgradeActionResult(resultBeforeUpgrade);
+        ActionResultV3.ActionResult result = (ActionResultV3.ActionResult)UpgradeManager.UpgradeCustomReturn(resultBeforeUpgrade);
         string shouldReturn = _actionResultVersionSpecific + "Pediatric tests added V3";
-        Assert.IsInstanceOfType(result, typeof(ActionResultSF));
+        Assert.IsInstanceOfType(result, typeof(ActionResultBase));
         Assert.IsInstanceOfType(result, typeof(ActionResultV3.ActionResult));
         Assert.IsTrue(result.ToString().Contains(shouldReturn));
 
@@ -91,7 +91,7 @@ async Task SetupAsync()
         var context = TestHelper.GetContext();
         object result = await _facade.ExecuteScript(id, context, nameof(IExecuteAsync.ExecuteAsync));
         string shouldReturn = _actionResultVersionSpecific + "Polio Vaccine added";
-        Assert.IsInstanceOfType(result, typeof(ActionResultSF));
+        Assert.IsInstanceOfType(result, typeof(ActionResultBase));
         Assert.IsInstanceOfType(result, typeof(ActionResultV3.ActionResult));
         Assert.IsTrue(result.ToString()!.Contains(shouldReturn));
 

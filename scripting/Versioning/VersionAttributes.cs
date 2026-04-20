@@ -76,21 +76,14 @@ public enum IGeneratorScriptReturnType
 }
 
 [AttributeUsage(AttributeTargets.Class)]
-public class MetaDataActionResult : Attribute
+public class MetaDataCustomReturn : Attribute
 {
     public int Version { get; }
-    public TypeInfo Type { get; }
 
-    public MetaDataActionResult(int version)
+    public MetaDataCustomReturn(int version)
     {
         Version = version;
-        Type = TypeInfo.DefaultVersioned;
-    }
 
-    public MetaDataActionResult(int version, TypeInfo type)
-    {
-        Version = version;
-        Type = type;
     }
 
 }

@@ -41,7 +41,7 @@ namespace GeneratorScriptsGenericSimple
     where TContext : IGeneratorContext_V2.IGeneratorContext
     {
 
-        Task<ActionResultSF> ExecuteAsync(TContext context)
+        Task<ActionResultBase> ExecuteAsync(TContext context)
         {
             throw new MethodNotImplementedException(message: nameof(ExecuteAsync) + " was not implemented.");
         }
@@ -57,7 +57,7 @@ namespace GeneratorScriptsGeneric
     public interface IActionScript<TContext, TActionResult> :
      IScriptMethodsAction
         where TContext : IContext    //changed from IGeneratorContext
-        where TActionResult : ActionResultSF
+        where TActionResult : ActionResultBase
     {
         Task<TActionResult> ExecuteAsync(TContext context)
         {

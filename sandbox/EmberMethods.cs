@@ -13,6 +13,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore;
 using Sandbox;
 using ContextBases;
+using System.Runtime.CompilerServices;
 
 public class EmberMethods
 {
@@ -119,73 +120,6 @@ public class EmberMethods
             catch { continue; }
         }
         return returnedDict;
-    }
-
-
-    public static object UpgradeObject(object resultValue)
-    {
-        Serilog.Log.Verbose("Entered {MethodName} in {ClassName}.", nameof(UpgradeObject), nameof(EmberMethods));
-        if (resultValue is ActionResultSF)
-        {
-            return UpgradeActionResult(resultValue);
-        }
-        // else if(){
-        // return UpgradeOtherType();
-        // }
-        else
-        {
-            throw new Exception("Result was not part of a predefined type.");
-        }
-    }
-    public static ActionResultSF UpgradeActionResult(object resultValue)   //todo change to base class return and cast in tests and so on
-    {
-        Serilog.Log.Verbose("Entered {MethodName} in {ClassName}.", nameof(UpgradeActionResult), nameof(EmberMethods));
-
-        ActionResultSF currentActionResult = (ActionResultSF)resultValue;
-
-        TypeInfo typeInfo = currentActionResult.GetType().GetTypeInfo();
-        var attrs = typeInfo.GetCustomAttributes();
-        var metaDataAttribute = typeInfo.GetCustomAttribute<MetaDataActionResult>();
-
-        if (metaDataAttribute == null)
-        {
-            throw new Exception(message: "MetadataAttribute was null why i cant tell you.");
-        }
-
-        int metaDatatVersionAtt = metaDataAttribute.Version;
-
-        int iterations = 0;
-        var dict = ActionResultVersionScanner.GetClassDictionary();
-        int maxIterations = dict.Keys.Count() + 1;
-
-        Console.WriteLine("max iterations: " + maxIterations);
-
-        Type maxVersionType = dict[dict.Keys.Max()];
-
-        while (currentActionResult.GetType() != maxVersionType && iterations <= maxIterations)
-        {
-            metaDatatVersionAtt++;
-            var nextVersionType = dict[metaDatatVersionAtt];
-
-            var uninitializedNextVersion =
-            (ActionResultSF)System.Runtime.CompilerServices.RuntimeHelpers.GetUninitializedObject(nextVersionType);
-
-            try
-            {
-                currentActionResult = (ActionResultSF)uninitializedNextVersion.Upgrade(currentActionResult);
-            }
-            catch (TargetInvocationException ex)
-            {
-                throw new Exception($"Failed to upgrade {maxVersionType.Name} to {nextVersionType.Name}.", ex.InnerException);
-            }
-
-            if (iterations > maxIterations)
-            {
-                throw new Exception("Somethign went wrong trying to upgrade the ActionResult");
-            }
-            iterations++;
-        }
-        return currentActionResult;
     }
 
     public static List<MetadataReference> GetReferences()

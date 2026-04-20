@@ -25,10 +25,10 @@ internal class EmberInternalFacade
     }
     private object CheckUpgradeActionResult(object result)
     {
-        if (result is UpgradeableReturnValue upgradeableReturnValue)
+        if (result is IUpgradeableReturnValue upgradeableReturnValue)
         {
             // return upgradeableReturnValue.Upgrade(result);
-            return EmberMethods.UpgradeObject(result);
+            return UpgradeManager.UpgradeCustomReturn(result);
         }
         return result;
         // if (result is ActionResultSF)

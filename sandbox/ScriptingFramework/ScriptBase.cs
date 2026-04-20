@@ -18,7 +18,7 @@ public interface IEvaluateAsync : IScriptMethod
 
 public interface IExecuteAsync : IScriptMethod
 {
-    Task<ActionResultSF> ExecuteAsync(IContext context)
+    Task<ActionResultBase> ExecuteAsync(IContext context)
     {
         throw new MethodNotImplementedException(message: "Method: " + nameof(ExecuteAsync) + " was not implemented.");
     }
@@ -26,7 +26,7 @@ public interface IExecuteAsync : IScriptMethod
 
 public interface IExecute1 : IScriptMethod
 {
-    Task<ActionResultSF> Execute1(IContext context)    //type of construcotr changes per version
+    Task<ActionResultBase> Execute1(IContext context)    //type of construcotr changes per version
     {
         throw new MethodNotImplementedException(message: "Method: " + nameof(Execute1) + " was not implemented.");
     }
@@ -34,7 +34,7 @@ public interface IExecute1 : IScriptMethod
 
 public interface IExecute2 : IScriptMethod
 {
-    Task<ActionResultSF> Execute2(IContext context)
+    Task<ActionResultBase> Execute2(IContext context)
     {
         throw new MethodNotImplementedException(message: "Method: " + nameof(Execute2) + " was not implemented.");
     }
