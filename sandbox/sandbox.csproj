@@ -69,13 +69,13 @@
     </ItemGroup>
 
     <ItemGroup>
-        <None Update="src\Scripts\**\*.cs">
+        <None Update="Scripts\**\*.cs">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
     </ItemGroup>
 
     <ItemGroup>
-        <EmbeddedResource Include="src\Scripts\**\*.cs" />
+        <EmbeddedResource Include="Scripts\**\*.cs" />
     </ItemGroup>
 
 

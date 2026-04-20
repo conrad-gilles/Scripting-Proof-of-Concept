@@ -1,4 +1,5 @@
 ask claude if Downgradeable really should be in sandbox?
+ask claude about upgradeactionresult in EmberMethods
 extract the monaco error mapping maybe to the BlazorUI
 scriptcomp line 475 fix
 make sure client cant define undefined class

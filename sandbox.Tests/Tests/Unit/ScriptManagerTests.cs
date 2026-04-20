@@ -163,26 +163,20 @@ public class ScriptManagerFacadeTests
     [TestMethod]
     public async Task ListScriptsTestWithFilter()
     {
-        string scriptFolderPathFull = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "..",
-                "sandbox", "src", "Scripts"));
-        string scriptFolderPathAction = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "..",
-                "sandbox", "src", "Scripts", "ActionScripts"));
-        string scriptFolderPathCondition = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "..",
-        "sandbox", "src", "Scripts", "ConditionScripts"));
         // await facade!.EnsureDeletedCreated();
         await _scriptManager!.DeleteAllData();
         // await _em!.CompileAllScriptsInFolderAndSaveToDB(scriptFolderPath, "Gilles", EmberMethods.GetEmberApiVersion());
 
         try
         {
-            await _em!.CompileAllScriptsInFolderAndSaveToDB(scriptFolderPathAction, "Gilles", EmberMethods.GetEmberApiVersion());
+            await _em!.CompileAllScriptsInFolderAndSaveToDB("Gilles", EmberMethods.GetEmberApiVersion());
         }
-        catch (System.Exception) { }
+        catch (System.Exception ex) { Console.WriteLine(ex.Message); }
         try
         {
-            await _em!.CompileAllScriptsInFolderAndSaveToDB(scriptFolderPathCondition, "Gilles", EmberMethods.GetEmberApiVersion());
+            await _em!.CompileAllScriptsInFolderAndSaveToDB("Gilles", EmberMethods.GetEmberApiVersion());
         }
-        catch (System.Exception) { }
+        catch (System.Exception ex) { Console.WriteLine(ex.Message); }
 
         List<CustomerScript> scripts = await _scriptManager!.ListScripts(includeCaches: true);
         Assert.IsNotNull(scripts);

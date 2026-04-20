@@ -25,63 +25,63 @@ public class TestHelper
                    Path.GetFullPath(Path.Combine(
                        AppDomain.CurrentDomain.BaseDirectory,
                        "..", "..", "..", "..",
-                       "sandbox", "src", "Scripts", "ActionScripts", "AddPediatricTestsV1.cs"
+                       "sandbox", "Scripts", "ActionScripts", "AddPediatricTestsV1.cs"
                    ))
                );
         sourceCodeActionV2 = EmberMethods.CreateStringFromCsFile(
         Path.GetFullPath(Path.Combine(
             AppDomain.CurrentDomain.BaseDirectory,
             "..", "..", "..", "..",
-            "sandbox", "src", "Scripts", "ActionScripts", "AddPediatricTestsV2.cs"
+            "sandbox", "Scripts", "ActionScripts", "AddPediatricTestsV2.cs"
         ))
     );
         sourceCodeActionV3 = EmberMethods.CreateStringFromCsFile(
        Path.GetFullPath(Path.Combine(
            AppDomain.CurrentDomain.BaseDirectory,
            "..", "..", "..", "..",
-           "sandbox", "src", "Scripts", "ActionScripts", "AddPediatricTestsV3.cs"
+           "sandbox", "Scripts", "ActionScripts", "AddPediatricTestsV3.cs"
        ))
    );
         sourceCodeVaccineAction = EmberMethods.CreateStringFromCsFile(
           Path.GetFullPath(Path.Combine(
           AppDomain.CurrentDomain.BaseDirectory,
           "..", "..", "..", "..",
-          "sandbox", "src", "Scripts", "ActionScripts", "VaccineScript.cs"
+          "sandbox", "Scripts", "ActionScripts", "VaccineScript.cs"
       ))
       );
         sourceCodePedia = EmberMethods.CreateStringFromCsFile(
        Path.GetFullPath(Path.Combine(
            AppDomain.CurrentDomain.BaseDirectory,
                    "..", "..", "..", "..",
-                   "sandbox", "src", "Scripts", "ConditionScripts", "PediatricCondition.cs"
+                   "sandbox", "Scripts", "ConditionScripts", "PediatricCondition.cs"
                ))
            );
         sourceCodeWhileTrue = EmberMethods.CreateStringFromCsFile(
       Path.GetFullPath(Path.Combine(
       AppDomain.CurrentDomain.BaseDirectory,
       "..", "..", "..", "..",
-      "sandbox", "src", "Scripts", "FaultyScripts", "WhileTrueScript.cs"
+      "sandbox", "Scripts", "FaultyScripts", "WhileTrueScript.cs"
   ))
   );
         sourceCodeIllegalUsings = EmberMethods.CreateStringFromCsFile(
             Path.GetFullPath(Path.Combine(
             AppDomain.CurrentDomain.BaseDirectory,
             "..", "..", "..", "..",
-            "sandbox", "src", "Scripts", "FaultyScripts", "IllegalUsingScript.cs"
+            "sandbox", "Scripts", "FaultyScripts", "IllegalUsingScript.cs"
         ))
         );
         sourceCodeMissingUsing = EmberMethods.CreateStringFromCsFile(
             Path.GetFullPath(Path.Combine(
             AppDomain.CurrentDomain.BaseDirectory,
             "..", "..", "..", "..",
-            "sandbox", "src", "Scripts", "FaultyScripts", "MissingUsingScript.cs"
+            "sandbox", "Scripts", "FaultyScripts", "MissingUsingScript.cs"
         ))
         );
         sourceCodePreventUsage = EmberMethods.CreateStringFromCsFile(
             Path.GetFullPath(Path.Combine(
             AppDomain.CurrentDomain.BaseDirectory,
             "..", "..", "..", "..",
-            "sandbox", "src", "Scripts", "FaultyScripts", "PreventUsageScript.cs"
+            "sandbox", "Scripts", "FaultyScripts", "PreventUsageScript.cs"
         ))
         );
 
@@ -89,56 +89,56 @@ public class TestHelper
             Path.GetFullPath(Path.Combine(
             AppDomain.CurrentDomain.BaseDirectory,
             "..", "..", "..", "..",
-            "sandbox", "src", "Scripts", "FaultyScripts", "WhileTrueUnchecked.cs"
+            "sandbox", "Scripts", "FaultyScripts", "WhileTrueUnchecked.cs"
         ))
         );
         sourceCodeMultipleClasses = EmberMethods.CreateStringFromCsFile(
                     Path.GetFullPath(Path.Combine(
                     AppDomain.CurrentDomain.BaseDirectory,
                     "..", "..", "..", "..",
-                    "sandbox", "src", "Scripts", "FaultyScripts", "MultipleClassesScript.cs"
+                    "sandbox", "Scripts", "FaultyScripts", "MultipleClassesScript.cs"
                 ))
                 );
         string sourceCodeExcecutionTimeTest = EmberMethods.CreateStringFromCsFile(
                 Path.GetFullPath(Path.Combine(
                 AppDomain.CurrentDomain.BaseDirectory,
                 "..", "..", "..", "..",
-                "sandbox", "src", "Scripts", "ActionScripts", "ExecutionTimeTest.cs"
+                "sandbox", "Scripts", "ActionScripts", "ExecutionTimeTest.cs"
             ))
             );
         string sourceCodeMultiMethodScripts = EmberMethods.CreateStringFromCsFile(
             Path.GetFullPath(Path.Combine(
             AppDomain.CurrentDomain.BaseDirectory,
             "..", "..", "..", "..",
-            "sandbox", "src", "Scripts", "ActionScripts", "MultipleMethodsScript.cs"
+            "sandbox", "Scripts", "ActionScripts", "MultipleMethodsScript.cs"
         ))
         );
         string undefinedMethodsScriptPublic = EmberMethods.CreateStringFromCsFile(
             Path.GetFullPath(Path.Combine(
             AppDomain.CurrentDomain.BaseDirectory,
             "..", "..", "..", "..",
-            "sandbox", "src", "Scripts", "FaultyScripts", "UndefinedMethods", "PublicScript.cs"
+            "sandbox", "Scripts", "FaultyScripts", "UndefinedMethods", "PublicScript.cs"
         ))
         );
         string undefinedMethodsScriptPrivate = EmberMethods.CreateStringFromCsFile(
             Path.GetFullPath(Path.Combine(
             AppDomain.CurrentDomain.BaseDirectory,
             "..", "..", "..", "..",
-            "sandbox", "src", "Scripts", "FaultyScripts", "UndefinedMethods", "PrivateScript.cs"
+            "sandbox", "Scripts", "FaultyScripts", "UndefinedMethods", "PrivateScript.cs"
         ))
         );
         string undefinedMethodsScriptInternal = EmberMethods.CreateStringFromCsFile(
             Path.GetFullPath(Path.Combine(
             AppDomain.CurrentDomain.BaseDirectory,
             "..", "..", "..", "..",
-            "sandbox", "src", "Scripts", "FaultyScripts", "UndefinedMethods", "InternalScript.cs"
+            "sandbox", "Scripts", "FaultyScripts", "UndefinedMethods", "InternalScript.cs"
         ))
         );
         string undefinedMethodsStatic = EmberMethods.CreateStringFromCsFile(
             Path.GetFullPath(Path.Combine(
             AppDomain.CurrentDomain.BaseDirectory,
             "..", "..", "..", "..",
-            "sandbox", "src", "Scripts", "FaultyScripts", "UndefinedMethods", "StaticScript.cs"
+            "sandbox", "Scripts", "FaultyScripts", "UndefinedMethods", "StaticScript.cs"
         ))
         );
         sourceCodes = [];
