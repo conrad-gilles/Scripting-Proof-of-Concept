@@ -47,11 +47,3 @@ public interface IExecute3 : IScriptMethod
     }
 }
 
-// public static class DefaultMethods
-// {
-//     public static readonly string Condition = nameof(IExecuteAsync.ExecuteAsync);
-//     public static readonly string Action = nameof(IEvaluateAsync.EvaluateAsync);
-
-// }
-// public static readonly String DefaultMethod = "Default";
-

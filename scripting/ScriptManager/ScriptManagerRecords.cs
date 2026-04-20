@@ -1,9 +1,9 @@
 using Microsoft.CodeAnalysis;
 
-namespace Ember.Scripting.ScriptManager;
+namespace Ember.Scripting.Manager;
 
 public record DuplicateRecord
 {
-    public required List<Guid> scriptGUIDs { get; init; }
-    public required Dictionary<Guid, int> cacheGUIDs { get; init; }
+    public required List<Guid> ScriptGUIDs { get; init; }
+    public required Dictionary<Guid, int> CacheGUIDs { get; init; }
 }

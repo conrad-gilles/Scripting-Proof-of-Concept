@@ -1,4 +1,4 @@
-namespace Ember.Scripting.ScriptManager;
+namespace Ember.Scripting.Manager;
 
 public interface IScriptManager
 {
@@ -9,9 +9,9 @@ public interface IScriptManager
     /// <param name="context"></param>
     /// <param name="currentApiVersion"></param>
     /// <returns></returns>
-    Task<object> ExecuteScriptById(Guid scriptId, Context context, string methodName, int? currentApiVersion = null);
+    Task<object> ExecuteScript(Guid scriptId, Context context, string methodName, int? currentApiVersion = null);
 
-    Task<object> ExecuteScriptByNameAndType<ScriptType>(string name, Context context, string methodName, int? currentApiVersion = null) where ScriptType : IScriptType;
+    Task<object> ExecuteScript<ScriptType>(string name, Context context, string methodName, int? currentApiVersion = null) where ScriptType : IScriptType;
 }
 
 

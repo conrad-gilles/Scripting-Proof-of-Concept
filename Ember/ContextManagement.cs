@@ -8,8 +8,8 @@ namespace Ember.Simulation
 {
     public class ContextManagement
     {
-        private readonly IScriptManagerDeleteAfter _scriptManager;
-        public ContextManagement(IScriptManagerDeleteAfter scriptManager)
+        private readonly IScriptManagerExtended _scriptManager;
+        public ContextManagement(IScriptManagerExtended scriptManager)
         {
             _scriptManager = scriptManager;
         }

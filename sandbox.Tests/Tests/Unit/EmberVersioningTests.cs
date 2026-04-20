@@ -15,7 +15,7 @@ public class EmberVersioningTests
 {
 
 
-    private IScriptManagerDeleteAfter? _facade;
+    private IScriptManagerExtended? _facade;
     private EmberInternalFacade? _eif;
     private EmberMethods? _em;
     // private DataV2.DataV2? _data;
@@ -72,7 +72,7 @@ public class EmberVersioningTests
     {
 
     }
-    public async Task<List<Guid>> SaturateDBAsync(IScriptManagerDeleteAfter facade, EmberMethods rm)
+    public async Task<List<Guid>> SaturateDBAsync(IScriptManagerExtended facade, EmberMethods rm)
     {
         List<Guid> ids = [];
         foreach (var item in _sourceCodes!)
@@ -82,7 +82,7 @@ public class EmberVersioningTests
         }
         return ids;
     }
-    public async Task ExecuteEachScript(IScriptManagerDeleteAfter facade, EmberMethods em)
+    public async Task ExecuteEachScript(IScriptManagerExtended facade, EmberMethods em)
     {
         foreach (var id in await SaturateDBAsync(facade, em))
         {
@@ -167,7 +167,7 @@ public class EmberVersioningTests
         Guid id = (await _facade!.CreateScript(_sourceCodeActionV1!)).Id;
 
         _facade = EmberMethods.GetNewScriptManagerInstance(2);
-        await _facade.UpdateScriptSC(id, _sourceCodeActionV2!);
+        await _facade.UpdateScript(id, _sourceCodeActionV2!);
         await _facade.CompileScript(id);
 
         string sourceCodeAV = (await _facade.GetCompiledCache(id)).OldSourceCode!;
@@ -195,7 +195,12 @@ public class EmberVersioningTests
             {4, typeof(GeneratorScriptsV4.IActionScript)},
         };
 
-        Dictionary<int, Type> retrievedDict = ScriptVersionScanner.GetClassDictionary();
+        var records = ScriptVersionScanner.GetClassRecords();
+        Dictionary<int, Type> retrievedDict = [];
+        foreach (var record in records)
+        {
+            retrievedDict.Add(record.Version, record.RetrievedType);
+        }
         PrintDictToConsole(retrievedDict);
 
 
@@ -301,11 +306,11 @@ public class EmberVersioningTests
         await Assert.ThrowsExceptionAsync<Exception>(async () =>
         {
             ctx = TestHelper.GetContext();
-            var result1 = await _facade.ExecuteScriptById(id, ctx, "Default");
+            var result1 = await _facade.ExecuteScript(id, ctx, "Default");
         });
 
         ctx = TestHelper.GetContext();
-        var result1 = await _facade.ExecuteScriptById(id, ctx, "Default");
+        var result1 = await _facade.ExecuteScript(id, ctx, "Default");
         var result = EmberMethods.UpgradeActionResult(result1);
 
         string shouldReturn = _actionResultVersionSpecific + "Pediatric tests added";

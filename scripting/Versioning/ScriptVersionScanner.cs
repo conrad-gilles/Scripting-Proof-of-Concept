@@ -1,28 +1,31 @@
 using System.Net.Http.Headers;
 using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.CSharp;
+
 
 namespace Ember.Scripting.Versioning;
 
 public static class ScriptVersionScanner
 {
-    public static Dictionary<int, Type> GetClassDictionary()
-    {
-        Type baseType = typeof(MetaDataIGeneratorScript);
-        return GetBaseTypeDictionary(baseType).Item1;
-    }
+    // public static Dictionary<int, Type> GetClassDictionary()
+    // {
+    //     Type baseType = typeof(MetaDataIGeneratorScript);
+    //     return GetBaseTypeDictionary(baseType).Item1;
+    // }
     public static List<ScriptMetaDataRecord> GetClassRecords()
     {
         Type baseType = typeof(MetaDataIGeneratorScript);
-        return GetBaseTypeDictionary(baseType).Item2;
+        return GetBaseTypeDictionary(baseType);
     }
-    private static (Dictionary<int, Type>, List<ScriptMetaDataRecord>) GetBaseTypeDictionary(Type baseType)
+    private static List<ScriptMetaDataRecord> GetBaseTypeDictionary(Type baseType)
     {
         Dictionary<int, Type> contextVersionMap = new();
         List<ScriptMetaDataRecord> records = [];
 
         //The following six lines were ai generated
-        var subClasses = AppDomain.CurrentDomain.GetAssemblies()
+        List<Type> subClasses = AppDomain.CurrentDomain.GetAssemblies()
             // .SelectMany(assembly => assembly.GetTypes())
             .SelectMany(assembly => VersionScannerHelper.GetLoadableTypes(assembly))
             .Where(t => t.IsInterface && t.GetCustomAttribute<MetaDataIGeneratorScript>() != null)
@@ -60,6 +63,38 @@ public static class ScriptVersionScanner
             Type contextType = metaDataAttribute.ContextVersion;
             Type arType = metaDataAttribute.ActionResultVersion;
 
+            // Extract method information using standard Reflection
+            List<MethodInfo> methodInfos = currentType.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly)
+                .Where(m => !m.IsSpecialName)
+                .ToList();
+
+            List<MethodRecord> methodRecords = new List<MethodRecord>();
+
+            foreach (var m in methodInfos)
+            {
+                // Note: For explicit interface implementations, m.Name contains dots (e.g., "IExecuteAsync.ExecuteAsync")
+                // We split by '.' and take the last part so it cleanly matches Roslyn's parsed method name.
+                string methodName = m.Name.Split('.').Last();
+                string returnType = m.ReturnType.Name;
+                ParameterInfo[] parameters = m.GetParameters();
+
+                List<ParameterRecord> resultParams = new List<ParameterRecord>();
+                foreach (ParameterInfo param in parameters)
+                {
+                    try
+                    {
+                        string paramName = param.Name!;
+                        string paramType = param.ParameterType.Name;
+                        resultParams.Add(new ParameterRecord { Name = paramName, ReturnType = paramType });
+                    }
+                    catch
+                    {
+                        continue;
+                    }
+                }
+                methodRecords.Add(new MethodRecord { Name = methodName, ReturnType = returnType, Parameters = resultParams });
+            }
+
             if (contextVersionMap.Values.Contains(currentType))
             {
                 throw new TypeMoreThanOnceInAssemblySVSException("Type was more than once in the assembly probably with more than 1 Version property");
@@ -74,24 +109,28 @@ public static class ScriptVersionScanner
             ScriptMetaDataRecord temp = new ScriptMetaDataRecord
             {
                 Version = version,
+                RetrievedType = currentType,
                 ScriptType = currentType.FullName!,
                 ContextType = contextType.FullName!,
-                ActionResultType = arType.FullName!
+                ActionResultType = arType.FullName!,
+                Methods = methodRecords
             };
             records.Add(temp);
 
         }
 
-        return (contextVersionMap, records);
+        return records;
     }
 }
 
 public record ScriptMetaDataRecord
 {
     public required int Version { get; init; }
+    public required Type RetrievedType { get; init; }
     public required string ScriptType { get; init; }
-    public required string ContextType { get; init; }
-    public required string ActionResultType { get; init; }
+    public required string ContextType { get; set; }
+    public required string ActionResultType { get; set; }
+    public required List<MethodRecord> Methods { get; init; }
 
     public override string ToString()
     {
@@ -116,3 +155,4 @@ public static class VersionScannerHelper
         }
     }
 }
+

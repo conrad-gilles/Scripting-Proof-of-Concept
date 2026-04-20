@@ -1,4 +1,4 @@
-namespace Ember.Scripting.ScriptManager;
+namespace Ember.Scripting.Manager;
 
 public abstract class ScriptManagerExceptions : ScriptingFrameworkException
 {

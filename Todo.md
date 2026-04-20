@@ -1,3 +1,8 @@
+ask claude if Downgradeable really should be in sandbox?
+extract the monaco error mapping maybe to the BlazorUI
+scriptcomp line 475 fix
+make sure client cant define undefined class
+if not using the injected recentusing remove them
 - move everything that generator and so on out of scripting class lib
 - fix ActionResultVersionScanner to make create a generic version and so on also change the attribute so it takes maybe a base Type loikke ActionResultSf
 - same as above with ContextVersionScanner

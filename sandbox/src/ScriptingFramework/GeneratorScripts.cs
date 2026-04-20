@@ -34,11 +34,6 @@ namespace GeneratorScriptsGenericSimple
         {
             throw new MethodNotImplementedException(message: nameof(EvaluateAsync) + " was not implemented.");
         }
-        // Task<bool> IGeneratorConditionScript.EvaluateAsync(IGeneratorReadOnlyContext context)
-        Task<bool> IEvaluateAsync.EvaluateAsync(IContext context)
-        {
-            return EvaluateAsync((TContext)context);
-        }
     }
     [MetaDataIGeneratorScript(version: 1, returnType: IGeneratorScriptReturnType.Action, type: IGeneratorScriptType.GenericSimple)]
     public interface IActionScript<TContext> :
@@ -49,13 +44,6 @@ namespace GeneratorScriptsGenericSimple
         Task<ActionResultSF> ExecuteAsync(TContext context)
         {
             throw new MethodNotImplementedException(message: nameof(ExecuteAsync) + " was not implemented.");
-        }
-
-        //explicit default implementation for the base interface
-        // Task<ActionResultBaseClass> IGeneratorActionScript.ExecuteAsync(IGeneratorContext context)
-        Task<ActionResultSF> IExecuteAsync.ExecuteAsync(IContext context)
-        {
-            return ExecuteAsync((TContext)context);
         }
     }
 }
@@ -75,12 +63,6 @@ namespace GeneratorScriptsGeneric
         {
             throw new MethodNotImplementedException(message: nameof(ExecuteAsync) + " was not implemented.");
         }
-
-        //explicit default implementation for the base interface
-        async Task<ActionResultSF> IExecuteAsync.ExecuteAsync(IContext context)
-        {
-            return await ExecuteAsync((TContext)context);
-        }
     }
 }
 
@@ -98,11 +80,6 @@ namespace GeneratorScriptsV2
         Task<ActionResultV2.ActionResult> ExecuteAsync(IGeneratorContext_V3.IGeneratorContext context)
         {
             throw new MethodNotImplementedException(message: nameof(ExecuteAsync) + " was not implemented.");
-        }
-
-        Task<ActionResultSF> IExecuteAsync.ExecuteAsync(IContext context)     //if bugs maybe put as async and await ExecuteAsync
-        {
-            return ExecuteAsync(context);
         }
     }
 }
@@ -129,23 +106,6 @@ namespace GeneratorScriptsV3
         {
             throw new MethodNotImplementedException(message: nameof(Execute3) + " was not implemented.");
         }
-
-        Task<ActionResultSF> IExecuteAsync.ExecuteAsync(IContext context)
-        {
-            return ExecuteAsync(context);
-        }
-        Task<ActionResultSF> IExecute1.Execute1(IContext context)
-        {
-            return Execute1(context);
-        }
-        Task<ActionResultSF> IExecute2.Execute2(IContext context)
-        {
-            return Execute2(context);
-        }
-        Task<string> IExecute3.Execute3(IContext context)
-        {
-            return Execute3(context);
-        }
     }
 }
 namespace GeneratorScriptsV4
@@ -154,7 +114,10 @@ namespace GeneratorScriptsV4
     public interface IActionScript :
      IScriptMethodsAction
     {
-        Task<ActionResultV3.ActionResult> ExecuteAsync(IGeneratorContextNoInheritance_V5.IGeneratorContext context);
+        Task<ActionResultV3.ActionResult> ExecuteAsync(IGeneratorContextNoInheritance_V5.IGeneratorContext context)
+        {
+            throw new MethodNotImplementedException(message: nameof(ExecuteAsync) + " was not implemented.");
+        }
         Task<ActionResultV3.ActionResult> Execute1(IGeneratorContextNoInheritance_V5.IGeneratorContext context)
         {
             throw new MethodNotImplementedException(message: nameof(Execute1) + " was not implemented.");
@@ -167,23 +130,6 @@ namespace GeneratorScriptsV4
         Task<string> Execute3(IGeneratorContextNoInheritance_V5.IGeneratorContext context)
         {
             throw new MethodNotImplementedException(message: nameof(Execute3) + " was not implemented.");
-        }
-
-        Task<ActionResultSF> IExecuteAsync.ExecuteAsync(IContext context)     //if bugs maybe put as async and await ExecuteAsync
-        {
-            return ExecuteAsync(context);
-        }
-        Task<ActionResultSF> IExecute1.Execute1(IContext context)     //if bugs maybe put as async and await ExecuteAsync
-        {
-            return Execute1(context);
-        }
-        Task<ActionResultSF> IExecute2.Execute2(IContext context)     //if bugs maybe put as async and await ExecuteAsync
-        {
-            return Execute2(context);
-        }
-        Task<string> IExecute3.Execute3(IContext context)     //if bugs maybe put as async and await ExecuteAsync
-        {
-            return Execute3(context);
         }
     }
 }

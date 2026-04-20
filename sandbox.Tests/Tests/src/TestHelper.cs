@@ -192,9 +192,9 @@ public class TestHelper
             vaccine = vaccine
         };
     }
-    public static IScriptManagerDeleteAfter InitScriptManager()
+    public static IScriptManagerExtended InitScriptManager()
     {
-        IScriptManagerDeleteAfter scriptManager;
+        IScriptManagerExtended scriptManager;
         ServiceCollection services = new ServiceCollection();
 
         LoggerForScripting logger = new LoggerForScripting();
@@ -211,7 +211,7 @@ public class TestHelper
 
         var provider = services.BuildServiceProvider();
 
-        return scriptManager = provider.GetRequiredService<IScriptManagerDeleteAfter>();
+        return scriptManager = provider.GetRequiredService<IScriptManagerExtended>();
     }
     public static RecentContext GetContext()
     {

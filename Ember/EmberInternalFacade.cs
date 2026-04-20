@@ -9,8 +9,8 @@ namespace Ember.Simulation;
 
 internal class EmberInternalFacade
 {
-    private IScriptManagerDeleteAfter _scriptManager;
-    public EmberInternalFacade(IScriptManagerDeleteAfter scriptManager)
+    private IScriptManagerExtended _scriptManager;
+    public EmberInternalFacade(IScriptManagerExtended scriptManager)
     {
         _scriptManager = scriptManager;
     }
@@ -20,8 +20,8 @@ internal class EmberInternalFacade
         var cf = new ContextManagement(_scriptManager);
         CustomerScript script = await _scriptManager.GetScript(id);
         // methodName = MethodNameFactory.GetOldMethodName(methodName, script.MinApiVersion, script.GetScriptType());
-        Context context = await cf.CreateByDowngrade(script.MinApiVersion, ctx);
-        return await _scriptManager.ExecuteScriptById(id, context, methodName: methodName);
+        Context context = await cf.CreateByDowngrade(script.ScriptApiVersion, ctx);
+        return await _scriptManager.ExecuteScript(id, context, methodName: methodName);
     }
     private object CheckUpgradeActionResult(object result)
     {
@@ -87,7 +87,7 @@ internal class ConditionScriptFacade : RecentIConditionScript
     private EmberInternalFacade _emberScriptManager;
     private string _scriptName;
 
-    public ConditionScriptFacade(IScriptManagerDeleteAfter scriptManager, string scriptName)
+    public ConditionScriptFacade(IScriptManagerExtended scriptManager, string scriptName)
     {
         _emberScriptManager = new EmberInternalFacade(scriptManager);
         _scriptName = scriptName;
@@ -102,10 +102,10 @@ internal class ConditionScriptFacade : RecentIConditionScript
 internal class ActionScriptFacade : RecentIActionScript
 {
     private EmberInternalFacade _emberScriptManager;
-    private IScriptManagerDeleteAfter _scriptManager;
+    private IScriptManagerExtended _scriptManager;
     private string _scriptName;
 
-    public ActionScriptFacade(IScriptManagerDeleteAfter scriptManager, string scriptName)
+    public ActionScriptFacade(IScriptManagerExtended scriptManager, string scriptName)
     {
         _scriptManager = scriptManager;
         _emberScriptManager = new EmberInternalFacade(scriptManager);
@@ -120,8 +120,8 @@ internal class ActionScriptFacade : RecentIActionScript
     public async Task<RecentActionResult> Execute1(RecentIContext context)
     {
         string methodName = nameof(IExecute1.Execute1);
-        CustomerScript script = await _scriptManager.GetScriptNT<IActionScript>(_scriptName);   // this is being called twice, also in ExecuteScript i can move it down but then i also need to move the old MethodName check down into ExecuteScript 
-        if (script.MinApiVersion == 10)
+        CustomerScript script = await _scriptManager.GetScript<IActionScript>(_scriptName);   // this is being called twice, also in ExecuteScript i can move it down but then i also need to move the old MethodName check down into ExecuteScript 
+        if (script.ScriptApiVersion == 10)
         {
             methodName = "ExecuteOldName1";
         }

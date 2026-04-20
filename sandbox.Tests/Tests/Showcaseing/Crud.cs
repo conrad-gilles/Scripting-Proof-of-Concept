@@ -12,7 +12,7 @@ using Sandbox;
 [TestClass]
 public class CrudDemos
 {
-    static IScriptManagerDeleteAfter ScriptManager = InitScriptManager();
+    static IScriptManagerExtended ScriptManager = InitScriptManager();
     static EmberInternalFacade InternalScriptManager = new EmberInternalFacade(ScriptManager);
     static EmberMethods em = new EmberMethods(ScriptManager);
 
@@ -28,9 +28,9 @@ public class CrudDemos
         await ScriptManager.DeleteAllData();
     }
 
-    public static IScriptManagerDeleteAfter InitScriptManager()
+    public static IScriptManagerExtended InitScriptManager()
     {
-        IScriptManagerDeleteAfter scriptManager;
+        IScriptManagerExtended scriptManager;
         ServiceCollection services = new ServiceCollection();
 
         LoggerForScripting logger = new LoggerForScripting();
@@ -46,7 +46,7 @@ public class CrudDemos
 
         var provider = services.BuildServiceProvider();
 
-        return scriptManager = provider.GetRequiredService<IScriptManagerDeleteAfter>();
+        return scriptManager = provider.GetRequiredService<IScriptManagerExtended>();
     }
     [TestMethod]
     public async Task Create()
@@ -61,7 +61,7 @@ public class CrudDemos
     public async Task Read()
     {
         await Create();
-        CustomerScript script = await ScriptManager.GetScriptNT<IActionScript>("AddPediatricTestsV2");  //
+        CustomerScript script = await ScriptManager.GetScript<IActionScript>("AddPediatricTestsV2");  //
         Console.WriteLine("Name: " + script.ScriptName + ", ScriptType: " + script.ScriptType);
     }
     [TestMethod]
@@ -69,14 +69,14 @@ public class CrudDemos
     {
         await Create();
         string newSourceCode = TestHelper.GetSC().sourceCodeActionV3;
-        await ScriptManager.UpdateScriptNT<IActionScript>("AddPediatricTestsV2", newSourceCode);
+        await ScriptManager.UpdateScript<IActionScript>("AddPediatricTestsV2", newSourceCode);
     }
 
     [TestMethod]
     public async Task Delete()
     {
         await Create();
-        await ScriptManager.DeleteScriptNT<IActionScript>("AddPediatricTestsV2");
+        await ScriptManager.DeleteScript<IActionScript>("AddPediatricTestsV2");
     }
     [TestMethod]
     public async Task Execute()

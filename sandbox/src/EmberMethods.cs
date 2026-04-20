@@ -16,9 +16,9 @@ using ContextBases;
 
 public class EmberMethods
 {
-    private readonly IScriptManagerDeleteAfter _facade;
+    private readonly IScriptManagerExtended _facade;
 
-    public EmberMethods(IScriptManagerDeleteAfter facade)
+    public EmberMethods(IScriptManagerExtended facade)
     {
         _facade = facade;
     }
@@ -33,9 +33,9 @@ public class EmberMethods
         return 5;
     }
 
-    public static IScriptManagerDeleteAfter GetNewScriptManagerInstance(int? apiVersion = null)
+    public static IScriptManagerExtended GetNewScriptManagerInstance(int? apiVersion = null)
     {
-        IScriptManagerDeleteAfter facade;
+        IScriptManagerExtended facade;
         ServiceCollection services2 = new ServiceCollection();
 
         LoggerForScripting logger = new LoggerForScripting();
@@ -52,7 +52,7 @@ public class EmberMethods
         services2.AddDbContextFactory<ScriptDbContext>();
         ScriptingServiceCollectionExtensions.AddEmberScripting(services2, EmberMethods.GetReferences(), EmberMethods.GetEmberApiVersion(testingDiffrentVersion: apiVersion), RecentTypeHelper.GetRecentTypes());
         var provider2 = services2.BuildServiceProvider();
-        return facade = provider2.GetRequiredService<IScriptManagerDeleteAfter>();
+        return facade = provider2.GetRequiredService<IScriptManagerExtended>();
     }
     public async Task<Dictionary<int, Guid>> ListAllCompiledFromDB()
     {
@@ -83,7 +83,7 @@ public class EmberMethods
         for (int i = 0; i < sourceCodes.Count; i++)
         {
             string str = (i + 1).ToString() + ". Name: " + sourceCodes[i].ScriptName + ", Created by: " + sourceCodes[i].CreatedBy
-            + ", Created at: " + sourceCodes[i].CreatedAt + ", MinApiVersion: " + sourceCodes[i].MinApiVersion + ", Modified at: " + sourceCodes[i].ModifiedAt
+            + ", Created at: " + sourceCodes[i].CreatedAt + ", MinApiVersion: " + sourceCodes[i].ScriptApiVersion + ", Modified at: " + sourceCodes[i].ModifiedAt
             + ", Compiled count [" + sourceCodes[i].CompiledCaches.Count() + "]";
             sourceDict.Add(i + 1, sourceCodes[i].Id);
             if (dontPrint == false) { Console.WriteLine(str); }

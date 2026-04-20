@@ -16,7 +16,7 @@ using Microsoft.EntityFrameworkCore.Query;
 [TestClass]
 public class MultiMethodScriptTests
 {
-    static IScriptManagerDeleteAfter ScriptManager = TestHelper.InitScriptManager();
+    static IScriptManagerExtended ScriptManager = TestHelper.InitScriptManager();
     static EmberInternalFacade InternalScriptManager = new EmberInternalFacade(ScriptManager);
     static EmberMethods em = new EmberMethods(ScriptManager);
 

@@ -137,7 +137,7 @@
 
 @code {
 
-    private IScriptManagerDeleteAfter ScriptManager => ScriptManagerAccessor.Current;
+    private IScriptManagerExtended ScriptManager => ScriptManagerAccessor.Current;
     private EmberInternalFacade EmberInternalFacade => EmberInternalFacadeAccessor.Current;
     private bool _isLoading = true;
     private Dictionary<int, List<CompiledScript>>? _apiVersionsData;

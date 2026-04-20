@@ -42,7 +42,7 @@ builder.Services.AddScoped<EmberInternalFacadeAccessor>(sp => new EmberInternalF
 // builder.Services.AddScoped<ISccriptManagerDeleteAfter, YourScriptManagerImplementation>();
 builder.Services.AddScoped<ScriptManagerAccessor>(sp => new ScriptManagerAccessor
 {
-    Current = sp.GetRequiredService<IScriptManagerDeleteAfter>()
+    Current = sp.GetRequiredService<IScriptManagerExtended>()
 });
 var app = builder.Build();
 

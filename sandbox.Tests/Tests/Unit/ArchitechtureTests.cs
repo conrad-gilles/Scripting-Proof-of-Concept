@@ -15,7 +15,7 @@ using Ember.Scripting.Compilation;
 [TestClass]
 public class ArchitechtureTests
 {
-    static IScriptManagerDeleteAfter ScriptManager = TestHelper.InitScriptManager();
+    static IScriptManagerExtended ScriptManager = TestHelper.InitScriptManager();
     static EmberInternalFacade InternalScriptManager = new EmberInternalFacade(ScriptManager);
     static EmberMethods em = new EmberMethods(ScriptManager);
 

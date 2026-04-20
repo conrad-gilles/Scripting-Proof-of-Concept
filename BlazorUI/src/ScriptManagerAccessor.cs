@@ -5,7 +5,7 @@ namespace BlazorUI.Services
 {
     public class ScriptManagerAccessor
     {
-        public IScriptManagerDeleteAfter Current { get; set; } = default!;
+        public IScriptManagerExtended Current { get; set; } = default!;
     }
     public class EmberInternalFacadeAccessor
     {

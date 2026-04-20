@@ -8,57 +8,48 @@ using Ember.Scripting.Compilation;
 
 namespace Ember.Scripting.Execution;
 
-internal class ScriptExecutor
+internal class ScriptExecutor(ILogger<ScriptExecutor> logger)
 {
-    private int _scriptTimeout = ((int)ExecutionTimeGroups.Medium);   // ms of how much time scripts get to execute
-    private readonly ILogger<ScriptExecutor> _logger;
-    public ScriptExecutor(ILogger<ScriptExecutor> logger)
-    {
-        _logger = logger;
-    }
+    private readonly int _scriptTimeout = ((int)ExecutionTimeGroups.Medium);   // ms of how much time scripts get to execute
+    private readonly int maxScriptLenght = 5 * 1024 * 1024;     // 5 mb maximum size
 
     public async Task<T> RunScriptExecution<T>(byte[] compiledScript, Context genContext, int? executionTime, string methodName)
     {
-        _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(RunScriptExecution), nameof(ScriptExecutor));
+        logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(RunScriptExecution), nameof(ScriptExecutor));
+        int scriptTimeout = _scriptTimeout;
 
-        if (compiledScript.Length > 5 * 1024 * 1024) // 5 mb maximum size
+        if (compiledScript.Length > maxScriptLenght)
         {
             throw new CompiledScriptWasTooLargeException(nameof(RunScriptExecution) + " failed in if (compiledScript.Length > 5 * 1024 * 1024)");
         }
         if (executionTime != null)
         {
-            _scriptTimeout = (int)executionTime;
-            Console.WriteLine("excecutionTime was null set to: " + _scriptTimeout);
+            scriptTimeout = executionTime.Value;
+            logger.LogTrace("excecutionTime was null set to: " + scriptTimeout);
         }
 
         Assembly assembly = Assembly.Load(compiledScript);
 
-        Type[] unfilteredTypeArray = assembly.GetTypes();   //even though there can be only one class defined in the script file, the compiler adds classes making the array.lenght over 1 which is unsafe so it is better to filer based on our predefined classes for scripts
-        List<Type> typeArrayList = [];
-        for (int i = 0; i < unfilteredTypeArray.Length; i++)
+        Type type;
+        try
         {
-            if (typeof(IScriptMethod).IsAssignableFrom(unfilteredTypeArray[i]))
+            type = assembly.GetTypes()
+                .Single(t => t.IsClass && !t.IsAbstract && typeof(IScriptMethod).IsAssignableFrom(t));
+        }
+        catch (InvalidOperationException)
+        {
+            var matches = assembly.GetTypes()
+                .Where(t => t.IsClass && !t.IsAbstract && typeof(IScriptMethod).IsAssignableFrom(t))
+                .ToList();
+
+            if (matches.Count == 0)
             {
-                typeArrayList.Add(unfilteredTypeArray[i]);
+                throw new NoClassFoundInScriptFileException(nameof(RunScriptExecution) + "failed in if (typeArray.Length == 0)");
             }
-            // if (typeof(IScriptMethodsCondition).IsAssignableFrom(unfilteredTypeArray[i]))
-            // {
-            //     typeArrayList.Add(unfilteredTypeArray[i]);
-            // }
-        }
-        Type[] typeArray = typeArrayList.ToArray();
 
-        if (typeArray.Length == 0)
-        {
-            throw new NoClassFoundInScriptFileException(nameof(RunScriptExecution) + "failed in if (typeArray.Length == 0)");
+            logger.LogInformation("More than one class found in script");
+            throw new MoreThanOneClassFoundInScriptExecutionException("More than one class found in script");
         }
-        else if (typeArray.Length > 1)
-        {
-            _logger.LogInformation("more than one class found in script");
-            throw new MoreThanOneClassFoundInScriptExecutionException("more than one class found in script");   //to implement more than one name you would need to pass name of class into this class
-        }
-
-        Type type = typeArray[0];
 
         object scriptInstance = Activator.CreateInstance(type)!;
 
@@ -67,7 +58,7 @@ internal class ScriptExecutor
             MethodInfo method;
             method = type.GetMethod(methodName)!;
 
-            using var cts = new CancellationTokenSource(_scriptTimeout);
+            using var cts = new CancellationTokenSource(scriptTimeout);
             ScriptEnvironment.CurrentToken.Value = cts.Token;
             System.Threading.Tasks.Task? resultTask;
             try
@@ -95,23 +86,21 @@ internal class ScriptExecutor
             var resultProperty = resultTask.GetType().GetProperty("Result");
             var resultValue = resultProperty!.GetValue(resultTask);
 
-            _logger.LogInformation($"Result in 86 sExecuter: {resultValue}");
+            logger.LogInformation($"Result in 86 sExecuter: {resultValue}");
 
             return (T)resultValue!;
         }
-
+        catch (CouldNotFindMethodException e)
+        {
+            logger.LogError(e.ToString());
+            logger.LogWarning("You might have passed the wrong GeneratorContext class, ex V1 instead of V2");
+            throw;
+        }
         catch (Exception e)
         {
-            _logger.LogError(e.ToString());
-            _logger.LogWarning("You might have passed the wrong GeneratorContext class, ex V1 instead of V2");
-            if (e.GetType() != typeof(CouldNotFindMethodException))
-            {
-                throw new ActionScriptExecutionException("You might have passed the wrong GeneratorContext class, ex V1 instead of V2", e);
-            }
-            else
-            {
-                throw;
-            }
+            logger.LogError(e.ToString());
+            logger.LogWarning("You might have passed the wrong GeneratorContext class, ex V1 instead of V2");
+            throw new ActionScriptExecutionException("You might have passed the wrong GeneratorContext class, ex V1 instead of V2", e);
         }
     }
 }

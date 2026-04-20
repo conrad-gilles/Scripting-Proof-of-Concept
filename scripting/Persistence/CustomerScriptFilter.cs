@@ -8,7 +8,7 @@ public class CustomerScriptFilter
 
     public string? SourceCode;
 
-    public int? MinApiVersion;
+    public int? ScriptApiVersion;
 
     public DateTime? CreatedAt;
 
@@ -21,7 +21,7 @@ public class CustomerScriptFilter
         ScriptName = scriptName;
         ScriptType = scriptType;
         SourceCode = sourceCode;
-        MinApiVersion = minApiVersion;
+        ScriptApiVersion = minApiVersion;
         CreatedAt = createdAt;
         ModifiedAt = modifiedAt;
         CreatedBy = createdBy;

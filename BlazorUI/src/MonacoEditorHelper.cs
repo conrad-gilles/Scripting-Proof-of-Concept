@@ -15,7 +15,7 @@ namespace BlazorUI.Helpers
 {
     public class MonacoEditorHelper
     {
-        private readonly IScriptManagerDeleteAfter _scriptManager;
+        private readonly IScriptManagerExtended _scriptManager;
         private readonly EmberInternalFacade _eif;
         private readonly MonacoEditor _editor;
         private readonly ConsoleService _console;
@@ -27,7 +27,7 @@ namespace BlazorUI.Helpers
         // If this is Guid.Empty, the helper knows it's a new script.
         public Guid CurrentScriptId { get; set; } = Guid.Empty;
 
-        internal MonacoEditorHelper(IScriptManagerDeleteAfter scriptManager, EmberInternalFacade eif, MonacoEditor editor, ConsoleService console, Popup myPopup)
+        internal MonacoEditorHelper(IScriptManagerExtended scriptManager, EmberInternalFacade eif, MonacoEditor editor, ConsoleService console, Popup myPopup)
         {
             _scriptManager = scriptManager;
             _eif = eif;

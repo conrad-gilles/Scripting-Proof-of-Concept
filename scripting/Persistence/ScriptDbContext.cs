@@ -2,10 +2,9 @@ using Ember.Scripting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
 
-// namespace EFModeling.EntityProperties.FluentAPI.Required;
 namespace Ember.Scripting.Persistence;
 
-public class ScriptDbContext : DbContext //, IDataProtectionKeyContext
+public class ScriptDbContext : DbContext
 {
     public ScriptDbContext(DbContextOptions<ScriptDbContext> options) : base(options)
     {
@@ -13,9 +12,6 @@ public class ScriptDbContext : DbContext //, IDataProtectionKeyContext
     public ScriptDbContext()
     {
     }
-
-    // public DbSet<DataProtectionKey> DataProtectionKeys { get; set; } = null!;   //todo this is here for blazor app to prevent loss of performance doesnt work yet app always crashes on Render.com
-
     public DbSet<CustomerScript> CustomerScripts { get; set; }
     public DbSet<CompiledScript> ScriptCompiledCaches { get; set; }
     public DbSet<EmberInstance> EmberInstances { get; set; }

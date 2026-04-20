@@ -21,7 +21,7 @@ public class CustomerScript
     public string? SourceCode { get; set; }
 
     [Column("min_api_version")]
-    public int MinApiVersion { get; set; }
+    public int ScriptApiVersion { get; set; }
 
     [Column("created_at")]
     public DateTime? CreatedAt { get; set; } = DateTime.UtcNow;
@@ -60,7 +60,7 @@ public class CustomerScript
 
         foreach (var sType in validScriptTypes)
         {
-            Console.WriteLine("Key: " + sType + ", Value: " + sType.Value.FullName);
+            // Console.WriteLine("Key: " + sType + ", Value: " + sType.Value.FullName);
             if (scriptTypeString == sType.Key)
             {
                 if (scriptType != null)
@@ -84,7 +84,7 @@ public class CustomerScript
         + ScriptType + "@"
         + "Source Code: " + SourceCode
         + "@" + "MinApiVersion: "
-        + MinApiVersion.ToString() + "@" + "Created at: " + CreatedAt.ToString() + "@"
+        + ScriptApiVersion.ToString() + "@" + "Created at: " + CreatedAt.ToString() + "@"
         + "Modified at: " + ModifiedAt.ToString() + "@" + "Created by " + CreatedBy;
 
         string compiledCachesString = "@ Compiled Caches: { @";
@@ -100,7 +100,7 @@ public class CustomerScript
     public string ToStringShorter()
     {
         string str = "Script Name: " + ScriptName + ", Script Type: " + ScriptType + ", MinApiVersion: "
-        + MinApiVersion.ToString() + ", Created at: " + CreatedAt.ToString() + ", Modified at: "
+        + ScriptApiVersion.ToString() + ", Created at: " + CreatedAt.ToString() + ", Modified at: "
         + ModifiedAt.ToString() + ", Created by " + CreatedBy;
 
         string compiledCachesString = "@ Compiled Caches: { @";

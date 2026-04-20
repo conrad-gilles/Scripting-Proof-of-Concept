@@ -16,7 +16,7 @@ namespace FirstTests;
 [TestClass]
 public class ScriptManagerFacadeTests
 {
-    private IScriptManagerDeleteAfter? _scriptManager;
+    private IScriptManagerExtended? _scriptManager;
     private EmberInternalFacade? _emberScriptManager;
     string? _sourceCodePedia = TestHelper.GetSC().sourceCodePedia;
     private string? _sourceCodeActionV1 = TestHelper.GetSC().sourceCodeActionV1;
@@ -67,7 +67,7 @@ public class ScriptManagerFacadeTests
         CustomerScript script = await _scriptManager!.CreateScript(_sourceCodePedia!);
         string newSourceCode = _sourceCodePedia + System.Environment.NewLine + @"//new line added for testing";
         // newSourceCode = newSourceCode.Replace("@", "@" + System.Environment.NewLine);
-        await _scriptManager.UpdateScriptSC(script.Id, newSourceCode);
+        await _scriptManager.UpdateScript(script.Id, newSourceCode);
 
         CustomerScript retrievedScript = await _scriptManager.GetScript(script.Id);
         Assert.AreEqual(retrievedScript.SourceCode, newSourceCode);

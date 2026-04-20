@@ -3,13 +3,58 @@ using Ember.Scripting.Compilation;
 using Ember.Scripting.Execution;
 using Ember.Scripting.Persistence;
 
-namespace Ember.Scripting.ScriptManager;
+namespace Ember.Scripting.Manager;
 
-public interface IScriptManagerDeleteAfter : IScriptManagerExtended
+public interface IScriptManagerExtended : IScriptManager
 {
+
+  #region Script Lifecycle
+
+  /// <summary>
+  /// Validates, compiles, and stores a new script
+  /// </summary>
+  /// <param name="sourceCode"></param>
+  /// <param name="apiVersion"></param>
+  /// <param name="createdAt"></param>
+  /// <returns></returns>
+  Task<CustomerScript> CreateScript(string sourceCode, int? apiVersion = null, DateTime? createdAt = null);
+  /// <summary>
+  /// Updates existing script source code
+  /// </summary>
+  /// <param name="scriptId"></param>
+  /// <param name="newSourceCode"></param>
+  /// <param name="apiVersion"></param>
+  /// <returns></returns>
+  Task UpdateScript(Guid scriptId, string newSourceCode, bool allowFaultySave = false, int? apiVersion = null);
+
+  Task UpdateScriptAndCompile(Guid scriptId, string newSourceCode, int? apiVersion = null);
+
+  Task UpdateScript<ScriptType>(string name, string newSourceCode, int? apiVersion = null) where ScriptType : IScriptType;
+
+  Task UpdateScriptAndCompile<ScriptType>(string name, string newSourceCode, int? apiVersion = null) where ScriptType : IScriptType;
+
+  /// <summary>
+  /// Removes script and all associated compiled caches
+  /// </summary>
+  /// <param name="scriptId"></param>
+  /// <returns></returns>
+  Task DeleteScript(Guid scriptId);
+
+  Task DeleteScript<ScriptType>(string scriptName) where ScriptType : IScriptType;
+
+  /// <summary>
+  /// Retrieves script metadata and source code
+  /// </summary>
+  /// <param name="scriptId"></param>
+  /// <param name="includeCaches"></param>
+  /// <returns></returns>
+  Task<CustomerScript> GetScript(Guid scriptId, bool includeCaches = false);
+
+  Task<CustomerScript> GetScript<ScriptType>(string name, bool includeCaches = false) where ScriptType : IScriptType;
+
   Task<List<CustomerScript>> ListScripts(CustomerScriptFilter filters = null!, bool includeCaches = false);
 
-
+  #endregion
 
   #region Compilation Operations
 
@@ -53,7 +98,7 @@ public interface IScriptManagerDeleteAfter : IScriptManagerExtended
   Task<string> GetCompilationErrors(Guid scriptId);
   Task<List<ScriptCompilationError>> GetCompilationErrors(string sourceCode);
 
-  Task<bool> ThrowCompilationErrors(string script);
+  Task<bool> TryCompile(string script);
 
   /// <summary>
   /// Gets the tuple from a script containing Class Name, base type name and the last integer of the declared version in the name
@@ -175,7 +220,7 @@ public interface IScriptManagerDeleteAfter : IScriptManagerExtended
   /// <returns></returns>
   Task<Dictionary<int, List<CompiledScript>>> GetCachesForEachApiVersion();
 
-  IUserSession GetUserName();
+  IUserSession GetUserSession();
 
   #endregion
 }

@@ -70,7 +70,7 @@
 <Popup @ref="myPopup" />
 
 @code {
-    private IScriptManagerDeleteAfter ScriptManager => ScriptManagerAccessor.Current;
+    private IScriptManagerExtended ScriptManager => ScriptManagerAccessor.Current;
     private EmberInternalFacade EmberInternalFacade => EmberInternalFacadeAccessor.Current;
     private MonacoEditor _editor = default!;
     private Popup myPopup = default!;

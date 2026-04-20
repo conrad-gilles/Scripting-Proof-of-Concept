@@ -1,4 +1,3 @@
-// using EFModeling.EntityProperties.FluentAPI.Required;
 using Microsoft.CodeAnalysis;
 using Microsoft.EntityFrameworkCore;
 using Ember.Scripting;
@@ -67,9 +66,9 @@ internal class ScriptRepository
                 {
                     query = query.Where(s => s.SourceCode == filters.SourceCode);
                 }
-                if (filters.MinApiVersion != null)
+                if (filters.ScriptApiVersion != null)
                 {
-                    query = query.Where(s => s.MinApiVersion == filters.MinApiVersion);
+                    query = query.Where(s => s.ScriptApiVersion == filters.ScriptApiVersion);
                 }
                 if (filters.CreatedAt != null)
                 {
@@ -164,7 +163,7 @@ internal class ScriptRepository
         int currentApiVersion = GetRecentApiVersion();
         CustomerScript script = await GetCustomerScript(scriptId, includeCaches: true);
 
-        int start = script.MinApiVersion;
+        int start = script.ScriptApiVersion;
         int count = currentApiVersion - start + 1;
         int[] versions = Enumerable.Range(start, count).ToArray();
         if (deleteAlso)
@@ -273,7 +272,7 @@ internal class ScriptRepository
             bool currentImplementation = false;
             foreach (var itemN in item.CompiledCaches)
             {
-                int start = item.MinApiVersion;
+                int start = item.ScriptApiVersion;
                 int count = currentApiVersion - start + 1;
 
                 int[] versions = Enumerable.Range(start, count).ToArray();
@@ -286,7 +285,7 @@ internal class ScriptRepository
                 {
                     currentImplementation = true;
                 }
-                if (itemN.ApiVersion < item.MinApiVersion)
+                if (itemN.ApiVersion < item.ScriptApiVersion)
                 {
                     await DeleteScriptCache(itemN.ScriptId, currentApiVersion);
                     _logger.LogInformation("Deleted an old Script Cache!");
@@ -325,7 +324,7 @@ internal class ScriptRepository
                 ScriptName = validationRecord.ClassName,
                 ScriptType = validationRecord.ScriptType.Name,
                 SourceCode = scriptString,
-                MinApiVersion = validationRecord.Version,
+                ScriptApiVersion = validationRecord.Version,
                 CreatedAt = createdAt,
                 ModifiedAt = DateTime.UtcNow,
                 CreatedBy = _userSession.UserName,
@@ -447,9 +446,9 @@ internal class ScriptRepository
                 {
                     existingScript.ScriptName = validationRecord.ClassName;
                 }
-                if (script.MinApiVersion != validationRecord.Version)
+                if (script.ScriptApiVersion != validationRecord.Version)
                 {
-                    existingScript.MinApiVersion = validationRecord.Version;
+                    existingScript.ScriptApiVersion = validationRecord.Version;
                 }
                 if (script.GetScriptType() != validationRecord.ScriptType)
                 {
@@ -630,7 +629,7 @@ internal class ScriptRepository
                 ScriptName = null,
                 ScriptType = null,
                 SourceCode = sourceCode,
-                MinApiVersion = GetRecentApiVersion(),
+                ScriptApiVersion = GetRecentApiVersion(),
                 CreatedAt = DateTime.UtcNow,
                 ModifiedAt = DateTime.UtcNow,
                 CreatedBy = userName,

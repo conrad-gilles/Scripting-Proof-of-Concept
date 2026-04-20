@@ -61,7 +61,7 @@ async Task MainProgramSwitch(IServiceProvider provider)
     try
     {
         // ScriptManagerFacade facade = provider.GetRequiredService<ScriptManagerFacade>();
-        IScriptManagerDeleteAfter facade = provider.GetRequiredService<IScriptManagerDeleteAfter>();
+        IScriptManagerExtended facade = provider.GetRequiredService<IScriptManagerExtended>();
         IScriptManager facade1 = provider.GetRequiredService<IScriptManager>();
         currentApiVersion = facade.GetRunningApiVersion();
 
@@ -154,7 +154,7 @@ async Task MainProgramSwitch(IServiceProvider provider)
                         // Console.WriteLine("Copy paste your new version now:");
                         // string userInput2 = Console.ReadLine();
 
-                        await facade.UpdateScriptSC(idEdit, str);
+                        await facade.UpdateScript(idEdit, str);
                         break;
 
                     case "DeleteScript":
@@ -213,19 +213,19 @@ async Task MainProgramSwitch(IServiceProvider provider)
 
                     case "ExecuteActionScript":
                         scriptId = await em.GetIdInConsoleAsync(fromSrc: true);
-                        ActionResultSF result = (ActionResultSF)await facade.ExecuteScriptById(scriptId, EmberMethods.GetContext(), "Default");
+                        ActionResultSF result = (ActionResultSF)await facade.ExecuteScript(scriptId, EmberMethods.GetContext(), "Default");
                         Console.WriteLine(result.ToString());   //you could do whatever with it
                         break;
 
                     case "ExecuteConditionScript":
                         scriptId = await em.GetIdInConsoleAsync(fromSrc: true);
-                        bool resultCond = (bool)await facade.ExecuteScriptById(scriptId, EmberMethods.GetContext(), "Default");
+                        bool resultCond = (bool)await facade.ExecuteScript(scriptId, EmberMethods.GetContext(), "Default");
                         Console.WriteLine(resultCond);
                         break;
 
                     case "ExecuteScriptById":
                         scriptId = await em.GetIdInConsoleAsync(fromSrc: true);
-                        object resultObj = await facade.ExecuteScriptById(scriptId, EmberMethods.GetContext(), "Default");
+                        object resultObj = await facade.ExecuteScript(scriptId, EmberMethods.GetContext(), "Default");
 
                         if (typeof(bool).IsAssignableFrom(resultObj.GetType()))       //good idea to check what type was returne, you could also just check the property from db normally
                         {
@@ -347,7 +347,7 @@ async Task MainProgramSwitch(IServiceProvider provider)
                         Console.WriteLine(strr);
                         break;
                     case "GetUserName":
-                        string strrr = facade.GetUserName().UserName;
+                        string strrr = facade.GetUserSession().UserName;
                         Console.WriteLine(strrr);
                         break;
 
@@ -357,7 +357,7 @@ async Task MainProgramSwitch(IServiceProvider provider)
                         sourceDict = await em.ListAllStoredSourceCodes(dontPrint: true);
                         scriptId = sourceDict[Int32.Parse(userInput)];
                         CustomerScript justForTesting = await facade.GetScript(scriptId);
-                        object resultObj2 = await facade.ExecuteScriptById(scriptId, EmberMethods.GetContext(), "Default");
+                        object resultObj2 = await facade.ExecuteScript(scriptId, EmberMethods.GetContext(), "Default");
 
                         if (typeof(bool).IsAssignableFrom(resultObj2.GetType()))       //good idea to check what type was returne, you could also just check the property from db normally
                         {

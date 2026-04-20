@@ -12,7 +12,7 @@ public class ScriptTests
 {
 
 
-    private IScriptManagerDeleteAfter? _facade;
+    private IScriptManagerExtended? _facade;
     private EmberInternalFacade? _eif;
     private EmberMethods? _em;
     private string? _actionResultVersionSpecific;
@@ -89,7 +89,7 @@ async Task SetupAsync()
         Guid id = (await _facade!.CreateScript(_sourceCodeVaccineAction!)).Id;
         CustomerScript retrievedScript = await _facade.GetScript(id);
         var context = TestHelper.GetContext();
-        object result = await _facade.ExecuteScriptById(id, context, nameof(IExecuteAsync.ExecuteAsync));
+        object result = await _facade.ExecuteScript(id, context, nameof(IExecuteAsync.ExecuteAsync));
         string shouldReturn = _actionResultVersionSpecific + "Polio Vaccine added";
         Assert.IsInstanceOfType(result, typeof(ActionResultSF));
         Assert.IsInstanceOfType(result, typeof(ActionResultV3.ActionResult));
@@ -146,7 +146,7 @@ async Task SetupAsync()
         object result = await _eif!.ExecuteScript(id, context, nameof(IEvaluateAsync.EvaluateAsync));
 
         await Task.Delay(2000);
-        await _facade!.UpdateScriptSC(retrievedScript.Id, "new source code doesnt matter if wrong shoudl save to db", allowFaultySave: true);
+        await _facade!.UpdateScript(retrievedScript.Id, "new source code doesnt matter if wrong shoudl save to db", allowFaultySave: true);
 
         CustomerScript updatedScript = await _facade.GetScript(id);
         DateTime? afterUpdateCA = updatedScript.CreatedAt;

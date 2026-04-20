@@ -86,7 +86,7 @@
                                                 <span class="badge bg-warning text-dark">Condition</span>
                                             }
                                         </td>
-                                        <td>v@(script.MinApiVersion)</td>
+                                        <td>v@(script.ScriptApiVersion)</td>
                                         <td>@(script.CreatedAt?.ToString("MM-dd HH:mm") ?? "N/A")</td>
                                         @if ((script.ModifiedAt!.Value - script.CreatedAt!.Value).TotalSeconds <= 1)
                                         {
@@ -180,7 +180,7 @@
 </div>
 
 @code {
-    private IScriptManagerDeleteAfter ScriptManager => ScriptManagerAccessor.Current;
+    private IScriptManagerExtended ScriptManager => ScriptManagerAccessor.Current;
     private EmberInternalFacade EmberInternalFacade => EmberInternalFacadeAccessor.Current;
     private List<CustomerScript> _scriptsList = new();
     private Popup myPopup = default!;

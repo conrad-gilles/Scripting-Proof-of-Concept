@@ -51,7 +51,7 @@
 <FakeTerminal />
 <Popup @ref="myPopup" />
 @code {
-    private IScriptManagerDeleteAfter ScriptManager => ScriptManagerAccessor.Current;
+    private IScriptManagerExtended ScriptManager => ScriptManagerAccessor.Current;
     private int _selectedApiVersion = AppSettings.EmberApiVersion;
     private Popup myPopup = default!;
     public async Task UpdateApiVersion()
@@ -77,7 +77,7 @@
 
             var provider2 = services2.BuildServiceProvider();
 
-            ScriptManagerAccessor.Current = provider2.GetRequiredService<IScriptManagerDeleteAfter>();
+            ScriptManagerAccessor.Current = provider2.GetRequiredService<IScriptManagerExtended>();
             EmberInternalFacadeAccessor.Current = provider2.GetRequiredService<EmberInternalFacade>();
             Console.Log($"User selected API Version {_selectedApiVersion}");
             AppSettings.EmberApiVersion = _selectedApiVersion;
