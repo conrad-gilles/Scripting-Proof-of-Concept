@@ -1,5 +1,9 @@
 namespace Ember.Sandbox.ScriptMethods;
 
+public interface IAllMethods : IExecuteAsync, IExecute1, IExecute2, IExecute3, IEvaluateAsync
+{
+
+}
 public interface IScriptMethodsAction : IExecuteAsync, IExecute1, IExecute2, IExecute3
 {
 
@@ -45,5 +49,34 @@ public interface IExecute3 : IScriptMethod
     {
         throw new MethodNotImplementedException(message: "Method: " + nameof(Execute3) + " was not implemented.");
     }
+}
+
+public interface IAllMethodsInside
+{
+    Task<bool> EvaluateAsync(IContext context)
+    {
+        throw new MethodNotImplementedException(message: "Method: " + nameof(EvaluateAsync) + " was not implemented.");
+    }
+
+    Task<ActionResultBase> ExecuteAsync(IContext context)
+    {
+        throw new MethodNotImplementedException(message: "Method: " + nameof(ExecuteAsync) + " was not implemented.");
+    }
+
+    Task<ActionResultBase> Execute1(IContext context)    //type of construcotr changes per version
+    {
+        throw new MethodNotImplementedException(message: "Method: " + nameof(Execute1) + " was not implemented.");
+    }
+
+    Task<ActionResultBase> Execute2(IContext context)
+    {
+        throw new MethodNotImplementedException(message: "Method: " + nameof(Execute2) + " was not implemented.");
+    }
+
+    Task<string> Execute3(IContext context)
+    {
+        throw new MethodNotImplementedException(message: "Method: " + nameof(Execute3) + " was not implemented.");
+    }
+
 }
 

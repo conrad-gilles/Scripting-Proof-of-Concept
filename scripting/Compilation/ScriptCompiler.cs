@@ -199,7 +199,7 @@ internal class ScriptCompiler
     }
     private int GetVersionInt(INamedTypeSymbol baseType)
     {
-        var scriptRecords = ScriptVersionScanner.GetClassRecords();
+        List<ScriptMetaDataRecord> scriptRecords = ScriptVersionScanner.GetClassRecords();
         string? contextTypeString = null;
 
         foreach (var record in scriptRecords)
@@ -221,15 +221,23 @@ internal class ScriptCompiler
         int? ctxVersion = null;
         Dictionary<int, Type> activeContexts = ContextVersionScanner.GetInterfaceDictionary();
 
-        foreach (var ctx in activeContexts)
+        if (contextTypeString == nameof(IContext))
         {
-            if (ctx.Value.FullName == contextTypeString)
+            ctxVersion = activeContexts.Keys.Max();
+        }
+        else
+        {
+            foreach (var ctx in activeContexts)
             {
-                if (ctxVersion != null)
+
+                if (ctx.Value.FullName == contextTypeString)
                 {
-                    throw new ContextNameOccuredMoreThanOnceException("Context name occured more than once for some reason that should not happen.");
+                    if (ctxVersion != null)
+                    {
+                        throw new ContextNameOccuredMoreThanOnceException("Context name occured more than once for some reason that should not happen.");
+                    }
+                    ctxVersion = ctx.Key;
                 }
-                ctxVersion = ctx.Key;
             }
         }
         return (int)ctxVersion!;
@@ -237,8 +245,8 @@ internal class ScriptCompiler
     private ScriptMetaDataRecord GetMetaDataRecord(INamedTypeSymbol baseType)
     {
         List<ScriptMetaDataRecord> scriptRecords = ScriptVersionScanner.GetClassRecords();
-        string? contextTypeStr = null;
-        string? arTypeString = null;
+        // string? contextTypeStr = null;
+        // string? arTypeString = null;
         ScriptMetaDataRecord? foundRecord = null;
 
         foreach (var record in scriptRecords)
@@ -254,25 +262,25 @@ internal class ScriptCompiler
                 if (baseType.TypeArguments.Length >= 1)
                 {
                     ITypeSymbol contextType = baseType.TypeArguments[0];
-                    contextTypeStr = GetFullyQualifiedName(contextType);
+                    // contextTypeStr = GetFullyQualifiedName(contextType);
                 }
                 if (baseType.TypeArguments.Length == 2)
                 {
                     ITypeSymbol contextType = baseType.TypeArguments[1];
-                    arTypeString = GetFullyQualifiedName(contextType);
+                    // arTypeString = GetFullyQualifiedName(contextType);
                 }
             }
             if (baseType.ToDisplayString().Contains(definedMethodName))
             {
                 foundRecord = record;
-                if (contextTypeStr != null)
-                {
-                    foundRecord.ContextType = contextTypeStr!;
-                }
-                if (arTypeString != null)
-                {
-                    foundRecord.ActionResultType = arTypeString!;
-                }
+                // if (contextTypeStr != null)
+                // {
+                //     foundRecord.ContextType = contextTypeStr!;
+                // }
+                // if (arTypeString != null)
+                // {
+                //     foundRecord.ActionResultType = arTypeString!;
+                // }
             }
         }
         if (foundRecord == null)

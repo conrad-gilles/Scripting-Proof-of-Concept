@@ -1,3 +1,4 @@
+make sure users cant define methods with diffrent context versions in 1 script
 ask claude if Downgradeable really should be in sandbox?
 write test for renamed method etc
 ask claude if i should merge sandbox and ember projects

@@ -73,7 +73,7 @@ namespace GeneratorScriptsGeneric
 
 namespace GeneratorScriptsV2
 {
-    [MetaDataIGeneratorScript(version: 2, contextVersion: typeof(IGeneratorContext_V3.IGeneratorContext), actionResultVersion: typeof(ActionResultV2.ActionResult))]
+    [MetaDataIGeneratorScript(version: 2)]
     public interface IActionScript :
       IScriptMethodsAction
     {
@@ -87,7 +87,7 @@ namespace GeneratorScriptsV3
 {
     // public interface IGeneratorActionScript : Ember.Scripting.IGeneratorActionScript
     // [MetaDataIGeneratorScript(version: 3)]
-    [MetaDataIGeneratorScript(version: 3, contextVersion: typeof(IGeneratorContext_V4.IGeneratorContext), actionResultVersion: typeof(ActionResultV3.ActionResult))]
+    [MetaDataIGeneratorScript(version: 3)]
     public interface IActionScript : IScriptMethodsAction
     {
         Task<ActionResultV3.ActionResult> ExecuteAsync(IGeneratorContext_V4.IGeneratorContext context)
@@ -110,7 +110,7 @@ namespace GeneratorScriptsV3
 }
 namespace GeneratorScriptsV4
 {
-    [MetaDataIGeneratorScript(version: 4, contextVersion: typeof(IGeneratorContextNoInheritance_V5.IGeneratorContext), actionResultVersion: typeof(ActionResultV3.ActionResult))]
+    [MetaDataIGeneratorScript(version: 4)]
     public interface IActionScript :
      IScriptMethodsAction
     {

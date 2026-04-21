@@ -9,11 +9,6 @@ namespace Ember.Scripting.Versioning;
 
 public static class ScriptVersionScanner
 {
-    // public static Dictionary<int, Type> GetClassDictionary()
-    // {
-    //     Type baseType = typeof(MetaDataIGeneratorScript);
-    //     return GetBaseTypeDictionary(baseType).Item1;
-    // }
     public static List<ScriptMetaDataRecord> GetClassRecords()
     {
         Type baseType = typeof(MetaDataIGeneratorScript);
@@ -60,10 +55,8 @@ public static class ScriptVersionScanner
 
             int version = metaDataAttribute.Version;
             Type scriptType = currentType;
-            Type contextType = metaDataAttribute.ContextVersion;
-            Type arType = metaDataAttribute.ActionResultVersion;
+            Type contextType = typeof(IContext);
 
-            // Extract method information using standard Reflection
             List<MethodInfo> methodInfos = currentType.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly)
                 .Where(m => !m.IsSpecialName)
                 .ToList();
@@ -72,8 +65,6 @@ public static class ScriptVersionScanner
 
             foreach (var m in methodInfos)
             {
-                // Note: For explicit interface implementations, m.Name contains dots (e.g., "IExecuteAsync.ExecuteAsync")
-                // We split by '.' and take the last part so it cleanly matches Roslyn's parsed method name.
                 string methodName = m.Name.Split('.').Last();
                 Type retType = m.ReturnType;
                 if (retType.IsGenericType)
@@ -94,6 +85,10 @@ public static class ScriptVersionScanner
                         if (pType.IsGenericType)
                         {
                             pType = pType.GetGenericArguments()[0];
+                        }
+                        if (typeof(IContext).IsAssignableFrom(pType))
+                        {
+                            contextType = pType;
                         }
                         string paramType = GetCSharpTypeName(pType);
                         resultParams.Add(new ParameterRecord { Name = paramName, ReturnType = paramType });
@@ -117,13 +112,17 @@ public static class ScriptVersionScanner
 
             // Console.WriteLine("Version: " + version + ", CurrentType: " + currentType.Name + " , Type: " + metaDataAttribute.Type + " , ReturnType: " + metaDataAttribute.ReturnType);
             contextVersionMap.Add(version, currentType);
+
+            if (contextType == typeof(IContext))
+            {
+                // throw new NoContextDefinedException();  // currently throws exception if there is no method with atleast 1 context as a parameter, i am now just checking in the compiler and setting version to 1
+            }
             ScriptMetaDataRecord temp = new ScriptMetaDataRecord
             {
                 Version = version,
                 RetrievedType = currentType,
                 ScriptType = currentType.FullName!,
                 ContextType = contextType.FullName!,
-                ActionResultType = arType.FullName!,
                 Methods = methodRecords
             };
             records.Add(temp);
@@ -191,12 +190,14 @@ public record ScriptMetaDataRecord
     public required Type RetrievedType { get; init; }
     public required string ScriptType { get; init; }
     public required string ContextType { get; set; }
-    public required string ActionResultType { get; set; }
+    // public required string ActionResultType { get; set; }
     public required List<MethodRecord> Methods { get; init; }
 
     public override string ToString()
     {
-        return "V" + Version + ", Type: " + ScriptType + ", Context: " + ContextType + ", AR: " + ActionResultType;
+        return "V" + Version + ", Type: " + ScriptType
+         + ", Context: " + ContextType;
+        //   + ", AR: " + ActionResultType;
     }
 }
 

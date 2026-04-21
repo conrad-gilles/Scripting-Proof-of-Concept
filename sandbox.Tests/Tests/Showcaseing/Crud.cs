@@ -87,7 +87,9 @@ public class CrudDemos
         ConsoleLogger logger = new ConsoleLogger();
         DataAccess testDataAccess = new DataAccess();
 
-        await Create();
+        string sourceCode = TestHelper.GetSC().sourceCodeActionV1;
+        CustomerScript script = await ScriptManager!.CreateScript(sourceCode!);
+
 
         var services = new ServiceCollection();
 
@@ -104,7 +106,9 @@ public class CrudDemos
         RecentActionResult ar = (RecentActionResult)await InternalScriptManager!.ExecuteScript<IActionScript>
         ("AddPediatricTestsV2", ctx, nameof(IExecuteAsync.ExecuteAsync));
 
+        RecentIActionScript scriptInstance = InternalScriptManager.GetScript<RecentIActionScript>(script.ScriptName!);
 
+        ar = await scriptInstance.ExecuteAsync(ctx);
         // ar = (ActiveActionResult)await InternalScriptManager.Execute1<IGeneratorActionScript>
         // ("AddPediatricTestsV2", ctx);
 
