@@ -126,6 +126,32 @@ public class WrongParameterTypeException : ValidationBeforeCompilationException
         Method = method;
     }
 }
+public class CouldNotFindMethodTypeException : ValidationBeforeCompilationException
+{
+    public Microsoft.CodeAnalysis.CSharp.Syntax.MethodDeclarationSyntax? Method { get; }
+
+    public CouldNotFindMethodTypeException() : base() { }
+    public CouldNotFindMethodTypeException(string message) : base(message) { }
+    public CouldNotFindMethodTypeException(string message, Exception innerException) : base(message, innerException) { }
+
+    public CouldNotFindMethodTypeException(string message, Microsoft.CodeAnalysis.CSharp.Syntax.MethodDeclarationSyntax? method) : base(message)
+    {
+        Method = method;
+    }
+}
+public class CouldNotFindParameterException : ValidationBeforeCompilationException
+{
+    public Microsoft.CodeAnalysis.CSharp.Syntax.MethodDeclarationSyntax? Method { get; }
+
+    public CouldNotFindParameterException() : base() { }
+    public CouldNotFindParameterException(string message) : base(message) { }
+    public CouldNotFindParameterException(string message, Exception innerException) : base(message, innerException) { }
+
+    public CouldNotFindParameterException(string message, Microsoft.CodeAnalysis.CSharp.Syntax.MethodDeclarationSyntax? method) : base(message)
+    {
+        Method = method;
+    }
+}
 public class ForbiddenTypeAccessException : ForbiddenNamespaceException
 {
     public new string? AttemptedNamespace { get; }

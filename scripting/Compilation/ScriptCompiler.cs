@@ -173,8 +173,7 @@ internal class ScriptCompiler
             Type scriptType = scriptType = CustomerScript.GetScriptType(parentSymbol.Name);
 
             List<MethodRecord> methods = ValidateOnlyInheritedMethodsAndReturn(tree!, model);
-            ValidateScriptMethods2(tree!, model, parentSymbol);
-            // ValidateScriptMethods(tree!, model, parentSymbol);
+            ValidateScriptMethodTypes(tree!, model, parentSymbol);
             int? executionTime = GetExecutionTime(tree);
             ValidateLoopsHavingCancellation(tree!);
             ValidateNamespaceUsage(tree!, model!);
@@ -283,7 +282,7 @@ internal class ScriptCompiler
         return foundRecord;
     }
 
-    public void ValidateScriptMethods2(SyntaxTree tree, SemanticModel semanticModel, INamedTypeSymbol baseType)
+    public void ValidateScriptMethodTypes(SyntaxTree tree, SemanticModel semanticModel, INamedTypeSymbol baseType)
     {
         if (baseType.IsGenericType == false)
         {
@@ -323,114 +322,34 @@ internal class ScriptCompiler
                 }
                 if (foundMethod == null)
                 {
-                    throw new Exception("no method found, scriptMethod: " + scriptMethod.Name);
+                    throw new CouldNotFindMethodTypeException("no method found, scriptMethod: " + scriptMethod.Name);
                 }
                 if (scriptMethod.ReturnType != foundMethod.ReturnType)
                 {
                     throw new WrongReturnTypeException(message: scriptMethod.Name + " has the wrong return Type: " + scriptMethod.ReturnType + ", it should be: " + foundMethod.ReturnType + ".");
                 }
-                Console.WriteLine(scriptMethod.Name + " has the return Type: " + scriptMethod.ReturnType);
-                Console.WriteLine("it should be: " + foundMethod.ReturnType);
-                foreach (var param in foundMethod.Parameters)
+                foreach (var scriptParam in scriptMethod.Parameters)
                 {
                     ParameterRecord? foundParam = null;
-                    foreach (var defindedParam in foundMethod.Parameters)
+                    foreach (var definedParam in foundMethod.Parameters)
                     {
-                        if (foundParam != null)
+                        if (definedParam.Name == scriptParam.Name)
                         {
-                            throw new Exception();
+                            foundParam = definedParam;
                         }
-                        foundParam = defindedParam;
                     }
                     if (foundParam == null)
                     {
-                        throw new Exception("no param not found");
+                        throw new CouldNotFindParameterException(foundMethod.Name + " could not find defined parameter: " + scriptParam.Name);
                     }
-                    if (param.ReturnType != foundParam.ReturnType)
+                    if (foundParam!.ReturnType != scriptParam.ReturnType)
                     {
-                        throw new WrongParameterTypeException(message: scriptMethod.Name + " has a wrong Parameter Type: " + param.ReturnType + ", it should be: " + foundParam.ReturnType + ".");
+                        throw new WrongParameterTypeException(foundMethod.Name + " a parameter had the wrong return type: " + scriptParam.ReturnType + ", it should have been: " + foundParam.ReturnType);
                     }
                 }
             }
         }
 
-    }
-    public void ValidateScriptMethods(SyntaxTree tree, SemanticModel semanticModel, INamedTypeSymbol baseType)
-    {
-        if (baseType.IsGenericType == false)
-        {
-            SyntaxNode root = tree.GetRoot();
-            IEnumerable<MethodDeclarationSyntax> methods = root.DescendantNodes().OfType<MethodDeclarationSyntax>();
-            string fullName = baseType.ToDisplayString();
-
-            ScriptMetaDataRecord finalRec = GetMetaDataRecord(baseType);
-
-            if (finalRec.ContextType == null || finalRec.ActionResultType == null)
-            {
-                throw new Exception("fullname: " + fullName);
-            }
-
-            foreach (var method in methods)
-            {
-                if (method.Modifiers.Any(SyntaxKind.PrivateKeyword))
-                {
-                    continue;   //skips private methods
-                }
-                if (method.Modifiers.Any(SyntaxKind.InternalKeyword))
-                {
-                    // continue;   //skips internal methods
-                }
-                if (method.Modifiers.Any(SyntaxKind.ProtectedKeyword))
-                {
-                    // continue;   //skips protected methods
-                }
-
-                IMethodSymbol methodSymbol = semanticModel.GetDeclaredSymbol(method)!;
-                string methodName = methodSymbol.Name;
-
-
-                // first we check if each method has the correct return type
-                ITypeSymbol returnType = methodSymbol.ReturnType;
-
-                string returnTypeString = returnType.MetadataName;
-
-                if (returnType is INamedTypeSymbol namedType &&     //to extract for example string from Task<string>
-                    namedType.IsGenericType &&
-                    namedType.Name == "Task"
-                    )
-                {
-                    ITypeSymbol innerType = namedType.TypeArguments[0];
-                    returnTypeString = innerType.ToDisplayString();
-                }
-
-                if (returnTypeString != finalRec.ActionResultType)
-                {
-                    if (returnTypeString != "string" && methodName != "Execute3")   //todo fix get rid off
-                    {
-                        throw new WrongReturnTypeException(message: methodName + " has the wrong return Type: " + returnTypeString + ", it should be: " + finalRec.ActionResultType + ".", method);
-                    }
-                }
-
-                // we go through each param (should always be 1) and check if it is the correct one
-                foreach (IParameterSymbol paramSymbol in methodSymbol.Parameters)
-                {
-                    string paramName = paramSymbol.Name;
-                    string paramType = paramSymbol.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-
-                    if (paramType.StartsWith("global::"))
-                    {
-                        paramType = paramType.Substring("global::".Length);
-                    }
-
-                    if (paramType != finalRec.ContextType
-                    && paramType != "CustomerScript" && methodName != "SomeUndefindedMethod"    //todo get rid of
-                    )
-                    {
-                        throw new WrongParameterTypeException(message: methodName + " has a wrong Parameter Type: " + paramType + ", it should be: " + finalRec.ContextType + ".", method);
-                    }
-                }
-            }
-        }
     }
     private string GetFullyQualifiedName(ITypeSymbol symbol)
     {

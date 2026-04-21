@@ -102,7 +102,7 @@ namespace GeneratorScriptsV3
         {
             throw new MethodNotImplementedException(message: nameof(Execute2) + " was not implemented.");
         }
-        Task<string> Execute3(IGeneratorContextNoInheritance_V5.IGeneratorContext context)
+        Task<string> Execute3(IGeneratorContext_V4.IGeneratorContext context)
         {
             throw new MethodNotImplementedException(message: nameof(Execute3) + " was not implemented.");
         }

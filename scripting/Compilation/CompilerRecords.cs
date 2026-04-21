@@ -1,4 +1,5 @@
 using System.Reflection;
+using System.Reflection.Metadata.Ecma335;
 using Microsoft.CodeAnalysis;
 
 namespace Ember.Scripting.Compilation;
@@ -135,13 +136,32 @@ public record MethodRecord
     public static MethodRecord GetMethodRecord(IMethodSymbol methodSymbol)
     {
         string name = methodSymbol.Name;
-        string returnType = methodSymbol.ReturnType.MetadataName;
+
+        ITypeSymbol returnTypeSymbol = methodSymbol.ReturnType;
+        if (returnTypeSymbol is INamedTypeSymbol namedReturnType && namedReturnType.IsGenericType)
+        {
+            returnTypeSymbol = namedReturnType.TypeArguments[0];
+        }
+
+        string returnType = returnTypeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+        if (returnType.StartsWith("global::"))
+        {
+            returnType = returnType.Substring("global::".Length);
+        }
+
         List<ParameterRecord> parameters = [];
 
         foreach (IParameterSymbol paramSymbol in methodSymbol.Parameters)
         {
             string paramName = paramSymbol.Name;
-            string paramType = paramSymbol.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+            ITypeSymbol typeSymbol = paramSymbol.Type;
+
+            if (typeSymbol is INamedTypeSymbol namedType && namedType.IsGenericType)
+            {
+                typeSymbol = namedType.TypeArguments[0];
+            }
+
+            string paramType = typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
 
             if (paramType.StartsWith("global::"))
             {
