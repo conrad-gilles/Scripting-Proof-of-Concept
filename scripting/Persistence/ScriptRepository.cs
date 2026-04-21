@@ -559,7 +559,7 @@ internal class ScriptRepository
         }
     }
 
-    public async Task<Guid> GetScriptId<ScriptType>(string scriptName)
+    public async Task<Guid> GetScriptId<ScriptType>(string scriptName) where ScriptType : IScriptType
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName} with Name: {ScriptId}.", nameof(GetCustomerScript), nameof(ScriptRepository), scriptName);
 

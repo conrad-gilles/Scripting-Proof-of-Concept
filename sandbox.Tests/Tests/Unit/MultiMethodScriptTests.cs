@@ -12,6 +12,7 @@ using Ember.Simulation;
 using Sandbox;
 using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.EntityFrameworkCore.Query;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 [TestClass]
 public class MultiMethodScriptTests
@@ -153,9 +154,12 @@ public class MultiMethodScriptTests
                  ValidationRecord vr2 = ScriptManager.BasicValidationBeforeCompiling(sourceCode);
              });
 
+        //returns: Ember.Scripting.Compilation.UndefinedMethodException: No new methods allowed that are not predefinded!MethodRecord: Name: SomeUndefindedMethod, ReturnType: Task`1, Parameters: System.Collections.Generic.List`1[Ember.Scripting.Compilation.ParameterRecord]
+
         Console.WriteLine(ex.Method);
         Assert.IsTrue(ex.Method!.Name == nameof(PublicScript.SomeUndefindedMethod));
-        Assert.IsTrue(ex.Method.ReturnType == "Task`1");
+        Console.WriteLine(ex.Method.ReturnType);
+        Assert.IsTrue(ex.Method.ReturnType == "string");
 
         sourceCode = TestHelper.GetSC().undefinedMethodsScriptPrivate;
 
@@ -172,23 +176,28 @@ public class MultiMethodScriptTests
 
         ex = await Assert.ThrowsExceptionAsync<UndefinedMethodException>(async () =>
             {
-                ValidationRecord vr = ScriptManager.BasicValidationBeforeCompiling(sourceCode);
+                ValidationRecord vr2 = ScriptManager.BasicValidationBeforeCompiling(sourceCode);
             });
+
+        //returns: Ember.Scripting.Compilation.UndefinedMethodException: No new methods allowed that are not predefinded!MethodRecord: Name: SomeUndefindedInternalMethod, ReturnType: Task`1, Parameters: System.Collections.Generic.List`1[Ember.Scripting.Compilation.ParameterRecord]
 
         Console.WriteLine(ex.Method);
         Assert.IsTrue(ex.Method!.Name == nameof(InternalScript.SomeUndefindedInternalMethod));
-        Assert.IsTrue(ex.Method.ReturnType == "Task`1");
+        Console.WriteLine(ex.Method.ReturnType);
+        Assert.IsTrue(ex.Method.ReturnType == "string");
 
         sourceCode = TestHelper.GetSC().undefinedMethodsScriptStatic;
 
         ex = await Assert.ThrowsExceptionAsync<UndefinedMethodException>(async () =>
             {
-                ValidationRecord vr = ScriptManager.BasicValidationBeforeCompiling(sourceCode);
+                ValidationRecord vr3 = ScriptManager.BasicValidationBeforeCompiling(sourceCode);
             });
+
+        // returns: Ember.Scripting.Compilation.UndefinedMethodException: No new methods allowed that are not predefinded!MethodRecord: Name: SomeUndefindedStaticMethod, ReturnType: Task`1, Parameters: System.Collections.Generic.List`1[Ember.Scripting.Compilation.ParameterRecord] 
 
         Console.WriteLine(ex.Method);
         Assert.IsTrue(ex.Method!.Name == nameof(StaticScript.SomeUndefindedStaticMethod));
-        Assert.IsTrue(ex.Method.ReturnType == "Task`1");
+        Assert.IsTrue(ex.Method.ReturnType == "string");
 
         // Assert.IsFalse(true);
     }

@@ -172,7 +172,7 @@ internal class ScriptCompiler
 
             Type scriptType = scriptType = CustomerScript.GetScriptType(parentSymbol.Name);
 
-            List<MethodRecord> methods = ValidateOnlyInheritedMethodsAndReturn(tree!, model);
+            List<MethodRecord> methods =
             ValidateScriptMethodTypes(tree!, model, parentSymbol);
             int? executionTime = GetExecutionTime(tree);
             ValidateLoopsHavingCancellation(tree!);
@@ -290,12 +290,15 @@ internal class ScriptCompiler
         return foundRecord;
     }
 
-    public void ValidateScriptMethodTypes(SyntaxTree tree, SemanticModel semanticModel, INamedTypeSymbol baseType)
+    public List<MethodRecord> ValidateScriptMethodTypes(SyntaxTree tree, SemanticModel semanticModel, INamedTypeSymbol baseType)
     {
+        List<MethodRecord> justToReturn = [];
+
         if (baseType.IsGenericType == false)
         {
             SyntaxNode root = tree.GetRoot();
             IEnumerable<MethodDeclarationSyntax> scriptMethods = root.DescendantNodes().OfType<MethodDeclarationSyntax>();
+
 
             ScriptMetaDataRecord record = GetMetaDataRecord(baseType);
 
@@ -315,6 +318,7 @@ internal class ScriptCompiler
                     // continue;   //skips protected methods
                 }
                 MethodRecord scriptMethod = MethodRecord.GetMethodRecord(semanticModel.GetDeclaredSymbol(scriptMethodMDS)!);
+                justToReturn.Add(scriptMethod);
 
                 MethodRecord? foundMethod = null;
                 foreach (var definedMeth in record.Methods)
@@ -330,7 +334,7 @@ internal class ScriptCompiler
                 }
                 if (foundMethod == null)
                 {
-                    throw new CouldNotFindMethodTypeException("no method found, scriptMethod: " + scriptMethod.Name);
+                    throw new UndefinedMethodException(message: "No new methods allowed that are not predefinded!" + scriptMethod.ToString(), scriptMethod);
                 }
                 if (scriptMethod.ReturnType != foundMethod.ReturnType)
                 {
@@ -357,7 +361,7 @@ internal class ScriptCompiler
                 }
             }
         }
-
+        return justToReturn;
     }
     private string GetFullyQualifiedName(ITypeSymbol symbol)
     {
@@ -389,146 +393,6 @@ internal class ScriptCompiler
         }
         return executionTime;
     }
-
-    private List<MethodRecord> ValidateOnlyInheritedMethodsAndReturn(SyntaxTree tree, SemanticModel semanticModel)
-    {
-        List<MethodRecord> result = [];
-
-        SyntaxNode root = tree.GetRoot();
-        IEnumerable<MethodDeclarationSyntax> methods = root.DescendantNodes().OfType<MethodDeclarationSyntax>();
-        List<MethodRecord> methodsRoslyn = GetMethodsRoslyn(methods, semanticModel);
-
-        IEnumerable<Type> validScriptMethods = AppDomain.CurrentDomain.GetAssemblies()  //get rid of this, bug: passes methods that are implemented in for example diffrent IGeneratorScript_V4.GenScript
-                   .SelectMany(a => a.GetTypes())
-                   .Where(t => t.IsInterface
-                            && typeof(IScriptMethod).IsAssignableFrom(t)
-                            && t != typeof(IScriptMethod)).ToList();
-
-
-        List<MethodRecord> methodsAssembly = GetMethodsAssembly(validScriptMethods);
-
-        foreach (var meth1 in methodsRoslyn)
-        {
-            bool isInside = false;
-            foreach (var meth2 in methodsAssembly)
-            {
-                if (MethodRecord.IsTheSame(meth1, meth2))
-                {
-                    isInside = true;
-                    result.Add(meth1);
-                }
-                else
-                {
-                    // Console.WriteLine("Method from Assembly that wasnt found: " + meth2);
-                }
-            }
-            if (isInside == false)
-            {
-                // Console.WriteLine("Method from Roslyn: " + meth1);
-                // Console.WriteLine("Method from Roslyn: "+meth2);
-                throw new UndefinedMethodException(message: "No new methods allowed that are not predefinded!" + meth1, meth1);
-            }
-        }
-        return result;
-    }
-
-    private List<MethodRecord> GetMethodsRoslyn(IEnumerable<MethodDeclarationSyntax> methods, SemanticModel semanticModel)
-    {
-        List<MethodRecord> result = [];
-
-        foreach (var method in methods)
-        {
-            if (method.Modifiers.Any(SyntaxKind.PrivateKeyword))
-            {
-                continue;   //skips private methods
-            }
-            if (method.Modifiers.Any(SyntaxKind.InternalKeyword))
-            {
-                // continue;   //skips internal methods
-            }
-            if (method.Modifiers.Any(SyntaxKind.ProtectedKeyword))
-            {
-                // continue;   //skips protected methods
-            }
-
-            IMethodSymbol methodSymbol = semanticModel.GetDeclaredSymbol(method)!;
-
-            string methodName = methodSymbol.Name;
-            ITypeSymbol returnType = methodSymbol.ReturnType;
-
-            // int iterations = 0;
-            // while (returnType is INamedTypeSymbol namedTypeSymbol && namedTypeSymbol.IsGenericType && iterations < 100)
-            // {
-            //     // Match against the open generic type definition of Task<T>
-            //     if (namedTypeSymbol.OriginalDefinition.ToDisplayString() == "System.Threading.Tasks.Task<TResult>")
-            //     {
-            //         // Extract the inner type T
-            //         returnType = namedTypeSymbol.TypeArguments[0];
-            //     }
-            // }
-            // if (iterations > 98)
-            // {
-            //     throw new Exception();
-            // }
-            string returnTypeString = returnType.MetadataName;
-            List<ParameterRecord> resultParams = [];
-
-            foreach (IParameterSymbol paramSymbol in methodSymbol.Parameters)
-            {
-                // try
-                // {
-                string paramName = paramSymbol.Name;
-                string paramType = paramSymbol.Type.MetadataName;
-
-                resultParams.Add(new ParameterRecord { Name = paramName, ReturnType = paramType });
-                // }
-                // catch { continue; }
-            }
-            result.Add(new MethodRecord { Name = methodName, ReturnType = returnTypeString, Parameters = resultParams });
-        }
-
-        return result;
-    }
-    private List<MethodRecord> GetMethodsAssembly(IEnumerable<Type> types)
-    {
-        List<MethodRecord> result = [];
-
-
-        BindingFlags flags =
-                            BindingFlags.NonPublic |
-                            BindingFlags.Public |
-                            BindingFlags.Instance |
-                            BindingFlags.Static;
-        foreach (var t in types)
-        {
-            MethodInfo[] methodsInType = t.GetMethods(flags);
-            foreach (var m in methodsInType)
-            {
-                string methodName = m.Name;
-                string returnType = m.ReturnType.Name;
-                ParameterInfo[] parameters = m.GetParameters();
-
-                List<ParameterRecord> resultParams = [];
-                foreach (ParameterInfo param in parameters)
-                {
-                    try
-                    {
-                        string paramName = param.Name!;
-                        string paramType = param.ParameterType.Name;
-                        resultParams.Add(new ParameterRecord { Name = paramName, ReturnType = paramType });
-                    }
-                    catch
-                    {
-                        continue;
-                    }
-                }
-                result.Add(new MethodRecord { Name = methodName, ReturnType = returnType, Parameters = resultParams });
-            }
-        }
-
-        return result;
-    }
-
     private void ValidateLoopsHavingCancellation(SyntaxTree tree)
     {
         var root = tree.GetRoot();
