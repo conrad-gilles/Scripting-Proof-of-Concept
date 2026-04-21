@@ -1,4 +1,5 @@
 ask claude if Downgradeable really should be in sandbox?
+write test for renamed method etc
 ask claude if i should merge sandbox and ember projects
 ask claude about upgradeactionresult in EmberMethods
 extract the monaco error mapping maybe to the BlazorUI

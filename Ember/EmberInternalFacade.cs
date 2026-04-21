@@ -17,33 +17,18 @@ internal class EmberInternalFacade
 
     private async Task<object> BaseExecute(Guid id, RecentContext ctx, string methodName)
     {
-        var cf = new ContextManagement(_scriptManager);
         CustomerScript script = await _scriptManager.GetScript(id);
         // methodName = MethodNameFactory.GetOldMethodName(methodName, script.MinApiVersion, script.GetScriptType());
-        Context context = await cf.CreateByDowngrade(script.ScriptApiVersion, ctx);
+        Context context = await CreateByDowngrade(script.ScriptApiVersion, ctx);
         return await _scriptManager.ExecuteScript(id, context, methodName: methodName);
     }
     private object CheckUpgradeActionResult(object result)
     {
         if (result is IUpgradeableReturnValue upgradeableReturnValue)
         {
-            // return upgradeableReturnValue.Upgrade(result);
             return UpgradeManager.UpgradeCustomReturn(result);
         }
         return result;
-        // if (result is ActionResultSF)
-        // {
-        //     return (RecentActionResult)EmberMethods.UpgradeActionResult(result);
-        // }
-        // if (result.GetType() == typeof(bool))
-        // {
-        //     return result;
-        // }
-        // if (result.GetType() == typeof(string))
-        // {
-        //     return result;
-        // }
-        // throw new Exception(message: "Type was" + result.GetType().Name);
     }
     internal async Task<object> ExecuteScript(Guid id, RecentContext ctx, string methodName)
     {
@@ -58,9 +43,8 @@ internal class EmberInternalFacade
     }
     public async Task<object> ExecuteUnfinishedScriptBySourceCode(string sourceCode, RecentContext context, string methodName)
     {
-        var cf = new ContextManagement(_scriptManager);
         ValidationRecord vali = _scriptManager.BasicValidationBeforeCompiling(sourceCode);
-        Context ctx = await cf.CreateByDowngrade(vali.Version, context);
+        Context ctx = await CreateByDowngrade(vali.Version, context);
 
         var result = await _scriptManager.ExecuteUnfinishedScriptBySourceCode(sourceCode, ctx, methodName: methodName);
 
@@ -80,6 +64,10 @@ internal class EmberInternalFacade
             return (TScript)toReturn;
         }
         throw new Exception();
+    }
+    public static async Task<Context> CreateByDowngrade(int desiredVersion, RecentContext ctx)
+    {
+        return await ContextManager.CreateByDowngrade(desiredVersion, ctx);
     }
 }
 internal class ConditionScriptFacade : RecentIConditionScript

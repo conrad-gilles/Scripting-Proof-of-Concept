@@ -87,9 +87,7 @@ public class SanboxTests
             {5, typeof(GeneratorContextNoInherVaccineV5.GeneratorContext)},
         };
 
-        ContextManagement sf;
         _facade = EmberMethods.GetNewScriptManagerInstance(1);
-        sf = new ContextManagement(_facade);
         Dictionary<int, Type> retrievedDict = ContextVersionScanner.GetClassDictionary();
         retrievedDict.Reverse();
         PrintDictToConsole(contextVersionMap);
@@ -270,7 +268,6 @@ public class SanboxTests
         RecentContext data = new RecentContext(labOrder: _obj!.labOrder, vaccine: _obj.vaccine);
 
         CustomerScript script;
-        ContextManagement sf;
         ValidationRecord valResult;
         object result;
         ActionResultV3.ActionResult ar;
@@ -281,8 +278,7 @@ public class SanboxTests
         valResult = _facade.BasicValidationBeforeCompiling(src!);
         script = (await _facade.CreateScript(src!));
 
-        sf = new ContextManagement(_facade);
-        Context ctx = await sf.CreateByDowngrade(script.ScriptApiVersion, data!);
+        Context ctx = await EmberInternalFacade.CreateByDowngrade(script.ScriptApiVersion, data!);
         Console.WriteLine("Type name: " + ctx.GetType().FullName);
 
         result = await _facade.ExecuteScript(script.Id, ctx, nameof(IExecuteAsync.ExecuteAsync));
@@ -294,8 +290,7 @@ public class SanboxTests
         valResult = _facade.BasicValidationBeforeCompiling(src!);
         script = (await _facade.CreateScript(src!));
 
-        sf = new ContextManagement(_facade);
-        ctx = await sf.CreateByDowngrade(script.ScriptApiVersion, data!);
+        ctx = await EmberInternalFacade.CreateByDowngrade(script.ScriptApiVersion, data!);
         Console.WriteLine("Type name: " + ctx.GetType().FullName);
 
         result = await _facade.ExecuteScript(script.Id, ctx, nameof(IExecuteAsync.ExecuteAsync));
@@ -307,8 +302,7 @@ public class SanboxTests
         valResult = _facade.BasicValidationBeforeCompiling(src!);
         script = (await _facade.CreateScript(src!));
 
-        sf = new ContextManagement(_facade);
-        ctx = await sf.CreateByDowngrade(script.ScriptApiVersion, data!);
+        ctx = await EmberInternalFacade.CreateByDowngrade(script.ScriptApiVersion, data!);
         Console.WriteLine("Type name: " + ctx.GetType().FullName);
 
         result = await _facade.ExecuteScript(script.Id, ctx, nameof(IExecuteAsync.ExecuteAsync));
@@ -320,8 +314,7 @@ public class SanboxTests
         valResult = _facade.BasicValidationBeforeCompiling(src!);
         script = (await _facade.CreateScript(src!));
 
-        sf = new ContextManagement(_facade);
-        ctx = await sf.CreateByDowngrade(script.ScriptApiVersion, data!);
+        ctx = await EmberInternalFacade.CreateByDowngrade(script.ScriptApiVersion, data!);
         Console.WriteLine("Type name: " + ctx.GetType().FullName);
 
         result = await _facade.ExecuteScript(script.Id, ctx, nameof(IEvaluateAsync.EvaluateAsync));
@@ -332,7 +325,7 @@ public class SanboxTests
 
 
         ////////////////////////////////////////////
-        ctx = await sf.CreateByDowngrade(script.ScriptApiVersion, data!);
+        ctx = await EmberInternalFacade.CreateByDowngrade(script.ScriptApiVersion, data!);
         result = await _facade.ExecuteScript(script.Id, ctx, nameof(IEvaluateAsync.EvaluateAsync));
 
 

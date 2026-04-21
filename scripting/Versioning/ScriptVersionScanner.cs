@@ -121,6 +121,122 @@ public static class ScriptVersionScanner
 
         return records;
     }
+    private static List<ScriptMetaDataRecord> GetBaseTypeDictionaryAI(Type baseType)
+    {
+        Dictionary<int, Type> contextVersionMap = new();
+        List<ScriptMetaDataRecord> records = [];
+
+        //The following six lines were ai generated
+        List<Type> subClasses = AppDomain.CurrentDomain.GetAssemblies()
+            // .SelectMany(assembly => assembly.GetTypes())
+            .SelectMany(assembly => VersionScannerHelper.GetLoadableTypes(assembly))
+            .Where(t => t.IsInterface && t.GetCustomAttribute<MetaDataIGeneratorScript>() != null)
+            .GroupBy(t => t.Namespace + "." + t.Name)
+            .Select(g => g.First())
+            .ToList();
+
+        for (int i = 0; i < subClasses.Count(); i++)
+        {
+            Type currentType = subClasses[i];
+
+            var metaDataAttribute = currentType.GetCustomAttribute<MetaDataIGeneratorScript>();
+
+            if (metaDataAttribute == null)
+            {
+                throw new MetaDataAttribueNullSVSException(message: nameof(metaDataAttribute) + " was mull, which means version would have been null.");
+            }
+            if (metaDataAttribute.Type == IGeneratorScriptType.AbstractBaseInSF
+            || metaDataAttribute.Type == IGeneratorScriptType.Generic
+            )
+            {
+                // throw new Exception(message: "Loop tried to instantiate a base type which it should not.");
+                continue;
+            }
+            if (metaDataAttribute.Type == IGeneratorScriptType.GenericSimple)
+            {
+                if (metaDataAttribute.ReturnType == IGeneratorScriptReturnType.Action)
+                {
+                    continue;
+                }
+            }
+
+            int version = metaDataAttribute.Version;
+            Type scriptType = currentType;
+            Type contextType = metaDataAttribute.ContextVersion;
+            Type arType = metaDataAttribute.ActionResultVersion;
+
+            // Extract method information using standard Reflection
+            List<MethodInfo> methodInfos = currentType.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly)
+                .Where(m => !m.IsSpecialName)
+                .ToList();
+
+            List<MethodRecord> methodRecords = new List<MethodRecord>();
+
+            foreach (var m in methodInfos)
+            {
+                // Note: For explicit interface implementations, m.Name contains dots (e.g., "IExecuteAsync.ExecuteAsync")
+                // We split by '.' and take the last part so it cleanly matches Roslyn's parsed method name.
+                string methodName = m.Name.Split('.').Last();
+
+                // Check if return type is Task<T> and extract T if true
+                string returnType = m.ReturnType.Name;
+                if (m.ReturnType.IsGenericType && m.ReturnType.GetGenericTypeDefinition() == typeof(Task<>))
+                {
+                    returnType = m.ReturnType.GetGenericArguments()[0].Name;
+                }
+
+                ParameterInfo[] parameters = m.GetParameters();
+
+                List<ParameterRecord> resultParams = new List<ParameterRecord>();
+                foreach (ParameterInfo param in parameters)
+                {
+                    try
+                    {
+                        string paramName = param.Name!;
+                        string paramType = param.ParameterType.Name;
+
+                        // Check if parameter type is Task<T> and extract T if true
+                        if (param.ParameterType.IsGenericType && param.ParameterType.GetGenericTypeDefinition() == typeof(Task<>))
+                        {
+                            paramType = param.ParameterType.GetGenericArguments()[0].Name;
+                        }
+
+                        resultParams.Add(new ParameterRecord { Name = paramName, ReturnType = paramType });
+                    }
+                    catch
+                    {
+                        continue;
+                    }
+                }
+                methodRecords.Add(new MethodRecord { Name = methodName, ReturnType = returnType, Parameters = resultParams });
+            }
+
+            if (contextVersionMap.Values.Contains(currentType))
+            {
+                throw new TypeMoreThanOnceInAssemblySVSException("Type was more than once in the assembly probably with more than 1 Version property");
+            }
+            if (contextVersionMap.ContainsKey(version))
+            {
+                throw new VersionIntMoreThanOnceInAssemblySVSException("Api version int more than once in the assembly should not happen.");
+            }
+
+            // Console.WriteLine("Version: " + version + ", CurrentType: " + currentType.Name + " , Type: " + metaDataAttribute.Type + " , ReturnType: " + metaDataAttribute.ReturnType);
+            contextVersionMap.Add(version, currentType);
+            ScriptMetaDataRecord temp = new ScriptMetaDataRecord
+            {
+                Version = version,
+                RetrievedType = currentType,
+                ScriptType = currentType.FullName!,
+                ContextType = contextType.FullName!,
+                ActionResultType = arType.FullName!,
+                Methods = methodRecords
+            };
+            records.Add(temp);
+
+        }
+
+        return records;
+    }
 }
 
 public record ScriptMetaDataRecord

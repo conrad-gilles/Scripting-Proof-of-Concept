@@ -278,7 +278,7 @@ public class SecurityTests
         {
         public async Task<ActionResultV2.ActionResult> ExecuteAsync(IGeneratorContext_V4.IGeneratorContext context)
         {
-        return ActionResultV3.ActionResult.Success("Default method ExecuteAsync was called");
+        return ActionResultV2.ActionResult.Success("Default method ExecuteAsync was called");
         }
 
         public async Task<ActionResultV3.ActionResult> Execute1(IGeneratorContext_V4.IGeneratorContext context)
