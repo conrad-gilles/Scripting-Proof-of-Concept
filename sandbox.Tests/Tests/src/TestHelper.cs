@@ -240,11 +240,11 @@ public class TestHelper
 
     public static string GetMethodNameAction()
     {
-        return nameof(IScriptMethodsAction.ExecuteAsync);
+        return nameof(RecentIActionScript.ExecuteAsync);
     }
     public static string GetMethodNameCond()
     {
-        return nameof(IScriptMethodsCondition.EvaluateAsync);
+        return nameof(RecentIConditionScript.EvaluateAsync);
     }
 
 }

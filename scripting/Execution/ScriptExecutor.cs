@@ -29,12 +29,12 @@ internal class ScriptExecutor(ILogger<ScriptExecutor> logger)
         try
         {
             type = assembly.GetTypes()
-                .Single(t => t.IsClass && !t.IsAbstract && typeof(IScriptMethod).IsAssignableFrom(t));
+                .Single(t => t.IsClass && !t.IsAbstract && typeof(IScriptVersion).IsAssignableFrom(t));
         }
         catch (InvalidOperationException)
         {
             var matches = assembly.GetTypes()
-                .Where(t => t.IsClass && !t.IsAbstract && typeof(IScriptMethod).IsAssignableFrom(t))
+                .Where(t => t.IsClass && !t.IsAbstract && typeof(IScriptVersion).IsAssignableFrom(t))
                 .ToList();
 
             if (matches.Count == 0)

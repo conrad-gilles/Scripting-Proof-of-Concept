@@ -88,7 +88,7 @@ public class EmberVersioningTests
         {
             CustomerScript retrievedScript = await facade!.GetScript(id);
             var context = TestHelper.GetContext();
-            object resultBeforeUpgrade = await _eif!.ExecuteScript(id, context, nameof(IExecuteAsync.ExecuteAsync));   //here somehow figure out how to get the version that is being executed todo
+            object resultBeforeUpgrade = await _eif!.ExecuteScript(id, context, nameof(RecentIActionScript.ExecuteAsync));   //here somehow figure out how to get the version that is being executed todo
 
             if (resultBeforeUpgrade is ActionResultBase)
             {

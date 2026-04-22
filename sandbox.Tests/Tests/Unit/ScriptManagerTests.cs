@@ -56,7 +56,7 @@ public class ScriptManagerFacadeTests
         Guid id = (await _scriptManager!.CreateScript(_sourceCodePedia!, apiVersion: 2)).Id;
         CustomerScript retrievedScript = await _scriptManager.GetScript(id);
         var context = TestHelper.GetContext();
-        await _emberScriptManager!.ExecuteScript(retrievedScript.Id, context, nameof(IEvaluateAsync.EvaluateAsync));
+        await _emberScriptManager!.ExecuteScript(retrievedScript.Id, context, nameof(RecentIConditionScript.EvaluateAsync));
 
         Assert.AreEqual(retrievedScript.SourceCode, _sourceCodePedia);
     }
@@ -374,7 +374,7 @@ public class ScriptManagerFacadeTests
         Guid id = (await _scriptManager!.CreateScript(_sourceCodeActionV1!)).Id;
         var testingContext = TestHelper.GetContext();
 
-        ActionResultBase result = (ActionResultBase)await _emberScriptManager!.ExecuteScript(id, testingContext, nameof(IExecuteAsync.ExecuteAsync));
+        ActionResultBase result = (ActionResultBase)await _emberScriptManager!.ExecuteScript(id, testingContext, nameof(RecentIActionScript.ExecuteAsync));
 
         Assert.IsNotNull(result);
         // Assert.IsTrue(result.IsSuccess);
@@ -385,7 +385,7 @@ public class ScriptManagerFacadeTests
         Guid id2 = (await _scriptManager.CreateScript(_sourceCodePedia!)).Id;
         await Assert.ThrowsExceptionAsync<System.InvalidCastException>(async () =>
         {
-            ActionResultBase result2 = (ActionResultBase)await _emberScriptManager.ExecuteScript(id2, testingContext, nameof(IEvaluateAsync.EvaluateAsync));
+            ActionResultBase result2 = (ActionResultBase)await _emberScriptManager.ExecuteScript(id2, testingContext, nameof(RecentIConditionScript.EvaluateAsync));
         });
 
     }
@@ -396,7 +396,7 @@ public class ScriptManagerFacadeTests
         Guid id = (await _scriptManager!.CreateScript(_sourceCodePedia!)).Id;
         var testingContext = TestHelper.GetContext();
 
-        bool result = (bool)await _emberScriptManager!.ExecuteScript(id, testingContext, nameof(IEvaluateAsync.EvaluateAsync));
+        bool result = (bool)await _emberScriptManager!.ExecuteScript(id, testingContext, nameof(RecentIConditionScript.EvaluateAsync));
 
         Assert.IsNotNull(result);
         Assert.IsTrue(result.GetType().ToString() == "System.Boolean");
@@ -404,7 +404,7 @@ public class ScriptManagerFacadeTests
         Guid id2 = (await _scriptManager.CreateScript(_sourceCodeActionV1!)).Id;
         await Assert.ThrowsExceptionAsync<System.InvalidCastException>(async () =>
         {
-            bool result2 = (bool)await _emberScriptManager.ExecuteScript(id2, testingContext, nameof(IExecuteAsync.ExecuteAsync));
+            bool result2 = (bool)await _emberScriptManager.ExecuteScript(id2, testingContext, nameof(RecentIActionScript.ExecuteAsync));
         });
     }
 
@@ -414,12 +414,12 @@ public class ScriptManagerFacadeTests
         var context = TestHelper.GetContext();
 
         Guid condId = (await _scriptManager!.CreateScript(_sourceCodePedia!)).Id;
-        object condResult = await _emberScriptManager!.ExecuteScript(condId, context, nameof(IEvaluateAsync.EvaluateAsync));
+        object condResult = await _emberScriptManager!.ExecuteScript(condId, context, nameof(RecentIConditionScript.EvaluateAsync));
         Assert.IsInstanceOfType(condResult, typeof(bool));
         Assert.AreEqual(true, (bool)condResult);
 
         Guid actId = (await _scriptManager.CreateScript(_sourceCodeActionV1!)).Id;
-        object actResult = await _emberScriptManager!.ExecuteScript(actId, context, nameof(IExecuteAsync.ExecuteAsync));
+        object actResult = await _emberScriptManager!.ExecuteScript(actId, context, nameof(RecentIActionScript.ExecuteAsync));
         Assert.IsInstanceOfType(actResult, typeof(ActionResultBase));
         // Assert.IsTrue(((ActionResultBaseClass)actResult).IsSuccess);
     }
@@ -430,7 +430,7 @@ public class ScriptManagerFacadeTests
         string sourceCode = TestHelper.GetSC().sourceCodeActionV3;
         RecentContext ctx = TestHelper.GetContext();
         EmberInternalFacade eif = new EmberInternalFacade(_scriptManager!);
-        object ar = await eif.ExecuteUnfinishedScriptBySourceCode(sourceCode, ctx, nameof(IExecuteAsync.ExecuteAsync));
+        object ar = await eif.ExecuteUnfinishedScriptBySourceCode(sourceCode, ctx, nameof(RecentIActionScript.ExecuteAsync));
 
 
         Assert.IsTrue(ar != null);

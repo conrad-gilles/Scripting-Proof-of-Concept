@@ -55,7 +55,7 @@ public class MultiMethodScriptTests
 
         // if no specific method defined fall back to default
         ar = (RecentActionResult)await InternalScriptManager!.ExecuteScript<IActionScript>
-        (script.ScriptName!, TestHelper.GetContext(), nameof(IExecuteAsync.ExecuteAsync));
+        (script.ScriptName!, TestHelper.GetContext(), nameof(RecentIActionScript.ExecuteAsync));
 
         Console.WriteLine(ar.ToString());
         Assert.IsTrue(ar.ToString().Contains("Default method ExecuteAsync was called"));
@@ -209,12 +209,12 @@ public class MultiMethodScriptTests
         CustomerScript scriptDB = await ScriptManager.CreateScript(sourceCode);
 
         // RecentActionResult ar = (RecentActionResult)await InternalScriptManager.ExecuteScript<IGeneratorActionScript>(scriptDB.ScriptName!, TestHelper.GetContext());
-        RecentIActionScript script = (RecentIActionScript)InternalScriptManager.GetScript<RecentIActionScript>(scriptDB.ScriptName!);
+        var script = InternalScriptManager.GetScript<IActionScript>(scriptDB.ScriptName!);
         RecentActionResult ar = await script.ExecuteAsync(TestHelper.GetContext());
         Assert.IsTrue(ar.ToString().Contains("Default method ExecuteAsync was called"));
 
         // ar = (RecentActionResult)await InternalScriptManager.Execute1<IGeneratorActionScript>(scriptDB.ScriptName!, TestHelper.GetContext());
-        script = (RecentIActionScript)InternalScriptManager.GetScript<RecentIActionScript>(scriptDB.ScriptName!);
+        script = InternalScriptManager.GetScript<IActionScript>(scriptDB.ScriptName!);
         ar = await script.Execute1(TestHelper.GetContext());
         Assert.IsTrue(ar.ToString().Contains("ExecuteAction1 was called"));
 
@@ -242,7 +242,7 @@ public class MultiMethodScriptTests
         CustomerScript scriptDB = await ScriptManager.CreateScript(sourceCode);
 
         //Getting the Script
-        RecentIActionScript script = InternalScriptManager.GetScript<RecentIActionScript>(scriptDB.ScriptName!);
+        var script = InternalScriptManager.GetScript<IActionScript>(scriptDB.ScriptName!);
 
         //Executing the first function
         RecentActionResult ar = (RecentActionResult)await script.ExecuteAsync(context);
@@ -262,7 +262,7 @@ public class MultiMethodScriptTests
         sourceCode = TestHelper.GetSC().sourceCodeVaccineAction;
         scriptDB = await ScriptManager.CreateScript(sourceCode);
 
-        script = (RecentIActionScript)InternalScriptManager.GetScript<RecentIActionScript>(scriptDB.ScriptName!);
+        script = InternalScriptManager.GetScript<IActionScript>(scriptDB.ScriptName!);
 
         //Executing the first function that exists
         ar = (RecentActionResult)await script.ExecuteAsync(context);
@@ -283,7 +283,7 @@ public class MultiMethodScriptTests
         //Setting up a condition Script
         sourceCode = TestHelper.GetSC().sourceCodePedia;
         scriptDB = await ScriptManager.CreateScript(sourceCode);
-        RecentIConditionScript condScript = InternalScriptManager.GetScript<RecentIConditionScript>(scriptDB.ScriptName!);
+        var condScript = InternalScriptManager.GetScript<IConditionScript>(scriptDB.ScriptName!);
 
         //Executing the evaluate function
         bool result = await condScript.EvaluateAsync(context);
@@ -309,7 +309,7 @@ public class MultiMethodScriptTests
         CustomerScript scriptDB = await ScriptManager.CreateScript(sourceCode);
 
         //Getting the Script
-        RecentIActionScript script = InternalScriptManager.GetScript<RecentIActionScript>(scriptDB.ScriptName!);
+        ScriptFacade<IActionScript> script = InternalScriptManager.GetScript<IActionScript>(scriptDB.ScriptName!);
 
         //Executing the first function
         RecentActionResult ar = (RecentActionResult)await script.ExecuteAsync(context);

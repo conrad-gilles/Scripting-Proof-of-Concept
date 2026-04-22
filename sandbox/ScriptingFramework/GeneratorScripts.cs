@@ -1,18 +1,16 @@
 using Ember.Scripting;
-using Ember.Sandbox.ScriptMethods;
-
 namespace Ember.Sandbox.ScriptingFrameWork.ScriptTypes
 {
     [MetaDataIGeneratorScript(version: 1, returnType: IGeneratorScriptReturnType.Condition, type: IGeneratorScriptType.AbstractBaseInSF)]
     public interface IConditionScript : IScriptType
     {
-        // Task<bool> EvaluateAsync(IContext context);
+
     }
 
     [MetaDataIGeneratorScript(version: 1, returnType: IGeneratorScriptReturnType.Action, type: IGeneratorScriptType.AbstractBaseInSF)]
     public interface IActionScript : IScriptType
     {
-        // Task<ActionResultSF> ExecuteAsync(IContext context);
+
     }
 }
 
@@ -25,9 +23,8 @@ namespace GeneratorScriptsGenericSimple
     /// Implementation using 1 generic for Context
     /// </summary>
     [MetaDataIGeneratorScript(version: 1, returnType: IGeneratorScriptReturnType.Condition, type: IGeneratorScriptType.GenericSimple)]
-    public interface IConditionScript<TContext> :
-      IScriptMethodsCondition  //todo this needs to get tested still
-                               // where TContext : IGeneratorReadOnlyContextV1.IGeneratorContext
+    public interface IConditionScript<TContext>
+        : IScriptVersion
         where TContext : IContext
     {
         Task<bool> EvaluateAsync(TContext context)
@@ -36,8 +33,8 @@ namespace GeneratorScriptsGenericSimple
         }
     }
     [MetaDataIGeneratorScript(version: 1, returnType: IGeneratorScriptReturnType.Action, type: IGeneratorScriptType.GenericSimple)]
-    public interface IActionScript<TContext> :
-     IScriptMethodsAction
+    public interface IActionScript<TContext>
+    : IScriptVersion
     where TContext : IGeneratorContext_V2.IGeneratorContext
     {
 
@@ -54,9 +51,9 @@ namespace GeneratorScriptsGeneric
     /// Implementation using 2 generics, one for context and one additional for ActionResult
     /// </summary>
     [MetaDataIGeneratorScript(version: 1, returnType: IGeneratorScriptReturnType.Action, type: IGeneratorScriptType.Generic)]
-    public interface IActionScript<TContext, TActionResult> :
-     IScriptMethodsAction
-        where TContext : IContext    //changed from IGeneratorContext
+    public interface IActionScript<TContext, TActionResult>
+        : IScriptVersion
+        where TContext : IContext
         where TActionResult : ActionResultBase
     {
         Task<TActionResult> ExecuteAsync(TContext context)
@@ -74,8 +71,8 @@ namespace GeneratorScriptsGeneric
 namespace GeneratorScriptsV2
 {
     [MetaDataIGeneratorScript(version: 2)]
-    public interface IActionScript :
-      IScriptMethodsAction
+    public interface IActionScript
+    : IScriptVersion
     {
         Task<ActionResultV2.ActionResult> ExecuteAsync(IGeneratorContext_V3.IGeneratorContext context)
         {
@@ -85,10 +82,9 @@ namespace GeneratorScriptsV2
 }
 namespace GeneratorScriptsV3
 {
-    // public interface IGeneratorActionScript : Ember.Scripting.IGeneratorActionScript
-    // [MetaDataIGeneratorScript(version: 3)]
     [MetaDataIGeneratorScript(version: 3)]
-    public interface IActionScript : IScriptMethodsAction
+    public interface IActionScript
+        : IScriptVersion
     {
         Task<ActionResultV3.ActionResult> ExecuteAsync(IGeneratorContext_V4.IGeneratorContext context)
         {
@@ -111,8 +107,8 @@ namespace GeneratorScriptsV3
 namespace GeneratorScriptsV4
 {
     [MetaDataIGeneratorScript(version: 4)]
-    public interface IActionScript :
-     IScriptMethodsAction
+    public interface IActionScript
+    : IScriptVersion
     {
         Task<ActionResultV3.ActionResult> ExecuteAsync(IGeneratorContextNoInheritance_V5.IGeneratorContext context)
         {
@@ -133,18 +129,5 @@ namespace GeneratorScriptsV4
         }
     }
 }
-
-// public class GeneratorActionBaseClass : IGeneratorActionScript
-// {
-//     public Task<ActionResultSF> ExecuteAsyncXXX(IGeneratorBaseInterfaceSF context)
-//     {
-//         throw new NotImplementedException();
-//     }
-
-//     public IGeneratorActionScript Upgrade(GeneratorScriptsV3.IGeneratorActionScript script)
-//     {
-
-//     }
-// }
 
 

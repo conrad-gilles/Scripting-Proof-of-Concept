@@ -104,15 +104,28 @@ public class CrudDemos
         RecentContext ctx = factory.Create(labOrder, vaccine);
 
         RecentActionResult ar = (RecentActionResult)await InternalScriptManager!.ExecuteScript<IActionScript>
-        ("AddPediatricTestsV2", ctx, nameof(IExecuteAsync.ExecuteAsync));
+        ("AddPediatricTestsV2", ctx, nameof(RecentIActionScript.ExecuteAsync));
 
-        RecentIActionScript scriptInstance = InternalScriptManager.GetScript<RecentIActionScript>(script.ScriptName!);
+        ScriptFacade<IActionScript> scriptInstance = InternalScriptManager.GetScript<IActionScript>(script.ScriptName!);
 
         ar = await scriptInstance.ExecuteAsync(ctx);
-        // ar = (ActiveActionResult)await InternalScriptManager.Execute1<IGeneratorActionScript>
-        // ("AddPediatricTestsV2", ctx);
+        Assert.IsTrue(ar.ToString().Contains("[Message contains either failure or succes: ] Pediatric tests added"));
 
-        // ar = (ActiveActionResult)await InternalScriptManager.Execute2<IGeneratorActionScript>
-        // ("AddPediatricTestsV2", ctx);
+        await Assert.ThrowsExceptionAsync<CouldNotFindMethodException>(async () =>
+        {
+            bool conditionResult = await scriptInstance.EvaluateAsync(ctx);
+        });
+
+
+        sourceCode = TestHelper.GetSC().sourceCodeMultiMethodScripts;
+        script = await ScriptManager!.CreateScript(sourceCode!);
+
+        scriptInstance = InternalScriptManager.GetScript<IActionScript>(script.ScriptName!);
+        ar = await scriptInstance.Execute1(ctx);
+
+        Assert.IsTrue(ar.ToString().Contains("[Message contains either failure or succes: ] ExecuteAction1 was called"));
+
+        string strResult = await scriptInstance.Execute3(ctx);
+        Assert.IsTrue(strResult.Contains("successfully returned"));
     }
 }

@@ -44,7 +44,7 @@ async Task SetupAsync()
         Guid id = (await _facade!.CreateScript(_sourceCodeActionV1!)).Id;
         CustomerScript retrievedScript = await _facade.GetScript(id);
         var context = TestHelper.GetContext();
-        object resultBeforeUpgrade = await _eif!.ExecuteScript(id, context, nameof(IExecuteAsync.ExecuteAsync));
+        object resultBeforeUpgrade = await _eif!.ExecuteScript(id, context, nameof(RecentIActionScript.ExecuteAsync));
         ActionResultV3.ActionResult result = (ActionResultV3.ActionResult)UpgradeManager.UpgradeCustomReturn(resultBeforeUpgrade);
         string shouldReturn = _actionResultVersionSpecific + "Pediatric tests added";
         Assert.IsInstanceOfType(result, typeof(ActionResultBase));
@@ -59,7 +59,7 @@ async Task SetupAsync()
         Guid id = (await _facade!.CreateScript(_sourceCodeActionV2!)).Id;
         CustomerScript retrievedScript = await _facade.GetScript(id);
         var context = TestHelper.GetContext();
-        object resultBeforeUpgrade = await _eif!.ExecuteScript(id, context, nameof(IExecuteAsync.ExecuteAsync));
+        object resultBeforeUpgrade = await _eif!.ExecuteScript(id, context, nameof(RecentIActionScript.ExecuteAsync));
         ActionResultV3.ActionResult result = (ActionResultV3.ActionResult)UpgradeManager.UpgradeCustomReturn(resultBeforeUpgrade);
         string shouldReturn = _actionResultVersionSpecific + "Pediatric tests added";
         Assert.IsInstanceOfType(result, typeof(ActionResultBase));
@@ -74,7 +74,7 @@ async Task SetupAsync()
         Guid id = (await _facade!.CreateScript(_sourceCodeActionV3!)).Id;
         CustomerScript retrievedScript = await _facade.GetScript(id);
         var context = TestHelper.GetContext();
-        object resultBeforeUpgrade = await _eif!.ExecuteScript(id, context, nameof(IExecuteAsync.ExecuteAsync));
+        object resultBeforeUpgrade = await _eif!.ExecuteScript(id, context, nameof(RecentIActionScript.ExecuteAsync));
         ActionResultV3.ActionResult result = (ActionResultV3.ActionResult)UpgradeManager.UpgradeCustomReturn(resultBeforeUpgrade);
         string shouldReturn = _actionResultVersionSpecific + "Pediatric tests added V3";
         Assert.IsInstanceOfType(result, typeof(ActionResultBase));
@@ -89,7 +89,7 @@ async Task SetupAsync()
         Guid id = (await _facade!.CreateScript(_sourceCodeVaccineAction!)).Id;
         CustomerScript retrievedScript = await _facade.GetScript(id);
         var context = TestHelper.GetContext();
-        object result = await _facade.ExecuteScript(id, context, nameof(IExecuteAsync.ExecuteAsync));
+        object result = await _facade.ExecuteScript(id, context, nameof(RecentIActionScript.ExecuteAsync));
         string shouldReturn = _actionResultVersionSpecific + "Polio Vaccine added";
         Assert.IsInstanceOfType(result, typeof(ActionResultBase));
         Assert.IsInstanceOfType(result, typeof(ActionResultV3.ActionResult));
@@ -104,7 +104,7 @@ async Task SetupAsync()
         Guid id = (await _facade!.CreateScript(_sourceCodePedia!)).Id;
         CustomerScript retrievedScript = await _facade.GetScript(id);
         var context = TestHelper.GetContext();
-        object result = await _eif!.ExecuteScript(id, context, nameof(IEvaluateAsync.EvaluateAsync));
+        object result = await _eif!.ExecuteScript(id, context, nameof(RecentIConditionScript.EvaluateAsync));
         string shouldReturn = "True";
         Assert.IsInstanceOfType(result, typeof(bool));
         Assert.IsTrue(result.ToString()!.Contains(shouldReturn));
@@ -135,7 +135,7 @@ async Task SetupAsync()
     {
         // await facade!.EnsureDeletedCreated();
         await _facade!.DeleteAllData();
-        // await rm!.CompileAllScriptsInFolderAndSaveToDB(path, nameof(IExecuteAsync.ExecuteAsync), await facade.GetRecentApiVersion());
+        // await rm!.CompileAllScriptsInFolderAndSaveToDB(path, nameof(RecentIActionScript.ExecuteAsync), await facade.GetRecentApiVersion());
 
         Guid id = (await _facade!.CreateScript(_sourceCodePedia!)).Id;
         CustomerScript retrievedScript = await _facade.GetScript(id);
@@ -143,7 +143,7 @@ async Task SetupAsync()
         DateTime? beforeUpdateMA = retrievedScript.ModifiedAt;
 
         var context = TestHelper.GetContext();
-        object result = await _eif!.ExecuteScript(id, context, nameof(IEvaluateAsync.EvaluateAsync));
+        object result = await _eif!.ExecuteScript(id, context, nameof(RecentIConditionScript.EvaluateAsync));
 
         await Task.Delay(2000);
         await _facade!.UpdateScript(retrievedScript.Id, "new source code doesnt matter if wrong shoudl save to db", allowFaultySave: true);

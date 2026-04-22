@@ -281,7 +281,7 @@ public class SanboxTests
         Context ctx = await EmberInternalFacade.CreateByDowngrade(script.ScriptApiVersion, data!);
         Console.WriteLine("Type name: " + ctx.GetType().FullName);
 
-        result = await _facade.ExecuteScript(script.Id, ctx, nameof(IExecuteAsync.ExecuteAsync));
+        result = await _facade.ExecuteScript(script.Id, ctx, nameof(RecentIActionScript.ExecuteAsync));
         ar = (ActionResultV3.ActionResult)UpgradeManager.UpgradeCustomReturn(result);
         Console.WriteLine(ar.ToString());
         Assert.IsInstanceOfType(ar, typeof(ActionResultV3.ActionResult));
@@ -293,7 +293,7 @@ public class SanboxTests
         ctx = await EmberInternalFacade.CreateByDowngrade(script.ScriptApiVersion, data!);
         Console.WriteLine("Type name: " + ctx.GetType().FullName);
 
-        result = await _facade.ExecuteScript(script.Id, ctx, nameof(IExecuteAsync.ExecuteAsync));
+        result = await _facade.ExecuteScript(script.Id, ctx, nameof(RecentIActionScript.ExecuteAsync));
         ar = (ActionResultV3.ActionResult)UpgradeManager.UpgradeCustomReturn(result);
         Console.WriteLine(ar.ToString());
         Assert.IsInstanceOfType(ar, typeof(ActionResultV3.ActionResult));
@@ -305,7 +305,7 @@ public class SanboxTests
         ctx = await EmberInternalFacade.CreateByDowngrade(script.ScriptApiVersion, data!);
         Console.WriteLine("Type name: " + ctx.GetType().FullName);
 
-        result = await _facade.ExecuteScript(script.Id, ctx, nameof(IExecuteAsync.ExecuteAsync));
+        result = await _facade.ExecuteScript(script.Id, ctx, nameof(RecentIActionScript.ExecuteAsync));
         ar = (ActionResultV3.ActionResult)UpgradeManager.UpgradeCustomReturn(result);
         Console.WriteLine(ar.ToString());
         Assert.IsInstanceOfType(ar, typeof(ActionResultV3.ActionResult));
@@ -317,7 +317,7 @@ public class SanboxTests
         ctx = await EmberInternalFacade.CreateByDowngrade(script.ScriptApiVersion, data!);
         Console.WriteLine("Type name: " + ctx.GetType().FullName);
 
-        result = await _facade.ExecuteScript(script.Id, ctx, nameof(IEvaluateAsync.EvaluateAsync));
+        result = await _facade.ExecuteScript(script.Id, ctx, nameof(RecentIConditionScript.EvaluateAsync));
         // ar = EmberMethods.UpgradeActionResult(result);
         Console.WriteLine(result.ToString());
 
@@ -326,7 +326,7 @@ public class SanboxTests
 
         ////////////////////////////////////////////
         ctx = await EmberInternalFacade.CreateByDowngrade(script.ScriptApiVersion, data!);
-        result = await _facade.ExecuteScript(script.Id, ctx, nameof(IEvaluateAsync.EvaluateAsync));
+        result = await _facade.ExecuteScript(script.Id, ctx, nameof(RecentIConditionScript.EvaluateAsync));
 
 
         // Assert.IsTrue(false);
