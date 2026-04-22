@@ -1,3 +1,4 @@
+using Microsoft.CodeAnalysis.Emit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -233,7 +234,7 @@ internal class ScriptRepository
             // throw new FacadeException(e.ToString(), e);
         }
     }
-    public async Task<List<ScriptCompilationError>> GetCompilationErrors(string sourceCode)
+    public async Task<EmitResult?> GetCompilationErrors(string sourceCode)
     {
         ValidationRecord? metaData = null;
         try
@@ -249,11 +250,11 @@ internal class ScriptRepository
             _compiler.RunCompilation(sourceCode);
             // throw new NoErrorsInScriptException("No error was in the Source Code.");
             List<ScriptCompilationError> returnList = [];
-            return returnList;
+            return null;
         }
         catch (CompilationFailedException e)
         {
-            return e.Errors;
+            return e.EmitResult!;
         }
     }
 

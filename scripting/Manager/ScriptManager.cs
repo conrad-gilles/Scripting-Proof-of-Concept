@@ -1,3 +1,4 @@
+using Microsoft.CodeAnalysis.Emit;
 using Microsoft.Extensions.Logging;
 
 namespace Ember.Scripting.Manager;
@@ -134,7 +135,7 @@ internal class ScriptManager(
         return await _db.GetCompilationErrors(scriptId);
     }
 
-    public async Task<List<ScriptCompilationError>> GetCompilationErrors(string sourceCode)
+    public async Task<EmitResult?> GetCompilationErrors(string sourceCode)
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName} with sourceCode: {sourceCode}.", nameof(GetCompilationErrors), nameof(ScriptManager), sourceCode);
         return await _db.GetCompilationErrors(sourceCode);

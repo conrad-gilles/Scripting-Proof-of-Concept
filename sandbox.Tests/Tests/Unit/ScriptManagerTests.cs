@@ -342,7 +342,7 @@ public class ScriptManagerFacadeTests
     {
         Guid id = Guid.NewGuid();
         string sourceCode = "wrong input test could be whatever";
-        List<ScriptCompilationError> result1 = await _scriptManager!.GetCompilationErrors(sourceCode);
+        List<ScriptCompilationError> result1 = EmberMethods.ParseCompilationErrors(await _scriptManager!.GetCompilationErrors(sourceCode));
 
         var expectedErrorIds = new List<string> { "CS1003", "CS1002", "CS8805", "CS0246" };
 
@@ -358,7 +358,7 @@ public class ScriptManagerFacadeTests
         sourceCode = TestHelper.GetSC().sourceCodeActionV2;
         // Exception ex = await Assert.ThrowsExceptionAsync<NoErrorsInScriptException>(async () =>
         // {
-        result1 = await _scriptManager!.GetCompilationErrors(sourceCode);
+        result1 = EmberMethods.ParseCompilationErrors(await _scriptManager!.GetCompilationErrors(sourceCode));
         // });
         List<ScriptCompilationError> expected = [];
         CollectionAssert.IsSubsetOf(expected, result1);

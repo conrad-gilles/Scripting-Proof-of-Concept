@@ -43,7 +43,7 @@ public class SecurityTests
 
         ExceptionHelper.PrintExceptionListToConsole(ex);
 
-        foreach (var item in ex.Errors)
+        foreach (var item in ex.EmitResult.Diagnostics)
         {
             Console.WriteLine(item.ToString());
         }

@@ -1,3 +1,5 @@
+using Microsoft.CodeAnalysis.Emit;
+
 namespace Ember.Scripting.Manager;
 
 public interface IScriptManagerExtended : IScriptManager
@@ -91,7 +93,7 @@ public interface IScriptManagerExtended : IScriptManager
   /// <param name="apiVersion"></param>
   /// <returns></returns>
   Task<string> GetCompilationErrors(Guid scriptId);
-  Task<List<ScriptCompilationError>> GetCompilationErrors(string sourceCode);
+  Task<EmitResult?> GetCompilationErrors(string sourceCode);
 
   Task<bool> TryCompile(string script);
 

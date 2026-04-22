@@ -150,4 +150,54 @@ public class EmberMethods
         }
         // Source https://www.tutorialspoint.com/chash-program-to-create-string-from-contents-of-a-file //obv i changed a lot but i still copied
     }
+    //The following method statement was AI Generated
+    public static List<ScriptCompilationError> ParseCompilationErrors(Microsoft.CodeAnalysis.Emit.EmitResult? emitResult)
+    {
+        if (emitResult == null || emitResult.Success == true)
+        {
+            return [];
+        }
+
+        List<ScriptCompilationError> compilerErrors = emitResult.Diagnostics
+        .Where(d => d.IsWarningAsError || d.Severity == Microsoft.CodeAnalysis.DiagnosticSeverity.Error)
+        .Select(d =>
+        {
+            var hasLocation = d.Location != Location.None;
+            var lineSpan = hasLocation ? d.Location.GetLineSpan() : default;
+
+            int startLine = hasLocation ? lineSpan.StartLinePosition.Line + 1 : 1;
+            int startCol = hasLocation ? lineSpan.StartLinePosition.Character + 1 : 1;
+            int endLine = hasLocation ? lineSpan.EndLinePosition.Line + 1 : 1;
+            int endCol = hasLocation ? lineSpan.EndLinePosition.Character + 1 : 1;
+
+            // Force a minimum width of 1 character so Monaco actually draws a squiggly line.
+            // For CS0161 (missing return), Roslyn sometimes gives the exact method name location.
+            if (startLine == endLine && startCol == endCol)
+            {
+                endCol = startCol + 1; // Minimum 1 char width
+            }
+
+            return new ScriptCompilationError(
+                Id: d.Id,
+                Message: d.GetMessage(),
+                Line: startLine,
+                Column: startCol,
+                EndLine: endLine,
+                EndColumn: endCol,
+                IsError: d.Severity == Microsoft.CodeAnalysis.DiagnosticSeverity.Error
+            );
+        }).ToList();
+
+        Log.Error("Compilation failed with {ErrorCount} errors.", compilerErrors.Count);
+
+        string errorString = "Errors: ";
+        foreach (var error in compilerErrors)
+        {
+            errorString = errorString + error.ToString() + ", ";
+        }
+
+        // Throw passing the clean DTOs
+        // throw new CompilationFailedException("Compilation failed, " + errorString, compilerErrors);
+        return compilerErrors;
+    }
 }

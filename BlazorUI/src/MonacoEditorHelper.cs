@@ -10,6 +10,7 @@ using Ember.Scripting;
 using Ember.Simulation;
 using Microsoft.JSInterop;
 using Ember.Scripting.Compilation;
+using Serilog;
 
 namespace BlazorUI.Helpers
 {
@@ -89,7 +90,7 @@ namespace BlazorUI.Helpers
                     sourceCode = await _editor.GetValueAsync();
                 }
 
-                List<ScriptCompilationError> errors = await _scriptManager.GetCompilationErrors(sourceCode);
+                List<ScriptCompilationError> errors = EmberMethods.ParseCompilationErrors(await _scriptManager.GetCompilationErrors(sourceCode));
 
                 var monacoMarkers = errors.Select(e => new MonacoMarker
                 {
@@ -152,7 +153,7 @@ namespace BlazorUI.Helpers
         {
             var code = await _editor.GetValueAsync();
             await _editor.ClearErrorsAsync();
-            List<ScriptCompilationError> errors = await _scriptManager.GetCompilationErrors(code);
+            List<ScriptCompilationError> errors = EmberMethods.ParseCompilationErrors(await _scriptManager.GetCompilationErrors(code));
             var monacoMarkers = errors.Select(e => new MonacoMarker
             {
                 Message = $"{e.Id} - {e.Message}",

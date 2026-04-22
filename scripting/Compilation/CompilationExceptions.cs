@@ -9,16 +9,16 @@ public abstract class CompilationException : ScriptingFrameworkException
 }
 public class CompilationFailedException : CompilationException
 {
-    public List<ScriptCompilationError> Errors = [];
+    public Microsoft.CodeAnalysis.Emit.EmitResult? EmitResult = null;
 
     public CompilationFailedException() : base() { }
     public CompilationFailedException(string message) : base(message) { }
     public CompilationFailedException(string message, Exception innerException) : base(message, innerException) { }
 
-    public CompilationFailedException(string message, List<ScriptCompilationError> errors)
+    public CompilationFailedException(string message, Microsoft.CodeAnalysis.Emit.EmitResult emitResult)
         : base(message)
     {
-        Errors = errors;
+        EmitResult = emitResult;
     }
 }
 
