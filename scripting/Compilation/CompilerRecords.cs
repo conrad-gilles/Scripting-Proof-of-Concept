@@ -1,6 +1,4 @@
 using System.Reflection;
-using System.Reflection.Metadata.Ecma335;
-using Microsoft.CodeAnalysis;
 
 namespace Ember.Scripting.Compilation;
 

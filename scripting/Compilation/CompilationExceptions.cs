@@ -152,6 +152,14 @@ public class CouldNotFindParameterException : ValidationBeforeCompilationExcepti
         Method = method;
     }
 }
+public class RecordCouldNotBeMatchedException : ValidationBeforeCompilationException
+{
+    public Microsoft.CodeAnalysis.CSharp.Syntax.MethodDeclarationSyntax? Method { get; }
+
+    public RecordCouldNotBeMatchedException() : base() { }
+    public RecordCouldNotBeMatchedException(string message) : base(message) { }
+    public RecordCouldNotBeMatchedException(string message, Exception innerException) : base(message, innerException) { }
+}
 public class ForbiddenTypeAccessException : ForbiddenNamespaceException
 {
     public new string? AttemptedNamespace { get; }

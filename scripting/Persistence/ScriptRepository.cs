@@ -1,11 +1,5 @@
-using Microsoft.CodeAnalysis;
 using Microsoft.EntityFrameworkCore;
-using Ember.Scripting;
 using Microsoft.Extensions.Logging;
-using Microsoft.CodeAnalysis.Scripting;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
-using Ember.Scripting.Compilation;
 
 namespace Ember.Scripting.Persistence;
 

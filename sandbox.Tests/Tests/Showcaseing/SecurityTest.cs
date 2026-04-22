@@ -415,10 +415,10 @@ public class SecurityTests
         }
         }
         """;
-        // Assert.ThrowsException<WrongParameterTypeException>(() =>    //todo fix generic ones
-        // {
-        ScriptManager.BasicValidationBeforeCompiling(sourceCode);   //should throw
-        // });
+        Assert.ThrowsException<WrongParameterTypeException>(() =>    //todo fix generic ones
+        {
+            ScriptManager.BasicValidationBeforeCompiling(sourceCode);   //should throw
+        });
 
         sourceCode = """
         using System;

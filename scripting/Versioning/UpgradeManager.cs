@@ -1,4 +1,3 @@
-using System.Net.Http.Headers;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 
@@ -17,7 +16,7 @@ public static class UpgradeManager
 
         if (metaDataAttribute == null)
         {
-            throw new Exception("MetaDataCustomReturn attribute was null.");
+            throw new MetadDataAttributeNotDefinedException("MetaDataCustomReturn attribute was null.");
         }
 
         Dictionary<Type, List<ScannerRecord>> dict = GetClassDictionary();
@@ -34,7 +33,7 @@ public static class UpgradeManager
 
         if (foundList == null || foundList.Count == 0)
         {
-            throw new Exception($"No version list found for type {current.GetType().FullName}.");
+            throw new NoVersionListFoundException($"No version list found for type {current.GetType().FullName}.");
         }
 
         List<ScannerRecord> ordered = foundList.OrderBy(r => r.Version).ToList();
@@ -52,7 +51,7 @@ public static class UpgradeManager
 
             if (nextRecord == null)
             {
-                throw new Exception($"No next version found after version {currentVersion} for {current.GetType().FullName}.");
+                throw new NoNextVersionFoundException($"No next version found after version {currentVersion} for {current.GetType().FullName}.");
             }
 
             IUpgradeableReturnValue uninitializedNext = (IUpgradeableReturnValue)RuntimeHelpers.GetUninitializedObject(nextRecord.CustomReturnType);
@@ -63,9 +62,7 @@ public static class UpgradeManager
             }
             catch (TargetInvocationException ex)
             {
-                throw new Exception(
-                    $"Failed to upgrade from {current.GetType().Name} to {nextRecord.CustomReturnType.Name}.",
-                    ex.InnerException);
+                throw new UpgradeFailedException("Failed to upgrade from " + current.GetType().Name + " to " + nextRecord.CustomReturnType.Name + ".", ex.InnerException!);
             }
         }
         return current;

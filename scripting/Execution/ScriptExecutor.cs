@@ -1,10 +1,5 @@
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.Extensions.Logging;
 using System.Reflection;
-using System.Threading.Tasks;
-using Ember.Scripting.Compilation;
 
 namespace Ember.Scripting.Execution;
 

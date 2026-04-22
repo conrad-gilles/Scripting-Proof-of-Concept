@@ -1,8 +1,3 @@
-using Microsoft.CodeAnalysis;
-using Ember.Scripting.Compilation;
-using Ember.Scripting.Execution;
-using Ember.Scripting.Persistence;
-
 namespace Ember.Scripting.Manager;
 
 public interface IScriptManagerExtended : IScriptManager

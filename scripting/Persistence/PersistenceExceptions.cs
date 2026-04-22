@@ -88,3 +88,15 @@ public class NoErrorsInScriptException : PersistenceException
     public NoErrorsInScriptException(string message) : base(message) { }
     public NoErrorsInScriptException(string message, Exception innerException) : base(message, innerException) { }
 }
+public class CollisionOccuredException : PersistenceException
+{
+    public CollisionOccuredException() : base() { }
+    public CollisionOccuredException(string message) : base(message) { }
+    public CollisionOccuredException(string message, Exception innerException) : base(message, innerException) { }
+}
+public class ScriptTypeNotSetException : PersistenceException
+{
+    public ScriptTypeNotSetException() : base() { }
+    public ScriptTypeNotSetException(string message) : base(message) { }
+    public ScriptTypeNotSetException(string message, Exception innerException) : base(message, innerException) { }
+}

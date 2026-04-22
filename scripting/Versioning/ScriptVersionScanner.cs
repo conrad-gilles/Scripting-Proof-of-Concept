@@ -1,9 +1,4 @@
-using System.Net.Http.Headers;
 using System.Reflection;
-using System.Security.Cryptography.X509Certificates;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.CSharp;
-
 
 namespace Ember.Scripting.Versioning;
 
@@ -16,7 +11,6 @@ public static class ScriptVersionScanner
     }
     private static List<ScriptMetaDataRecord> GetBaseTypeDictionary(Type baseType)
     {
-        Dictionary<int, Type> contextVersionMap = new();
         List<ScriptMetaDataRecord> records = [];
 
         //The following six lines were ai generated
@@ -39,11 +33,18 @@ public static class ScriptVersionScanner
                 throw new MetaDataAttribueNullSVSException(message: nameof(metaDataAttribute) + " was mull, which means version would have been null.");
             }
             if (metaDataAttribute.Type == IGeneratorScriptType.AbstractBaseInSF
-            || metaDataAttribute.Type == IGeneratorScriptType.Generic
+            // || metaDataAttribute.Type == IGeneratorScriptType.Generic
             )
             {
                 // throw new Exception(message: "Loop tried to instantiate a base type which it should not.");
                 continue;
+            }
+            if (metaDataAttribute.Type == IGeneratorScriptType.Generic)
+            {
+                if (metaDataAttribute.ReturnType == IGeneratorScriptReturnType.Condition)
+                {
+                    continue;
+                }
             }
             if (metaDataAttribute.Type == IGeneratorScriptType.GenericSimple)
             {
@@ -101,17 +102,15 @@ public static class ScriptVersionScanner
                 methodRecords.Add(new MethodRecord { Name = methodName, ReturnType = returnType, Parameters = resultParams });
             }
 
-            if (contextVersionMap.Values.Contains(currentType))
+            if (records.Any(r => r.RetrievedType == currentType))
             {
-                throw new TypeMoreThanOnceInAssemblySVSException("Type was more than once in the assembly probably with more than 1 Version property");
+                // throw new TypeMoreThanOnceInAssemblySVSException("Type was more than once in the assembly probably with more than 1 Version property");
             }
-            if (contextVersionMap.ContainsKey(version))
+            var existingVersionRecord = records.FirstOrDefault(r => r.Version == version);
+            if (existingVersionRecord != null)
             {
-                throw new VersionIntMoreThanOnceInAssemblySVSException("Api version int more than once in the assembly should not happen.");
+                // throw new VersionIntMoreThanOnceInAssemblySVSException("Api version int: " + version + " more than once in the assembly should not happen. Tried to insert: " + currentType + ", but it was already used by: " + contextVersionMap[version]);
             }
-
-            // Console.WriteLine("Version: " + version + ", CurrentType: " + currentType.Name + " , Type: " + metaDataAttribute.Type + " , ReturnType: " + metaDataAttribute.ReturnType);
-            contextVersionMap.Add(version, currentType);
 
             if (contextType == typeof(IContext))
             {
@@ -181,23 +180,6 @@ public static class ScriptVersionScanner
 
         // 4. Fallback for custom objects, structs, or enums (e.g., ActionResultV3.ActionResult)
         return type.FullName ?? type.Name;
-    }
-}
-
-public record ScriptMetaDataRecord
-{
-    public required int Version { get; init; }
-    public required Type RetrievedType { get; init; }
-    public required string ScriptType { get; init; }
-    public required string ContextType { get; set; }
-    // public required string ActionResultType { get; set; }
-    public required List<MethodRecord> Methods { get; init; }
-
-    public override string ToString()
-    {
-        return "V" + Version + ", Type: " + ScriptType
-         + ", Context: " + ContextType;
-        //   + ", AR: " + ActionResultType;
     }
 }
 

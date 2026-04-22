@@ -1,8 +1,4 @@
-using Microsoft.CodeAnalysis.Scripting;
-using Microsoft.CodeAnalysis;
-using Microsoft.EntityFrameworkCore.Infrastructure.Internal;
 using Microsoft.Extensions.Logging;
-using Ember.Scripting.Compilation;
 
 namespace Ember.Scripting.Manager;
 

@@ -1,10 +1,6 @@
-using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.Scripting;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Npgsql.Internal;
 using System.Reflection;
 
 namespace Ember.Scripting.Compilation;
@@ -172,8 +168,7 @@ internal class ScriptCompiler
 
             Type scriptType = scriptType = CustomerScript.GetScriptType(parentSymbol.Name);
 
-            List<MethodRecord> methods =
-            ValidateScriptMethodTypes(tree!, model, parentSymbol);
+            List<MethodRecord> methods = ValidateScriptMethodTypes(tree!, model, parentSymbol);
             int? executionTime = GetExecutionTime(tree);
             ValidateLoopsHavingCancellation(tree!);
             ValidateNamespaceUsage(tree!, model!);
@@ -245,47 +240,86 @@ internal class ScriptCompiler
     private ScriptMetaDataRecord GetMetaDataRecord(INamedTypeSymbol baseType)
     {
         List<ScriptMetaDataRecord> scriptRecords = ScriptVersionScanner.GetClassRecords();
-        // string? contextTypeStr = null;
-        // string? arTypeString = null;
-        ScriptMetaDataRecord? foundRecord = null;
 
+        foreach (var item in scriptRecords)
+        {
+            Console.WriteLine("Version: " + item.Version + ", Type: " + item.ScriptType);
+        }
+
+        string? contextTypeStr = null;
+        string? customReturnType = null;
+
+        ScriptMetaDataRecord? foundRecord = null;
         foreach (var record in scriptRecords)
         {
             string definedMethodName = record.RetrievedType.FullName!;
+
             if (definedMethodName.Contains("`"))
             {
                 definedMethodName = definedMethodName.Split('`')[0];
             }
-            // Console.WriteLine("definedMethodName: " + definedMethodName);
             if (baseType.IsGenericType)
             {
                 if (baseType.TypeArguments.Length >= 1)
                 {
                     ITypeSymbol contextType = baseType.TypeArguments[0];
-                    // contextTypeStr = GetFullyQualifiedName(contextType);
+                    contextTypeStr = GetFullyQualifiedName(contextType);
+                    customReturnType = "bool";
                 }
                 if (baseType.TypeArguments.Length == 2)
                 {
                     ITypeSymbol contextType = baseType.TypeArguments[1];
-                    // arTypeString = GetFullyQualifiedName(contextType);
+                    customReturnType = GetFullyQualifiedName(contextType);
                 }
             }
             if (baseType.ToDisplayString().Contains(definedMethodName))
             {
-                foundRecord = record;
-                // if (contextTypeStr != null)
-                // {
-                //     foundRecord.ContextType = contextTypeStr!;
-                // }
-                // if (arTypeString != null)
-                // {
-                //     foundRecord.ActionResultType = arTypeString!;
-                // }
+                Console.WriteLine(baseType.ToDisplayString() + ",contains definedMethodName: " + definedMethodName);
+
+                List<MethodRecord> methods = [];
+                if (contextTypeStr != null)
+                {
+                    foreach (var item in record.Methods)
+                    {
+                        List<ParameterRecord> parameters = [];
+                        foreach (var item2 in item.Parameters)
+                        {
+                            parameters.Add(new ParameterRecord
+                            {
+                                Name = item2.Name,
+                                ReturnType = contextTypeStr!
+                            }
+                            );
+                        }
+                        methods.Add(new MethodRecord
+                        {
+                            Name = item.Name,
+                            ReturnType = customReturnType!,
+                            Parameters = parameters
+                        });
+                    }
+                    foundRecord = new ScriptMetaDataRecord
+                    {
+                        Version = record.Version,
+                        ContextType = record.ContextType,
+                        RetrievedType = record.RetrievedType,
+                        ScriptType = record.ScriptType,
+                        Methods = methods
+                    };
+                }
+                else
+                {
+                    foundRecord = record;
+                }
+            }
+            else
+            {
+                Console.WriteLine(baseType.ToDisplayString() + ", does not contain definedMethodName: " + definedMethodName);
             }
         }
         if (foundRecord == null)
         {
-            throw new Exception(baseType.ToDisplayString());
+            throw new RecordCouldNotBeMatchedException(baseType.ToDisplayString());
         }
         return foundRecord;
     }
@@ -294,70 +328,63 @@ internal class ScriptCompiler
     {
         List<MethodRecord> justToReturn = [];
 
-        if (baseType.IsGenericType == false)
+        SyntaxNode root = tree.GetRoot();
+        IEnumerable<MethodDeclarationSyntax> scriptMethods = root.DescendantNodes().OfType<MethodDeclarationSyntax>();
+
+
+        ScriptMetaDataRecord record = GetMetaDataRecord(baseType);
+
+        foreach (var scriptMethodMDS in scriptMethods)
         {
-            SyntaxNode root = tree.GetRoot();
-            IEnumerable<MethodDeclarationSyntax> scriptMethods = root.DescendantNodes().OfType<MethodDeclarationSyntax>();
 
-
-            ScriptMetaDataRecord record = GetMetaDataRecord(baseType);
-
-            foreach (var scriptMethodMDS in scriptMethods)
+            if (scriptMethodMDS.Modifiers.Any(SyntaxKind.PrivateKeyword))
             {
+                continue;   //skips private methods
+            }
+            if (scriptMethodMDS.Modifiers.Any(SyntaxKind.InternalKeyword))
+            {
+                // continue;   //skips internal methods
+            }
+            if (scriptMethodMDS.Modifiers.Any(SyntaxKind.ProtectedKeyword))
+            {
+                // continue;   //skips protected methods
+            }
+            MethodRecord scriptMethod = MethodRecord.GetMethodRecord(semanticModel.GetDeclaredSymbol(scriptMethodMDS)!);
+            justToReturn.Add(scriptMethod);
 
-                if (scriptMethodMDS.Modifiers.Any(SyntaxKind.PrivateKeyword))
+            MethodRecord? foundMethod = null;
+            foreach (var definedMeth in record.Methods)
+            {
+                if (scriptMethod.Name == definedMeth.Name)
                 {
-                    continue;   //skips private methods
+                    foundMethod = definedMeth;
                 }
-                if (scriptMethodMDS.Modifiers.Any(SyntaxKind.InternalKeyword))
+            }
+            if (foundMethod == null)
+            {
+                throw new UndefinedMethodException(message: "No new methods allowed that are not predefinded!" + scriptMethod.ToString(), scriptMethod);
+            }
+            if (scriptMethod.ReturnType != foundMethod.ReturnType)
+            {
+                throw new WrongReturnTypeException(message: scriptMethod.Name + " has the wrong return Type: " + scriptMethod.ReturnType + ", it should be: " + foundMethod.ReturnType + ".");
+            }
+            foreach (var scriptParam in scriptMethod.Parameters)
+            {
+                ParameterRecord? foundParam = null;
+                foreach (var definedParam in foundMethod.Parameters)
                 {
-                    // continue;   //skips internal methods
-                }
-                if (scriptMethodMDS.Modifiers.Any(SyntaxKind.ProtectedKeyword))
-                {
-                    // continue;   //skips protected methods
-                }
-                MethodRecord scriptMethod = MethodRecord.GetMethodRecord(semanticModel.GetDeclaredSymbol(scriptMethodMDS)!);
-                justToReturn.Add(scriptMethod);
-
-                MethodRecord? foundMethod = null;
-                foreach (var definedMeth in record.Methods)
-                {
-                    if (scriptMethod.Name == definedMeth.Name)
+                    if (definedParam.Name == scriptParam.Name)
                     {
-                        if (definedMeth.Parameters[0].Name != nameof(IContext))
-                        {
-                            foundMethod = definedMeth;
-                        }
-
+                        foundParam = definedParam;
                     }
                 }
-                if (foundMethod == null)
+                if (foundParam == null)
                 {
-                    throw new UndefinedMethodException(message: "No new methods allowed that are not predefinded!" + scriptMethod.ToString(), scriptMethod);
+                    throw new CouldNotFindParameterException(foundMethod.Name + " could not find defined parameter: " + scriptParam.Name);
                 }
-                if (scriptMethod.ReturnType != foundMethod.ReturnType)
+                if (foundParam!.ReturnType != scriptParam.ReturnType)
                 {
-                    throw new WrongReturnTypeException(message: scriptMethod.Name + " has the wrong return Type: " + scriptMethod.ReturnType + ", it should be: " + foundMethod.ReturnType + ".");
-                }
-                foreach (var scriptParam in scriptMethod.Parameters)
-                {
-                    ParameterRecord? foundParam = null;
-                    foreach (var definedParam in foundMethod.Parameters)
-                    {
-                        if (definedParam.Name == scriptParam.Name)
-                        {
-                            foundParam = definedParam;
-                        }
-                    }
-                    if (foundParam == null)
-                    {
-                        throw new CouldNotFindParameterException(foundMethod.Name + " could not find defined parameter: " + scriptParam.Name);
-                    }
-                    if (foundParam!.ReturnType != scriptParam.ReturnType)
-                    {
-                        throw new WrongParameterTypeException(foundMethod.Name + " a parameter had the wrong return type: " + scriptParam.ReturnType + ", it should have been: " + foundParam.ReturnType);
-                    }
+                    throw new WrongParameterTypeException(foundMethod.Name + " a parameter had the wrong return type: " + scriptParam.ReturnType + ", it should have been: " + foundParam.ReturnType);
                 }
             }
         }

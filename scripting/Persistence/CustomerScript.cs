@@ -1,6 +1,4 @@
-using System;
 using System.ComponentModel.DataAnnotations.Schema;
-using Microsoft.Extensions.Logging;
 
 namespace Ember.Scripting.Persistence;
 
@@ -65,14 +63,14 @@ public class CustomerScript
             {
                 if (scriptType != null)
                 {
-                    throw new Exception("Collision occured");
+                    throw new CollisionOccuredException("Collision occured");
                 }
                 scriptType = sType.Value;
             }
         }
         if (scriptType == null)
         {
-            throw new Exception("ScriptType not set baseType.ToDisplayString(): ");
+            throw new ScriptTypeNotSetException("ScriptType not set baseType.ToDisplayString(): ");
         }
         return scriptType;
     }

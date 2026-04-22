@@ -187,21 +187,22 @@ public class EmberVersioningTests
     [TestMethod]
     public void ScriptVersionScannerTest()
     {
-        Dictionary<int, Type> contextVersionMap = new()
+        List<(int, Type)> contextVersionMap = new()
         {
-            {1, typeof(GeneratorScriptsGenericSimple.IConditionScript<>)},
-            {2, typeof(GeneratorScriptsV2.IActionScript)},
-            {3, typeof(GeneratorScriptsV3.IActionScript)},
-            {4, typeof(GeneratorScriptsV4.IActionScript)},
+            (1, typeof(GeneratorScriptsGenericSimple.IConditionScript<>)),
+            (1, typeof(GeneratorScriptsGeneric.IActionScript<,>)),
+            (2, typeof(GeneratorScriptsV2.IActionScript)),
+            (3, typeof(GeneratorScriptsV3.IActionScript)),
+            (4, typeof(GeneratorScriptsV4.IActionScript)),
         };
 
         var records = ScriptVersionScanner.GetClassRecords();
-        Dictionary<int, Type> retrievedDict = [];
+        List<(int, Type)> retrievedDict = [];
         foreach (var record in records)
         {
-            retrievedDict.Add(record.Version, record.RetrievedType);
+            retrievedDict.Add((record.Version, record.RetrievedType));
         }
-        PrintDictToConsole(retrievedDict);
+        // PrintDictToConsole(retrievedDict);
 
 
         CollectionAssert.AreEquivalent(contextVersionMap, retrievedDict);

@@ -1,2 +1,1 @@
-using Ember.Scripting.Persistence;
-//todo
+namespace Ember.Scripting.Persistence;

@@ -1,5 +1,3 @@
-using Microsoft.CodeAnalysis;
-
 namespace Ember.Scripting.Manager;
 
 public record DuplicateRecord

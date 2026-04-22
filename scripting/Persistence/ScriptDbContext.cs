@@ -1,6 +1,4 @@
-using Ember.Scripting;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
 
 namespace Ember.Scripting.Persistence;
 

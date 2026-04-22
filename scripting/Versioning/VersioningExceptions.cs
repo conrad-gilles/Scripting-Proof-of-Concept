@@ -97,3 +97,27 @@ public class VersionIntMoreThanOnceInAssemblyCVSIException : VersionIntMoreThanO
     public VersionIntMoreThanOnceInAssemblyCVSIException(string message) : base(message) { }
     public VersionIntMoreThanOnceInAssemblyCVSIException(string message, Exception innerException) : base(message, innerException) { }
 }
+public class MetadDataAttributeNotDefinedException : VersioningExceptions
+{
+    public MetadDataAttributeNotDefinedException() : base() { }
+    public MetadDataAttributeNotDefinedException(string message) : base(message) { }
+    public MetadDataAttributeNotDefinedException(string message, Exception innerException) : base(message, innerException) { }
+}
+public class NoVersionListFoundException : VersioningExceptions
+{
+    public NoVersionListFoundException() : base() { }
+    public NoVersionListFoundException(string message) : base(message) { }
+    public NoVersionListFoundException(string message, Exception innerException) : base(message, innerException) { }
+}
+public class NoNextVersionFoundException : VersioningExceptions
+{
+    public NoNextVersionFoundException() : base() { }
+    public NoNextVersionFoundException(string message) : base(message) { }
+    public NoNextVersionFoundException(string message, Exception innerException) : base(message, innerException) { }
+}
+public class UpgradeFailedException : VersioningExceptions
+{
+    public UpgradeFailedException() : base() { }
+    public UpgradeFailedException(string message) : base(message) { }
+    public UpgradeFailedException(string message, Exception innerException) : base(message, innerException) { }
+}

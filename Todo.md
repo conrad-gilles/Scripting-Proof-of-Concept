@@ -1,4 +1,3 @@
-make sure users cant define methods with diffrent context versions in 1 script
 fix genericbasicvalidation
 ask claude if Downgradeable really should be in sandbox?
 write test for renamed method etc
