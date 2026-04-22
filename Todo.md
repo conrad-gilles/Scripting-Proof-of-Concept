@@ -1,5 +1,3 @@
-integrate execute 3 correctly
-executor generic check or it was compiler?
 ask claude if Downgradeable really should be in sandbox?
 write test for renamed method etc
 ask claude if i should merge sandbox and ember projects

@@ -160,6 +160,12 @@ public class RecordCouldNotBeMatchedException : ValidationBeforeCompilationExcep
     public RecordCouldNotBeMatchedException(string message) : base(message) { }
     public RecordCouldNotBeMatchedException(string message, Exception innerException) : base(message, innerException) { }
 }
+public class NoMethodInScriptException : ValidationBeforeCompilationException
+{
+    public NoMethodInScriptException() : base() { }
+    public NoMethodInScriptException(string message) : base(message) { }
+    public NoMethodInScriptException(string message, Exception innerException) : base(message, innerException) { }
+}
 public class ForbiddenTypeAccessException : ForbiddenNamespaceException
 {
     public new string? AttemptedNamespace { get; }

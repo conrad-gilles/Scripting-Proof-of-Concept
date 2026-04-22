@@ -490,4 +490,26 @@ public class SecurityTests
     """;
         ScriptManager.BasicValidationBeforeCompiling(sourceCode);
     }
+
+    [TestMethod]
+    public async Task TestNoMethod()
+    {
+        string sourceCode = """
+        using System;   //todo this is possible to default in compiler
+        using System.Threading.Tasks;
+        using System.Collections.Generic;   //todo same for them
+        using Ember.Scripting;
+        using GeneratorScriptsGeneric;
+        using IGeneratorContext_V2;
+
+        public class ExecutionTimeTest : GeneratorScriptsGeneric.IActionScript<IGeneratorContext_V2.IGeneratorContext, ActionResultV1.ActionResult>
+        {
+        
+        }
+        """;
+        await Assert.ThrowsExceptionAsync<NoMethodInScriptException>(async () =>
+        {
+            ScriptManager.BasicValidationBeforeCompiling(sourceCode);
+        });
+    }
 }

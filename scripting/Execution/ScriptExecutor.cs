@@ -8,7 +8,7 @@ internal class ScriptExecutor(ILogger<ScriptExecutor> logger)
     private readonly int _scriptTimeout = ((int)ExecutionTimeGroups.Medium);   // ms of how much time scripts get to execute
     private readonly int maxScriptLenght = 5 * 1024 * 1024;     // 5 mb maximum size
 
-    public async Task<T> RunScriptExecution<T>(byte[] compiledScript, Context genContext, int? executionTime, string methodName)
+    public async Task<object> RunScriptExecution(byte[] compiledScript, Context genContext, int? executionTime, string methodName)
     {
         logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(RunScriptExecution), nameof(ScriptExecutor));
         int scriptTimeout = _scriptTimeout;
@@ -83,7 +83,7 @@ internal class ScriptExecutor(ILogger<ScriptExecutor> logger)
 
             logger.LogInformation($"Result in 86 sExecuter: {resultValue}");
 
-            return (T)resultValue!;
+            return resultValue!;
         }
         catch (CouldNotFindMethodException e)
         {

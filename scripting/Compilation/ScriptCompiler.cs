@@ -286,7 +286,6 @@ internal class ScriptCompiler
         SyntaxNode root = tree.GetRoot();
         IEnumerable<MethodDeclarationSyntax> scriptMethods = root.DescendantNodes().OfType<MethodDeclarationSyntax>();
 
-
         ScriptMetaDataRecord record = GetMetaDataRecord(baseType);
 
         foreach (var scriptMethodMDS in scriptMethods)
@@ -343,6 +342,10 @@ internal class ScriptCompiler
                 }
             }
         }
+        if (justToReturn.Count() < 1)
+        {
+            throw new NoMethodInScriptException("Script needs at least one method to be stored.");
+        }
         return justToReturn;
     }
     private string GetFullyQualifiedName(ITypeSymbol symbol)
@@ -375,6 +378,7 @@ internal class ScriptCompiler
         }
         return executionTime;
     }
+    //Ai generated
     private void ValidateLoopsHavingCancellation(SyntaxTree tree)
     {
         var root = tree.GetRoot();

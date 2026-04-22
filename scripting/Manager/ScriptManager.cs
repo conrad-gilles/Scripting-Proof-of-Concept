@@ -181,7 +181,7 @@ internal class ScriptManager(
             executionTime = script.CustomerScript!.ExecutionTimeInMS;
             // Console.WriteLine("execution time was in 199 set to: " + executionTime);
         }
-        object result = await _executor.RunScriptExecution<object>(compiledScript!, context, executionTime, methodName);  //returns either bool or action result todo maybe add checks if thats the case but normally should be
+        object result = await _executor.RunScriptExecution(compiledScript!, context, executionTime, methodName);  //returns either bool or action result todo maybe add checks if thats the case but normally should be
         return result;
     }
 
@@ -200,7 +200,7 @@ internal class ScriptManager(
             // Console.WriteLine("execution time was in 217 set to: " + executionTime);
         }
         byte[] comp = _compiler.RunCompilation(sourceCode);
-        return await _executor.RunScriptExecution<object>(compiledScript: comp, genContext: context, executionTime: executionTime, methodName: methodName);
+        return await _executor.RunScriptExecution(compiledScript: comp, genContext: context, executionTime: executionTime, methodName: methodName);
         // return null //todo
     }
     #endregion
