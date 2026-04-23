@@ -10,6 +10,23 @@ internal class EmberInternalFacade
     public EmberInternalFacade(IScriptManagerExtended scriptManager)
     {
         _scriptManager = scriptManager;
+
+        // Automatically find all concrete classes that inherit from RecentScriptFacade
+        var scriptTypes = typeof(RecentScriptFacade).Assembly.GetTypes()
+            .Where(t => t.IsClass && !t.IsAbstract && t.IsSubclassOf(typeof(RecentScriptFacade)));
+
+        _scriptTypeMap = new Dictionary<Type, Type>();
+
+        foreach (var type in scriptTypes)
+        {
+            // Find the specific interfaces (like RecentIConditionScript) this class implements
+            var interfaces = type.GetInterfaces();
+            foreach (var iface in interfaces)
+            {
+                _scriptTypeMap[iface] = type;
+            }
+
+        }
     }
 
     private async Task<object> BaseExecute(Guid id, RecentContext ctx, string methodName)
@@ -46,7 +63,8 @@ internal class EmberInternalFacade
 
         return CheckUpgradeActionResult(result);
     }
-    public TScript GetScript<TScript>(string name) where TScript : RecentScriptFacade
+    // Original version
+    public TScript GetScriptV1<TScript>(string name) where TScript : RecentScriptFacade
     {
         if (typeof(RecentIConditionScript).IsAssignableFrom(typeof(TScript)))
         {
@@ -60,6 +78,48 @@ internal class EmberInternalFacade
         }
         throw new ArgumentException($"Unsupported script type: {typeof(TScript).Name}");
     }
+
+    // //Ai generated better version of the method above
+    private readonly Dictionary<Type, Func<IScriptManagerExtended, string, RecentScriptFacade>> _scriptFactories = new()
+    {
+    { typeof(RecentIConditionScript), (manager, name) => new ConditionScript(manager, name) },
+    { typeof(RecentIActionScript), (manager, name) => new ActionScript(manager, name) }
+    };
+
+    public TScript GetScriptV2<TScript>(string name) where TScript : RecentScriptFacade
+    {
+        // Uses LINQ to find the first factory whose key (interface) is assignable from TScript
+        var match = _scriptFactories.FirstOrDefault(kvp => kvp.Key.IsAssignableFrom(typeof(TScript)));
+
+        if (match.Value != null)
+        {
+            return (TScript)match.Value(_scriptManager, name);
+        }
+
+        throw new ArgumentException($"Unsupported script type: {typeof(TScript).Name}");
+    }
+
+    // Another Ai generated version of the GetScrip Method using Reflection note the stuff inside the constructor is also part of it
+    private readonly Dictionary<Type, Type> _scriptTypeMap;
+    public TScript GetScript<TScript>(string name) where TScript : RecentScriptFacade
+    {
+        Type requestedType = typeof(TScript);
+
+        // Find the first interface that TScript implements which we have a mapped class for
+        var matchingInterface = _scriptTypeMap.Keys.FirstOrDefault(i => i.IsAssignableFrom(requestedType));
+
+        if (matchingInterface != null)
+        {
+            Type concreteType = _scriptTypeMap[matchingInterface];
+
+            // Use Activator to instantiate the class with parameters
+            var instance = Activator.CreateInstance(concreteType, _scriptManager, name);
+            return (TScript)instance!;
+        }
+
+        throw new ArgumentException($"Unsupported script type: {requestedType.Name}");
+    }
+
     public async Task<TScript> CreateScript<TScript>(string sourceCode) where TScript : RecentScriptFacade
     {
         CustomerScript script = await _scriptManager.CreateScript(sourceCode);
