@@ -95,7 +95,7 @@ internal class ScriptExecutor(ILogger<ScriptExecutor> logger)
         {
             logger.LogError(e.ToString());
             logger.LogWarning("You might have passed the wrong GeneratorContext class, ex V1 instead of V2");
-            throw new ActionScriptExecutionException("You might have passed the wrong GeneratorContext class, ex V1 instead of V2", e);
+            throw new ActionScriptExecutionException("Something went wrong when trying to exexute the script. Message: " + e.Message, e);
         }
     }
 }

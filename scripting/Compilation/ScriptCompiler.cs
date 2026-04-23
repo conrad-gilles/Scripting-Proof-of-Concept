@@ -37,8 +37,7 @@ internal class ScriptCompiler
         //Takes C# source string and turns it into a "Roslyn parsed syntax tree representation" of a normal C# file
         SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(script);
 
-        List<MetadataReference>? references = [];
-        references = _allReferences;
+        List<MetadataReference>? references = _allReferences;
 
         //this initiates the process of the compilation (does not produce bytes yet), it binds the source code with the refrences and the config options
         CSharpCompilation compilation = CSharpCompilation.Create(
@@ -195,11 +194,6 @@ internal class ScriptCompiler
     {
         List<ScriptMetaDataRecord> scriptRecords = ScriptVersionScanner.GetClassRecords();
 
-        foreach (var item in scriptRecords)
-        {
-            Console.WriteLine("Version: " + item.Version + ", Type: " + item.ScriptType);
-        }
-
         string? contextTypeStr = null;
         string? customReturnType = null;
 
@@ -228,8 +222,6 @@ internal class ScriptCompiler
             }
             if (baseType.ToDisplayString().Contains(definedMethodName))
             {
-                // Console.WriteLine(baseType.ToDisplayString() + ",contains definedMethodName: " + definedMethodName);
-
                 List<MethodRecord> methods = [];
                 if (contextTypeStr != null)
                 {
@@ -265,10 +257,6 @@ internal class ScriptCompiler
                 {
                     foundRecord = record;
                 }
-            }
-            else
-            {
-                // Console.WriteLine(baseType.ToDisplayString() + ", does not contain definedMethodName: " + definedMethodName);
             }
         }
         if (foundRecord == null)
