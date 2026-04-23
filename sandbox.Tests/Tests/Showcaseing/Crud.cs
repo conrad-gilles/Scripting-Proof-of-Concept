@@ -168,10 +168,8 @@ public class CrudDemos
     [TestMethod]
     public async Task RenamedMethodTestAsync()
     {
+        ActionScript scriptInstance = await InternalScriptManager.CreateScript<ActionScript>(scriptSourceCode);
 
-        CustomerScript script = await ScriptManager!.CreateScript(scriptSourceCode);
-
-        ActionScript scriptInstance = InternalScriptManager.GetScript<ActionScript>(script.ScriptName!);
         RecentActionResult ar = await scriptInstance.Execute1(TestHelper.GetContext());
 
         Assert.IsTrue(ar.ToString().Contains("Successfully returned old Method!"));

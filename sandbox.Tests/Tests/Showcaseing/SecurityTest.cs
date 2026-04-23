@@ -512,4 +512,61 @@ public class SecurityTests
             ScriptManager.BasicValidationBeforeCompiling(sourceCode);
         });
     }
+    string scriptSourceCode = """
+        using System;
+        using System.Threading.Tasks;
+        using System.Collections.Generic;
+        using Ember.Scripting;
+        using IGeneratorContext_V3;
+        using GeneratorScriptsV2;
+
+        public class AddPediatricTestsV3 : GeneratorScriptsV2.IActionScript
+        {
+            public async Task<ActionResultV2.ActionResult> Execute1OldName(IGeneratorContext_V3.IGeneratorContext context)
+            {
+                return ActionResultV2.ActionResult.Success("Successfully returned old Method!");
+            }
+            public async Task<ActionResultV2.ActionResult> ExecuteMethodThatWasDeleted(IGeneratorContext_V3.IGeneratorContext context)
+            {
+                return ActionResultV2.ActionResult.Success("Successfully returned deleted Method!");
+            }
+        }
+        """;
+    string scriptSourceCodeNew = """
+        using System.Threading.Tasks;
+        using System;
+        using Ember.Scripting;
+        using GeneratorScriptsV4;
+
+        public class VaccineScript : GeneratorScriptsV4.IActionScript
+        {
+            public async Task<ActionResultV3.ActionResult> Execute2(IGeneratorContextNoInheritance_V5.IGeneratorContext context)
+            {
+                return ActionResultV3.ActionResult.Success("New Method Example");
+            }
+        }
+        """;
+    [TestMethod]
+    public void TestValidateOnlyRecentTypes()
+    {
+        ValidationRecord rec = ScriptManager.BasicValidationBeforeCompiling(scriptSourceCode);
+        AllowOnlyRecentTypesException ex = Assert.ThrowsException<AllowOnlyRecentTypesException>(() =>
+        {
+            AllowOnlyRecentTypes.ValidateAllowOnlyRecentTypes(rec.ParentSymbol, RecentTypeHelper.GetRecentTypes());
+        });
+
+        rec = ScriptManager.BasicValidationBeforeCompiling(TestHelper.GetSC().sourceCodeActionV1);
+        ex = Assert.ThrowsException<AllowOnlyRecentTypesException>(() =>
+       {
+           AllowOnlyRecentTypes.ValidateAllowOnlyRecentTypes(rec.ParentSymbol, RecentTypeHelper.GetRecentTypes());
+       });
+
+        rec = ScriptManager.BasicValidationBeforeCompiling(TestHelper.GetSC().sourceCodePedia);
+
+        AllowOnlyRecentTypes.ValidateAllowOnlyRecentTypes(rec.ParentSymbol, RecentTypeHelper.GetRecentTypes());
+
+        rec = ScriptManager.BasicValidationBeforeCompiling(scriptSourceCodeNew);
+
+        AllowOnlyRecentTypes.ValidateAllowOnlyRecentTypes(rec.ParentSymbol, RecentTypeHelper.GetRecentTypes());
+    }
 }

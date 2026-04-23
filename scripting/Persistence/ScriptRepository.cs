@@ -320,7 +320,7 @@ internal class ScriptRepository
                 ScriptType = validationRecord.ScriptType.Name,
                 SourceCode = scriptString,
                 ScriptApiVersion = validationRecord.Version,
-                CreatedAt = createdAt,
+                CreatedAt = (DateTime)createdAt,
                 ModifiedAt = DateTime.UtcNow,
                 CreatedBy = _userSession.UserName,
                 ExecutionTimeInMS = validationRecord.ExecutionTime

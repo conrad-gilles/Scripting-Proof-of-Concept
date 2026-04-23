@@ -1,3 +1,5 @@
+using System.Threading.Tasks;
+
 namespace Ember.Simulation;
 
 
@@ -58,7 +60,12 @@ internal class EmberInternalFacade
         }
         throw new ArgumentException($"Unsupported script type: {typeof(TScript).Name}");
     }
-    public static async Task<Context> CreateByDowngrade(int desiredVersion, RecentContext ctx)
+    public async Task<TScript> CreateScript<TScript>(string sourceCode) where TScript : RecentScriptFacade
+    {
+        CustomerScript script = await _scriptManager.CreateScript(sourceCode);
+        return GetScript<TScript>(script.ScriptName!);
+    }
+    public static async Task<Context> CreateByDowngrade(int desiredVersion, RecentContext ctx)  //make internal probably
     {
         return await ContextManager.CreateByDowngrade(desiredVersion, ctx);
     }

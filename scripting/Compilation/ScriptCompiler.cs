@@ -120,7 +120,7 @@ internal class ScriptCompiler
             Type scriptType = scriptType = CustomerScript.GetScriptType(parentSymbol.Name);
 
             List<MethodRecord> methods = ValidateScriptMethodTypes(tree!, model, parentSymbol);
-            ValidateOnlyUseRecentTypes(methods);    //work in progress
+            // ValiHelper.ValidateOnlyUseRecentTypes(methods, parentSymbol.ToDisplayString(), _recentTypes);    //work in progress
             int? executionTime = GetExecutionTime(tree);
             ValidateLoopsHavingCancellation(tree!);
             ValidateNamespaceUsage(tree!, model!);
@@ -130,7 +130,8 @@ internal class ScriptCompiler
                 ScriptType = scriptType!,
                 Version = (int)versionInt,
                 ExecutionTime = executionTime,
-                methods = methods
+                methods = methods,
+                ParentSymbol = parentSymbol.ToDisplayString()
             };
             return returnedRecord;
         }
@@ -144,10 +145,7 @@ internal class ScriptCompiler
             throw new ScriptFieldNullException("The script very likely did not implement one of the predefined interfaces.", e);
         }
     }
-    private void ValidateOnlyUseRecentTypes(List<MethodRecord> methods)
-    {
 
-    }
     private int GetVersionInt(INamedTypeSymbol baseType)
     {
         List<ScriptMetaDataRecord> scriptRecords = ScriptVersionScanner.GetClassRecords();
@@ -230,7 +228,7 @@ internal class ScriptCompiler
             }
             if (baseType.ToDisplayString().Contains(definedMethodName))
             {
-                Console.WriteLine(baseType.ToDisplayString() + ",contains definedMethodName: " + definedMethodName);
+                // Console.WriteLine(baseType.ToDisplayString() + ",contains definedMethodName: " + definedMethodName);
 
                 List<MethodRecord> methods = [];
                 if (contextTypeStr != null)
@@ -270,7 +268,7 @@ internal class ScriptCompiler
             }
             else
             {
-                Console.WriteLine(baseType.ToDisplayString() + ", does not contain definedMethodName: " + definedMethodName);
+                // Console.WriteLine(baseType.ToDisplayString() + ", does not contain definedMethodName: " + definedMethodName);
             }
         }
         if (foundRecord == null)
@@ -534,4 +532,31 @@ internal class ScriptCompiler
     }
 }
 
-
+public static class AllowOnlyRecentTypes
+{
+    public static void ValidateAllowOnlyRecentTypes(string parentSymbol, List<Type> recentTypes)
+    {
+        if (parentSymbol.Contains("<"))
+        {
+            parentSymbol = parentSymbol.Split('<')[0];
+        }
+        bool found = false;
+        foreach (var recentType in recentTypes)
+        {
+            string typeClean = recentType.FullName!;
+            if (recentType.FullName!.Contains("`"))
+            {
+                typeClean = recentType.FullName.Split('`')[0];
+            }
+            if (parentSymbol == typeClean)
+            {
+                found = true;
+                break;
+            }
+        }
+        if (found == false)
+        {
+            throw new AllowOnlyRecentTypesException("Script was not a recent type!");
+        }
+    }
+}

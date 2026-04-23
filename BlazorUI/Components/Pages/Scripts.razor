@@ -87,8 +87,8 @@
                                             }
                                         </td>
                                         <td>v@(script.ScriptApiVersion)</td>
-                                        <td>@(script.CreatedAt?.ToString("MM-dd HH:mm") ?? "N/A")</td>
-                                        @if ((script.ModifiedAt!.Value - script.CreatedAt!.Value).TotalSeconds <= 1)
+                                        <td>@(script.CreatedAt.ToString("MM-dd HH:mm") ?? "N/A")</td>
+                                        @if ((script.ModifiedAt!.Value - script.CreatedAt).TotalSeconds <= 1)
                                         {
                                             <td>No Edit</td>
                                         }

@@ -206,3 +206,9 @@ public class ConcellationTokenUncheckedException : CompilationException
     public ConcellationTokenUncheckedException(string message) : base(message) { }
     public ConcellationTokenUncheckedException(string message, Exception innerException) : base(message, innerException) { }
 }
+public class AllowOnlyRecentTypesException : ValidationBeforeCompilationException
+{
+    public AllowOnlyRecentTypesException() : base() { }
+    public AllowOnlyRecentTypesException(string message) : base(message) { }
+    public AllowOnlyRecentTypesException(string message, Exception innerException) : base(message, innerException) { }
+}

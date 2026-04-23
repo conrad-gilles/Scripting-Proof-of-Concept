@@ -11,6 +11,7 @@ public record ValidationRecord
     public required int? ExecutionTime { get; init; }
 
     public List<MethodRecord>? methods { get; init; }
+    public string ParentSymbol = "Default";
 
     public string BaseTypeAsString()
     {

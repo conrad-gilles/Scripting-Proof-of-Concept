@@ -10,10 +10,10 @@ public class CustomerScript
     public Guid Id { get; set; }
 
     [Column("script_name")]
-    public string? ScriptName { get; set; }
+    public string ScriptName { get; set; }
 
     [Column("script_type")]
-    public string? ScriptType { get; set; }
+    public string ScriptType { get; set; }
 
     [Column("source_code")]
     public string? SourceCode { get; set; }
@@ -22,7 +22,7 @@ public class CustomerScript
     public int ScriptApiVersion { get; set; }
 
     [Column("created_at")]
-    public DateTime? CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     [Column("modified_at")]
     public DateTime? ModifiedAt { get; set; } = DateTime.UtcNow;
