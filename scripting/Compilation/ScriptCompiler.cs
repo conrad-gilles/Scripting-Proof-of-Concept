@@ -78,7 +78,6 @@ internal class ScriptCompiler
         var mscorlib = MetadataReference.CreateFromFile(typeof(object).Assembly.Location);
         IEnumerable<MetadataReference>? minimalReferences = [mscorlib];
         var compilation = CSharpCompilation.Create("MyCompilation",
-            // syntaxTrees: new[] { tree }, references: minimalReferences);   // i might be able to use this method to init the refrences also above?
             syntaxTrees: new[] { tree }, references: _allReferences);   // i might be able to use this method to init the refrences also above?
         var model = compilation.GetSemanticModel(tree);
         var classesInTree = tree.GetRoot().DescendantNodes().OfType<ClassDeclarationSyntax>().ToList();
@@ -93,7 +92,6 @@ internal class ScriptCompiler
 
         try
         {
-            // INamedTypeSymbol baseType = myClassSymbol!.BaseType!;
             INamedTypeSymbol parentSymbol = myClassSymbol!.Interfaces.FirstOrDefault() ?? myClassSymbol!.BaseType!;
 
             if (parentSymbol.Name == "Object")
@@ -102,10 +100,8 @@ internal class ScriptCompiler
             }
 
             var className = myClassSymbol.ToString();
-            // var parentSymbol = myClassSymbol!.Interfaces.FirstOrDefault() ?? myClassSymbol.BaseType;
             int? versionInt = null;
 
-            // versionInt = GetMetaDataRecord(parentSymbol).ContextVersion;
             versionInt = GetVersionInt(parentSymbol);
 
             if (versionInt == null)
@@ -124,6 +120,7 @@ internal class ScriptCompiler
             Type scriptType = scriptType = CustomerScript.GetScriptType(parentSymbol.Name);
 
             List<MethodRecord> methods = ValidateScriptMethodTypes(tree!, model, parentSymbol);
+            ValidateOnlyUseRecentTypes(methods);    //work in progress
             int? executionTime = GetExecutionTime(tree);
             ValidateLoopsHavingCancellation(tree!);
             ValidateNamespaceUsage(tree!, model!);
@@ -146,6 +143,10 @@ internal class ScriptCompiler
         {
             throw new ScriptFieldNullException("The script very likely did not implement one of the predefined interfaces.", e);
         }
+    }
+    private void ValidateOnlyUseRecentTypes(List<MethodRecord> methods)
+    {
+
     }
     private int GetVersionInt(INamedTypeSymbol baseType)
     {
@@ -378,7 +379,7 @@ internal class ScriptCompiler
         }
         return executionTime;
     }
-    //Ai generated
+    //Following method was AI generated 
     private void ValidateLoopsHavingCancellation(SyntaxTree tree)
     {
         var root = tree.GetRoot();

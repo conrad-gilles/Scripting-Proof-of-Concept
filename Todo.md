@@ -1,3 +1,9 @@
+maybe create and get script in eif?
+make sure proterties such as ScriptName are never null
+finish ValidateOnlyUseRecentTypes in Compiler
+rename=method that in v1 is called xy is called in v2 xyz but still called xy in v1
+make tests for rename, delete and new method added
+
 ask claude if Downgradeable really should be in sandbox?
 write test for renamed method etc
 ask claude if i should merge sandbox and ember projects

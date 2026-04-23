@@ -44,10 +44,19 @@ internal class EmberInternalFacade
 
         return CheckUpgradeActionResult(result);
     }
-    public ScriptFacade<ScriptType> GetScript<ScriptType>(string name) where ScriptType : IScriptType
+    public TScript GetScript<TScript>(string name) where TScript : RecentScriptFacade
     {
-        ScriptFacade<ScriptType> toReturn = new ScriptFacade<ScriptType>(_scriptManager, name);
-        return toReturn;
+        if (typeof(RecentIConditionScript).IsAssignableFrom(typeof(TScript)))
+        {
+            var toReturn = (RecentScriptFacade)new ConditionScript(_scriptManager, name);
+            return (TScript)toReturn;
+        }
+        else if (typeof(RecentIActionScript).IsAssignableFrom(typeof(TScript)))
+        {
+            var toReturn = (RecentScriptFacade)new ActionScript(_scriptManager, name);
+            return (TScript)toReturn;
+        }
+        throw new ArgumentException($"Unsupported script type: {typeof(TScript).Name}");
     }
     public static async Task<Context> CreateByDowngrade(int desiredVersion, RecentContext ctx)
     {

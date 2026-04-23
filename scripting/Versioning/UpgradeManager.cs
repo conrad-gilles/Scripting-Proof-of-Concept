@@ -106,10 +106,8 @@ public static class UpgradeManager
                 {
                     throw new VersionIntMoreThanOnceInAssemblyARVSException("Api version int more than once in the assembly should not happen.");
                 }
-                // contextVersionMap.Add(version, currentType);
                 ScannerRecord tempRecord = new ScannerRecord
                 {
-                    // AbstractBase = abstractSubClasses[i],
                     Version = metaDataAttribute.Version,
                     CustomReturnType = currentType
                 };
@@ -123,14 +121,11 @@ public static class UpgradeManager
 
 public record ScannerRecord
 {
-    // public required Type AbstractBase { get; init; }
     public required int Version { get; init; }
     public required Type CustomReturnType { get; init; }
 
     public override string ToString()
     {
-        return
-        //  nameof(AbstractBase) + ": " + AbstractBase.FullName + 
-        ", Version: " + Version + ", CustomReturnType: " + CustomReturnType;
+        return "Version: " + Version + ", CustomReturnType: " + CustomReturnType;
     }
 }

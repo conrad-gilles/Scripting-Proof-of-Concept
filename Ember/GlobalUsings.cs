@@ -17,8 +17,6 @@ global using RecentIActionScript = GeneratorScriptsV4.IActionScript;
 global using RecentContextFactory = GeneratorContextNoInherVaccineV5;
 // global using ActiveMultiersionActionScript = Mu/
 
-// public interface RecentIScript
-
 
 public record RecentTypeHelper
 {

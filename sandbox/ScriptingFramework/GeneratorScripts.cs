@@ -2,13 +2,13 @@ using Ember.Scripting;
 namespace Ember.Sandbox.ScriptingFrameWork.ScriptTypes
 {
     [MetaDataIGeneratorScript(version: 1, returnType: IGeneratorScriptReturnType.Condition, type: IGeneratorScriptType.AbstractBaseInSF)]
-    public interface IConditionScript : IScriptType
+    public interface IConditionScript : IScriptType     //Do not rename
     {
 
     }
 
     [MetaDataIGeneratorScript(version: 1, returnType: IGeneratorScriptReturnType.Action, type: IGeneratorScriptType.AbstractBaseInSF)]
-    public interface IActionScript : IScriptType
+    public interface IActionScript : IScriptType    //Do not rename
     {
 
     }
@@ -78,6 +78,14 @@ namespace GeneratorScriptsV2
         {
             throw new MethodNotImplementedException(message: nameof(ExecuteAsync) + " was not implemented.");
         }
+        Task<ActionResultV2.ActionResult> Execute1OldName(IGeneratorContext_V3.IGeneratorContext context)
+        {
+            throw new MethodNotImplementedException(message: nameof(Execute1OldName) + " was not implemented.");
+        }
+        Task<ActionResultV2.ActionResult> ExecuteMethodThatWasDeleted(IGeneratorContext_V3.IGeneratorContext context)
+        {
+            throw new MethodNotImplementedException(message: nameof(Execute1OldName) + " was not implemented.");
+        }
     }
 }
 namespace GeneratorScriptsV3
@@ -129,5 +137,3 @@ namespace GeneratorScriptsV4
         }
     }
 }
-
-

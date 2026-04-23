@@ -5,7 +5,6 @@ namespace Ember.Scripting.Compilation;
 public record ValidationRecord
 {
     public required string ClassName { get; init; }
-    // public required ScriptTypes BaseTypeName { get; init; }
     public required Type ScriptType { get; init; }
 
     public required int Version { get; init; }
@@ -16,19 +15,6 @@ public record ValidationRecord
     public string BaseTypeAsString()
     {
         string sScriptType;
-        // if (ScriptType == typeof(IActionScript))
-        // {
-        //     sScriptType = nameof(IActionScript);
-        // }
-        // else if (ScriptType == typeof(IConditionScript))
-        // {
-        //     sScriptType = nameof(IConditionScript);
-        // }
-        // else
-        // {
-        //     throw new CouldNotMatchBaseTypeInRecord("Could not match the BaseTypeNAme to a String this should never happen!");
-        // }
-
         sScriptType = ScriptType.Name;
         return sScriptType;
     }
