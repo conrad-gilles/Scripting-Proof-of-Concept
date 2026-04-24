@@ -17,7 +17,7 @@ public interface IDowngradeableContext
 
 public static class ContextManager
 {
-    public static async Task<Context> CreateByDowngrade(int desiredVersion, Context recentCtx)
+    public static async Task<IContext> CreateByDowngrade(int desiredVersion, IContext recentCtx)
     {
         Dictionary<int, Type> contextVersionMap = ContextVersionScanner.GetClassDictionary();
 
@@ -28,7 +28,7 @@ public static class ContextManager
 
         Type recentCtxType = recentCtx.GetType();
         Type desiredCtxType = contextVersionMap[desiredVersion];
-        Context context = recentCtx;
+        Context context = (Context)recentCtx;
 
         int iterations = 0;
         int maxIterations = ContextVersionScanner.GetClassDictionary().Keys.Count() + 3;
@@ -53,6 +53,6 @@ public static class ContextManager
             }
             iterations++;
         }
-        return context;
+        return (IContext)context;
     }
 }

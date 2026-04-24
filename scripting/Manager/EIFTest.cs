@@ -37,7 +37,7 @@ public class InternalManager
     private async Task<object> BaseExecute(Guid id, IContext ctx, string methodName)
     {
         CustomerScript script = await _scriptManager.GetScript(id);
-        IContext context = (IContext)await ContextManager.CreateByDowngrade(script.ScriptApiVersion, (Context)ctx);
+        IContext context = (IContext)await ContextManager.CreateByDowngrade(script.ScriptApiVersion, (IContext)ctx);
         return await _scriptManager.ExecuteScript(id, (IContext)context, methodName: methodName);
     }
     private object CheckUpgradeResult(object result)
@@ -62,7 +62,7 @@ public class InternalManager
     public async Task<object> ExecuteUnfinishedScriptBySourceCode(string sourceCode, IContext context, string methodName)
     {
         ValidationRecord vali = _scriptManager.BasicValidationBeforeCompiling(sourceCode);
-        IContext ctx = (IContext)await ContextManager.CreateByDowngrade(vali.Version, (Context)context);
+        IContext ctx = (IContext)await ContextManager.CreateByDowngrade(vali.Version, (IContext)context);
 
         var result = await _scriptManager.ExecuteUnfinishedScriptBySourceCode(sourceCode, (IContext)ctx, methodName: methodName);
 
