@@ -2,7 +2,7 @@ namespace Ember.Scripting.ScriptingFramework;
 
 public abstract class Context : IDowngradeableContext       //remove use interfr
 {
-    public abstract Context Downgrade();
+    public abstract IContext Downgrade();
 }
 
 public interface IContext
@@ -12,7 +12,7 @@ public interface IContext
 
 public interface IDowngradeableContext
 {
-    public Context Downgrade();
+    public IContext Downgrade();
 }
 
 public static class ContextManager
@@ -39,7 +39,7 @@ public static class ContextManager
             {
                 try
                 {
-                    context = context.Downgrade();
+                    context = (Context)context.Downgrade();
                     recentCtxType = context.GetType();
                 }
                 catch (Exception e)
