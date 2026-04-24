@@ -34,10 +34,10 @@ public class InternalManager
         }
     }
 
-    private async Task<object> BaseExecute(Guid id, Context ctx, string methodName)
+    private async Task<object> BaseExecute(Guid id, IContext ctx, string methodName)
     {
         CustomerScript script = await _scriptManager.GetScript(id);
-        Context context = await ContextManager.CreateByDowngrade(script.ScriptApiVersion, ctx);
+        IContext context = (IContext)await ContextManager.CreateByDowngrade(script.ScriptApiVersion, (Context)ctx);
         return await _scriptManager.ExecuteScript(id, (IContext)context, methodName: methodName);
     }
     private object CheckUpgradeResult(object result)
@@ -48,21 +48,21 @@ public class InternalManager
         }
         return result;
     }
-    public async Task<object> ExecuteScript(Guid id, Context ctx, string methodName)
+    public async Task<object> ExecuteScript(Guid id, IContext ctx, string methodName)
     {
-        var result = await BaseExecute(id, ctx, methodName);
+        var result = await BaseExecute(id, (IContext)ctx, methodName);
         return CheckUpgradeResult(result);
     }
-    public async Task<object> ExecuteScript<ScriptType>(string name, Context ctx, string methodName)
+    public async Task<object> ExecuteScript<ScriptType>(string name, IContext ctx, string methodName)
     where ScriptType : IScriptType
     {
         Guid id = await _scriptManager.GetScriptId<ScriptType>(name);
         return await ExecuteScript(id, ctx, methodName);
     }
-    public async Task<object> ExecuteUnfinishedScriptBySourceCode(string sourceCode, Context context, string methodName)
+    public async Task<object> ExecuteUnfinishedScriptBySourceCode(string sourceCode, IContext context, string methodName)
     {
         ValidationRecord vali = _scriptManager.BasicValidationBeforeCompiling(sourceCode);
-        Context ctx = await ContextManager.CreateByDowngrade(vali.Version, context);
+        IContext ctx = (IContext)await ContextManager.CreateByDowngrade(vali.Version, (Context)context);
 
         var result = await _scriptManager.ExecuteUnfinishedScriptBySourceCode(sourceCode, (IContext)ctx, methodName: methodName);
 
