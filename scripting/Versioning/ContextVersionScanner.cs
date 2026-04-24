@@ -31,7 +31,7 @@ public static class ContextVersionScanner
         for (int i = 0; i < subClasses.Count(); i++)
         {
             Type currentType = subClasses[i];
-            var uninitializedContext = (Context)RuntimeHelpers.GetUninitializedObject(currentType);
+            var uninitializedContext = (IContext)RuntimeHelpers.GetUninitializedObject(currentType);
 
             System.Reflection.TypeInfo typeInfo = uninitializedContext.GetType().GetTypeInfo();
 

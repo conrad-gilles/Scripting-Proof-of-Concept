@@ -23,7 +23,7 @@ public static class ContextManager
 
         if (contextVersionMap.Values.Contains(recentCtx.GetType()) == false)
         {
-            throw new NoContextClassDefinedForApiVException("No Context class defined in " + nameof(contextVersionMap) + " for the passed Context Type.");
+            throw new NoContextClassDefinedForApiVException("No Context class defined in " + nameof(contextVersionMap) + " for the passed Context Type: " + recentCtx.GetType().FullName);
         }
 
         Type recentCtxType = recentCtx.GetType();
