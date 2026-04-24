@@ -92,7 +92,7 @@ public class EmberVersioningTests
 
             if (resultBeforeUpgrade is ActionResultBase)
             {
-                ActionResultV3.ActionResult result = (ActionResultV3.ActionResult)UpgradeManager.UpgradeCustomReturn(resultBeforeUpgrade);
+                ActionResultV3.ActionResult result = (ActionResultV3.ActionResult)UpgradeManager.UpgradeReturnValue(resultBeforeUpgrade);
                 string shouldReturn = _actionResultVersionSpecific + "Pediatric tests added";
                 Assert.IsInstanceOfType(result, typeof(ActionResultBase));
                 Assert.IsInstanceOfType(result, typeof(ActionResultV3.ActionResult));
@@ -294,7 +294,7 @@ public class EmberVersioningTests
 
         ctx = TestHelper.GetContext();
         var result1 = await _facade.ExecuteScript(id, ctx, "Default");
-        var result = UpgradeManager.UpgradeCustomReturn(result1);
+        var result = UpgradeManager.UpgradeReturnValue(result1);
 
         string shouldReturn = _actionResultVersionSpecific + "Pediatric tests added";
         Assert.IsInstanceOfType(result, typeof(ActionResultBase));

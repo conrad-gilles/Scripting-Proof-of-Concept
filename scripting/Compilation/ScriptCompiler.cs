@@ -116,7 +116,7 @@ internal class ScriptCompiler
             _logger.LogTrace("ParentSymbol Name = " + parentSymbol);
             _logger.LogTrace("Version Int = " + versionInt);
 
-            Type scriptType = scriptType = CustomerScript.GetScriptType(parentSymbol.Name);
+            Type scriptType = scriptType = CustomerScript.GetScriptType(parentSymbol.ToDisplayString());
 
             List<MethodRecord> methods = ValidateScriptMethodTypes(tree!, model, parentSymbol);
             // ValiHelper.ValidateOnlyUseRecentTypes(methods, parentSymbol.ToDisplayString(), _recentTypes);    //work in progress

@@ -5,9 +5,9 @@ namespace Ember.Scripting.Versioning;
 
 public static class UpgradeManager
 {
-    public static IUpgradeableReturnValue UpgradeCustomReturn(object resultValue)
+    public static IUpgradeableReturnValue UpgradeReturnValue(object returnValue)
     {
-        IUpgradeableReturnValue current = (IUpgradeableReturnValue)resultValue;
+        IUpgradeableReturnValue current = (IUpgradeableReturnValue)returnValue;
 
         MetaDataCustomReturn? metaDataAttribute = current
             .GetType()

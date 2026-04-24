@@ -2,7 +2,7 @@
 CREATE TABLE customer_scripts (
     id UUID PRIMARY KEY,
     script_name VARCHAR(100),
-    script_type VARCHAR(50),    -- 'GeneratorCondition', 'GeneratorAction'
+    script_type VARCHAR(50),    -- 'GeneratorCondition', 'GeneratorAction'  candidate key, name mit type
     source_code TEXT NOT NULL,
     min_api_version INT NOT NULL,
     -- From [ScriptMetadata] attribute

@@ -42,37 +42,69 @@ public class CustomerScript
 
     public Type GetScriptType()
     {
-        return GetScriptType(ScriptType!);
+        HashSet<Type> rootScriptTypes = GetRootTypes();
+
+        foreach (Type root in rootScriptTypes)
+        {
+            if (root.FullName!.Contains(ScriptType))
+            {
+                return root;
+            }
+        }
+        throw new ScriptTypeNotSetException("ScriptType not set baseType.ToDisplayString(): " + ScriptType);
+    }
+    public static HashSet<Type> GetRootTypes()
+    {
+        return AppDomain.CurrentDomain.GetAssemblies()
+            .SelectMany(a => a.GetTypes())
+            .Where(t =>
+                t.IsInterface &&
+                typeof(IScriptType).IsAssignableFrom(t) &&
+                t != typeof(IScriptType) &&
+                !typeof(IScriptVersion).IsAssignableFrom(t))
+            .ToHashSet();
     }
     public static Type GetScriptType(string scriptTypeString)
     {
-        Type? scriptType = null;
-
-        Dictionary<string, Type> validScriptTypes = AppDomain.CurrentDomain.GetAssemblies()
-           .SelectMany(a => a.GetTypes())
-           .Where(t => t.IsInterface
-                    && typeof(IScriptType).IsAssignableFrom(t)
-                    && t != typeof(IScriptType))
-           .ToDictionary(t => t.Name!, t => t);
-
-
-        foreach (var sType in validScriptTypes)
+        if (scriptTypeString.Contains("<"))
         {
-            // Console.WriteLine("Key: " + sType + ", Value: " + sType.Value.FullName);
-            if (scriptTypeString == sType.Key)
+            scriptTypeString = scriptTypeString.Split('<')[0];
+        }
+
+        HashSet<Type> versionedScriptInterfaces = AppDomain.CurrentDomain.GetAssemblies()
+            .SelectMany(a => a.GetTypes())
+            .Where(t =>
+                t.IsInterface &&
+                typeof(IScriptVersion).IsAssignableFrom(t) &&
+                t != typeof(IScriptVersion))
+            .ToHashSet();
+
+        HashSet<Type> rootScriptTypes = GetRootTypes();
+
+        Dictionary<Type, Type> mappedTypes = [];
+        foreach (Type versioned in versionedScriptInterfaces)
+        {
+            foreach (Type root in rootScriptTypes)
             {
-                if (scriptType != null)
+                if (root.IsAssignableFrom(versioned))
                 {
-                    throw new CollisionOccuredException("Collision occured");
+                    mappedTypes.Add(versioned, root);
                 }
-                scriptType = sType.Value;
+            }
+            if (mappedTypes[versioned] == null)
+            {
+                throw new Exception();
             }
         }
-        if (scriptType == null)
+        foreach (Type versioned in versionedScriptInterfaces)
         {
-            throw new ScriptTypeNotSetException("ScriptType not set baseType.ToDisplayString(): ");
+            Console.WriteLine(versioned.FullName);
+            if (versioned.FullName!.Contains(scriptTypeString))
+            {
+                return mappedTypes[versioned];
+            }
         }
-        return scriptType;
+        throw new ScriptTypeNotSetException("ScriptType not set baseType.ToDisplayString(): " + scriptTypeString);
     }
     public override string ToString()
     {

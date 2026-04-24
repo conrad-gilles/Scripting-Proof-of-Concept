@@ -282,12 +282,12 @@ public class ArchitechtureTests
         ActionResultV1.ActionResult arV1 = ActionResultV2.ActionResult.Failure("it didnt work");
         ActionResultV2.ActionResult arV2 = ActionResultV2.ActionResult.Success("ye it worked");
 
-        ActionResultV3.ActionResult result = (ActionResultV3.ActionResult)UpgradeManager.UpgradeCustomReturn(arV1);
+        ActionResultV3.ActionResult result = (ActionResultV3.ActionResult)UpgradeManager.UpgradeReturnValue(arV1);
         Console.WriteLine("Full Type: " + result.GetType().FullName + ", Mess: " + result.ToString());
 
         Assert.IsTrue(result.ToString().Contains("[Message contains either failure or succes: ] it didnt workGENERIC_ERROR"));
 
-        result = (ActionResultV3.ActionResult)UpgradeManager.UpgradeCustomReturn(arV2);
+        result = (ActionResultV3.ActionResult)UpgradeManager.UpgradeReturnValue(arV2);
         Console.WriteLine("Full Type: " + result.GetType().FullName + ", Mess: " + result.ToString());
 
         Assert.IsTrue(result.ToString().Contains("[Message contains either failure or succes: ] ye it worked"));

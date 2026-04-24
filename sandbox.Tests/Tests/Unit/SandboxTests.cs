@@ -112,8 +112,8 @@ public class SanboxTests
         ActionResultV1.ActionResult v1Failure = ActionResultV1.ActionResult.Failure("it didnt work");
         ActionResultV1.ActionResult v1Success = ActionResultV1.ActionResult.Success("ye it worked");
 
-        ActionResultV3.ActionResult upgradedFailure = (ActionResultV3.ActionResult)UpgradeManager.UpgradeCustomReturn(v1Failure);
-        ActionResultV3.ActionResult upgradedSuccess = (ActionResultV3.ActionResult)UpgradeManager.UpgradeCustomReturn(v1Success);
+        ActionResultV3.ActionResult upgradedFailure = (ActionResultV3.ActionResult)UpgradeManager.UpgradeReturnValue(v1Failure);
+        ActionResultV3.ActionResult upgradedSuccess = (ActionResultV3.ActionResult)UpgradeManager.UpgradeReturnValue(v1Success);
 
         Assert.IsInstanceOfType(upgradedFailure, typeof(ActionResultV3.ActionResult));
         Assert.IsInstanceOfType(upgradedSuccess, typeof(ActionResultV3.ActionResult));
@@ -131,7 +131,7 @@ public class SanboxTests
         ActionResultV2.ActionResult v2 = ActionResultV2.ActionResult.Failure(
             "something broke", new List<string> { "step1", "step2" });
 
-        ActionResultV3.ActionResult upgraded = (ActionResultV3.ActionResult)UpgradeManager.UpgradeCustomReturn(v2);
+        ActionResultV3.ActionResult upgraded = (ActionResultV3.ActionResult)UpgradeManager.UpgradeReturnValue(v2);
 
         Assert.IsInstanceOfType(upgraded, typeof(ActionResultV3.ActionResult));
         ActionResultV3.ActionResult v3 = (ActionResultV3.ActionResult)upgraded;
@@ -144,7 +144,7 @@ public class SanboxTests
     {
         ActionResultV3.ActionResult v3 = ActionResultV3.ActionResult.Success("already latest");
 
-        ActionResultV3.ActionResult result = (ActionResultV3.ActionResult)UpgradeManager.UpgradeCustomReturn(v3);
+        ActionResultV3.ActionResult result = (ActionResultV3.ActionResult)UpgradeManager.UpgradeReturnValue(v3);
 
         Assert.IsInstanceOfType(result, typeof(ActionResultV3.ActionResult));
         Assert.AreEqual(v3, result);
@@ -159,7 +159,7 @@ public class SanboxTests
         Console.WriteLine(nameof(valResult.ClassName) + " : " + valResult.ClassName);
         Console.WriteLine(nameof(valResult.Version) + " : " + valResult.Version);
 
-        Assert.IsTrue(valResult.ScriptType == typeof(IActionScript));
+        Assert.IsTrue(valResult.ScriptType == typeof(IActionScriptBase));
         Assert.IsTrue(valResult.ClassName == "AddPediatricTestsV3");
         Assert.IsTrue(valResult.Version == 3);
 
@@ -169,7 +169,7 @@ public class SanboxTests
         Console.WriteLine(nameof(valResult.ClassName) + " : " + valResult.ClassName);
         Console.WriteLine(nameof(valResult.Version) + " : " + valResult.Version);
 
-        Assert.IsTrue(valResult.ScriptType == typeof(IActionScript));
+        Assert.IsTrue(valResult.ScriptType == typeof(IActionScriptBase));
         Assert.IsTrue(valResult.ClassName == "AddPediatricTestsV2");
         Assert.IsTrue(valResult.Version == 2);
 
@@ -179,7 +179,7 @@ public class SanboxTests
         Console.WriteLine(nameof(valResult.ClassName) + " : " + valResult.ClassName);
         Console.WriteLine(nameof(valResult.Version) + " : " + valResult.Version);
 
-        Assert.IsTrue(valResult.ScriptType == typeof(IActionScript));
+        Assert.IsTrue(valResult.ScriptType == typeof(IActionScriptBase));
         Assert.IsTrue(valResult.ClassName == "AddPediatricTestsV4");
         Assert.IsTrue(valResult.Version == 4);
 
@@ -189,7 +189,7 @@ public class SanboxTests
         Console.WriteLine(nameof(valResult.ClassName) + " : " + valResult.ClassName);
         Console.WriteLine(nameof(valResult.Version) + " : " + valResult.Version);
 
-        Assert.IsTrue(valResult.ScriptType == typeof(IActionScript));
+        Assert.IsTrue(valResult.ScriptType == typeof(IActionScriptBase));
         Assert.IsTrue(valResult.ClassName == "VaccineScript");
         Assert.IsTrue(valResult.Version == 5);
 
@@ -278,11 +278,11 @@ public class SanboxTests
         valResult = _facade.BasicValidationBeforeCompiling(src!);
         script = (await _facade.CreateScript(src!));
 
-        Context ctx = await EmberInternalFacade.CreateByDowngrade(script.ScriptApiVersion, data!);
+        Context ctx = await ContextManager.CreateByDowngrade(script.ScriptApiVersion, data!);
         Console.WriteLine("Type name: " + ctx.GetType().FullName);
 
         result = await _facade.ExecuteScript(script.Id, ctx, nameof(RecentIActionScript.ExecuteAsync));
-        ar = (ActionResultV3.ActionResult)UpgradeManager.UpgradeCustomReturn(result);
+        ar = (ActionResultV3.ActionResult)UpgradeManager.UpgradeReturnValue(result);
         Console.WriteLine(ar.ToString());
         Assert.IsInstanceOfType(ar, typeof(ActionResultV3.ActionResult));
 
@@ -290,11 +290,11 @@ public class SanboxTests
         valResult = _facade.BasicValidationBeforeCompiling(src!);
         script = (await _facade.CreateScript(src!));
 
-        ctx = await EmberInternalFacade.CreateByDowngrade(script.ScriptApiVersion, data!);
+        ctx = await ContextManager.CreateByDowngrade(script.ScriptApiVersion, data!);
         Console.WriteLine("Type name: " + ctx.GetType().FullName);
 
         result = await _facade.ExecuteScript(script.Id, ctx, nameof(RecentIActionScript.ExecuteAsync));
-        ar = (ActionResultV3.ActionResult)UpgradeManager.UpgradeCustomReturn(result);
+        ar = (ActionResultV3.ActionResult)UpgradeManager.UpgradeReturnValue(result);
         Console.WriteLine(ar.ToString());
         Assert.IsInstanceOfType(ar, typeof(ActionResultV3.ActionResult));
 
@@ -302,11 +302,11 @@ public class SanboxTests
         valResult = _facade.BasicValidationBeforeCompiling(src!);
         script = (await _facade.CreateScript(src!));
 
-        ctx = await EmberInternalFacade.CreateByDowngrade(script.ScriptApiVersion, data!);
+        ctx = await ContextManager.CreateByDowngrade(script.ScriptApiVersion, data!);
         Console.WriteLine("Type name: " + ctx.GetType().FullName);
 
         result = await _facade.ExecuteScript(script.Id, ctx, nameof(RecentIActionScript.ExecuteAsync));
-        ar = (ActionResultV3.ActionResult)UpgradeManager.UpgradeCustomReturn(result);
+        ar = (ActionResultV3.ActionResult)UpgradeManager.UpgradeReturnValue(result);
         Console.WriteLine(ar.ToString());
         Assert.IsInstanceOfType(ar, typeof(ActionResultV3.ActionResult));
 
@@ -314,7 +314,7 @@ public class SanboxTests
         valResult = _facade.BasicValidationBeforeCompiling(src!);
         script = (await _facade.CreateScript(src!));
 
-        ctx = await EmberInternalFacade.CreateByDowngrade(script.ScriptApiVersion, data!);
+        ctx = await ContextManager.CreateByDowngrade(script.ScriptApiVersion, data!);
         Console.WriteLine("Type name: " + ctx.GetType().FullName);
 
         result = await _facade.ExecuteScript(script.Id, ctx, nameof(RecentIConditionScript.EvaluateAsync));
@@ -325,7 +325,7 @@ public class SanboxTests
 
 
         ////////////////////////////////////////////
-        ctx = await EmberInternalFacade.CreateByDowngrade(script.ScriptApiVersion, data!);
+        ctx = await ContextManager.CreateByDowngrade(script.ScriptApiVersion, data!);
         result = await _facade.ExecuteScript(script.Id, ctx, nameof(RecentIConditionScript.EvaluateAsync));
 
 

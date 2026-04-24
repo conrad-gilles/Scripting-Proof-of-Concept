@@ -379,7 +379,7 @@ public class ScriptManagerFacadeTests
         Assert.IsNotNull(result);
         // Assert.IsTrue(result.IsSuccess);
         // Assert.IsTrue(result.Message.Contains("Pediatric"));
-        result = (ActionResultV3.ActionResult)UpgradeManager.UpgradeCustomReturn(result);
+        result = (ActionResultV3.ActionResult)UpgradeManager.UpgradeReturnValue(result);
         Assert.IsInstanceOfType(result, typeof(ActionResultV3.ActionResult));
 
         Guid id2 = (await _scriptManager.CreateScript(_sourceCodePedia!)).Id;

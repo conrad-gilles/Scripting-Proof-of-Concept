@@ -5,6 +5,9 @@
 
 repomix-output.xml
 
+sandbox/logs
+sandbox.Tests/TestResults
+
 Notes.md
 commits.txt
 

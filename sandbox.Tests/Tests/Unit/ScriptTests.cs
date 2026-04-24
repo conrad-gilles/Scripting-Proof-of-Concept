@@ -45,7 +45,7 @@ async Task SetupAsync()
         CustomerScript retrievedScript = await _facade.GetScript(id);
         var context = TestHelper.GetContext();
         object resultBeforeUpgrade = await _eif!.ExecuteScript(id, context, nameof(RecentIActionScript.ExecuteAsync));
-        ActionResultV3.ActionResult result = (ActionResultV3.ActionResult)UpgradeManager.UpgradeCustomReturn(resultBeforeUpgrade);
+        ActionResultV3.ActionResult result = (ActionResultV3.ActionResult)UpgradeManager.UpgradeReturnValue(resultBeforeUpgrade);
         string shouldReturn = _actionResultVersionSpecific + "Pediatric tests added";
         Assert.IsInstanceOfType(result, typeof(ActionResultBase));
         Assert.IsInstanceOfType(result, typeof(ActionResultV3.ActionResult));
@@ -60,7 +60,7 @@ async Task SetupAsync()
         CustomerScript retrievedScript = await _facade.GetScript(id);
         var context = TestHelper.GetContext();
         object resultBeforeUpgrade = await _eif!.ExecuteScript(id, context, nameof(RecentIActionScript.ExecuteAsync));
-        ActionResultV3.ActionResult result = (ActionResultV3.ActionResult)UpgradeManager.UpgradeCustomReturn(resultBeforeUpgrade);
+        ActionResultV3.ActionResult result = (ActionResultV3.ActionResult)UpgradeManager.UpgradeReturnValue(resultBeforeUpgrade);
         string shouldReturn = _actionResultVersionSpecific + "Pediatric tests added";
         Assert.IsInstanceOfType(result, typeof(ActionResultBase));
         Assert.IsInstanceOfType(result, typeof(ActionResultV3.ActionResult));
@@ -75,7 +75,7 @@ async Task SetupAsync()
         CustomerScript retrievedScript = await _facade.GetScript(id);
         var context = TestHelper.GetContext();
         object resultBeforeUpgrade = await _eif!.ExecuteScript(id, context, nameof(RecentIActionScript.ExecuteAsync));
-        ActionResultV3.ActionResult result = (ActionResultV3.ActionResult)UpgradeManager.UpgradeCustomReturn(resultBeforeUpgrade);
+        ActionResultV3.ActionResult result = (ActionResultV3.ActionResult)UpgradeManager.UpgradeReturnValue(resultBeforeUpgrade);
         string shouldReturn = _actionResultVersionSpecific + "Pediatric tests added V3";
         Assert.IsInstanceOfType(result, typeof(ActionResultBase));
         Assert.IsInstanceOfType(result, typeof(ActionResultV3.ActionResult));

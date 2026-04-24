@@ -501,7 +501,7 @@ internal class ScriptRepository
             }
             catch (Exception e)
             {
-                throw new CompilationOfUpdatedScriptException(message: "Failed to compile the updated script. Script source code was not updated.", e);
+                throw new CompilationOfUpdatedScriptException(message: "Failed to compile the updated script. Script source code was not updated. Message: " + e.Message, e);
             }
         }
     }

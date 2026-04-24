@@ -61,7 +61,7 @@ public class CrudDemos
     public async Task Read()
     {
         await Create();
-        CustomerScript script = await ScriptManager.GetScript<IActionScript>("AddPediatricTestsV2");  //
+        CustomerScript script = await ScriptManager.GetScript<IActionScriptBase>("AddPediatricTestsV2");  //
         Console.WriteLine("Name: " + script.ScriptName + ", ScriptType: " + script.ScriptType);
     }
     [TestMethod]
@@ -69,14 +69,14 @@ public class CrudDemos
     {
         await Create();
         string newSourceCode = TestHelper.GetSC().sourceCodeActionV3;
-        await ScriptManager.UpdateScript<IActionScript>("AddPediatricTestsV2", newSourceCode);
+        await ScriptManager.UpdateScript<IActionScriptBase>("AddPediatricTestsV2", newSourceCode);
     }
 
     [TestMethod]
     public async Task Delete()
     {
         await Create();
-        await ScriptManager.DeleteScript<IActionScript>("AddPediatricTestsV2");
+        await ScriptManager.DeleteScript<IActionScriptBase>("AddPediatricTestsV2");
     }
     [TestMethod]
     public async Task Execute()
@@ -103,7 +103,7 @@ public class CrudDemos
 
         RecentContext ctx = factory.Create(labOrder, vaccine);
 
-        RecentActionResult ar = (RecentActionResult)await InternalScriptManager!.ExecuteScript<IActionScript>
+        RecentActionResult ar = (RecentActionResult)await InternalScriptManager!.ExecuteScript<IActionScriptBase>
         ("AddPediatricTestsV2", ctx, nameof(RecentIActionScript.ExecuteAsync));
 
         ActionScript scriptInstance = InternalScriptManager.GetScript<ActionScript>(script.ScriptName!);

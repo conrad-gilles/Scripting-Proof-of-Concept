@@ -1,14 +1,13 @@
 using Ember.Scripting;
+using GeneratorScriptsGeneric;
 namespace Ember.Sandbox.ScriptingFrameWork.ScriptTypes
 {
-    [MetaDataIGeneratorScript(version: 1, returnType: IGeneratorScriptReturnType.Condition, type: IGeneratorScriptType.AbstractBaseInSF)]
     public interface IConditionScript : IScriptType     //Do not rename
     {
 
     }
 
-    [MetaDataIGeneratorScript(version: 1, returnType: IGeneratorScriptReturnType.Action, type: IGeneratorScriptType.AbstractBaseInSF)]
-    public interface IActionScript : IScriptType    //Do not rename
+    public interface IActionScriptBase : IScriptType    //Do not rename
     {
 
     }
@@ -25,6 +24,7 @@ namespace GeneratorScriptsGenericSimple
     [MetaDataIGeneratorScript(version: 1, returnType: IGeneratorScriptReturnType.Condition, type: IGeneratorScriptType.GenericSimple)]
     public interface IConditionScript<TContext>
         : IScriptVersion
+        , IConditionScript
         where TContext : IContext
     {
         Task<bool> EvaluateAsync(TContext context)
@@ -35,6 +35,7 @@ namespace GeneratorScriptsGenericSimple
     [MetaDataIGeneratorScript(version: 1, returnType: IGeneratorScriptReturnType.Action, type: IGeneratorScriptType.GenericSimple)]
     public interface IActionScript<TContext>
     : IScriptVersion
+    , IActionScriptBase
     where TContext : IGeneratorContext_V2.IGeneratorContext
     {
 
@@ -53,6 +54,7 @@ namespace GeneratorScriptsGeneric
     [MetaDataIGeneratorScript(version: 1, returnType: IGeneratorScriptReturnType.Action, type: IGeneratorScriptType.Generic)]
     public interface IActionScript<TContext, TActionResult>
         : IScriptVersion
+        , IActionScriptBase
         where TContext : IContext
         where TActionResult : ActionResultBase
     {
@@ -73,6 +75,7 @@ namespace GeneratorScriptsV2
     [MetaDataIGeneratorScript(version: 2)]
     public interface IActionScript
     : IScriptVersion
+    , Ember.Sandbox.ScriptingFrameWork.ScriptTypes.IActionScriptBase
     {
         Task<ActionResultV2.ActionResult> ExecuteAsync(IGeneratorContext_V3.IGeneratorContext context)
         {
@@ -93,6 +96,7 @@ namespace GeneratorScriptsV3
     [MetaDataIGeneratorScript(version: 3)]
     public interface IActionScript
         : IScriptVersion
+        , Ember.Sandbox.ScriptingFrameWork.ScriptTypes.IActionScriptBase
     {
         Task<ActionResultV3.ActionResult> ExecuteAsync(IGeneratorContext_V4.IGeneratorContext context)
         {
@@ -117,6 +121,7 @@ namespace GeneratorScriptsV4
     [MetaDataIGeneratorScript(version: 4)]
     public interface IActionScript
     : IScriptVersion
+    , Ember.Sandbox.ScriptingFrameWork.ScriptTypes.IActionScriptBase
     {
         Task<ActionResultV3.ActionResult> ExecuteAsync(IGeneratorContextNoInheritance_V5.IGeneratorContext context)
         {

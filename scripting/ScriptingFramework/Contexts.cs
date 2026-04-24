@@ -1,6 +1,6 @@
 namespace Ember.Scripting.ScriptingFramework;
 
-public abstract class Context : IDowngradeableContext
+public abstract class Context : IDowngradeableContext       //remove use interfr
 {
     public abstract Context Downgrade();
 }

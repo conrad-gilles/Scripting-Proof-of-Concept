@@ -9,8 +9,8 @@ global using Ember.Sandbox.ScriptingFrameWork.ScriptTypes;
 
 
 global using RecentActionResult = ActionResultV3.ActionResult;
-global using RecentIContext = IGeneratorContextNoInheritance_V5.IGeneratorContext;
-global using RecentContext = GeneratorContextNoInherVaccineV5.GeneratorContext;
+global using RecentIContext = IGeneratorContextNoInheritance_V5.IGeneratorContext;//och
+global using RecentContext = GeneratorContextNoInherVaccineV5.GeneratorContext; //raus
 // global using RecentIGeneratorConditionScript = GeneratorScriptsGenericSimple.IGeneratorConditionScript<IGeneratorReadOnlyContextV1.IGeneratorContext>;
 global using RecentIConditionScript = GeneratorScriptsGenericSimple.IConditionScript<IGeneratorContextNoInheritance_V5.IGeneratorContext>;
 global using RecentIActionScript = GeneratorScriptsV4.IActionScript;
