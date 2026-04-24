@@ -9,8 +9,7 @@ public static class ContextVersionScanner
     // Moved exactly as it was from ScriptFactory
     public static Dictionary<int, Type> GetClassDictionary()
     {
-        Type baseType = typeof(Context);
-        return GetBaseTypeDictionary(baseType);
+        return GetBaseTypeDictionary();
     }
 
     public static Dictionary<int, Type> GetInterfaceDictionary()
@@ -19,15 +18,16 @@ public static class ContextVersionScanner
         return GetBaseTypeDictionaryIntrfc();
     }
 
-    private static Dictionary<int, Type> GetBaseTypeDictionary(Type baseType)
+    private static Dictionary<int, Type> GetBaseTypeDictionary()
     {
+        Type baseType = typeof(IContext);
+
         Dictionary<int, Type> contextVersionMap = new();
-        //the following 4 lines were ai generated
+
         var subClasses = AppDomain.CurrentDomain.GetAssemblies()
-                    //    .SelectMany(assembly => assembly.GetTypes())
-                    .SelectMany(assembly => VersionScannerHelper.GetLoadableTypes(assembly))
-                   .Where(t => t.IsClass && !t.IsAbstract && t.IsSubclassOf(baseType))
-                   .ToList();
+            .SelectMany(assembly => VersionScannerHelper.GetLoadableTypes(assembly))
+            .Where(t => t.IsClass && !t.IsAbstract && baseType.IsAssignableFrom(t))
+            .ToList();
 
         for (int i = 0; i < subClasses.Count(); i++)
         {

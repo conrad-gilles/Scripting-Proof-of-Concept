@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using Ember.Scripting;
 using IGeneratorReadOnlyContextV1;
 using ContextBases;
+using Microsoft.EntityFrameworkCore.Metadata.Conventions;
 
 namespace ContextBases
 {
@@ -72,7 +73,7 @@ namespace IGeneratorContextNoInheritance_V5
 namespace ReadOnlyContextV1
 {
     [MetaDataGeneratorClass(version: 1)]
-    public class GeneratorContext : Context, IGeneratorReadOnlyContextV1.IGeneratorContext
+    public class GeneratorContext : IGeneratorReadOnlyContextV1.IGeneratorContext
     {
         public ILabOrderInterface LabOrder;
         public IPatientInterface Patient;
@@ -93,7 +94,7 @@ namespace ReadOnlyContextV1
         IPatientInterface IGeneratorReadOnlyContextV1.IGeneratorContext.Patient2 => Patient;
         IConsoleLoggerInterface IGeneratorReadOnlyContextV1.IGeneratorContext.Logger2 => Logger;
         IDataAccessInterface IGeneratorReadOnlyContextV1.IGeneratorContext.Data2 => Data;
-        public override IGeneratorContextBaseInterfaceSF Downgrade()
+        public IDowngradeableContext Downgrade()
         {
             // return null;
             throw new Exception("Can not instaniate the abstract base class.");
@@ -104,7 +105,7 @@ namespace ReadOnlyContextV1
 namespace RWContextV2
 {
     [MetaDataGeneratorClass(version: 2)]
-    public class GeneratorContext : Context, IGeneratorContext_V2.IGeneratorContext
+    public class GeneratorContext : IGeneratorContext_V2.IGeneratorContext
     {
         public ILabOrderRWInterface LabOrder;
         public IPatientInterface Patient;
@@ -131,7 +132,7 @@ namespace RWContextV2
         public IDataAccessInterface Data2 => Data;
 
         ILabOrderInterface IGeneratorReadOnlyContextV1.IGeneratorContext.LabOrder => LabOrder2;
-        public override IGeneratorContextBaseInterfaceSF Downgrade()
+        public IDowngradeableContext Downgrade()
         {
             try
             {
@@ -172,7 +173,7 @@ namespace GeneratorContextV3
         }
         ILabOrderInterfaceV2 IGeneratorContext_V3.IGeneratorContext.LabOrder => LabOrderV2;
 
-        public override IGeneratorContextBaseInterfaceSF Downgrade()
+        public new IGeneratorContextBaseInterfaceSF Downgrade()
         {
             try
             {
@@ -213,7 +214,7 @@ namespace GeneratorContextV4
         }
         ILabOrderInterfaceV3 IGeneratorContext_V4.IGeneratorContext.LabOrder => LabOrderV3;
 
-        public override IGeneratorContextBaseInterfaceSF Downgrade()
+        public new IGeneratorContextBaseInterfaceSF Downgrade()
         {
             try
             {
@@ -234,7 +235,7 @@ namespace GeneratorContextV4
 namespace GeneratorContextNoInherVaccineV5
 {
     [MetaDataGeneratorClass(version: 5)]
-    public class GeneratorContext : Context, IGeneratorContextNoInheritance_V5.IGeneratorContext   //into diffrent namespaces blocks later folders
+    public class GeneratorContext : IGeneratorContextNoInheritance_V5.IGeneratorContext   //into diffrent namespaces blocks later folders
     {
         ILabOrderInterfaceV4NoInheritence LabOrder;
         IVaccineInterface Vaccine;
@@ -248,7 +249,7 @@ namespace GeneratorContextNoInherVaccineV5
 
         IVaccineInterface IGeneratorContextNoInheritance_V5.IGeneratorContext.Vaccine => Vaccine;
 
-        public override IGeneratorContextBaseInterfaceSF Downgrade()
+        public IDowngradeableContext Downgrade()
         {
             try
             {
