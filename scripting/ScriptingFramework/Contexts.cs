@@ -2,17 +2,17 @@ namespace Ember.Scripting.ScriptingFramework;
 
 public abstract class Context : IDowngradeableContext       //remove use interfr
 {
-    public abstract IContext Downgrade();
+    public abstract IDowngradeableContext Downgrade();
 }
 
-public interface IContext : IDowngradeableContext
+public interface IContext
 {
 
 }
 
-public interface IDowngradeableContext
+public interface IDowngradeableContext : IContext
 {
-    public IContext Downgrade();
+    public IDowngradeableContext Downgrade();
 }
 
 public static class ContextManager
@@ -28,7 +28,7 @@ public static class ContextManager
 
         Type recentCtxType = recentCtx.GetType();
         Type desiredCtxType = contextVersionMap[desiredVersion];
-        IContext context = recentCtx;
+        IDowngradeableContext context = (IDowngradeableContext)recentCtx;   //todo add real type check
 
         int iterations = 0;
         int maxIterations = ContextVersionScanner.GetClassDictionary().Keys.Count() + 3;

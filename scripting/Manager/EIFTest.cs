@@ -62,7 +62,7 @@ public class InternalManager
     public async Task<object> ExecuteUnfinishedScriptBySourceCode(string sourceCode, IContext context, string methodName)
     {
         ValidationRecord vali = _scriptManager.BasicValidationBeforeCompiling(sourceCode);
-        IContext ctx = (IContext)await ContextManager.CreateByDowngrade(vali.Version, (IContext)context);
+        IContext ctx = (IContext)await ContextManager.CreateByDowngrade(vali.Version, context);
 
         var result = await _scriptManager.ExecuteUnfinishedScriptBySourceCode(sourceCode, (IContext)ctx, methodName: methodName);
 

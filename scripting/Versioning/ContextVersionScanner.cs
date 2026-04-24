@@ -1,5 +1,6 @@
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Ember.Scripting.Versioning;
 
@@ -15,7 +16,7 @@ public static class ContextVersionScanner
     public static Dictionary<int, Type> GetInterfaceDictionary()
     {
         Type baseType = typeof(IContext);
-        return GetBaseTypeDictionaryIntrfc(baseType);
+        return GetBaseTypeDictionaryIntrfc();
     }
 
     private static Dictionary<int, Type> GetBaseTypeDictionary(Type baseType)
@@ -55,8 +56,9 @@ public static class ContextVersionScanner
         return contextVersionMap;
     }
 
-    private static Dictionary<int, Type> GetBaseTypeDictionaryIntrfc(Type baseType)
+    private static Dictionary<int, Type> GetBaseTypeDictionaryIntrfc()
     {
+        Type baseType = typeof(IContext);
         Dictionary<int, Type> contextVersionMap = new();
 
         // var subClasses = AppDomain.CurrentDomain.GetAssemblies()
@@ -67,7 +69,7 @@ public static class ContextVersionScanner
         //AiGenerated Linq queries
         var subClasses = AppDomain.CurrentDomain.GetAssemblies()
            .SelectMany(assembly => VersionScannerHelper.GetLoadableTypes(assembly))
-           .Where(t => t.IsInterface && baseType.IsAssignableFrom(t) && t != baseType)
+           .Where(t => t.IsInterface && baseType.IsAssignableFrom(t) && t != baseType && t != typeof(IDowngradeableContext))
            .ToList();
 
         for (int i = 0; i < subClasses.Count(); i++)
@@ -77,7 +79,7 @@ public static class ContextVersionScanner
             var versionAttr = currentType.GetCustomAttribute<MetaDataIGeneratorIntrfc>();
             if (versionAttr == null)
             {
-                throw new MetaDataAttribueNullCVSIException(message: nameof(versionAttr) + " was null, you probably forgot to put an attribute defining the version of the IGeneratorContext.");
+                throw new MetaDataAttribueNullCVSIException(message: subClasses[i].FullName + " versionAttr was null, you probably forgot to put an attribute defining the version of the IGeneratorContext.");
             }
             int version = versionAttr.Version;
 
