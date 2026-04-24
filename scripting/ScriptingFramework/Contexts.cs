@@ -5,7 +5,7 @@ public abstract class Context : IDowngradeableContext       //remove use interfr
     public abstract IContext Downgrade();
 }
 
-public interface IContext
+public interface IContext : IDowngradeableContext
 {
 
 }
@@ -28,7 +28,7 @@ public static class ContextManager
 
         Type recentCtxType = recentCtx.GetType();
         Type desiredCtxType = contextVersionMap[desiredVersion];
-        Context context = (Context)recentCtx;
+        IContext context = recentCtx;
 
         int iterations = 0;
         int maxIterations = ContextVersionScanner.GetClassDictionary().Keys.Count() + 3;
@@ -39,7 +39,7 @@ public static class ContextManager
             {
                 try
                 {
-                    context = (Context)context.Downgrade();
+                    context = context.Downgrade();
                     recentCtxType = context.GetType();
                 }
                 catch (Exception e)
