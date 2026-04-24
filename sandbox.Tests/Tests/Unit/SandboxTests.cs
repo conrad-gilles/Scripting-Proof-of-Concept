@@ -11,6 +11,7 @@ using Sandbox;
 using Ember.Scripting.Compilation;
 
 using Ember.Simulation;
+using Newtonsoft.Json.Serialization;
 
 [TestClass]
 public class SanboxTests
@@ -278,10 +279,10 @@ public class SanboxTests
         valResult = _facade.BasicValidationBeforeCompiling(src!);
         script = (await _facade.CreateScript(src!));
 
-        Context ctx = await ContextManager.CreateByDowngrade(script.ScriptApiVersion, data!);
+        IContext ctx = (IContext)await ContextManager.CreateByDowngrade(script.ScriptApiVersion, data!);
         Console.WriteLine("Type name: " + ctx.GetType().FullName);
 
-        result = await _facade.ExecuteScript(script.Id, ctx, nameof(RecentIActionScript.ExecuteAsync));
+        result = await _facade.ExecuteScript(script.Id, (IContext)ctx, nameof(RecentIActionScript.ExecuteAsync));
         ar = (ActionResultV3.ActionResult)UpgradeManager.UpgradeReturnValue(result);
         Console.WriteLine(ar.ToString());
         Assert.IsInstanceOfType(ar, typeof(ActionResultV3.ActionResult));
@@ -290,10 +291,10 @@ public class SanboxTests
         valResult = _facade.BasicValidationBeforeCompiling(src!);
         script = (await _facade.CreateScript(src!));
 
-        ctx = await ContextManager.CreateByDowngrade(script.ScriptApiVersion, data!);
+        ctx = (IContext)await ContextManager.CreateByDowngrade(script.ScriptApiVersion, data!);
         Console.WriteLine("Type name: " + ctx.GetType().FullName);
 
-        result = await _facade.ExecuteScript(script.Id, ctx, nameof(RecentIActionScript.ExecuteAsync));
+        result = await _facade.ExecuteScript(script.Id, (IContext)ctx, nameof(RecentIActionScript.ExecuteAsync));
         ar = (ActionResultV3.ActionResult)UpgradeManager.UpgradeReturnValue(result);
         Console.WriteLine(ar.ToString());
         Assert.IsInstanceOfType(ar, typeof(ActionResultV3.ActionResult));
@@ -302,10 +303,10 @@ public class SanboxTests
         valResult = _facade.BasicValidationBeforeCompiling(src!);
         script = (await _facade.CreateScript(src!));
 
-        ctx = await ContextManager.CreateByDowngrade(script.ScriptApiVersion, data!);
+        ctx = (IContext)await ContextManager.CreateByDowngrade(script.ScriptApiVersion, data!);
         Console.WriteLine("Type name: " + ctx.GetType().FullName);
 
-        result = await _facade.ExecuteScript(script.Id, ctx, nameof(RecentIActionScript.ExecuteAsync));
+        result = await _facade.ExecuteScript(script.Id, (IContext)ctx, nameof(RecentIActionScript.ExecuteAsync));
         ar = (ActionResultV3.ActionResult)UpgradeManager.UpgradeReturnValue(result);
         Console.WriteLine(ar.ToString());
         Assert.IsInstanceOfType(ar, typeof(ActionResultV3.ActionResult));
@@ -314,10 +315,10 @@ public class SanboxTests
         valResult = _facade.BasicValidationBeforeCompiling(src!);
         script = (await _facade.CreateScript(src!));
 
-        ctx = await ContextManager.CreateByDowngrade(script.ScriptApiVersion, data!);
+        ctx = (IContext)await ContextManager.CreateByDowngrade(script.ScriptApiVersion, data!);
         Console.WriteLine("Type name: " + ctx.GetType().FullName);
 
-        result = await _facade.ExecuteScript(script.Id, ctx, nameof(RecentIConditionScript.EvaluateAsync));
+        result = await _facade.ExecuteScript(script.Id, (IContext)ctx, nameof(RecentIConditionScript.EvaluateAsync));
         // ar = EmberMethods.UpgradeActionResult(result);
         Console.WriteLine(result.ToString());
 
@@ -325,8 +326,8 @@ public class SanboxTests
 
 
         ////////////////////////////////////////////
-        ctx = await ContextManager.CreateByDowngrade(script.ScriptApiVersion, data!);
-        result = await _facade.ExecuteScript(script.Id, ctx, nameof(RecentIConditionScript.EvaluateAsync));
+        ctx = (IContext)await ContextManager.CreateByDowngrade(script.ScriptApiVersion, data!);
+        result = await _facade.ExecuteScript(script.Id, (IContext)ctx, nameof(RecentIConditionScript.EvaluateAsync));
 
 
         // Assert.IsTrue(false);

@@ -38,7 +38,7 @@ public class InternalManager
     {
         CustomerScript script = await _scriptManager.GetScript(id);
         Context context = await ContextManager.CreateByDowngrade(script.ScriptApiVersion, ctx);
-        return await _scriptManager.ExecuteScript(id, context, methodName: methodName);
+        return await _scriptManager.ExecuteScript(id, (IContext)context, methodName: methodName);
     }
     private object CheckUpgradeResult(object result)
     {
@@ -64,7 +64,7 @@ public class InternalManager
         ValidationRecord vali = _scriptManager.BasicValidationBeforeCompiling(sourceCode);
         Context ctx = await ContextManager.CreateByDowngrade(vali.Version, context);
 
-        var result = await _scriptManager.ExecuteUnfinishedScriptBySourceCode(sourceCode, ctx, methodName: methodName);
+        var result = await _scriptManager.ExecuteUnfinishedScriptBySourceCode(sourceCode, (IContext)ctx, methodName: methodName);
 
         return CheckUpgradeResult(result);
     }

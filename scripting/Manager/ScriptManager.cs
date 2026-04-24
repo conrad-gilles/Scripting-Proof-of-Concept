@@ -159,7 +159,7 @@ internal class ScriptManager(
     #region Execution Operations
 
     // Generic execution 
-    public async Task<object> ExecuteScript(Guid scriptId, Context context, string methodName, int? apiVersion = null)
+    public async Task<object> ExecuteScript(Guid scriptId, IContext context, string methodName, int? apiVersion = null)
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName} with scriptId: {ScriptId}.", nameof(ExecuteScript), nameof(ScriptManager), scriptId);
 
@@ -181,17 +181,17 @@ internal class ScriptManager(
             executionTime = script.CustomerScript!.ExecutionTimeInMS;
             // Console.WriteLine("execution time was in 199 set to: " + executionTime);
         }
-        object result = await _executor.RunScriptExecution(compiledScript!, context, executionTime, methodName);  //returns either bool or action result todo maybe add checks if thats the case but normally should be
+        object result = await _executor.RunScriptExecution(compiledScript!, (IContext)context, executionTime, methodName);  //returns either bool or action result todo maybe add checks if thats the case but normally should be
         return result;
     }
 
-    public async Task<object> ExecuteScript<ScriptType>(string name, Context context, string methodName, int? apiVersion = null) where ScriptType : IScriptType
+    public async Task<object> ExecuteScript<ScriptType>(string name, IContext context, string methodName, int? apiVersion = null) where ScriptType : IScriptType
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName} with scriptName: {ScriptId}.", nameof(ExecuteScript), nameof(ScriptManager), name);
         Guid scriptId = await GetScriptId<ScriptType>(name);
         return await ExecuteScript(scriptId, context, methodName, apiVersion);
     }
-    public async Task<object> ExecuteUnfinishedScriptBySourceCode(string sourceCode, Context context, string methodName, int? apiVersion = null, int? executionTime = null)
+    public async Task<object> ExecuteUnfinishedScriptBySourceCode(string sourceCode, IContext context, string methodName, int? apiVersion = null, int? executionTime = null)
     {
         ValidationRecord vali = _compiler.BasicValidationBeforeCompiling(sourceCode);
         if (executionTime == null)
@@ -200,7 +200,7 @@ internal class ScriptManager(
             // Console.WriteLine("execution time was in 217 set to: " + executionTime);
         }
         byte[] comp = _compiler.RunCompilation(sourceCode);
-        return await _executor.RunScriptExecution(compiledScript: comp, genContext: context, executionTime: executionTime, methodName: methodName);
+        return await _executor.RunScriptExecution(compiledScript: comp, genContext: (IContext)context, executionTime: executionTime, methodName: methodName);
         // return null //todo
     }
     #endregion

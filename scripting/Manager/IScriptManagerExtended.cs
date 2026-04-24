@@ -106,7 +106,7 @@ public interface IScriptManagerExtended : IScriptManager
 
   #endregion
 
-  Task<object> ExecuteUnfinishedScriptBySourceCode(string sourceCode, Context context, string methodName, int? apiVersion = null, int? executionTime = null);
+  Task<object> ExecuteUnfinishedScriptBySourceCode(string sourceCode, IContext context, string methodName, int? apiVersion = null, int? executionTime = null);
 
 
   #region Cache Management

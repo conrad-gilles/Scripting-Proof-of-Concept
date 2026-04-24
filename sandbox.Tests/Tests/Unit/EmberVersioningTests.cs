@@ -280,7 +280,7 @@ public class EmberVersioningTests
 
     public async Task GetTestingContextTest()
     {
-        Context ctx;
+        IContext ctx;
         Guid id;
         id = (await _facade!.CreateScript(_sourceCodeActionV2!)).Id;
         var vali = _facade.BasicValidationBeforeCompiling(_sourceCodeActionV2!);
@@ -289,11 +289,11 @@ public class EmberVersioningTests
         await Assert.ThrowsExceptionAsync<Exception>(async () =>
         {
             ctx = TestHelper.GetContext();
-            var result1 = await _facade.ExecuteScript(id, ctx, "Default");
+            var result1 = await _facade.ExecuteScript(id, (IContext)ctx, "Default");
         });
 
         ctx = TestHelper.GetContext();
-        var result1 = await _facade.ExecuteScript(id, ctx, "Default");
+        var result1 = await _facade.ExecuteScript(id, (IContext)ctx, "Default");
         var result = UpgradeManager.UpgradeReturnValue(result1);
 
         string shouldReturn = _actionResultVersionSpecific + "Pediatric tests added";
