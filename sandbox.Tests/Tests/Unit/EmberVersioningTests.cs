@@ -16,7 +16,7 @@ public class EmberVersioningTests
 
 
     private IScriptManagerExtended? _facade;
-    private EmberInternalFacade? _eif;
+    private InternalManager? _eif;
     private EmberMethods? _em;
     // private DataV2.DataV2? _data;
     private string? _actionResultVersionSpecific;
@@ -34,7 +34,7 @@ public class EmberVersioningTests
     {
         int v = EmberMethods.GetEmberApiVersion();
         _facade = EmberMethods.GetNewScriptManagerInstance(v);
-        _eif = new EmberInternalFacade(_facade);
+        _eif = new InternalManager(_facade);
         _em = new EmberMethods(_facade);
         await _facade.DeleteAllData();
         _actionResultVersionSpecific = "[Message contains either failure or succes: ] ";  //change this if action result version changes it will thraow cause of message contains

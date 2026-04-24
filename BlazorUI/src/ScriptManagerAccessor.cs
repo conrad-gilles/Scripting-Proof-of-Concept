@@ -9,7 +9,7 @@ namespace BlazorUI.Services
     }
     public class EmberInternalFacadeAccessor
     {
-        internal EmberInternalFacade Current { get; set; } = default!;
+        internal InternalManager Current { get; set; } = default!;
     }
     public class ScriptRepositoryAccessor
     {

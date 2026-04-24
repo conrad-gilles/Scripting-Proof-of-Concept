@@ -17,7 +17,7 @@ namespace FirstTests;
 public class ScriptManagerFacadeTests
 {
     private IScriptManagerExtended? _scriptManager;
-    private EmberInternalFacade? _emberScriptManager;
+    private InternalManager? _emberScriptManager;
     string? _sourceCodePedia = TestHelper.GetSC().sourceCodePedia;
     private string? _sourceCodeActionV1 = TestHelper.GetSC().sourceCodeActionV1;
     private string? _sourceCodeActionV3 = TestHelper.GetSC().sourceCodeActionV3;
@@ -27,7 +27,7 @@ public class ScriptManagerFacadeTests
     public async Task Setup()
     {
         _scriptManager = EmberMethods.GetNewScriptManagerInstance();
-        _emberScriptManager = new EmberInternalFacade(_scriptManager);
+        _emberScriptManager = new InternalManager(_scriptManager);
         _em = new EmberMethods(_scriptManager);
 
         await _scriptManager.DeleteAllData();
@@ -429,7 +429,7 @@ public class ScriptManagerFacadeTests
     {
         string sourceCode = TestHelper.GetSC().sourceCodeActionV3;
         RecentContext ctx = TestHelper.GetContext();
-        EmberInternalFacade eif = new EmberInternalFacade(_scriptManager!);
+        InternalManager eif = new InternalManager(_scriptManager!);
         object ar = await eif.ExecuteUnfinishedScriptBySourceCode(sourceCode, ctx, nameof(RecentIActionScript.ExecuteAsync));
 
 

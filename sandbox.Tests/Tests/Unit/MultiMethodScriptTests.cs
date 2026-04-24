@@ -18,7 +18,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 public class MultiMethodScriptTests
 {
     static IScriptManagerExtended ScriptManager = TestHelper.InitScriptManager();
-    static EmberInternalFacade InternalScriptManager = new EmberInternalFacade(ScriptManager);
+    static InternalManager InternalScriptManager = new InternalManager(ScriptManager);
     static EmberMethods em = new EmberMethods(ScriptManager);
 
     [TestInitialize]

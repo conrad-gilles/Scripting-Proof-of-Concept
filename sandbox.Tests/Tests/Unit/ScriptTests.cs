@@ -13,7 +13,7 @@ public class ScriptTests
 
 
     private IScriptManagerExtended? _facade;
-    private EmberInternalFacade? _eif;
+    private InternalManager? _eif;
     private EmberMethods? _em;
     private string? _actionResultVersionSpecific;
     private string? _sourceCodeActionV1 = TestHelper.GetSC().sourceCodeActionV1;
@@ -28,7 +28,7 @@ public class ScriptTests
 async Task SetupAsync()
     {
         _facade = EmberMethods.GetNewScriptManagerInstance();
-        _eif = new EmberInternalFacade(_facade);
+        _eif = new InternalManager(_facade);
         _em = new EmberMethods(_facade);
         await _facade.DeleteAllData();
 

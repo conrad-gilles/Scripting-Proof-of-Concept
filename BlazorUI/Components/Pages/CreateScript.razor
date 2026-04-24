@@ -71,7 +71,7 @@
 
 @code {
     private IScriptManagerExtended ScriptManager => ScriptManagerAccessor.Current;
-    private EmberInternalFacade EmberInternalFacade => EmberInternalFacadeAccessor.Current;
+    private InternalManager EmberInternalFacade => EmberInternalFacadeAccessor.Current;
     private MonacoEditor _editor = default!;
     private Popup myPopup = default!;
     private MonacoEditorHelper _editorHelper = default!;

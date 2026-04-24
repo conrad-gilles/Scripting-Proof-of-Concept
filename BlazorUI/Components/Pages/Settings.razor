@@ -71,14 +71,14 @@
 
             services2.AddDbContextFactory<ScriptDbContext>();
             services2.AddScoped<IUserSession, Sandbox.SandBoxUserSession>();
-            services2.AddScoped<EmberInternalFacade>();
+            services2.AddScoped<InternalManager>();
             ScriptingServiceCollectionExtensions.AddEmberScripting(services2, EmberMethods.GetReferences(),
                 EmberMethods.GetEmberApiVersion(testingDiffrentVersion: _selectedApiVersion), RecentTypeHelper.GetRecentTypes());
 
             var provider2 = services2.BuildServiceProvider();
 
             ScriptManagerAccessor.Current = provider2.GetRequiredService<IScriptManagerExtended>();
-            EmberInternalFacadeAccessor.Current = provider2.GetRequiredService<EmberInternalFacade>();
+            EmberInternalFacadeAccessor.Current = provider2.GetRequiredService<InternalManager>();
             Console.Log($"User selected API Version {_selectedApiVersion}");
             AppSettings.EmberApiVersion = _selectedApiVersion;
 

@@ -13,7 +13,7 @@ using Microsoft.CodeAnalysis.Scripting;
 public class EmberInternalFacadeTests
 {
     private IScriptManagerExtended? _scriptManager;
-    private EmberInternalFacade? _internalScriptManager;
+    private InternalManager? _internalScriptManager;
     private EmberMethods? _em;
     private ObjectsRecord? _obj;
     // private DataV1.MockData? _data;
@@ -29,7 +29,7 @@ public class EmberInternalFacadeTests
      void Setup()
     {
         _scriptManager = EmberMethods.GetNewScriptManagerInstance();
-        _internalScriptManager = new EmberInternalFacade(_scriptManager);
+        _internalScriptManager = new InternalManager(_scriptManager);
         _scriptManager.DeleteAllData();
         _em = new EmberMethods(_scriptManager!);
         _obj = TestHelper.ScriptObjects();
@@ -47,7 +47,7 @@ public class EmberInternalFacadeTests
         src = _sourceCodeVaccineAction!;
         _scriptManager = EmberMethods.GetNewScriptManagerInstance();
 
-        EmberInternalFacade InternalScriptManager = new EmberInternalFacade(_scriptManager);
+        InternalManager InternalScriptManager = new InternalManager(_scriptManager);
 
         id = (await _scriptManager.CreateScript(_sourceCodeActionV2!)).Id;
 

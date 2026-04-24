@@ -1,13 +1,11 @@
-using System.Threading.Tasks;
+namespace Ember.Scripting.Manager;
 
-namespace Ember.Simulation;
-
-
-
-internal class EmberInternalFacade
+public class InternalManager
 {
     private IScriptManagerExtended _scriptManager;
-    public EmberInternalFacade(IScriptManagerExtended scriptManager)
+    private readonly Dictionary<Type, Type> _scriptTypeMap;
+
+    public InternalManager(IScriptManagerExtended scriptManager)
     {
         _scriptManager = scriptManager;
 
@@ -36,7 +34,7 @@ internal class EmberInternalFacade
         }
     }
 
-    private async Task<object> BaseExecute(Guid id, RecentContext ctx, string methodName)
+    private async Task<object> BaseExecute(Guid id, Context ctx, string methodName)
     {
         CustomerScript script = await _scriptManager.GetScript(id);
         Context context = await ContextManager.CreateByDowngrade(script.ScriptApiVersion, ctx);
@@ -50,18 +48,18 @@ internal class EmberInternalFacade
         }
         return result;
     }
-    internal async Task<object> ExecuteScript(Guid id, RecentContext ctx, string methodName)
+    public async Task<object> ExecuteScript(Guid id, Context ctx, string methodName)
     {
         var result = await BaseExecute(id, ctx, methodName);
         return CheckUpgradeResult(result);
     }
-    internal async Task<object> ExecuteScript<ScriptType>(string name, RecentContext ctx, string methodName)
+    public async Task<object> ExecuteScript<ScriptType>(string name, Context ctx, string methodName)
     where ScriptType : IScriptType
     {
         Guid id = await _scriptManager.GetScriptId<ScriptType>(name);
         return await ExecuteScript(id, ctx, methodName);
     }
-    public async Task<object> ExecuteUnfinishedScriptBySourceCode(string sourceCode, RecentContext context, string methodName)
+    public async Task<object> ExecuteUnfinishedScriptBySourceCode(string sourceCode, Context context, string methodName)
     {
         ValidationRecord vali = _scriptManager.BasicValidationBeforeCompiling(sourceCode);
         Context ctx = await ContextManager.CreateByDowngrade(vali.Version, context);
@@ -70,44 +68,8 @@ internal class EmberInternalFacade
 
         return CheckUpgradeResult(result);
     }
-    // Original version
-    public TScript GetScriptV1<TScript>(string name) where TScript : RecentScriptFacade
-    {
-        if (typeof(RecentIConditionScript).IsAssignableFrom(typeof(TScript)))
-        {
-            var toReturn = (RecentScriptFacade)new ConditionScript(_scriptManager, name);
-            return (TScript)toReturn;
-        }
-        else if (typeof(RecentIActionScript).IsAssignableFrom(typeof(TScript)))
-        {
-            var toReturn = (RecentScriptFacade)new ActionScript(_scriptManager, name);
-            return (TScript)toReturn;
-        }
-        throw new ArgumentException($"Unsupported script type: {typeof(TScript).Name}");
-    }
 
-    // //Ai generated better version of the method above
-    private readonly Dictionary<Type, Func<IScriptManagerExtended, string, RecentScriptFacade>> _scriptFactories = new()
-    {
-    { typeof(RecentIConditionScript), (manager, name) => new ConditionScript(manager, name) },
-    { typeof(RecentIActionScript), (manager, name) => new ActionScript(manager, name) }
-    };
-
-    public TScript GetScriptV2<TScript>(string name) where TScript : RecentScriptFacade
-    {
-        // Uses LINQ to find the first factory whose key (interface) is assignable from TScript
-        var match = _scriptFactories.FirstOrDefault(kvp => kvp.Key.IsAssignableFrom(typeof(TScript)));
-
-        if (match.Value != null)
-        {
-            return (TScript)match.Value(_scriptManager, name);
-        }
-
-        throw new ArgumentException($"Unsupported script type: {typeof(TScript).Name}");
-    }
-
-    // Another Ai generated version of the GetScrip Method using Reflection note the stuff inside the constructor is also part of it
-    private readonly Dictionary<Type, Type> _scriptTypeMap;
+    //Ai generated, with also the bottom part of the Constructor
     public TScript GetScript<TScript>(string name) where TScript : RecentScriptFacade
     {
         Type requestedType = typeof(TScript);
