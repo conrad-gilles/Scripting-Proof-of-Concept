@@ -19,7 +19,7 @@ public static class ScriptingServiceCollectionExtensions
         services.AddTransient<ScriptExecutor>();
 
         // 3. Register DbHelper using a factory so we can keep its constructor internal
-        services.AddTransient<ScriptRepository>(sp => new ScriptRepository(
+        services.AddTransient(sp => new ScriptRepository(
             sp.GetRequiredService<ScriptCompiler>(),
             sp.GetRequiredService<List<MetadataReference>>(),
             sp.GetRequiredService<ILogger<ScriptRepository>>(),
@@ -30,7 +30,7 @@ public static class ScriptingServiceCollectionExtensions
 
         // 4. Register the Facade using a factory to hide the internal parameters
         // Step A: Register the concrete class using the factory so it can use the internal constructor
-        services.AddTransient<ScriptManager>(sp => new ScriptManager(
+        services.AddTransient(sp => new ScriptManager(
             sp.GetRequiredService<ScriptRepository>(),
             sp.GetRequiredService<ScriptCompiler>(),
             sp.GetRequiredService<ScriptExecutor>(),
@@ -38,9 +38,13 @@ public static class ScriptingServiceCollectionExtensions
             sp.GetRequiredService<IUserSession>()
         ));
 
+        services.AddTransient(sp => new InternalManager(    //maybe in the future swittch to singleton
+        sp.GetRequiredService<IScriptManagerExtended>()
+        ));
+        services.AddSingleton<IInternalManager>(sp => sp.GetRequiredService<InternalManager>());
+
         // Step B: Point both interfaces to the exact same concrete registration above
         services.AddTransient<IScriptManager>(sp => sp.GetRequiredService<ScriptManager>());
-        services.AddTransient<IScriptManagerExtended>(sp => sp.GetRequiredService<ScriptManager>());
         services.AddTransient<IScriptManagerExtended>(sp => sp.GetRequiredService<ScriptManager>());
 
         return services;

@@ -1,6 +1,6 @@
 namespace Ember.Scripting.Manager;
 
-public class InternalManager
+public class InternalManager : IInternalManager
 {
     private IScriptManagerExtended _scriptManager;
     private readonly Dictionary<Type, Type> _scriptTypeMap;
@@ -94,4 +94,14 @@ public class InternalManager
         CustomerScript script = await _scriptManager.CreateScript(sourceCode);
         return GetScript<TScript>(script.ScriptName!);
     }
+}
+
+public interface IInternalManager
+{
+    Task<object> ExecuteScript(Guid id, IRecentContext context, string methodName);
+    Task<object> ExecuteScript<ScriptType>(string name, IRecentContext context, string methodName)
+        where ScriptType : IScriptType;
+    Task<object> ExecuteUnfinishedScriptBySourceCode(string sourceCode, IRecentContext context, string methodName);
+    TScript GetScript<TScript>(string name) where TScript : RecentScriptFacade;
+    Task<TScript> CreateScript<TScript>(string sourceCode) where TScript : RecentScriptFacade;
 }
