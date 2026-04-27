@@ -279,7 +279,7 @@ public class SanboxTests
         valResult = _facade.BasicValidationBeforeCompiling(src!);
         script = (await _facade.CreateScript(src!));
 
-        IContext ctx = (IContext)await ContextManager.CreateByDowngrade(script.ScriptApiVersion, data!);
+        IContext ctx = (IContext)ContextManager.CreateByDowngrade(script.ScriptApiVersion, data!);
         Console.WriteLine("Type name: " + ctx.GetType().FullName);
 
         result = await _facade.ExecuteScript(script.Id, (IContext)ctx, nameof(RecentIActionScript.ExecuteAsync));
@@ -291,7 +291,7 @@ public class SanboxTests
         valResult = _facade.BasicValidationBeforeCompiling(src!);
         script = (await _facade.CreateScript(src!));
 
-        ctx = (IContext)await ContextManager.CreateByDowngrade(script.ScriptApiVersion, data!);
+        ctx = (IContext)ContextManager.CreateByDowngrade(script.ScriptApiVersion, data!);
         Console.WriteLine("Type name: " + ctx.GetType().FullName);
 
         result = await _facade.ExecuteScript(script.Id, (IContext)ctx, nameof(RecentIActionScript.ExecuteAsync));
@@ -303,7 +303,7 @@ public class SanboxTests
         valResult = _facade.BasicValidationBeforeCompiling(src!);
         script = (await _facade.CreateScript(src!));
 
-        ctx = (IContext)await ContextManager.CreateByDowngrade(script.ScriptApiVersion, data!);
+        ctx = (IContext)ContextManager.CreateByDowngrade(script.ScriptApiVersion, data!);
         Console.WriteLine("Type name: " + ctx.GetType().FullName);
 
         result = await _facade.ExecuteScript(script.Id, (IContext)ctx, nameof(RecentIActionScript.ExecuteAsync));
@@ -315,7 +315,7 @@ public class SanboxTests
         valResult = _facade.BasicValidationBeforeCompiling(src!);
         script = (await _facade.CreateScript(src!));
 
-        ctx = (IContext)await ContextManager.CreateByDowngrade(script.ScriptApiVersion, data!);
+        ctx = (IContext)ContextManager.CreateByDowngrade(script.ScriptApiVersion, data!);
         Console.WriteLine("Type name: " + ctx.GetType().FullName);
 
         result = await _facade.ExecuteScript(script.Id, (IContext)ctx, nameof(RecentIConditionScript.EvaluateAsync));
@@ -326,10 +326,51 @@ public class SanboxTests
 
 
         ////////////////////////////////////////////
-        ctx = (IContext)await ContextManager.CreateByDowngrade(script.ScriptApiVersion, data!);
+        ctx = (IContext)ContextManager.CreateByDowngrade(script.ScriptApiVersion, data!);
         result = await _facade.ExecuteScript(script.Id, (IContext)ctx, nameof(RecentIConditionScript.EvaluateAsync));
 
 
         // Assert.IsTrue(false);
+    }
+
+    [TestMethod]
+    public void TestDowngrade()
+    {
+        RecentIGeneratorContext ctx = new RecentGeneratorContext(null!, null!);
+        Dictionary<int, Type> contextVersionMap = ContextVersionScanner.GetClassDictionary(ctx);
+        foreach (var item in contextVersionMap)
+        {
+            Console.WriteLine("Key: " + item.Key + ", Value: " + item.Value);
+        }
+
+        int version = 1;
+        IContext downCtx = ContextManager.CreateByDowngrade(version, ctx);
+
+        Console.WriteLine("Context V" + version + " " + downCtx.GetType().FullName);
+        Assert.IsTrue(downCtx.GetType().FullName == "ReadOnlyContextV1.GeneratorContext");
+
+        version = 2;
+        downCtx = ContextManager.CreateByDowngrade(version, ctx);
+
+        Console.WriteLine("Context V" + version + " " + downCtx.GetType().FullName);
+        Assert.IsTrue(downCtx.GetType().FullName == "RWContextV2.GeneratorContext");
+
+        version = 3;
+        downCtx = ContextManager.CreateByDowngrade(version, ctx);
+
+        Console.WriteLine("Context V" + version + " " + downCtx.GetType().FullName);
+        Assert.IsTrue(downCtx.GetType().FullName == "GeneratorContextV3.GeneratorContext");
+
+        version = 4;
+        downCtx = ContextManager.CreateByDowngrade(version, ctx);
+
+        Console.WriteLine("Context V" + version + " " + downCtx.GetType().FullName);
+        Assert.IsTrue(downCtx.GetType().FullName == "GeneratorContextV4.GeneratorContext");
+
+        version = 5;
+        downCtx = ContextManager.CreateByDowngrade(version, ctx);
+
+        Console.WriteLine("Context V" + version + " " + downCtx.GetType().FullName);
+        Assert.IsTrue(downCtx.GetType().FullName == "GeneratorContextNoInherVaccineV5.GeneratorContext");
     }
 }

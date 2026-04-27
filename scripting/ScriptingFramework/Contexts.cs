@@ -16,7 +16,7 @@ public interface IRecentContext : IDowngradeableContext    //maybe should just i
 
 public static class ContextManager
 {
-    public static async Task<IContext> CreateByDowngrade(int desiredVersion, IRecentContext recentCtx)
+    public static IContext CreateByDowngrade(int desiredVersion, IRecentContext recentCtx)
     {
         Dictionary<int, Type> contextVersionMap = ContextVersionScanner.GetClassDictionary(recentCtx);
 
@@ -27,24 +27,21 @@ public static class ContextManager
 
         Type recentCtxType = recentCtx.GetType();
         Type desiredCtxType = contextVersionMap[desiredVersion];
-        IDowngradeableContext context = (IDowngradeableContext)recentCtx;   //todo add real type check
+        IDowngradeableContext context = recentCtx;
 
         int iterations = 0;
         int maxIterations = contextVersionMap.Keys.Count() + 3;
 
         while (recentCtxType != desiredCtxType && iterations <= maxIterations)
         {
-            if (recentCtxType == recentCtx.GetType())
+            try
             {
-                try
-                {
-                    context = context.Downgrade();
-                    recentCtxType = context.GetType();
-                }
-                catch (Exception e)
-                {
-                    throw new DowngradeFailedInEmberException("CreateContextByDowngrade failed in while.", e);
-                }
+                context = context.Downgrade();
+                recentCtxType = context.GetType();
+            }
+            catch (Exception e)
+            {
+                throw new DowngradeFailedInEmberException("CreateContextByDowngrade failed in while.", e);
             }
             if (iterations > maxIterations)
             {
@@ -52,6 +49,6 @@ public static class ContextManager
             }
             iterations++;
         }
-        return (IContext)context;
+        return context;
     }
 }

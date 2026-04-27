@@ -97,7 +97,7 @@ namespace ReadOnlyContextV1
         public IDowngradeableContext Downgrade()
         {
             // return null;
-            throw new Exception("Can not instaniate the abstract base class.");
+            throw new NonDowngradeableException("Can not instaniate the abstract base class.");
         }
     }
 }
@@ -132,7 +132,7 @@ namespace RWContextV2
         public IDataAccessInterface Data2 => Data;
 
         ILabOrderInterface IGeneratorReadOnlyContextV1.IGeneratorContext.LabOrder => LabOrder2;
-        public IDowngradeableContext Downgrade()
+        public virtual IDowngradeableContext Downgrade()
         {
             try
             {
@@ -173,7 +173,7 @@ namespace GeneratorContextV3
         }
         ILabOrderInterfaceV2 IGeneratorContext_V3.IGeneratorContext.LabOrder => LabOrderV2;
 
-        public new IGeneratorContextBaseInterface Downgrade()
+        public override IDowngradeableContext Downgrade()
         {
             try
             {
@@ -214,7 +214,7 @@ namespace GeneratorContextV4
         }
         ILabOrderInterfaceV3 IGeneratorContext_V4.IGeneratorContext.LabOrder => LabOrderV3;
 
-        public new IGeneratorContextBaseInterface Downgrade()
+        public override IDowngradeableContext Downgrade()
         {
             try
             {

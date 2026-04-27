@@ -28,3 +28,4 @@ public class CreateStringFromCsFileException : Exception
     public CreateStringFromCsFileException(string message, Exception innerException) : base(message, innerException) { }
 }
 
+

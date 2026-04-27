@@ -35,3 +35,9 @@ public class LoopExecutedTooManyTimesException : ScriptingFrameworkException
     public LoopExecutedTooManyTimesException(string message) : base(message) { }
     public LoopExecutedTooManyTimesException(string message, Exception innerException) : base(message, innerException) { }
 }
+public class NonDowngradeableException : ScriptingFrameworkException
+{
+    public NonDowngradeableException() : base() { }
+    public NonDowngradeableException(string message) : base(message) { }
+    public NonDowngradeableException(string message, Exception innerException) : base(message, innerException) { }
+}
