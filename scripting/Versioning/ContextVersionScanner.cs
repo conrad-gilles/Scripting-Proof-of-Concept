@@ -7,9 +7,9 @@ namespace Ember.Scripting.Versioning;
 public static class ContextVersionScanner
 {
     // Moved exactly as it was from ScriptFactory
-    public static Dictionary<int, Type> GetClassDictionary()
+    public static Dictionary<int, Type> GetClassDictionary(IRecentContext recentCtx)
     {
-        return GetBaseTypeDictionary();
+        return GetBaseTypeDictionary(recentCtx);
     }
 
     public static Dictionary<int, Type> GetInterfaceDictionary()
@@ -18,15 +18,21 @@ public static class ContextVersionScanner
         return GetBaseTypeDictionaryIntrfc();
     }
 
-    private static Dictionary<int, Type> GetBaseTypeDictionary()
+    private static Dictionary<int, Type> GetBaseTypeDictionary(IRecentContext recentCtx)
     {
+        Type concreteType = recentCtx.GetType();
+        Type versionedInterface = GetDirectInterfaces(concreteType).Single();
+
+        Type otherBaseInterface = GetDirectInterfaces(versionedInterface)
+        .Single(i => i != typeof(IRecentContext));
+        // Console.WriteLine("Base123: " + otherBaseInterface.FullName);
         Type baseType = typeof(IContext);
 
         Dictionary<int, Type> contextVersionMap = new();
 
         var subClasses = AppDomain.CurrentDomain.GetAssemblies()
             .SelectMany(assembly => VersionScannerHelper.GetLoadableTypes(assembly))
-            .Where(t => t.IsClass && !t.IsAbstract && baseType.IsAssignableFrom(t))
+            .Where(t => t.IsClass && !t.IsAbstract && baseType.IsAssignableFrom(t) && otherBaseInterface.IsAssignableFrom(t))
             .ToList();
 
         for (int i = 0; i < subClasses.Count(); i++)
@@ -96,6 +102,11 @@ public static class ContextVersionScanner
 
         return contextVersionMap;
     }
-
+    private static Type[] GetDirectInterfaces(Type type)
+    {
+        Type[] all = type.GetInterfaces();
+        Type[] transitive = all.SelectMany(i => i.GetInterfaces()).ToArray();
+        return all.Where(i => transitive.All(b => b != i)).ToArray();
+    }
 
 }

@@ -220,8 +220,8 @@ public class EmberVersioningTests
             {4, typeof(GeneratorContextV4.GeneratorContext)},
             {5, typeof(GeneratorContextNoInherVaccineV5.GeneratorContext)},
         };
-
-        Dictionary<int, Type> retrievedDict = ContextVersionScanner.GetClassDictionary();
+        RecentIGeneratorContext ctx = new RecentGeneratorContext(null!, null!);
+        Dictionary<int, Type> retrievedDict = ContextVersionScanner.GetClassDictionary(ctx);
         PrintDictToConsole(retrievedDict);
 
 

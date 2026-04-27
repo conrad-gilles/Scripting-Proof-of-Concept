@@ -89,7 +89,8 @@ public class SanboxTests
         };
 
         _facade = EmberMethods.GetNewScriptManagerInstance(1);
-        Dictionary<int, Type> retrievedDict = ContextVersionScanner.GetClassDictionary();
+        RecentIGeneratorContext ctx = new RecentGeneratorContext(null!, null!);
+        Dictionary<int, Type> retrievedDict = ContextVersionScanner.GetClassDictionary(ctx);
         retrievedDict.Reverse();
         PrintDictToConsole(contextVersionMap);
         PrintDictToConsole(retrievedDict);

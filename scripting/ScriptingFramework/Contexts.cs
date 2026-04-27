@@ -18,7 +18,7 @@ public static class ContextManager
 {
     public static async Task<IContext> CreateByDowngrade(int desiredVersion, IRecentContext recentCtx)
     {
-        Dictionary<int, Type> contextVersionMap = ContextVersionScanner.GetClassDictionary();
+        Dictionary<int, Type> contextVersionMap = ContextVersionScanner.GetClassDictionary(recentCtx);
 
         if (contextVersionMap.Values.Contains(recentCtx.GetType()) == false)
         {
@@ -30,7 +30,7 @@ public static class ContextManager
         IDowngradeableContext context = (IDowngradeableContext)recentCtx;   //todo add real type check
 
         int iterations = 0;
-        int maxIterations = ContextVersionScanner.GetClassDictionary().Keys.Count() + 3;
+        int maxIterations = contextVersionMap.Keys.Count() + 3;
 
         while (recentCtxType != desiredCtxType && iterations <= maxIterations)
         {
