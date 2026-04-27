@@ -73,8 +73,8 @@ public class SecurityTests
             (services, obj.logger, obj.testDataAccess);
 
             using var provider = services.BuildServiceProvider();
-            RecentContextFactory.IGeneratorContextFactory factory = provider.GetRequiredService<RecentContextFactory.IGeneratorContextFactory>();
-            RecentContext ctx = factory.Create(obj.labOrder, obj.vaccine);
+            RecentGeneratorContextFactory.IGeneratorContextFactory factory = provider.GetRequiredService<RecentGeneratorContextFactory.IGeneratorContextFactory>();
+            RecentIGeneratorContext ctx = factory.CreateGeneratorContext(obj.labOrder, obj.vaccine);
             RecentActionResult ar = (RecentActionResult)await InternalScriptManager!.ExecuteScript<IActionScriptBase>("WhileTrueScript", ctx, nameof(RecentIActionScript.ExecuteAsync));
 
             Console.WriteLine("Name: " + script.ScriptName + ", ScriptType: " + script.ScriptType);

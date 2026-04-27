@@ -128,8 +128,8 @@ public class EmberInternalFacadeTests
         (services, _obj!.logger, _obj.testDataAccess);
         using var provider = services.BuildServiceProvider();
 
-        RecentContextFactory.IGeneratorContextFactory factory = provider.GetRequiredService<RecentContextFactory.IGeneratorContextFactory>();
-        RecentContext ctx = factory.Create(_obj.labOrder, _obj.vaccine);
+        RecentGeneratorContextFactory.IGeneratorContextFactory factory = provider.GetRequiredService<RecentGeneratorContextFactory.IGeneratorContextFactory>();
+        RecentIGeneratorContext ctx = factory.CreateGeneratorContext(_obj.labOrder, _obj.vaccine);
 
         RecentActionResult ar = (RecentActionResult)await _internalScriptManager!.ExecuteScript<IActionScriptBase>(scrip.ScriptName!, ctx, nameof(RecentIActionScript.ExecuteAsync));
 

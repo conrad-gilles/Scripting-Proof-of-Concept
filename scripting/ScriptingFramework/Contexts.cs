@@ -4,15 +4,19 @@ public interface IContext
 {
 
 }
-
 public interface IDowngradeableContext : IContext
 {
     public IDowngradeableContext Downgrade();
 }
+public interface IRecentContext : IDowngradeableContext    //maybe should just inherit from IContext? but if its recent it implies theres a pervious version?
+{
+
+}
+
 
 public static class ContextManager
 {
-    public static async Task<IContext> CreateByDowngrade(int desiredVersion, IContext recentCtx)
+    public static async Task<IContext> CreateByDowngrade(int desiredVersion, IRecentContext recentCtx)
     {
         Dictionary<int, Type> contextVersionMap = ContextVersionScanner.GetClassDictionary();
 

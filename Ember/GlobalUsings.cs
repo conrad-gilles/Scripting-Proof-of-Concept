@@ -9,13 +9,13 @@ global using Ember.Sandbox.ScriptingFrameWork.ScriptTypes;
 
 
 global using RecentActionResult = ActionResultV3.ActionResult;
-global using RecentIContext = IGeneratorContextNoInheritance_V5.IGeneratorContext;//och
-global using RecentContext = GeneratorContextNoInherVaccineV5.GeneratorContext; //raus
-// global using RecentIGeneratorConditionScript = GeneratorScriptsGenericSimple.IGeneratorConditionScript<IGeneratorReadOnlyContextV1.IGeneratorContext>;
 global using RecentIConditionScript = GeneratorScriptsGenericSimple.IConditionScript<IGeneratorContextNoInheritance_V5.IGeneratorContext>;
 global using RecentIActionScript = GeneratorScriptsV4.IActionScript;
-global using RecentContextFactory = GeneratorContextNoInherVaccineV5;
-// global using ActiveMultiersionActionScript = Mu/
+
+global using RecentGeneratorContextFactory = ContextFactoryNameSpace;
+
+global using RecentIGeneratorContext = IGeneratorContextNoInheritance_V5.IGeneratorContext;
+global using RecentGeneratorContext = GeneratorContextNoInherVaccineV5.GeneratorContext;
 
 
 public record RecentTypeHelper
@@ -24,8 +24,8 @@ public record RecentTypeHelper
     {
         List<Type> returnedDict = [];
         returnedDict.Add(typeof(RecentActionResult));
-        returnedDict.Add(typeof(RecentIContext));
-        returnedDict.Add(typeof(RecentContext));
+        returnedDict.Add(typeof(RecentIGeneratorContext));
+        returnedDict.Add(typeof(RecentGeneratorContext));
         returnedDict.Add(typeof(RecentIConditionScript));
         returnedDict.Add(typeof(RecentIActionScript));
         return returnedDict;

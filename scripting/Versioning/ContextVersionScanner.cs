@@ -69,7 +69,7 @@ public static class ContextVersionScanner
         //AiGenerated Linq queries
         var subClasses = AppDomain.CurrentDomain.GetAssemblies()
            .SelectMany(assembly => VersionScannerHelper.GetLoadableTypes(assembly))
-           .Where(t => t.IsInterface && baseType.IsAssignableFrom(t) && t != baseType && t != typeof(IDowngradeableContext))
+           .Where(t => t.IsInterface && baseType.IsAssignableFrom(t) && t != baseType && t != typeof(IDowngradeableContext) && t != typeof(IRecentContext))
            .ToList();
 
         for (int i = 0; i < subClasses.Count(); i++)

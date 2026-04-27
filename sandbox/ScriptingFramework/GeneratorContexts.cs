@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Conventions;
 namespace ContextBases
 {
     [MetaDataIGeneratorIntrfc(version: 0, type: TypeInfo.AbstractBaseInSF)]
-    public interface IGeneratorContextBaseInterfaceSF : IDowngradeableContext
+    public interface IGeneratorContextBaseInterface : IDowngradeableContext
     {
     }
 }
@@ -16,7 +16,7 @@ namespace ContextBases
 namespace IGeneratorReadOnlyContextV1
 {
     [MetaDataIGeneratorIntrfc(version: 1)]
-    public interface IGeneratorContext : IGeneratorContextBaseInterfaceSF
+    public interface IGeneratorContext : IGeneratorContextBaseInterface
     {
         ILabOrderInterface LabOrder { get; }      // Read current order data
         IPatientInterface Patient2 { get; }     // Read patient data
@@ -58,7 +58,7 @@ namespace IGeneratorContext_V4
 namespace IGeneratorContextNoInheritance_V5
 {
     [MetaDataIGeneratorIntrfc(version: 5)]
-    public interface IGeneratorContext : IGeneratorContextBaseInterfaceSF
+    public interface IGeneratorContext : IGeneratorContextBaseInterface, IRecentContext
     {
         ILabOrderInterfaceV4NoInheritence LabOrder { get; }
         IVaccineInterface Vaccine { get; }
@@ -173,7 +173,7 @@ namespace GeneratorContextV3
         }
         ILabOrderInterfaceV2 IGeneratorContext_V3.IGeneratorContext.LabOrder => LabOrderV2;
 
-        public new IGeneratorContextBaseInterfaceSF Downgrade()
+        public new IGeneratorContextBaseInterface Downgrade()
         {
             try
             {
@@ -214,7 +214,7 @@ namespace GeneratorContextV4
         }
         ILabOrderInterfaceV3 IGeneratorContext_V4.IGeneratorContext.LabOrder => LabOrderV3;
 
-        public new IGeneratorContextBaseInterfaceSF Downgrade()
+        public new IGeneratorContextBaseInterface Downgrade()
         {
             try
             {
@@ -235,7 +235,9 @@ namespace GeneratorContextV4
 namespace GeneratorContextNoInherVaccineV5
 {
     [MetaDataGeneratorClass(version: 5)]
-    public class GeneratorContext : IGeneratorContextNoInheritance_V5.IGeneratorContext   //into diffrent namespaces blocks later folders
+    public class GeneratorContext :
+    IGeneratorContextNoInheritance_V5.IGeneratorContext   //into diffrent namespaces blocks later folders
+    // , IRecentContext
     {
         ILabOrderInterfaceV4NoInheritence LabOrder;
         IVaccineInterface Vaccine;

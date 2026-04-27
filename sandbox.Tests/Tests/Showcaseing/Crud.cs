@@ -98,10 +98,10 @@ public class CrudDemos
 
         using var provider = services.BuildServiceProvider();
 
-        RecentContextFactory.IGeneratorContextFactory factory = provider.GetRequiredService<RecentContextFactory.IGeneratorContextFactory>();
+        RecentGeneratorContextFactory.IGeneratorContextFactory factory = provider.GetRequiredService<RecentGeneratorContextFactory.IGeneratorContextFactory>();
 
 
-        RecentContext ctx = factory.Create(labOrder, vaccine);
+        RecentIGeneratorContext ctx = factory.CreateGeneratorContext(labOrder, vaccine);
 
         RecentActionResult ar = (RecentActionResult)await InternalScriptManager!.ExecuteScript<IActionScriptBase>
         ("AddPediatricTestsV2", ctx, nameof(RecentIActionScript.ExecuteAsync));

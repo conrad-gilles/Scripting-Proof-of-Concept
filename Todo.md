@@ -1,3 +1,4 @@
+merge ember manager scriptmanager
 init.sql make script name and type a cancdidate key with name as the specific one
 Move ember internal facade to the scripting lib
 not 1 recent contex but one for every scripttype

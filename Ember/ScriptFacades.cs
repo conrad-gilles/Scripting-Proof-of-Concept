@@ -11,10 +11,10 @@ internal class ConditionScript : RecentScriptFacade, RecentIConditionScript
         _emberScriptManager = new InternalManager(scriptManager);
         _scriptName = scriptName;
     }
-    public async Task<bool> EvaluateAsync(RecentIContext context)
+    public async Task<bool> EvaluateAsync(IRecentContext context)
     {
         string methodName = nameof(RecentIConditionScript.EvaluateAsync);
-        return (bool)await _emberScriptManager.ExecuteScript<IConditionScript>(_scriptName, (RecentContext)context, methodName);
+        return (bool)await _emberScriptManager.ExecuteScript<IConditionScript>(_scriptName, context, methodName);
 
     }
 }
@@ -31,13 +31,13 @@ internal class ActionScript : RecentScriptFacade, RecentIActionScript
         _emberScriptManager = new InternalManager(scriptManager);
         _scriptName = scriptName;
     }
-    public async Task<RecentActionResult> ExecuteAsync(RecentIContext context)
+    public async Task<RecentActionResult> ExecuteAsync(IRecentContext context)
     {
         string methodName = nameof(RecentIActionScript.ExecuteAsync);
-        return (RecentActionResult)await _emberScriptManager.ExecuteScript<IActionScriptBase>(_scriptName, (RecentContext)context, methodName);
+        return (RecentActionResult)await _emberScriptManager.ExecuteScript<IActionScriptBase>(_scriptName, context, methodName);
     }
 
-    public async Task<RecentActionResult> Execute1(RecentIContext context)
+    public async Task<RecentActionResult> Execute1(IRecentContext context)
     {
         string methodName = nameof(RecentIActionScript.Execute1);
         CustomerScript script = await _scriptManager.GetScript<IActionScriptBase>(_scriptName);   // this is being called twice, also in ExecuteScript i can move it down but then i also need to move the old MethodName check down into ExecuteScript 
@@ -45,16 +45,16 @@ internal class ActionScript : RecentScriptFacade, RecentIActionScript
         {
             methodName = "Execute1OldName";
         }
-        return (RecentActionResult)await _emberScriptManager.ExecuteScript<IActionScriptBase>(_scriptName, (RecentContext)context, methodName);
+        return (RecentActionResult)await _emberScriptManager.ExecuteScript<IActionScriptBase>(_scriptName, context, methodName);
     }
-    public async Task<RecentActionResult> Execute2(RecentIContext context)
+    public async Task<RecentActionResult> Execute2(IRecentContext context)
     {
         string methodName = nameof(RecentIActionScript.Execute2);
-        return (RecentActionResult)await _emberScriptManager.ExecuteScript<IActionScriptBase>(_scriptName, (RecentContext)context, methodName);
+        return (RecentActionResult)await _emberScriptManager.ExecuteScript<IActionScriptBase>(_scriptName, context, methodName);
     }
-    public async Task<string> Execute3(RecentIContext context)
+    public async Task<string> Execute3(IRecentContext context)
     {
         string methodName = nameof(RecentIActionScript.Execute3);
-        return (string)await _emberScriptManager.ExecuteScript<IActionScriptBase>(_scriptName, (RecentContext)context, methodName);
+        return (string)await _emberScriptManager.ExecuteScript<IActionScriptBase>(_scriptName, context, methodName);
     }
 }

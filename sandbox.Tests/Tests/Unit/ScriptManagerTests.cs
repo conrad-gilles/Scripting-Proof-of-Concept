@@ -10,7 +10,6 @@ using Sandbox;
 using Ember.Simulation;
 using Ember.Scripting.Compilation;
 
-
 namespace FirstTests;
 
 [TestClass]
@@ -372,7 +371,7 @@ public class ScriptManagerFacadeTests
     public async Task ExecuteActionScriptTest()
     {
         Guid id = (await _scriptManager!.CreateScript(_sourceCodeActionV1!)).Id;
-        var testingContext = TestHelper.GetContext();
+        RecentIGeneratorContext testingContext = TestHelper.GetContext();
 
         ActionResultBase result = (ActionResultBase)await _emberScriptManager!.ExecuteScript(id, testingContext, nameof(RecentIActionScript.ExecuteAsync));
 
@@ -428,7 +427,7 @@ public class ScriptManagerFacadeTests
     public async Task ExecuteUnfinishedScriptBySourceCodeTest()
     {
         string sourceCode = TestHelper.GetSC().sourceCodeActionV3;
-        RecentContext ctx = TestHelper.GetContext();
+        RecentIGeneratorContext ctx = TestHelper.GetContext();
         InternalManager eif = new InternalManager(_scriptManager!);
         object ar = await eif.ExecuteUnfinishedScriptBySourceCode(sourceCode, ctx, nameof(RecentIActionScript.ExecuteAsync));
 

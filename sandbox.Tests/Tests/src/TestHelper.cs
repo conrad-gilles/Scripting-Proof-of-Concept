@@ -213,7 +213,7 @@ public class TestHelper
 
         return scriptManager = provider.GetRequiredService<IScriptManagerExtended>();
     }
-    public static RecentContext GetContext()
+    public static RecentIGeneratorContext GetContext()
     {
         LabOrder labOrder = new LabOrder("1", "Pediatrics");
         Vaccine vaccine = new Vaccine("Polio", 1, DateTime.UtcNow);
@@ -230,10 +230,10 @@ public class TestHelper
 
         using var provider = services.BuildServiceProvider();
 
-        RecentContextFactory.IGeneratorContextFactory factory = provider.GetRequiredService<RecentContextFactory.IGeneratorContextFactory>();
+        RecentGeneratorContextFactory.IGeneratorContextFactory factory = provider.GetRequiredService<RecentGeneratorContextFactory.IGeneratorContextFactory>();
 
 
-        RecentContext ctx = factory.Create(labOrder, vaccine);
+        RecentIGeneratorContext ctx = factory.CreateGeneratorContext(labOrder, vaccine);
 
         return ctx;
     }

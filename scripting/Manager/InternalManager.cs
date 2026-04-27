@@ -34,10 +34,10 @@ public class InternalManager
         }
     }
 
-    private async Task<object> BaseExecute(Guid id, IContext ctx, string methodName)
+    private async Task<object> BaseExecute(Guid id, IRecentContext ctx, string methodName)
     {
         CustomerScript script = await _scriptManager.GetScript(id);
-        IContext context = (IContext)await ContextManager.CreateByDowngrade(script.ScriptApiVersion, (IContext)ctx);
+        IContext context = (IContext)await ContextManager.CreateByDowngrade(script.ScriptApiVersion, ctx);
         return await _scriptManager.ExecuteScript(id, (IContext)context, methodName: methodName);
     }
     private object CheckUpgradeResult(object result)
@@ -48,18 +48,18 @@ public class InternalManager
         }
         return result;
     }
-    public async Task<object> ExecuteScript(Guid id, IContext ctx, string methodName)
+    public async Task<object> ExecuteScript(Guid id, IRecentContext context, string methodName)
     {
-        var result = await BaseExecute(id, (IContext)ctx, methodName);
+        var result = await BaseExecute(id, context, methodName);
         return CheckUpgradeResult(result);
     }
-    public async Task<object> ExecuteScript<ScriptType>(string name, IContext ctx, string methodName)
+    public async Task<object> ExecuteScript<ScriptType>(string name, IRecentContext context, string methodName)
     where ScriptType : IScriptType
     {
         Guid id = await _scriptManager.GetScriptId<ScriptType>(name);
-        return await ExecuteScript(id, ctx, methodName);
+        return await ExecuteScript(id, context, methodName);
     }
-    public async Task<object> ExecuteUnfinishedScriptBySourceCode(string sourceCode, IContext context, string methodName)
+    public async Task<object> ExecuteUnfinishedScriptBySourceCode(string sourceCode, IRecentContext context, string methodName)
     {
         ValidationRecord vali = _scriptManager.BasicValidationBeforeCompiling(sourceCode);
         IContext ctx = (IContext)await ContextManager.CreateByDowngrade(vali.Version, context);

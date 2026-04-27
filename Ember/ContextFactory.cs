@@ -4,19 +4,27 @@ using Microsoft.Extensions.Logging;
 // using 
 
 //The active ContextFactory
-namespace GeneratorContextNoInherVaccineV5
+namespace ContextFactoryNameSpace
 {
-    public class ContextFactory : IGeneratorContextFactory
+    public class ContextFactory : IGeneratorContextFactory, ISomeOtherContextFactory
     {
-        public RecentContext Create(ILabOrderInterfaceV4NoInheritence labOrder, IVaccineInterface vaccine)
+        public RecentIGeneratorContext CreateGeneratorContext(ILabOrderInterfaceV4NoInheritence labOrder, IVaccineInterface vaccine)
         {
-            return new RecentContext(labOrder, vaccine);
+            return new RecentGeneratorContext(labOrder, vaccine);
+        }
+
+        public RecentIGeneratorContext CreateOtherFactory(ILabOrderInterfaceV4NoInheritence labOrder, IVaccineInterface vaccine)
+        {
+            throw new NotImplementedException();
         }
     }
-
     public interface IGeneratorContextFactory
     {
-        public RecentContext Create(ILabOrderInterfaceV4NoInheritence labOrder, IVaccineInterface vaccine);
+        public RecentIGeneratorContext CreateGeneratorContext(ILabOrderInterfaceV4NoInheritence labOrder, IVaccineInterface vaccine);
+    }
+    public interface ISomeOtherContextFactory
+    {
+        public RecentIGeneratorContext CreateOtherFactory(ILabOrderInterfaceV4NoInheritence labOrder, IVaccineInterface vaccine);
     }
 }
 
@@ -31,8 +39,16 @@ namespace Ember.Simulation
             services.AddSingleton(logger);
             services.AddSingleton(testDataAccess);
 
-            // Register the factory
-            services.AddTransient<RecentContextFactory.IGeneratorContextFactory, RecentContextFactory.ContextFactory>();
+            // // Register the factory
+            // services.AddTransient<RecentGeneratorContextFactory.IGeneratorContextFactory, RecentGeneratorContextFactory.ContextFactory>();
+
+            // Register the concrete factory
+            services.AddTransient<ContextFactoryNameSpace.ContextFactory>();
+
+            // Forward interfaces to the concrete implementation
+            services.AddTransient<ContextFactoryNameSpace.IGeneratorContextFactory>(sp => sp.GetRequiredService<ContextFactoryNameSpace.ContextFactory>());
+            services.AddTransient<ContextFactoryNameSpace.ISomeOtherContextFactory>(sp => sp.GetRequiredService<ContextFactoryNameSpace.ContextFactory>());
+
             return services;
         }
     }
