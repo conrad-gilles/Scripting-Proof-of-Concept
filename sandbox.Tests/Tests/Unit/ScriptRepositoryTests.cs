@@ -6,7 +6,6 @@ using Ember.Scripting;
 using Serilog;
 using Microsoft.Extensions.DependencyInjection;
 using sandbox.Tests;
-using Sandbox;
 using Ember.Scripting.Compilation;
 
 namespace FirstTests;

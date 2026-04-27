@@ -7,7 +7,6 @@ using Microsoft.EntityFrameworkCore;
 // using EFModeling.EntityProperties.FluentAPI.Required;
 using Moq;
 using Serilog;
-using Sandbox;
 
 namespace BlazorUI.Tests;
 

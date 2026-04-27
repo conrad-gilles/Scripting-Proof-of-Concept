@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Sandbox;
+// namespace Ember.Simulation;
 
 
 public class ExceptionHelper    //for future to traverse exception chain

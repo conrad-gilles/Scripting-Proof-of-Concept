@@ -20,7 +20,7 @@ var references = EmberMethods.GetReferences();
 // string connectionString = "Host=localhost;Port=5432;Database=script_registry;Username=admin;Password=your_secure_password";
 
 builder.Services.AddDbContextFactory<ScriptDbContext>();
-builder.Services.AddScoped<IUserSession, Sandbox.SandBoxUserSession>();
+builder.Services.AddScoped<IUserSession, SandBoxUserSession>();
 
 builder.Services.AddEmberScripting(references, AppSettings.EmberApiVersion, RecentTypeHelper.GetRecentTypes());
 builder.Services.AddDbContext<ScriptDbContext>();

@@ -65,7 +65,7 @@
 
     <ItemGroup>
         <Compile Include="..\Ember\GlobalUsings.cs" Link="GlobalUsings.cs" />
-         <!-- <Compile Include="..\sandbox.Tests\Tests\src\TestHelper.cs" Link="TestHelper.cs" /> -->
+        <!-- <Compile Include="..\sandbox.Tests\Tests\src\TestHelper.cs" Link="TestHelper.cs" /> -->
     </ItemGroup>
 
     <ItemGroup>
@@ -78,5 +78,9 @@
         <EmbeddedResource Include="Scripts\**\*.cs" />
     </ItemGroup>
 
+    <ItemGroup>
+        <ProjectReference Include="..\scripting\scripting.csproj" />
+        <ProjectReference Include="..\Ember\Ember.csproj" />
+    </ItemGroup>
 
 </Project>

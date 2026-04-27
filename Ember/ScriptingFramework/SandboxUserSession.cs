@@ -1,6 +1,6 @@
 using Ember.Scripting;
 
-namespace Sandbox;
+namespace Ember.Simulation;
 
 public class SandBoxUserSession : IUserSession
 {

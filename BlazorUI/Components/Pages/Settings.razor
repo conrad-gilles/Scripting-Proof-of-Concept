@@ -70,7 +70,7 @@
             });
 
             services2.AddDbContextFactory<ScriptDbContext>();
-            services2.AddScoped<IUserSession, Sandbox.SandBoxUserSession>();
+            services2.AddScoped<IUserSession, SandBoxUserSession>();
             services2.AddScoped<InternalManager>();
             ScriptingServiceCollectionExtensions.AddEmberScripting(services2, EmberMethods.GetReferences(),
                 EmberMethods.GetEmberApiVersion(testingDiffrentVersion: _selectedApiVersion), RecentTypeHelper.GetRecentTypes());

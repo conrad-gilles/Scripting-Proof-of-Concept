@@ -7,7 +7,6 @@ using Serilog;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using System.ComponentModel.DataAnnotations;
-using Sandbox;
 using Ember.Scripting.Compilation;
 
 using Ember.Simulation;
