@@ -8,7 +8,7 @@ public interface IDowngradeableContext : IContext
 {
     public IDowngradeableContext Downgrade();
 }
-public interface IRecentContext : IDowngradeableContext    //maybe should just inherit from IContext? but if its recent it implies theres a pervious version?
+public interface IRecentContext : IContext    //maybe should just inherit from IContext? but if its recent it implies theres a pervious version?
 {
 
 }
@@ -27,7 +27,7 @@ public static class ContextManager
 
         Type recentCtxType = recentCtx.GetType();
         Type desiredCtxType = contextVersionMap[desiredVersion];
-        IDowngradeableContext context = recentCtx;
+        IDowngradeableContext context = (IDowngradeableContext)recentCtx;
 
         int iterations = 0;
         int maxIterations = contextVersionMap.Keys.Count() + 3;
