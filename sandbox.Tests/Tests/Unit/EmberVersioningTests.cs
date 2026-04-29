@@ -15,8 +15,8 @@ public class EmberVersioningTests
 {
 
 
-    private IScriptManagerExtended? _facade;
-    private InternalManager? _eif;
+    private IScriptManagerBaseExtended? _facade;
+    private ScriptManager? _eif;
     private EmberMethods? _em;
     // private DataV2.DataV2? _data;
     private string? _actionResultVersionSpecific;
@@ -34,7 +34,7 @@ public class EmberVersioningTests
     {
         int v = EmberMethods.GetEmberApiVersion();
         _facade = EmberMethods.GetNewScriptManagerInstance(v);
-        _eif = new InternalManager(_facade);
+        _eif = new ScriptManager(_facade);
         _em = new EmberMethods(_facade);
         await _facade.DeleteAllData();
         _actionResultVersionSpecific = "[Message contains either failure or succes: ] ";  //change this if action result version changes it will thraow cause of message contains
@@ -72,7 +72,7 @@ public class EmberVersioningTests
     {
 
     }
-    public async Task<List<Guid>> SaturateDBAsync(IScriptManagerExtended facade, EmberMethods rm)
+    public async Task<List<Guid>> SaturateDBAsync(IScriptManagerBaseExtended facade, EmberMethods rm)
     {
         List<Guid> ids = [];
         foreach (var item in _sourceCodes!)
@@ -82,7 +82,7 @@ public class EmberVersioningTests
         }
         return ids;
     }
-    public async Task ExecuteEachScript(IScriptManagerExtended facade, EmberMethods em)
+    public async Task ExecuteEachScript(IScriptManagerBaseExtended facade, EmberMethods em)
     {
         foreach (var id in await SaturateDBAsync(facade, em))
         {

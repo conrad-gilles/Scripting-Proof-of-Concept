@@ -180,8 +180,8 @@
 </div>
 
 @code {
-    private IScriptManagerExtended ScriptManager => ScriptManagerAccessor.Current;
-    private InternalManager EmberInternalFacade => EmberInternalFacadeAccessor.Current;
+    private IScriptManagerBaseExtended ScriptManager => ScriptManagerAccessor.Current;
+    private ScriptManager EmberInternalFacade => EmberInternalFacadeAccessor.Current;
     private List<CustomerScript> _scriptsList = new();
     private Popup myPopup = default!;
     private bool _isLoading = true;

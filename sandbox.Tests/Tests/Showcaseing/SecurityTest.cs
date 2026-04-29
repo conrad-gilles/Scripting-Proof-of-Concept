@@ -13,8 +13,8 @@ using Ember.Scripting.Compilation;
 [TestClass]
 public class SecurityTests
 {
-    static IScriptManagerExtended ScriptManager = TestHelper.InitScriptManager();
-    static InternalManager InternalScriptManager = new InternalManager(ScriptManager);
+    static IScriptManagerBaseExtended ScriptManager = TestHelper.InitScriptManager();
+    static ScriptManager InternalScriptManager = new ScriptManager(ScriptManager);
     static EmberMethods em = new EmberMethods(ScriptManager);
 
     [TestInitialize]

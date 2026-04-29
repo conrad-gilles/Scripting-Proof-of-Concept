@@ -5,11 +5,11 @@ namespace BlazorUI.Services
 {
     public class ScriptManagerAccessor
     {
-        public IScriptManagerExtended Current { get; set; } = default!;
+        public IScriptManagerBaseExtended Current { get; set; } = default!;
     }
     public class EmberInternalFacadeAccessor
     {
-        internal InternalManager Current { get; set; } = default!;
+        internal ScriptManager Current { get; set; } = default!;
     }
     public class ScriptRepositoryAccessor
     {

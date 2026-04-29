@@ -13,7 +13,7 @@ namespace FirstTests;
 [TestClass]
 public class ScriptRepositoryTests
 {
-    private IScriptManagerExtended? _facade;
+    private IScriptManagerBaseExtended? _facade;
     private string? _sourceCodePedia = TestHelper.GetSC().sourceCodePedia;
     private string? _sourceCodeActionV1 = TestHelper.GetSC().sourceCodeActionV1;
     private string? _sourceCodeActionV3 = TestHelper.GetSC().sourceCodeActionV3;

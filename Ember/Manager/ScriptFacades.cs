@@ -3,12 +3,12 @@ namespace Ember.Simulation;
 
 internal class ConditionScript : RecentScriptFacade, RecentIConditionScript
 {
-    private InternalManager _emberScriptManager;
+    private ScriptManager _emberScriptManager;
     private string _scriptName;
 
-    public ConditionScript(IScriptManagerExtended scriptManager, string scriptName)
+    public ConditionScript(IScriptManagerBaseExtended scriptManager, string scriptName)
     {
-        _emberScriptManager = new InternalManager(scriptManager);
+        _emberScriptManager = new ScriptManager(scriptManager);
         _scriptName = scriptName;
     }
     public async Task<bool> EvaluateAsync(RecentIGeneratorContext context)
@@ -21,14 +21,14 @@ internal class ConditionScript : RecentScriptFacade, RecentIConditionScript
 
 internal class ActionScript : RecentScriptFacade, RecentIActionScript
 {
-    private InternalManager _emberScriptManager;
-    private IScriptManagerExtended _scriptManager;
+    private ScriptManager _emberScriptManager;
+    private IScriptManagerBaseExtended _scriptManager;
     private string _scriptName;
 
-    public ActionScript(IScriptManagerExtended scriptManager, string scriptName)
+    public ActionScript(IScriptManagerBaseExtended scriptManager, string scriptName)
     {
         _scriptManager = scriptManager;
-        _emberScriptManager = new InternalManager(scriptManager);
+        _emberScriptManager = new ScriptManager(scriptManager);
         _scriptName = scriptName;
     }
     public async Task<RecentActionResult> ExecuteAsync(RecentIGeneratorContext context)

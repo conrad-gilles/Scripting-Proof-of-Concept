@@ -16,8 +16,8 @@ namespace BlazorUI.Helpers
 {
     public class MonacoEditorHelper
     {
-        private readonly IScriptManagerExtended _scriptManager;
-        private readonly InternalManager _eif;
+        private readonly IScriptManagerBaseExtended _scriptManager;
+        private readonly ScriptManager _eif;
         private readonly MonacoEditor _editor;
         private readonly ConsoleService _console;
         private readonly Popup _myPopup = default!;
@@ -28,7 +28,7 @@ namespace BlazorUI.Helpers
         // If this is Guid.Empty, the helper knows it's a new script.
         public Guid CurrentScriptId { get; set; } = Guid.Empty;
 
-        internal MonacoEditorHelper(IScriptManagerExtended scriptManager, InternalManager eif, MonacoEditor editor, ConsoleService console, Popup myPopup)
+        internal MonacoEditorHelper(IScriptManagerBaseExtended scriptManager, ScriptManager eif, MonacoEditor editor, ConsoleService console, Popup myPopup)
         {
             _scriptManager = scriptManager;
             _eif = eif;

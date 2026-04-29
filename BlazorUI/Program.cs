@@ -34,15 +34,15 @@ builder.Services.AddDataProtection()
     .PersistKeysToFileSystem(new DirectoryInfo(Path.GetTempPath()));
 
 builder.Services.AddScoped<ConsoleService>();
-builder.Services.AddScoped<InternalManager>();
+builder.Services.AddScoped<ScriptManager>();
 builder.Services.AddScoped<EmberInternalFacadeAccessor>(sp => new EmberInternalFacadeAccessor
 {
-    Current = sp.GetRequiredService<InternalManager>()
+    Current = sp.GetRequiredService<ScriptManager>()
 });
 // builder.Services.AddScoped<ISccriptManagerDeleteAfter, YourScriptManagerImplementation>();
 builder.Services.AddScoped<ScriptManagerAccessor>(sp => new ScriptManagerAccessor
 {
-    Current = sp.GetRequiredService<IScriptManagerExtended>()
+    Current = sp.GetRequiredService<IScriptManagerBaseExtended>()
 });
 var app = builder.Build();
 

@@ -15,7 +15,7 @@ using Newtonsoft.Json.Serialization;
 [TestClass]
 public class SanboxTests
 {
-    private IScriptManagerExtended? _facade;
+    private IScriptManagerBaseExtended? _facade;
     private EmberMethods? _em;
     private ObjectsRecord? _obj;
     // DataV1.MockData? data;

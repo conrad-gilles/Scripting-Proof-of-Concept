@@ -31,7 +31,7 @@ public static class TestAssemblyInit
     [AssemblyCleanup]
     public static async Task Cleanup()
     {
-        IScriptManagerExtended ScriptManager = TestHelper.InitScriptManager();
+        IScriptManagerBaseExtended ScriptManager = TestHelper.InitScriptManager();
         await ScriptManager.DeleteAllData();
     }
 }

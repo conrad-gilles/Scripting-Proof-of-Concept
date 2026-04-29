@@ -29,7 +29,7 @@ public class HomeDashboardTests : BunitContext // Inheriting from BunitContext m
         Services.AddSingleton(mockDbFactory.Object);
 
         // 2. Setup Mock ScriptManager
-        var mockScriptManager = new Mock<IScriptManagerExtended>();
+        var mockScriptManager = new Mock<IScriptManagerBaseExtended>();
 
         // FIX 1: Provide both parameters explicitly for Moq (Filter and bool)
         mockScriptManager.Setup(m => m.ListScripts(It.IsAny<CustomerScriptFilter>(), true))

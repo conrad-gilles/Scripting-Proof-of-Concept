@@ -41,7 +41,7 @@ try
     ScriptingServiceCollectionExtensions.AddEmberScripting(services, EmberMethods.GetReferences(), EmberMethods.GetEmberApiVersion(), RecentTypeHelper.GetRecentTypes());
 
     var provider = services.BuildServiceProvider();
-    IScriptManagerExtended facade = provider.GetRequiredService<IScriptManagerExtended>();
+    IScriptManagerBaseExtended facade = provider.GetRequiredService<IScriptManagerBaseExtended>();
 }
 finally
 {

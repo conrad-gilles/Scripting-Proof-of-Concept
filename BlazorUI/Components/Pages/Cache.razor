@@ -74,7 +74,7 @@
 </div>
 
 @code {
-    private IScriptManagerExtended ScriptManager => ScriptManagerAccessor.Current;
+    private IScriptManagerBaseExtended ScriptManager => ScriptManagerAccessor.Current;
     private List<CompiledScript> _caches = [];
     private Popup myPopup = default!;
 

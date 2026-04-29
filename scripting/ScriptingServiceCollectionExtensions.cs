@@ -30,22 +30,22 @@ public static class ScriptingServiceCollectionExtensions
 
         // 4. Register the Facade using a factory to hide the internal parameters
         // Step A: Register the concrete class using the factory so it can use the internal constructor
-        services.AddTransient(sp => new ScriptManager(
+        services.AddTransient(sp => new ScriptManagerBase(
             sp.GetRequiredService<ScriptRepository>(),
             sp.GetRequiredService<ScriptCompiler>(),
             sp.GetRequiredService<ScriptExecutor>(),
-            sp.GetRequiredService<ILogger<ScriptManager>>(),
+            sp.GetRequiredService<ILogger<ScriptManagerBase>>(),
             sp.GetRequiredService<IUserSession>()
         ));
 
-        services.AddTransient(sp => new InternalManager(    //maybe in the future swittch to singleton
-        sp.GetRequiredService<IScriptManagerExtended>()
+        services.AddTransient(sp => new ScriptManager(    //maybe in the future swittch to singleton
+        sp.GetRequiredService<IScriptManagerBaseExtended>()
         ));
-        services.AddSingleton<IInternalManager>(sp => sp.GetRequiredService<InternalManager>());
+        services.AddSingleton<IScriptManager>(sp => sp.GetRequiredService<ScriptManager>());
 
         // Step B: Point both interfaces to the exact same concrete registration above
-        services.AddTransient<IScriptManager>(sp => sp.GetRequiredService<ScriptManager>());
-        services.AddTransient<IScriptManagerExtended>(sp => sp.GetRequiredService<ScriptManager>());
+        services.AddTransient<IScriptManagerBase>(sp => sp.GetRequiredService<ScriptManagerBase>());
+        services.AddTransient<IScriptManagerBaseExtended>(sp => sp.GetRequiredService<ScriptManagerBase>());
 
         return services;
     }

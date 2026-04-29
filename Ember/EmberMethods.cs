@@ -16,9 +16,9 @@ using System.Runtime.CompilerServices;
 
 public class EmberMethods
 {
-    private readonly IScriptManagerExtended _facade;
+    private readonly IScriptManagerBaseExtended _facade;
 
-    public EmberMethods(IScriptManagerExtended facade)
+    public EmberMethods(IScriptManagerBaseExtended facade)
     {
         _facade = facade;
     }
@@ -33,9 +33,9 @@ public class EmberMethods
         return 5;
     }
 
-    public static IScriptManagerExtended GetNewScriptManagerInstance(int? apiVersion = null)
+    public static IScriptManagerBaseExtended GetNewScriptManagerInstance(int? apiVersion = null)
     {
-        IScriptManagerExtended facade;
+        IScriptManagerBaseExtended facade;
         ServiceCollection services2 = new ServiceCollection();
 
         LoggerForScripting logger = new LoggerForScripting();
@@ -51,7 +51,7 @@ public class EmberMethods
         services2.AddDbContextFactory<ScriptDbContext>();
         ScriptingServiceCollectionExtensions.AddEmberScripting(services2, EmberMethods.GetReferences(), EmberMethods.GetEmberApiVersion(testingDiffrentVersion: apiVersion), RecentTypeHelper.GetRecentTypes());
         var provider2 = services2.BuildServiceProvider();
-        return facade = provider2.GetRequiredService<IScriptManagerExtended>();
+        return facade = provider2.GetRequiredService<IScriptManagerBaseExtended>();
     }
 
     public async Task CompileAllScriptsInFolderAndSaveToDB(string? userName = null, int? currentApiVersion = null)

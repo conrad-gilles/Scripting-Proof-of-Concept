@@ -2,7 +2,7 @@ using Microsoft.CodeAnalysis.Emit;
 
 namespace Ember.Scripting.Manager;
 
-public interface IScriptManagerExtended : IScriptManager
+public interface IScriptManagerBaseExtended : IScriptManagerBase
 {
 
   #region Script Lifecycle

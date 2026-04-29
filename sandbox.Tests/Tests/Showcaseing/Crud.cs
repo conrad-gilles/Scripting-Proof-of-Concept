@@ -11,8 +11,8 @@ using Ember.Simulation;
 [TestClass]
 public class CrudDemos
 {
-    static IScriptManagerExtended ScriptManager = InitScriptManager();
-    static InternalManager InternalScriptManager = new InternalManager(ScriptManager);
+    static IScriptManagerBaseExtended ScriptManager = InitScriptManager();
+    static ScriptManager InternalScriptManager = new ScriptManager(ScriptManager);
     static EmberMethods em = new EmberMethods(ScriptManager);
 
     [TestInitialize]
@@ -27,9 +27,9 @@ public class CrudDemos
         await ScriptManager.DeleteAllData();
     }
 
-    public static IScriptManagerExtended InitScriptManager()
+    public static IScriptManagerBaseExtended InitScriptManager()
     {
-        IScriptManagerExtended scriptManager;
+        IScriptManagerBaseExtended scriptManager;
         ServiceCollection services = new ServiceCollection();
 
         LoggerForScripting logger = new LoggerForScripting();
@@ -45,7 +45,7 @@ public class CrudDemos
 
         var provider = services.BuildServiceProvider();
 
-        return scriptManager = provider.GetRequiredService<IScriptManagerExtended>();
+        return scriptManager = provider.GetRequiredService<IScriptManagerBaseExtended>();
     }
     [TestMethod]
     public async Task Create()

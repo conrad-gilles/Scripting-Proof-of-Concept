@@ -1,6 +1,6 @@
 namespace Ember.Scripting.Manager;
 
-public interface IScriptManager
+public interface IScriptManagerBase
 {
     /// <summary>
     /// Generic execution that detects script type automatically
