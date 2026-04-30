@@ -3,9 +3,9 @@ using System.Runtime.CompilerServices;
 
 namespace Ember.Scripting.Versioning;
 
-public static class UpgradeManager
+internal static class UpgradeManager
 {
-    public static IUpgradeableReturnValue UpgradeReturnValue(object returnValue)
+    internal static IUpgradeableReturnValue UpgradeReturnValue(object returnValue)
     {
         IUpgradeableReturnValue current = (IUpgradeableReturnValue)returnValue;
 
@@ -68,7 +68,7 @@ public static class UpgradeManager
         return current;
     }
 
-    public static Dictionary<Type, List<ScannerRecord>> GetClassDictionary()
+    internal static Dictionary<Type, List<ScannerRecord>> GetClassDictionary()
     {
         Type baseType = typeof(CustomReturnType);
 
@@ -119,10 +119,10 @@ public static class UpgradeManager
     }
 }
 
-public record ScannerRecord
+internal record ScannerRecord
 {
-    public required int Version { get; init; }
-    public required Type CustomReturnType { get; init; }
+    internal required int Version { get; init; }
+    internal required Type CustomReturnType { get; init; }
 
     public override string ToString()
     {

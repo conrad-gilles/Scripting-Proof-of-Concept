@@ -1,6 +1,6 @@
 namespace Ember.Scripting.Versioning;
 
-public record ScriptMetaDataRecord
+internal record ScriptMetaDataRecord
 {
     public required int Version { get; init; }
     public required Type RetrievedType { get; init; }

@@ -187,19 +187,6 @@ public class ReferencesForVersionNotFound : CompilationException
     public ReferencesForVersionNotFound(string message, Exception innerException) : base(message, innerException) { }
 }
 
-public class CouldNotMatchBaseTypeInCompiler : CompilationException
-{
-    public CouldNotMatchBaseTypeInCompiler() : base() { }
-    public CouldNotMatchBaseTypeInCompiler(string message) : base(message) { }
-    public CouldNotMatchBaseTypeInCompiler(string message, Exception innerException) : base(message, innerException) { }
-}
-public class CouldNotMatchBaseTypeInRecord : CompilationException
-{
-    public CouldNotMatchBaseTypeInRecord() : base() { }
-    public CouldNotMatchBaseTypeInRecord(string message) : base(message) { }
-    public CouldNotMatchBaseTypeInRecord(string message, Exception innerException) : base(message, innerException) { }
-}
-
 public class ConcellationTokenUncheckedException : CompilationException
 {
     public ConcellationTokenUncheckedException() : base() { }

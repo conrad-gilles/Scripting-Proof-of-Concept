@@ -4,15 +4,15 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Ember.Scripting.Versioning;
 
-public static class ContextVersionScanner
+internal static class ContextVersionScanner
 {
     // Moved exactly as it was from ScriptFactory
-    public static Dictionary<int, Type> GetClassDictionary(IRecentContext recentCtx)
+    internal static Dictionary<int, Type> GetClassDictionary(IRecentContext recentCtx)
     {
         return GetBaseTypeDictionary(recentCtx);
     }
 
-    public static Dictionary<int, Type> GetInterfaceDictionary()
+    internal static Dictionary<int, Type> GetInterfaceDictionary()
     {
         Type baseType = typeof(IContext);
         return GetBaseTypeDictionaryIntrfc();

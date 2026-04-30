@@ -14,9 +14,9 @@ public interface IRecentContext : IContext    //maybe should just inherit from I
 }
 
 
-public static class ContextManager
+internal static class ContextManager
 {
-    public static IContext CreateByDowngrade(int desiredVersion, IRecentContext recentCtx)
+    internal static IContext CreateByDowngrade(int desiredVersion, IRecentContext recentCtx)
     {
         Dictionary<int, Type> contextVersionMap = ContextVersionScanner.GetClassDictionary(recentCtx);
 

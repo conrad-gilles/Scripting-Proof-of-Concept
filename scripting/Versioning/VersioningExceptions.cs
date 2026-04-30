@@ -49,18 +49,6 @@ public class TypeMoreThanOnceInAssemblyCVSCException : VersioningExceptions
     public TypeMoreThanOnceInAssemblyCVSCException(string message) : base(message) { }
     public TypeMoreThanOnceInAssemblyCVSCException(string message, Exception innerException) : base(message, innerException) { }
 }
-public class TypeMoreThanOnceInAssemblyARVSException : TypeMoreThanOnceInAssemblyException
-{
-    public TypeMoreThanOnceInAssemblyARVSException() : base() { }
-    public TypeMoreThanOnceInAssemblyARVSException(string message) : base(message) { }
-    public TypeMoreThanOnceInAssemblyARVSException(string message, Exception innerException) : base(message, innerException) { }
-}
-public class TypeMoreThanOnceInAssemblySVSException : TypeMoreThanOnceInAssemblyException
-{
-    public TypeMoreThanOnceInAssemblySVSException() : base() { }
-    public TypeMoreThanOnceInAssemblySVSException(string message) : base(message) { }
-    public TypeMoreThanOnceInAssemblySVSException(string message, Exception innerException) : base(message, innerException) { }
-}
 public class TypeMoreThanOnceInAssemblyCVSIException : TypeMoreThanOnceInAssemblyException
 {
     public TypeMoreThanOnceInAssemblyCVSIException() : base() { }
@@ -84,12 +72,6 @@ public class VersionIntMoreThanOnceInAssemblyCVSCException : VersionIntMoreThanO
     public VersionIntMoreThanOnceInAssemblyCVSCException() : base() { }
     public VersionIntMoreThanOnceInAssemblyCVSCException(string message) : base(message) { }
     public VersionIntMoreThanOnceInAssemblyCVSCException(string message, Exception innerException) : base(message, innerException) { }
-}
-public class VersionIntMoreThanOnceInAssemblySVSException : VersionIntMoreThanOnceInAssemblyException
-{
-    public VersionIntMoreThanOnceInAssemblySVSException() : base() { }
-    public VersionIntMoreThanOnceInAssemblySVSException(string message) : base(message) { }
-    public VersionIntMoreThanOnceInAssemblySVSException(string message, Exception innerException) : base(message, innerException) { }
 }
 public class VersionIntMoreThanOnceInAssemblyCVSIException : VersionIntMoreThanOnceInAssemblyException
 {

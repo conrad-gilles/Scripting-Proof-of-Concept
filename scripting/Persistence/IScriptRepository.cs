@@ -1,1 +1,0 @@
-namespace Ember.Scripting.Persistence;

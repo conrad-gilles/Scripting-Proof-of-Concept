@@ -30,7 +30,7 @@ internal class ScriptCompiler
         _logger = logger;
         _recentTypes = recentTypes;
     }
-    public byte[] RunCompilation(string script)
+    internal byte[] RunCompilation(string script)
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(RunCompilation), nameof(ScriptCompiler));
 
@@ -60,7 +60,7 @@ internal class ScriptCompiler
         byte[] assemblyBytes = ms.ToArray();
         return assemblyBytes;
     }
-    public ValidationRecord BasicValidationBeforeCompiling(string script)//record
+    internal ValidationRecord BasicValidationBeforeCompiling(string script)//record
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(BasicValidationBeforeCompiling), nameof(ScriptCompiler));
 
@@ -266,7 +266,7 @@ internal class ScriptCompiler
         return foundRecord;
     }
 
-    public List<MethodRecord> ValidateScriptMethodTypes(SyntaxTree tree, SemanticModel semanticModel, INamedTypeSymbol baseType)
+    private List<MethodRecord> ValidateScriptMethodTypes(SyntaxTree tree, SemanticModel semanticModel, INamedTypeSymbol baseType)
     {
         List<MethodRecord> justToReturn = [];
 
@@ -344,7 +344,7 @@ internal class ScriptCompiler
         }
         return name;
     }
-    public int? GetExecutionTime(SyntaxTree syntaxTree)
+    private int? GetExecutionTime(SyntaxTree syntaxTree)
     {
         int? executionTime = null;
 
@@ -451,7 +451,7 @@ internal class ScriptCompiler
         }
     }
 
-    public bool IsTheSameTree(string script1, string script2)
+    internal bool IsTheSameTree(string script1, string script2)
     {
         //This function i quickly generated with AI
         _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(IsTheSameTree), nameof(ScriptCompiler));
@@ -463,7 +463,7 @@ internal class ScriptCompiler
         return areSame;
     }
 
-    public List<MetadataReference> GetReferencesForOldVersion(int version, List<string>? customDlls = null, bool loadCurrentRT = true)  //todo fix this
+    private List<MetadataReference> GetReferencesForOldVersion(int version, List<string>? customDlls = null, bool loadCurrentRT = true)  //todo fix this
     {
         var stdReferences = _standardReferencesForAllScripts;
         _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(GetReferencesForOldVersion), nameof(ScriptCompiler));

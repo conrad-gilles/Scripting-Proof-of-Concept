@@ -22,7 +22,7 @@ internal class ScriptRepository
         _contextFactory = contextFactory;
         _userSession = userSession;
     }
-    public async Task DeleteAllData()
+    internal async Task DeleteAllData()
     {
 
         _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(DeleteAllData), nameof(ScriptRepository));
@@ -35,7 +35,7 @@ internal class ScriptRepository
 
 
     }
-    public async Task<List<CustomerScript>> GetAllCustomerScripts(bool includeCaches = false, CustomerScriptFilter? filters = null)
+    internal async Task<List<CustomerScript>> GetAllCustomerScripts(bool includeCaches = false, CustomerScriptFilter? filters = null)
     {
 
         _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(GetAllCustomerScripts), nameof(ScriptRepository));
@@ -101,7 +101,7 @@ internal class ScriptRepository
 
 
     }
-    public async Task<List<CompiledScript>> GetAllCompiledScriptCaches(bool includeScripts = true)
+    internal async Task<List<CompiledScript>> GetAllCompiledScriptCaches(bool includeScripts = true)
     {
 
         _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(GetAllCompiledScriptCaches), nameof(ScriptRepository));
@@ -124,12 +124,12 @@ internal class ScriptRepository
 
 
     }
-    public int GetRecentApiVersion()
+    internal int GetRecentApiVersion()
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(GetRecentApiVersion), nameof(ScriptRepository));
         return _recentApiVersion;
     }
-    public async Task ClearScriptCache(Guid scriptId)
+    internal async Task ClearScriptCache(Guid scriptId)
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName} with scriptId: {ScriptId}.", nameof(ClearScriptCache), nameof(ScriptRepository), scriptId);
 
@@ -151,7 +151,7 @@ internal class ScriptRepository
         }
 
     }
-    public async Task RecompileScript(Guid scriptId, bool deleteAlso = false)
+    internal async Task RecompileScript(Guid scriptId, bool deleteAlso = false)
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName} with scriptId: {ScriptId}.", nameof(RecompileScript), nameof(ScriptRepository), scriptId);
 
@@ -189,13 +189,13 @@ internal class ScriptRepository
 
 
     }
-    public async Task RecompileCache(Guid scriptId, int apiVersion)
+    internal async Task RecompileCache(Guid scriptId, int apiVersion)
     {
         await DeleteScriptCache(scriptId, apiVersion);
         CustomerScript script = await GetCustomerScript(scriptId);
         await CreateAndInsertCompiledScript(script, apiVersion);
     }
-    public async Task<string> GetCompilationErrors(Guid scriptId, int? apiVersion = null)
+    internal async Task<string> GetCompilationErrors(Guid scriptId, int? apiVersion = null)
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName} with scriptId: {ScriptId}.", nameof(GetCompilationErrors), nameof(ScriptRepository), scriptId);
 
@@ -234,7 +234,7 @@ internal class ScriptRepository
             // throw new FacadeException(e.ToString(), e);
         }
     }
-    public async Task<EmitResult?> GetCompilationErrors(string sourceCode)
+    internal async Task<EmitResult?> GetCompilationErrors(string sourceCode)
     {
         ValidationRecord? metaData = null;
         try
@@ -258,7 +258,7 @@ internal class ScriptRepository
         }
     }
 
-    public async Task AutomaticCompilationOnVersionUpdate(int currentApiVersion)
+    internal async Task AutomaticCompilationOnVersionUpdate(int currentApiVersion)
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName} with currentApiVersion: {ApiVersion}.", nameof(AutomaticCompilationOnVersionUpdate), nameof(ScriptRepository), currentApiVersion);
 
@@ -294,7 +294,7 @@ internal class ScriptRepository
             }
         }
     }
-    public async Task<CustomerScript> CreateAndInsertCustomerScript(string scriptString, Guid? randomGUID = null, int? oldApiV = null, DateTime? createdAt = null)
+    internal async Task<CustomerScript> CreateAndInsertCustomerScript(string scriptString, Guid? randomGUID = null, int? oldApiV = null, DateTime? createdAt = null)
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName} with ID: {ScriptId}.", nameof(CreateAndInsertCustomerScript), nameof(ScriptRepository), randomGUID);
         if (oldApiV == null)
@@ -345,7 +345,7 @@ internal class ScriptRepository
             }
         }
     }
-    public async Task CreateAndInsertCompiledScript(CustomerScript script, int? apiV = null)
+    internal async Task CreateAndInsertCompiledScript(CustomerScript script, int? apiV = null)
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName} with ID: {ScriptId}.", nameof(CreateAndInsertCompiledScript), nameof(ScriptRepository), script.Id);
 
@@ -387,7 +387,7 @@ internal class ScriptRepository
             }
         }
     }
-    public async Task DeleteCustomerScript(Guid id)
+    internal async Task DeleteCustomerScript(Guid id)
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName} with ID: {ScriptId}.", nameof(DeleteCustomerScript), nameof(ScriptRepository), id);
 
@@ -398,7 +398,7 @@ internal class ScriptRepository
             await db.SaveChangesAsync();
         }
     }
-    public async Task DeleteScriptCache(Guid id, int apiVersion)
+    internal async Task DeleteScriptCache(Guid id, int apiVersion)
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName} with ID: {ScriptId} and ApiVersion: {ApiVersion}.", nameof(DeleteScriptCache), nameof(ScriptRepository), id, apiVersion);
 
@@ -419,7 +419,7 @@ internal class ScriptRepository
             }
         }
     }
-    public async Task UpdateScript(CustomerScript script, string newSourceCode, bool allowFaultySave = false, int? apiVersion = null)
+    internal async Task UpdateScript(CustomerScript script, string newSourceCode, bool allowFaultySave = false, int? apiVersion = null)
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName} with scriptId: {ScriptId}.", nameof(UpdateScript), nameof(ScriptRepository), script.Id);
 
@@ -460,7 +460,7 @@ internal class ScriptRepository
         }
     }
     // Goal is to compile the updated script first before insertion to prevent having to undo a insertion of a non working script
-    public async Task UpdateScriptAndRecompile(Guid scriptId, string newSourceCode, int? apiVersion = null)
+    internal async Task UpdateScriptAndRecompile(Guid scriptId, string newSourceCode, int? apiVersion = null)
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName} with scriptId: {ScriptId}.", nameof(UpdateScriptAndRecompile), nameof(ScriptRepository), scriptId);
 
@@ -505,7 +505,7 @@ internal class ScriptRepository
             }
         }
     }
-    public async Task InsertScriptCompiledCache(CompiledScript scriptCompiledCache)
+    internal async Task InsertScriptCompiledCache(CompiledScript scriptCompiledCache)
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(InsertScriptCompiledCache), nameof(ScriptRepository));
 
@@ -518,7 +518,7 @@ internal class ScriptRepository
         }
     }
 
-    public async Task<CompiledScript> GetCompiledScripCache(Guid id, int? apiVersion = null)
+    internal async Task<CompiledScript> GetCompiledScripCache(Guid id, int? apiVersion = null)
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName} with ID: {ScriptId}.", nameof(GetCompiledScripCache), nameof(ScriptRepository), id);
 
@@ -532,7 +532,7 @@ internal class ScriptRepository
             return cache;
         }
     }
-    public async Task<CustomerScript> GetCustomerScript(Guid id, bool includeCaches = false)
+    internal async Task<CustomerScript> GetCustomerScript(Guid id, bool includeCaches = false)
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName} with ID: {ScriptId}.", nameof(GetCustomerScript), nameof(ScriptRepository), id);
 
@@ -554,7 +554,7 @@ internal class ScriptRepository
         }
     }
 
-    public async Task<Guid> GetScriptId<ScriptType>(string scriptName) where ScriptType : IScriptType
+    internal async Task<Guid> GetScriptId<ScriptType>(string scriptName) where ScriptType : IScriptType
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName} with Name: {ScriptId}.", nameof(GetCustomerScript), nameof(ScriptRepository), scriptName);
 
@@ -564,7 +564,7 @@ internal class ScriptRepository
             return script.Id;
         }
     }
-    public async Task CompileAllStoredScripts()
+    internal async Task CompileAllStoredScripts()
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(CompileAllStoredScripts), nameof(ScriptRepository));
 
@@ -579,7 +579,7 @@ internal class ScriptRepository
         }
     }
 
-    public async Task SaveScriptWithoutCompiling(Guid id, string sourceCode)
+    internal async Task SaveScriptWithoutCompiling(Guid id, string sourceCode)
     {
         using (var db = await _contextFactory.CreateDbContextAsync())
         {
@@ -614,7 +614,7 @@ internal class ScriptRepository
             await db.SaveChangesAsync();
         }
     }
-    public async Task CreateScriptWithoutCompiling(Guid id, string sourceCode, string? userName = null)
+    internal async Task CreateScriptWithoutCompiling(Guid id, string sourceCode, string? userName = null)
     {
         using (var db = await _contextFactory.CreateDbContextAsync())
         {
@@ -634,7 +634,7 @@ internal class ScriptRepository
             await db.SaveChangesAsync();
         }
     }
-    public async Task DeleteAllCachedScripts()
+    internal async Task DeleteAllCachedScripts()
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(DeleteAllCachedScripts), nameof(ScriptRepository));
 
@@ -643,7 +643,7 @@ internal class ScriptRepository
             await db.ScriptCompiledCaches.ExecuteDeleteAsync();
         }
     }
-    public async Task<bool> IsDuplicateScript(CustomerScript script)    //todo make more efficient using ef core
+    internal async Task<bool> IsDuplicateScript(CustomerScript script)    //todo make more efficient using ef core
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(IsDuplicateScript), nameof(ScriptRepository));
         // CustomerScriptFilter filter = new CustomerScriptFilter(scriptName: script.ScriptName, sourceCode: script.SourceCode);
@@ -666,7 +666,7 @@ internal class ScriptRepository
         // }
         // return false;   //but name is duplicate! only source code is unique, also this could be an issue if the name of the script is not taken from the source code as it could lead to a script having a diffrent name but the same source code as another this would lead to this algorithm not finginh the duplicate script
     }
-    public async Task<DuplicateListDbH> DetectDuplicates()
+    internal async Task<DuplicateListDbH> DetectDuplicates()
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(DetectDuplicates), nameof(ScriptRepository));
 
@@ -727,7 +727,7 @@ internal class ScriptRepository
             cachesToDelete = cachesToDelete
         };
     }
-    public async Task<List<int>> GetActiveApiVersions()
+    internal async Task<List<int>> GetActiveApiVersions()
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(GetActiveApiVersions), nameof(ScriptRepository));
 
@@ -742,12 +742,12 @@ internal class ScriptRepository
         }
         return ls;
     }
-    public async Task<int> GetMostRecentApiVersionInDb()
+    internal async Task<int> GetMostRecentApiVersionInDb()
     {
         List<int> versions = await GetActiveApiVersions();
         return versions.Max();
     }
-    public async Task RemoveDuplicates(List<Guid>? duplicateGuids = null, Dictionary<Guid, int>? cachesWithoutScript = null)
+    internal async Task RemoveDuplicates(List<Guid>? duplicateGuids = null, Dictionary<Guid, int>? cachesWithoutScript = null)
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(RemoveDuplicates), nameof(ScriptRepository));
 
@@ -779,7 +779,7 @@ internal class ScriptRepository
         }
     }
     //Ai generated
-    public async Task HealthCheck() //todo verify
+    internal async Task HealthCheck() //todo verify
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(HealthCheck), nameof(ScriptRepository));
 
@@ -832,7 +832,7 @@ internal class ScriptRepository
         }
     }
 
-    public async Task<Dictionary<int, List<CompiledScript>>> GetCachesForEachApiVersion()
+    internal async Task<Dictionary<int, List<CompiledScript>>> GetCachesForEachApiVersion()
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(GetActiveApiVersions), nameof(ScriptRepository));
 

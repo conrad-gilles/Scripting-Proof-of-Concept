@@ -2,9 +2,9 @@ using System.Reflection;
 
 namespace Ember.Scripting.Versioning;
 
-public static class ScriptVersionScanner
+internal static class ScriptVersionScanner
 {
-    public static List<ScriptMetaDataRecord> GetClassRecords()
+    internal static List<ScriptMetaDataRecord> GetClassRecords()
     {
         Type baseType = typeof(MetaDataIGeneratorScript);
         return GetBaseTypeDictionary(baseType);
@@ -183,10 +183,10 @@ public static class ScriptVersionScanner
     }
 }
 
-public static class VersionScannerHelper
+internal static class VersionScannerHelper
 {
     //Ai generated to fix a bug when running bUnit tests
-    public static IEnumerable<Type> GetLoadableTypes(Assembly assembly)
+    internal static IEnumerable<Type> GetLoadableTypes(Assembly assembly)
     {
         try
         {
