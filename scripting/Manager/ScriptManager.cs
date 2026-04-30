@@ -96,12 +96,53 @@ public class ScriptManager : IScriptManager
     }
 }
 
+/// <summary>
+/// A simplified interface for running and managing scripts, handling context conversions automatically behind the scenes.
+/// </summary>
 public interface IScriptManager
 {
+    /// <summary>
+    /// Runs a script by its ID and returns the result.
+    /// </summary>
+    /// <param name="id">The unique ID of the script.</param>
+    /// <param name="context">The context passed to the method.</param>
+    /// <param name="methodName">The method to run inside the script.</param>
+    /// <returns>The upgraded result from the script.</returns>
     Task<object> ExecuteScript(Guid id, IRecentContext context, string methodName);
+
+    /// <summary>
+    /// Runs a script by its name and returns the result.
+    /// </summary>
+    /// <typeparam name="ScriptType">The script type.</typeparam>
+    /// <param name="name">The name of the script.</param>
+    /// <param name="context">The context passed to the method.</param>
+    /// <param name="methodName">The method to run inside the script.</param>
+    /// <returns>The upgraded result from the script.</returns>
     Task<object> ExecuteScript<ScriptType>(string name, IRecentContext context, string methodName)
         where ScriptType : IScriptType;
+
+    /// <summary>
+    /// Quickly tests and runs raw C# code without saving it permanently.
+    /// </summary>
+    /// <param name="sourceCode">The C# code.</param>
+    /// <param name="context">The context passed to the method.</param>
+    /// <param name="methodName">The method to run.</param>
+    /// <returns>The upgraded result from the script.</returns>
     Task<object> ExecuteUnfinishedScriptBySourceCode(string sourceCode, IRecentContext context, string methodName);
+
+    /// <summary>
+    /// Retrieves a script facade object to easily interact with a specific script.
+    /// </summary>
+    /// <typeparam name="TScript">The specific script facade type.</typeparam>
+    /// <param name="name">The name of the script.</param>
+    /// <returns>The script facade object.</returns>
     TScript GetScript<TScript>(string name) where TScript : RecentScriptFacade;
+
+    /// <summary>
+    /// Creates a new script in the database from source code and returns its facade.
+    /// </summary>
+    /// <typeparam name="TScript">The specific script facade type.</typeparam>
+    /// <param name="sourceCode">The raw C# code to create the script from.</param>
+    /// <returns>The script facade object.</returns>
     Task<TScript> CreateScript<TScript>(string sourceCode) where TScript : RecentScriptFacade;
 }

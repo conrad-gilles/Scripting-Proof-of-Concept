@@ -8,7 +8,7 @@ public interface IDowngradeableContext : IContext
 {
     public IDowngradeableContext Downgrade();
 }
-public interface IRecentContext : IContext    //maybe should just inherit from IContext? but if its recent it implies theres a pervious version?
+public interface IRecentContext : IContext
 {
 
 }

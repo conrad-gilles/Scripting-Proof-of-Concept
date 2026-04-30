@@ -23,6 +23,12 @@ internal class ScriptCompiler
                         MetadataReference.CreateFromFile(Assembly.Load("System.Threading.Tasks").Location),
                         MetadataReference.CreateFromFile(Assembly.Load("netstandard").Location)
                         ];
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ScriptCompiler"/> class.
+    /// </summary>
+    /// <param name="hostReferences">A list of <see cref="MetadataReference"/> to be added to the compiler's reference list, alongside the standard framework references.</param>
+    /// <param name="logger">The logger instance used for recording trace and error information during compilation.</param>
+    /// <param name="recentTypes">A list of allowed recent types to validate scripts against.</param>
     public ScriptCompiler(List<MetadataReference> hostReferences, ILogger<ScriptCompiler> logger, List<Type> recentTypes)
     {
         _allReferences.AddRange(_standardReferencesForAllScripts);
@@ -30,6 +36,11 @@ internal class ScriptCompiler
         _logger = logger;
         _recentTypes = recentTypes;
     }
+    /// <summary>
+    /// Parses the provided C# script into a syntax tree and compiles it, it then returns it as an array of bytes
+    /// </summary>
+    /// <param name="script">The raw C# source code string to be compiled.</param>
+    /// <exception cref="CompilationFailedException">Thrown when the code fails to compile successfully.</exception>
     internal byte[] RunCompilation(string script)
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(RunCompilation), nameof(ScriptCompiler));
@@ -60,6 +71,19 @@ internal class ScriptCompiler
         byte[] assemblyBytes = ms.ToArray();
         return assemblyBytes;
     }
+    /// <summary>
+    /// Performs validation on the script's source code by analyzing its syntax tree and semantic model.
+    /// </summary>
+    /// <remarks>
+    /// This method ensures the script contains exactly one class, correctly implements an allowed base interface or type, 
+    /// validates method signatures against expected parameters and return types, checks for cancellation tokens in loops, 
+    /// and prevents the use of forbidden/unsafe namespaces.
+    /// </remarks>
+    /// <param name="script">The C# source code string of the script to validate.</param>
+    /// <returns>A <see cref="ValidationRecord"/> containing extracted metadata such as the class name, script type, API version, execution time, and validated methods.</returns>
+    /// <exception cref="ScriptWasEmptyOrNullException">Thrown if the provided script string is null or whitespace.</exception>
+    /// <exception cref="MoreThanOneClassFoundInScriptException">Thrown if the script contains more than one class declaration.</exception>
+    /// <exception cref="ScriptFieldNullException">Thrown if a necessary base type, version, or class name could not be successfully resolved.</exception>
     internal ValidationRecord BasicValidationBeforeCompiling(string script)//record
     {
         _logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(BasicValidationBeforeCompiling), nameof(ScriptCompiler));
@@ -451,6 +475,12 @@ internal class ScriptCompiler
         }
     }
 
+    /// <summary>
+    /// Compares two C# scripts to determine if they represent equivalent syntax tree structures.
+    /// </summary>
+    /// <param name="script1">The first C# source code string to compare.</param>
+    /// <param name="script2">The second C# source code string to compare.</param>
+    /// <returns><c>true</c> if both scripts produce structurally equivalent syntax trees (ignoring formatting/whitespace); otherwise, <c>false</c>.</returns>
     internal bool IsTheSameTree(string script1, string script2)
     {
         //This function i quickly generated with AI
@@ -520,9 +550,16 @@ internal class ScriptCompiler
     }
 }
 
-public static class AllowOnlyRecentTypes
+internal static class AllowOnlyRecentTypes
 {
-    public static void ValidateAllowOnlyRecentTypes(string parentSymbol, List<Type> recentTypes)
+    /// <summary>
+    /// Validates whether the script's parent type (interface or base class) is within the allowed list of recent types.
+    /// It is currently not called inside Basicvalidation since it would break some tests.  
+    /// </summary>
+    /// <param name="parentSymbol">The display string representation of the parent type symbol (e.g., interface or base class name).</param>
+    /// <param name="recentTypes">A list of permitted <see cref="Type"/> objects to check against.</param>
+    /// <exception cref="AllowOnlyRecentTypesException">Thrown when the parent symbol does not match any of the allowed recent types.</exception>
+    internal static void ValidateAllowOnlyRecentTypes(string parentSymbol, List<Type> recentTypes)
     {
         if (parentSymbol.Contains("<"))
         {

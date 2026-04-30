@@ -30,23 +30,13 @@ public class ScriptDbContext : DbContext
             string? connectionString = null;
             connectionString = Environment.GetEnvironmentVariable("DATABASE_URL")!;
 
-            bool useContainer = true;
-            if (useContainer)
+            if (string.IsNullOrEmpty(connectionString)) //using PostgreSQL container
             {
-                if (string.IsNullOrEmpty(connectionString)) //using PostgreSQL container
-                {
-                    // connectionString = "Host=localhost;Port=5432;Database=script_registry;Username=admin;Password=your_secure_password";
-                    // connectionString = "Host=db;Port=5432;Database=script_registry;Username=admin;Password=your_secure_password";
-                    connectionString = "Host=localhost;Port=5432;Database=script_registry;Username=admin;Password=your_secure_password";
-                }
+                // connectionString = "Host=localhost;Port=5432;Database=script_registry;Username=admin;Password=your_secure_password";
+                // connectionString = "Host=db;Port=5432;Database=script_registry;Username=admin;Password=your_secure_password";
+                connectionString = "Host=localhost;Port=5432;Database=script_registry;Username=admin;Password=your_secure_password";
             }
-            else
-            {
-                if (string.IsNullOrEmpty(connectionString)) //using Neon.tech db, in a real application ofc you would never hardcode this but pass as environment variable like above
-                {
-                    connectionString = "Host=ep-lingering-boat-agx7ywj8.c-2.eu-central-1.aws.neon.tech;Database=scriptsDB;Username=neondb_owner;Password=npg_XcDBEPxH7m9o;SSL Mode=Require;Trust Server Certificate=true;";
-                }
-            }
+
 
             optionsBuilder.UseNpgsql(connectionString);
             // optionsBuilder.UseNpgsql(connectionString, b => b.MigrationsAssembly("BlazorUI"));  //todo might have to delete for local testing but necessary to store the instructions on how to generate the tables
