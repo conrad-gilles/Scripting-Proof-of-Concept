@@ -14,7 +14,7 @@ public class ScriptManager : IScriptManager
         .SelectMany(assembly => VersionScannerHelper.GetLoadableTypes(assembly))
         .Where(t => t.IsClass
              && !t.IsAbstract
-             && typeof(RecentScriptFacade).IsAssignableFrom(t));
+             && typeof(IRecentScriptFacade).IsAssignableFrom(t));
 
         _scriptTypeMap = new Dictionary<Type, Type>();
 
@@ -24,7 +24,7 @@ public class ScriptManager : IScriptManager
             var interfaces = type.GetInterfaces();
             foreach (var iface in interfaces)
             {
-                if (iface == typeof(RecentScriptFacade))
+                if (iface == typeof(IRecentScriptFacade))
                 {
                     continue;
                 }
@@ -70,7 +70,7 @@ public class ScriptManager : IScriptManager
     }
 
     //Ai generated, with also the bottom part of the Constructor
-    public TScript GetScript<TScript>(string name) where TScript : RecentScriptFacade
+    public TScript GetScript<TScript>(string name) where TScript : IRecentScriptFacade
     {
         Type requestedType = typeof(TScript);
 
@@ -89,7 +89,7 @@ public class ScriptManager : IScriptManager
         throw new ArgumentException($"Unsupported script type: {requestedType.Name}");
     }
 
-    public async Task<TScript> CreateScript<TScript>(string sourceCode) where TScript : RecentScriptFacade
+    public async Task<TScript> CreateScript<TScript>(string sourceCode) where TScript : IRecentScriptFacade
     {
         CustomerScript script = await _scriptManager.CreateScript(sourceCode);
         return GetScript<TScript>(script.ScriptName!);
@@ -136,7 +136,7 @@ public interface IScriptManager
     /// <typeparam name="TScript">The specific script facade type.</typeparam>
     /// <param name="name">The name of the script.</param>
     /// <returns>The script facade object.</returns>
-    TScript GetScript<TScript>(string name) where TScript : RecentScriptFacade;
+    TScript GetScript<TScript>(string name) where TScript : IRecentScriptFacade;
 
     /// <summary>
     /// Creates a new script in the database from source code and returns its facade.
@@ -144,5 +144,5 @@ public interface IScriptManager
     /// <typeparam name="TScript">The specific script facade type.</typeparam>
     /// <param name="sourceCode">The raw C# code to create the script from.</param>
     /// <returns>The script facade object.</returns>
-    Task<TScript> CreateScript<TScript>(string sourceCode) where TScript : RecentScriptFacade;
+    Task<TScript> CreateScript<TScript>(string sourceCode) where TScript : IRecentScriptFacade;
 }

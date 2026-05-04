@@ -1,7 +1,7 @@
 namespace Ember.Simulation;
 
 
-internal class ConditionScript : RecentScriptFacade, RecentIConditionScript
+internal class ConditionScript : IRecentScriptFacade, RecentIConditionScript
 {
     private ScriptManager _emberScriptManager;
     private string _scriptName;
@@ -19,7 +19,7 @@ internal class ConditionScript : RecentScriptFacade, RecentIConditionScript
     }
 }
 
-internal class ActionScript : RecentScriptFacade, RecentIActionScript
+internal class ActionScript : IRecentScriptFacade, RecentIActionScript
 {
     private ScriptManager _emberScriptManager;
     private IScriptManagerBaseExtended _scriptManager;

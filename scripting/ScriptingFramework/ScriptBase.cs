@@ -5,7 +5,7 @@ public interface IScriptVersion
 
 }
 
-public interface RecentScriptFacade  //interface rename library
+public interface IRecentScriptFacade  //interface rename library
 {
 
 }
