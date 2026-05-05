@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Conventions;
 
 namespace ContextBases
 {
-    [MetaDataIGeneratorIntrfc(version: 0, type: TypeInfo.AbstractBaseInSF)]
+    [MetaDataIntrfc(version: 0, type: TypeInfo.AbstractBaseInSF)]
     public interface IGeneratorContextBaseInterface : IDowngradeableContext
     {
     }
@@ -15,7 +15,7 @@ namespace ContextBases
 
 namespace IGeneratorReadOnlyContextV1
 {
-    [MetaDataIGeneratorIntrfc(version: 1)]
+    [MetaDataIntrfc(version: 1)]
     public interface IGeneratorContext : IGeneratorContextBaseInterface
     {
         ILabOrderInterface LabOrder { get; }      // Read current order data
@@ -27,7 +27,7 @@ namespace IGeneratorReadOnlyContextV1
 
 namespace IGeneratorContext_V2
 {
-    [MetaDataIGeneratorIntrfc(version: 2)]
+    [MetaDataIntrfc(version: 2)]
     public interface IGeneratorContext : IGeneratorReadOnlyContextV1.IGeneratorContext
     {
         new ILabOrderRWInterface LabOrder2 { get; }
@@ -39,7 +39,7 @@ namespace IGeneratorContext_V2
 
 namespace IGeneratorContext_V3
 {
-    [MetaDataIGeneratorIntrfc(version: 3)]
+    [MetaDataIntrfc(version: 3)]
     public interface IGeneratorContext : IGeneratorContext_V2.IGeneratorContext
     {
         new ILabOrderInterfaceV2 LabOrder { get; }
@@ -49,7 +49,7 @@ namespace IGeneratorContext_V3
 
 namespace IGeneratorContext_V4
 {
-    [MetaDataIGeneratorIntrfc(version: 4)]
+    [MetaDataIntrfc(version: 4)]
     public interface IGeneratorContext : IGeneratorContext_V3.IGeneratorContext
     {
         new ILabOrderInterfaceV3 LabOrder { get; }
@@ -57,7 +57,7 @@ namespace IGeneratorContext_V4
 }
 namespace IGeneratorContextNoInheritance_V5
 {
-    [MetaDataIGeneratorIntrfc(version: 5)]
+    [MetaDataIntrfc(version: 5)]
     public interface IGeneratorContext : IGeneratorContextBaseInterface, IRecentContext
     {
         ILabOrderInterfaceV4NoInheritence LabOrder { get; }
@@ -72,7 +72,7 @@ namespace IGeneratorContextNoInheritance_V5
 /// </summary>
 namespace ReadOnlyContextV1
 {
-    [MetaDataGeneratorClass(version: 1)]
+    [MetaDataClass(version: 1)]
     public class GeneratorContext : IGeneratorReadOnlyContextV1.IGeneratorContext
     {
         public ILabOrderInterface LabOrder;
@@ -104,7 +104,7 @@ namespace ReadOnlyContextV1
 
 namespace RWContextV2
 {
-    [MetaDataGeneratorClass(version: 2)]
+    [MetaDataClass(version: 2)]
     public class GeneratorContext : IGeneratorContext_V2.IGeneratorContext
     {
         public ILabOrderRWInterface LabOrder;
@@ -152,7 +152,7 @@ namespace RWContextV2
 
 namespace GeneratorContextV3
 {
-    [MetaDataGeneratorClass(version: 3)]
+    [MetaDataClass(version: 3)]
     public class GeneratorContext : RWContextV2.GeneratorContext, IGeneratorContext_V3.IGeneratorContext
     {
         public ILabOrderInterfaceV2 LabOrderV2;
@@ -193,7 +193,7 @@ namespace GeneratorContextV3
 
 namespace GeneratorContextV4
 {
-    [MetaDataGeneratorClass(version: 4)]
+    [MetaDataClass(version: 4)]
     public class GeneratorContext : GeneratorContextV3.GeneratorContext, IGeneratorContext_V4.IGeneratorContext  //todo implement Adapter pattern
     {
         public ILabOrderInterfaceV3 LabOrderV3;
@@ -234,7 +234,7 @@ namespace GeneratorContextV4
 
 namespace GeneratorContextNoInherVaccineV5
 {
-    [MetaDataGeneratorClass(version: 5)]
+    [MetaDataClass(version: 5)]
     public class GeneratorContext :
     IGeneratorContextNoInheritance_V5.IGeneratorContext   //into diffrent namespaces blocks later folders
     // , IRecentContext

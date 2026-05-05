@@ -42,7 +42,7 @@ internal static class ContextVersionScanner
 
             System.Reflection.TypeInfo typeInfo = uninitializedContext.GetType().GetTypeInfo();
 
-            var metaDataAttribute = typeInfo.GetCustomAttribute<MetaDataGeneratorClass>();
+            var metaDataAttribute = typeInfo.GetCustomAttribute<MetaDataClass>();
             if (metaDataAttribute == null)
             {
                 throw new MetaDataAttribueNullCVSCException(message: "MetdaDataAttribute was mull, which means version would have been null.");
@@ -82,7 +82,7 @@ internal static class ContextVersionScanner
         {
             Type currentType = subClasses[i];
 
-            var versionAttr = currentType.GetCustomAttribute<MetaDataIGeneratorIntrfc>();
+            var versionAttr = currentType.GetCustomAttribute<MetaDataIntrfc>();
             if (versionAttr == null)
             {
                 throw new MetaDataAttribueNullCVSIException(message: subClasses[i].FullName + " versionAttr was null, you probably forgot to put an attribute defining the version of the IGeneratorContext.");

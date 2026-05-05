@@ -1,34 +1,34 @@
 namespace Ember.Scripting.Versioning;
 
 [AttributeUsage(AttributeTargets.Interface)]
-public class MetaDataIGeneratorScript : Attribute
+public class MetaDataIScript : Attribute
 {
     public int Version { get; }
-    public IGeneratorScriptType Type { get; }
-    public IGeneratorScriptReturnType ReturnType { get; }
-    public MetaDataIGeneratorScript(int version, IGeneratorScriptReturnType returnType, IGeneratorScriptType type)
+    public IMDScriptType Type { get; }
+    public IMDScriptReturnType ReturnType { get; }
+    public MetaDataIScript(int version, IMDScriptReturnType returnType, IMDScriptType type)
     {
         Version = version;
         ReturnType = returnType;
         Type = type;
     }
 
-    public MetaDataIGeneratorScript(int version)
+    public MetaDataIScript(int version)
     {
         Version = version;
-        ReturnType = IGeneratorScriptReturnType.Action;
-        Type = IGeneratorScriptType.DefaultVersioned;
+        ReturnType = IMDScriptReturnType.Action;
+        Type = IMDScriptType.DefaultVersioned;
     }
 }
 
-public enum IGeneratorScriptType
+public enum IMDScriptType
 {
     AbstractBaseInSF,
     GenericSimple,
     Generic,
     DefaultVersioned
 }
-public enum IGeneratorScriptReturnType
+public enum IMDScriptReturnType
 {
     Condition, Action
 }
@@ -54,18 +54,18 @@ public enum TypeInfo
 
 
 [AttributeUsage(AttributeTargets.Class)]
-public class MetaDataGeneratorClass : Attribute
+public class MetaDataClass : Attribute
 {
     public int Version { get; }
     public TypeInfo Type { get; }
 
-    public MetaDataGeneratorClass(int version)
+    public MetaDataClass(int version)
     {
         Version = version;
         Type = TypeInfo.DefaultVersioned;
     }
 
-    public MetaDataGeneratorClass(int version, TypeInfo type)
+    public MetaDataClass(int version, TypeInfo type)
     {
         Version = version;
         Type = type;
@@ -73,18 +73,18 @@ public class MetaDataGeneratorClass : Attribute
 }
 
 [AttributeUsage(AttributeTargets.Interface)]
-public class MetaDataIGeneratorIntrfc : Attribute
+public class MetaDataIntrfc : Attribute
 {
     public int Version { get; }
     public TypeInfo Type { get; }
 
-    public MetaDataIGeneratorIntrfc(int version)
+    public MetaDataIntrfc(int version)
     {
         Version = version;
         Type = TypeInfo.DefaultVersioned;
     }
 
-    public MetaDataIGeneratorIntrfc(int version, TypeInfo type)
+    public MetaDataIntrfc(int version, TypeInfo type)
     {
         Version = version;
         Type = type;

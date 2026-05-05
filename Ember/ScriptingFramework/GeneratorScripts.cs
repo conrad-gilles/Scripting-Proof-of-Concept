@@ -21,7 +21,7 @@ namespace GeneratorScriptsGenericSimple
     /// <summary>
     /// Implementation using 1 generic for Context
     /// </summary>
-    [MetaDataIGeneratorScript(version: 1, returnType: IGeneratorScriptReturnType.Condition, type: IGeneratorScriptType.GenericSimple)]
+    [MetaDataIScript(version: 1, returnType: IMDScriptReturnType.Condition, type: IMDScriptType.GenericSimple)]
     public interface IConditionScript<TContext>
         : IScriptVersion
         , IConditionScript
@@ -32,7 +32,7 @@ namespace GeneratorScriptsGenericSimple
             throw new MethodNotImplementedException(message: nameof(EvaluateAsync) + " was not implemented.");
         }
     }
-    [MetaDataIGeneratorScript(version: 1, returnType: IGeneratorScriptReturnType.Action, type: IGeneratorScriptType.GenericSimple)]
+    [MetaDataIScript(version: 1, returnType: IMDScriptReturnType.Action, type: IMDScriptType.GenericSimple)]
     public interface IActionScript<TContext>
     : IScriptVersion
     , IActionScript
@@ -51,7 +51,7 @@ namespace GeneratorScriptsGeneric
     /// <summary>
     /// Implementation using 2 generics, one for context and one additional for ActionResult
     /// </summary>
-    [MetaDataIGeneratorScript(version: 1, returnType: IGeneratorScriptReturnType.Action, type: IGeneratorScriptType.Generic)]
+    [MetaDataIScript(version: 1, returnType: IMDScriptReturnType.Action, type: IMDScriptType.Generic)]
     public interface IActionScript<TContext, TActionResult>
         : IScriptVersion
         , IActionScript
@@ -72,7 +72,7 @@ namespace GeneratorScriptsGeneric
 
 namespace GeneratorScriptsV2
 {
-    [MetaDataIGeneratorScript(version: 2)]
+    [MetaDataIScript(version: 2)]
     public interface IActionScript
     : IScriptVersion
     , Ember.Sandbox.ScriptingFrameWork.ScriptTypes.IActionScript
@@ -93,7 +93,7 @@ namespace GeneratorScriptsV2
 }
 namespace GeneratorScriptsV3
 {
-    [MetaDataIGeneratorScript(version: 3)]
+    [MetaDataIScript(version: 3)]
     public interface IActionScript
         : IScriptVersion
         , Ember.Sandbox.ScriptingFrameWork.ScriptTypes.IActionScript
@@ -118,7 +118,7 @@ namespace GeneratorScriptsV3
 }
 namespace GeneratorScriptsV4
 {
-    [MetaDataIGeneratorScript(version: 4)]
+    [MetaDataIScript(version: 4)]
     public interface IActionScript
     : IScriptVersion
     , Ember.Sandbox.ScriptingFrameWork.ScriptTypes.IActionScript

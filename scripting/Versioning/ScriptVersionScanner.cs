@@ -6,7 +6,7 @@ internal static class ScriptVersionScanner
 {
     internal static List<ScriptMetaDataRecord> GetClassRecords()
     {
-        Type baseType = typeof(MetaDataIGeneratorScript);
+        Type baseType = typeof(MetaDataIScript);
         return GetBaseTypeDictionary(baseType);
     }
     private static List<ScriptMetaDataRecord> GetBaseTypeDictionary(Type baseType)
@@ -17,7 +17,7 @@ internal static class ScriptVersionScanner
         List<Type> subClasses = AppDomain.CurrentDomain.GetAssemblies()
             // .SelectMany(assembly => assembly.GetTypes())
             .SelectMany(assembly => VersionScannerHelper.GetLoadableTypes(assembly))
-            .Where(t => t.IsInterface && t.GetCustomAttribute<MetaDataIGeneratorScript>() != null)
+            .Where(t => t.IsInterface && t.GetCustomAttribute<MetaDataIScript>() != null)
             .GroupBy(t => t.Namespace + "." + t.Name)
             .Select(g => g.First())
             .ToList();
@@ -26,29 +26,29 @@ internal static class ScriptVersionScanner
         {
             Type currentType = subClasses[i];
 
-            var metaDataAttribute = currentType.GetCustomAttribute<MetaDataIGeneratorScript>();
+            var metaDataAttribute = currentType.GetCustomAttribute<MetaDataIScript>();
 
             if (metaDataAttribute == null)
             {
                 throw new MetaDataAttribueNullSVSException(message: nameof(metaDataAttribute) + " was mull, which means version would have been null.");
             }
-            if (metaDataAttribute.Type == IGeneratorScriptType.AbstractBaseInSF
+            if (metaDataAttribute.Type == IMDScriptType.AbstractBaseInSF
             // || metaDataAttribute.Type == IGeneratorScriptType.Generic
             )
             {
                 // throw new Exception(message: "Loop tried to instantiate a base type which it should not.");
                 continue;
             }
-            if (metaDataAttribute.Type == IGeneratorScriptType.Generic)
+            if (metaDataAttribute.Type == IMDScriptType.Generic)
             {
-                if (metaDataAttribute.ReturnType == IGeneratorScriptReturnType.Condition)
+                if (metaDataAttribute.ReturnType == IMDScriptReturnType.Condition)
                 {
                     continue;
                 }
             }
-            if (metaDataAttribute.Type == IGeneratorScriptType.GenericSimple)
+            if (metaDataAttribute.Type == IMDScriptType.GenericSimple)
             {
-                if (metaDataAttribute.ReturnType == IGeneratorScriptReturnType.Action)
+                if (metaDataAttribute.ReturnType == IMDScriptReturnType.Action)
                 {
                     continue;
                 }
