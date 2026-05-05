@@ -33,7 +33,7 @@ public class MultiMethodScriptTests
 
         //define specific method in the methodName parameter
         CustomerScript script = await ScriptManager.CreateScript(sourceCode);
-        RecentActionResult ar = (RecentActionResult)await InternalScriptManager!.ExecuteScript<IActionScriptBase>
+        RecentActionResult ar = (RecentActionResult)await InternalScriptManager!.ExecuteScript<IActionScript>
         (script.ScriptName!, TestHelper.GetContext(), methodName: "Execute1");
 
         Console.WriteLine(ar.ToString());
@@ -41,19 +41,19 @@ public class MultiMethodScriptTests
 
         Exception ex = await Assert.ThrowsExceptionAsync<ActionScriptExecutionException>(async () =>
         {
-            ar = (RecentActionResult)await InternalScriptManager!.ExecuteScript<IActionScriptBase>
+            ar = (RecentActionResult)await InternalScriptManager!.ExecuteScript<IActionScript>
            (script.ScriptName!, TestHelper.GetContext(), methodName: "Execute2");
         });
 
         // Can explicitly call default method
-        ar = (RecentActionResult)await InternalScriptManager!.ExecuteScript<IActionScriptBase>
+        ar = (RecentActionResult)await InternalScriptManager!.ExecuteScript<IActionScript>
        (script.ScriptName!, TestHelper.GetContext(), methodName: "ExecuteAsync");
 
         Console.WriteLine(ar.ToString());
         Assert.IsTrue(ar.ToString().Contains("Default method ExecuteAsync was called"));
 
         // if no specific method defined fall back to default
-        ar = (RecentActionResult)await InternalScriptManager!.ExecuteScript<IActionScriptBase>
+        ar = (RecentActionResult)await InternalScriptManager!.ExecuteScript<IActionScript>
         (script.ScriptName!, TestHelper.GetContext(), nameof(RecentIActionScript.ExecuteAsync));
 
         Console.WriteLine(ar.ToString());
@@ -101,7 +101,7 @@ public class MultiMethodScriptTests
 
         Exception ex = await Assert.ThrowsExceptionAsync<CouldNotFindMethodException>(async () =>
         {
-            RecentActionResult ar = (RecentActionResult)await InternalScriptManager!.ExecuteScript<IActionScriptBase>
+            RecentActionResult ar = (RecentActionResult)await InternalScriptManager!.ExecuteScript<IActionScript>
             (scriptDB.ScriptName!, TestHelper.GetContext(), methodName: "MethodDoesntExist");
         });
 
@@ -112,7 +112,7 @@ public class MultiMethodScriptTests
 
         ex = await Assert.ThrowsExceptionAsync<CouldNotFindMethodException>(async () =>
        {
-           RecentActionResult ar = (RecentActionResult)await InternalScriptManager!.ExecuteScript<IActionScriptBase>
+           RecentActionResult ar = (RecentActionResult)await InternalScriptManager!.ExecuteScript<IActionScript>
                (scriptDB.ScriptName!, TestHelper.GetContext(), methodName: "ExecuteAction1");
        });
         ExceptionHelper.PrintExceptionListToConsole(ex);

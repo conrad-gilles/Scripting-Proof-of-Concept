@@ -85,14 +85,14 @@ public class EmberInternalFacadeTests
         // var ctx = _internalScriptManager!.CreateContext(_obj!.labOrder, _obj.vaccine);
         var ctx = TestHelper.GetContext();
         // Type scriptType=script.GetScriptType();
-        RecentActionResult ar = (RecentActionResult)await _internalScriptManager.ExecuteScript<IActionScriptBase>(script.ScriptName!, ctx, nameof(RecentIActionScript.ExecuteAsync));
+        RecentActionResult ar = (RecentActionResult)await _internalScriptManager.ExecuteScript<IActionScript>(script.ScriptName!, ctx, nameof(RecentIActionScript.ExecuteAsync));
 
         Console.WriteLine("Name: " + script.ScriptName + ", ScriptType: " + script.GetScriptType().Name);
         Console.WriteLine("Type name: " + ar.GetType().FullName);
         Console.WriteLine("Returned result: " + ar);
 
         Assert.IsTrue(script.ScriptName == "AddPediatricTestsV2");
-        Assert.IsTrue(script.GetScriptType() == typeof(IActionScriptBase));
+        Assert.IsTrue(script.GetScriptType() == typeof(IActionScript));
         Assert.IsTrue(ar.ToString().Contains("[Message contains either failure or succes: ] Pediatric tests added"));
 
         Exception e = await Assert.ThrowsExceptionAsync<CreateAndInsertCustomerScriptException>(async () =>
@@ -104,14 +104,14 @@ public class EmberInternalFacadeTests
         script = await _scriptManager!.CreateScript(_sourceCodeActionV3!);
         // ctx = _internalScriptManager!.CreateContext(_obj.labOrder, _obj.vaccine);
         ctx = TestHelper.GetContext();
-        ar = (RecentActionResult)await _internalScriptManager.ExecuteScript<IActionScriptBase>(script.ScriptName!, ctx, nameof(RecentIActionScript.ExecuteAsync));
+        ar = (RecentActionResult)await _internalScriptManager.ExecuteScript<IActionScript>(script.ScriptName!, ctx, nameof(RecentIActionScript.ExecuteAsync));
 
         Console.WriteLine("Name: " + script.ScriptName + ", ScriptType: " + script.GetScriptType());
         Console.WriteLine("Type name: " + ar.GetType().FullName);
         Console.WriteLine("Returned result: " + ar);
 
         Assert.IsTrue(script.ScriptName == "AddPediatricTestsV4");
-        Assert.IsTrue(script.GetScriptType() == typeof(IActionScriptBase));
+        Assert.IsTrue(script.GetScriptType() == typeof(IActionScript));
         Assert.IsTrue(ar.ToString().Contains("[Message contains either failure or succes: ] Pediatric tests added V3"));
         // Assert.IsTrue(false);
     }
@@ -131,14 +131,14 @@ public class EmberInternalFacadeTests
         RecentGeneratorContextFactory.IGeneratorContextFactory factory = provider.GetRequiredService<RecentGeneratorContextFactory.IGeneratorContextFactory>();
         RecentIGeneratorContext ctx = factory.CreateGeneratorContext(_obj.labOrder, _obj.vaccine);
 
-        RecentActionResult ar = (RecentActionResult)await _internalScriptManager!.ExecuteScript<IActionScriptBase>(scrip.ScriptName!, ctx, nameof(RecentIActionScript.ExecuteAsync));
+        RecentActionResult ar = (RecentActionResult)await _internalScriptManager!.ExecuteScript<IActionScript>(scrip.ScriptName!, ctx, nameof(RecentIActionScript.ExecuteAsync));
 
         Console.WriteLine("Name: " + scrip.ScriptName! + ", ScriptType: " + scrip.GetScriptType());
         Console.WriteLine("Type name: " + ar.GetType().FullName);
         Console.WriteLine("Returned result: " + ar);
 
         Assert.IsTrue(scrip.ScriptName == "AddPediatricTestsV2");
-        Assert.IsTrue(scrip.GetScriptType() == typeof(IActionScriptBase));
+        Assert.IsTrue(scrip.GetScriptType() == typeof(IActionScript));
         Assert.IsTrue(ar.ToString().Contains("[Message contains either failure or succes: ] Pediatric tests added"));
 
         // Assert.IsTrue(false);

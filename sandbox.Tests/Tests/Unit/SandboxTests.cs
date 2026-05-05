@@ -160,7 +160,7 @@ public class SanboxTests
         Console.WriteLine(nameof(valResult.ClassName) + " : " + valResult.ClassName);
         Console.WriteLine(nameof(valResult.Version) + " : " + valResult.Version);
 
-        Assert.IsTrue(valResult.ScriptType == typeof(IActionScriptBase));
+        Assert.IsTrue(valResult.ScriptType == typeof(IActionScript));
         Assert.IsTrue(valResult.ClassName == "AddPediatricTestsV3");
         Assert.IsTrue(valResult.Version == 3);
 
@@ -170,7 +170,7 @@ public class SanboxTests
         Console.WriteLine(nameof(valResult.ClassName) + " : " + valResult.ClassName);
         Console.WriteLine(nameof(valResult.Version) + " : " + valResult.Version);
 
-        Assert.IsTrue(valResult.ScriptType == typeof(IActionScriptBase));
+        Assert.IsTrue(valResult.ScriptType == typeof(IActionScript));
         Assert.IsTrue(valResult.ClassName == "AddPediatricTestsV2");
         Assert.IsTrue(valResult.Version == 2);
 
@@ -180,7 +180,7 @@ public class SanboxTests
         Console.WriteLine(nameof(valResult.ClassName) + " : " + valResult.ClassName);
         Console.WriteLine(nameof(valResult.Version) + " : " + valResult.Version);
 
-        Assert.IsTrue(valResult.ScriptType == typeof(IActionScriptBase));
+        Assert.IsTrue(valResult.ScriptType == typeof(IActionScript));
         Assert.IsTrue(valResult.ClassName == "AddPediatricTestsV4");
         Assert.IsTrue(valResult.Version == 4);
 
@@ -190,7 +190,7 @@ public class SanboxTests
         Console.WriteLine(nameof(valResult.ClassName) + " : " + valResult.ClassName);
         Console.WriteLine(nameof(valResult.Version) + " : " + valResult.Version);
 
-        Assert.IsTrue(valResult.ScriptType == typeof(IActionScriptBase));
+        Assert.IsTrue(valResult.ScriptType == typeof(IActionScript));
         Assert.IsTrue(valResult.ClassName == "VaccineScript");
         Assert.IsTrue(valResult.Version == 5);
 
