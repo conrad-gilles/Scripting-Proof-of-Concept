@@ -1,7 +1,7 @@
 using System.Threading.Tasks;
 using System;
 using Ember.Scripting;
-using GeneratorScriptsV4;
+using GeneratorScriptV4;
 
 // public class VaccineScript : IGeneratorActionScript<IGeneratorContextNoInheritance_V4.IGeneratorContext, ActionResultV3NoInheritance>
 // {
@@ -20,7 +20,7 @@ using GeneratorScriptsV4;
 //     }
 // }
 
-public class VaccineScript : GeneratorScriptsV4.IActionScript
+public class VaccineScript : GeneratorScriptV4.IActionScript
 {
     public async Task<ActionResultV3.ActionResult> ExecuteAsync(IGeneratorContextNoInheritance_V5.IGeneratorContext context)
     {

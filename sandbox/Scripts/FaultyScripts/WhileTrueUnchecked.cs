@@ -2,10 +2,10 @@ using System;   //todo this is possible to default in compiler
 using System.Threading.Tasks;
 using System.Collections.Generic;   //todo same for them
 using Ember.Scripting;
-using GeneratorScriptsV3;
+using GeneratorScriptV3;
 using IGeneratorContext_V4;
 
-public class WhileTrueUnchecked : GeneratorScriptsV3.IActionScript
+public class WhileTrueUnchecked : GeneratorScriptV3.IActionScript
 {
     public async Task<ActionResultV3.ActionResult> ExecuteAsync(IGeneratorContext_V4.IGeneratorContext context)
     {

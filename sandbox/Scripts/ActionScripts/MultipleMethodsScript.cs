@@ -2,12 +2,12 @@ using System;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using Ember.Scripting;
-using GeneratorScriptsV3;
+using GeneratorScriptV3;
 using IGeneratorContext_V4;
 using Ember.Scripting.ScriptingFramework;
 using Ember.Sandbox.ScriptingFrameWork.ScriptTypes;
 
-public class MultipleMethodsScript : GeneratorScriptsV3.IActionScript
+public class MultipleMethodsScript : GeneratorScriptV3.IActionScript
 {
     public async Task<ActionResultV3.ActionResult> ExecuteAsync(IGeneratorContext_V4.IGeneratorContext context)
     {

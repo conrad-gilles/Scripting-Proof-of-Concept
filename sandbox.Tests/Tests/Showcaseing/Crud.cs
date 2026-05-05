@@ -135,9 +135,9 @@ public class CrudDemos
         using System.Collections.Generic;
         using Ember.Scripting;
         using IGeneratorContext_V3;
-        using GeneratorScriptsV2;
+        using GeneratorScriptV2;
 
-        public class AddPediatricTestsV3 : GeneratorScriptsV2.IActionScript
+        public class AddPediatricTestsV3 : GeneratorScriptV2.IActionScript
         {
             public async Task<ActionResultV2.ActionResult> Execute1OldName(IGeneratorContext_V3.IGeneratorContext context)
             {
@@ -153,9 +153,9 @@ public class CrudDemos
         using System.Threading.Tasks;
         using System;
         using Ember.Scripting;
-        using GeneratorScriptsV4;
+        using GeneratorScriptV4;
 
-        public class VaccineScript : GeneratorScriptsV4.IActionScript
+        public class VaccineScript : GeneratorScriptV4.IActionScript
         {
             public async Task<ActionResultV3.ActionResult> Execute2(IGeneratorContextNoInheritance_V5.IGeneratorContext context)
             {

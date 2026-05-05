@@ -3,10 +3,10 @@ using System.Threading.Tasks;
 using System.Collections.Generic;   //todo same for them
 using Ember.Scripting;
 using Ember.Scripting.Execution;
-using GeneratorScriptsV3;
+using GeneratorScriptV3;
 using IGeneratorContext_V4;
 
-public class WhileTrueScript : GeneratorScriptsV3.IActionScript
+public class WhileTrueScript : GeneratorScriptV3.IActionScript
 {
     public async Task<ActionResultV3.ActionResult> ExecuteAsync(IGeneratorContext_V4.IGeneratorContext context)
     {

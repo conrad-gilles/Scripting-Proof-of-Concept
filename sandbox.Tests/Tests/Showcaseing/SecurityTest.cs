@@ -238,10 +238,10 @@ public class SecurityTests
         using System.Threading.Tasks;
         using System.Collections.Generic;
         using Ember.Scripting;
-        using GeneratorScriptsV3;
+        using GeneratorScriptV3;
         using IGeneratorContext_V4;
 
-        public class MultipleMethodsScript : GeneratorScriptsV3.IActionScript
+        public class MultipleMethodsScript : GeneratorScriptV3.IActionScript
         {
         public async Task<ActionResultV3.ActionResult> ExecuteAsync(IGeneratorContext_V4.IGeneratorContext context)
         {
@@ -270,10 +270,10 @@ public class SecurityTests
         using System.Threading.Tasks;
         using System.Collections.Generic;
         using Ember.Scripting;
-        using GeneratorScriptsV3;
+        using GeneratorScriptV3;
         using IGeneratorContext_V4;
 
-        public class MultipleMethodsScript : GeneratorScriptsV3.IActionScript
+        public class MultipleMethodsScript : GeneratorScriptV3.IActionScript
         {
         public async Task<ActionResultV2.ActionResult> ExecuteAsync(IGeneratorContext_V4.IGeneratorContext context)
         {
@@ -305,10 +305,10 @@ public class SecurityTests
         using System.Threading.Tasks;
         using System.Collections.Generic;
         using Ember.Scripting;
-        using GeneratorScriptsV3;
+        using GeneratorScriptV3;
         using IGeneratorContext_V4;
 
-        public class MultipleMethodsScript : GeneratorScriptsV3.IActionScript
+        public class MultipleMethodsScript : GeneratorScriptV3.IActionScript
         {
         public async Task<ActionResultV3.ActionResult> ExecuteAsync(IGeneratorContext_V3.IGeneratorContext context)
         {
@@ -424,12 +424,12 @@ public class SecurityTests
         using System.Threading.Tasks;
         using System.Collections.Generic;
         using Ember.Scripting;
-        using GeneratorScriptsV3;
+        using GeneratorScriptV3;
         using IGeneratorContext_V4;
         using Ember.Scripting.ScriptingFramework;
         using Ember.Sandbox.ScriptingFrameWork.ScriptTypes;
 
-        public class MultipleMethodsScript : GeneratorScriptsV3.IActionScript
+        public class MultipleMethodsScript : GeneratorScriptV3.IActionScript
          {
         public async Task<ActionResultV3.ActionResult> ExecuteAsync(IGeneratorContext_V4.IGeneratorContext context)
         {
@@ -461,12 +461,12 @@ public class SecurityTests
         using System.Threading.Tasks;
         using System.Collections.Generic;
         using Ember.Scripting;
-        using GeneratorScriptsV3;
+        using GeneratorScriptV3;
         using IGeneratorContext_V4;
         using Ember.Scripting.ScriptingFramework;
         using Ember.Sandbox.ScriptingFrameWork.ScriptTypes;
 
-        public class MultipleMethodsScript : GeneratorScriptsV3.IActionScript
+        public class MultipleMethodsScript : GeneratorScriptV3.IActionScript
          {
         public async Task<ActionResultV3.ActionResult> ExecuteAsync(IGeneratorContext_V4.IGeneratorContext context)
         {
@@ -517,9 +517,9 @@ public class SecurityTests
         using System.Collections.Generic;
         using Ember.Scripting;
         using IGeneratorContext_V3;
-        using GeneratorScriptsV2;
+        using GeneratorScriptV2;
 
-        public class AddPediatricTestsV3 : GeneratorScriptsV2.IActionScript
+        public class AddPediatricTestsV3 : GeneratorScriptV2.IActionScript
         {
             public async Task<ActionResultV2.ActionResult> Execute1OldName(IGeneratorContext_V3.IGeneratorContext context)
             {
@@ -535,9 +535,9 @@ public class SecurityTests
         using System.Threading.Tasks;
         using System;
         using Ember.Scripting;
-        using GeneratorScriptsV4;
+        using GeneratorScriptV4;
 
-        public class VaccineScript : GeneratorScriptsV4.IActionScript
+        public class VaccineScript : GeneratorScriptV4.IActionScript
         {
             public async Task<ActionResultV3.ActionResult> Execute2(IGeneratorContextNoInheritance_V5.IGeneratorContext context)
             {

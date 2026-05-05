@@ -191,9 +191,9 @@ public class EmberVersioningTests
         {
             (1, typeof(GeneratorScriptsGenericSimple.IConditionScript<>)),
             (1, typeof(GeneratorScriptsGeneric.IActionScript<,>)),
-            (2, typeof(GeneratorScriptsV2.IActionScript)),
-            (3, typeof(GeneratorScriptsV3.IActionScript)),
-            (4, typeof(GeneratorScriptsV4.IActionScript)),
+            (2, typeof(GeneratorScriptV2.IActionScript)),
+            (3, typeof(GeneratorScriptV3.IActionScript)),
+            (4, typeof(GeneratorScriptV4.IActionScript)),
         };
 
         var records = ScriptVersionScanner.GetClassRecords();

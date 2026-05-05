@@ -12,7 +12,7 @@ global using Ember.Simulation;
 
 global using RecentActionResult = ActionResultV3.ActionResult;
 global using RecentIConditionScript = GeneratorScriptsGenericSimple.IConditionScript<IGeneratorContextNoInheritance_V5.IGeneratorContext>;
-global using RecentIActionScript = GeneratorScriptsV4.IActionScript;
+global using RecentIActionScript = GeneratorScriptV4.IActionScript;
 
 global using RecentGeneratorContextFactory = ContextFactoryNameSpace;
 

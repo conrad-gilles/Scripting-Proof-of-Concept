@@ -2,10 +2,10 @@ using System;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using Ember.Scripting;
-using GeneratorScriptsV3;
+using GeneratorScriptV3;
 using IGeneratorContext_V4;
 
-public class InternalScript : GeneratorScriptsV3.IActionScript
+public class InternalScript : GeneratorScriptV3.IActionScript
 {
     public async Task<ActionResultV3.ActionResult> ExecuteAsync(IGeneratorContext_V4.IGeneratorContext context)
     {

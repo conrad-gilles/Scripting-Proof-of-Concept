@@ -70,7 +70,7 @@ namespace GeneratorScriptsGeneric
 /// Implementation using versioning of Generator scripts good for strict control over what version of context and what version of the return type the user uses
 /// </summary>
 
-namespace GeneratorScriptsV2
+namespace GeneratorScriptV2
 {
     [MetaDataIScript(version: 2)]
     public interface IActionScript
@@ -91,7 +91,7 @@ namespace GeneratorScriptsV2
         }
     }
 }
-namespace GeneratorScriptsV3
+namespace GeneratorScriptV3
 {
     [MetaDataIScript(version: 3)]
     public interface IActionScript
@@ -116,7 +116,7 @@ namespace GeneratorScriptsV3
         }
     }
 }
-namespace GeneratorScriptsV4
+namespace GeneratorScriptV4
 {
     [MetaDataIScript(version: 4)]
     public interface IActionScript
