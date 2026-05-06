@@ -10,6 +10,7 @@ internal class ScriptCompiler
     private readonly List<MetadataReference> _allReferences = [];
     private readonly ILogger<ScriptCompiler> _logger;
     private readonly List<Type> _recentTypes;
+    private readonly int maxScriptLenght = 5 * 1024 * 1024;     // 5 mb maximum size
 
     private readonly List<MetadataReference> _standardReferencesForAllScripts = [MetadataReference.CreateFromFile(typeof(object).Assembly.Location),
                         MetadataReference.CreateFromFile(typeof(Console).Assembly.Location),
@@ -69,6 +70,12 @@ internal class ScriptCompiler
         }
 
         byte[] assemblyBytes = ms.ToArray();
+
+        if (assemblyBytes.Length > maxScriptLenght)
+        {
+            throw new CompiledScriptWasTooLargeException(nameof(RunCompilation) + " failed in if (compiledScript.Length > 5 * 1024 * 1024)");
+        }
+
         return assemblyBytes;
     }
     /// <summary>
