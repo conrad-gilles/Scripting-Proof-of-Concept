@@ -200,7 +200,7 @@ internal class ScriptManagerBase(
             // Console.WriteLine("execution time was in 217 set to: " + executionTime);
         }
         byte[] comp = _compiler.RunCompilation(sourceCode);
-        return await _executor.RunScriptExecution(compiledScript: comp, genContext: (IContext)context, executionTime: executionTime, methodName: methodName);
+        return await _executor.RunScriptExecution(compiledScript: comp, context: (IContext)context, executionTime: executionTime, methodName: methodName);
         // return null //todo
     }
     #endregion

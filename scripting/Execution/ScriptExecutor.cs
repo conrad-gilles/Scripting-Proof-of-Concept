@@ -15,17 +15,16 @@ internal class ScriptExecutor(ILogger<ScriptExecutor> logger)
     /// Loads a compiled script assembly, instantiates its class, and invokes a specified asynchronous method while enforcing size limits and execution timeouts.
     /// </summary>
     /// <param name="compiledScript">The raw byte array of the compiled script.</param>
-    /// <param name="genContext">The context object that is passed as an argument to the script's method.</param>
+    /// <param name="context">The context object that is passed as an argument to the script's method.</param>
     /// <param name="executionTime">An optional custom timeout in milliseconds. If null, the default medium execution time is applied.</param>
     /// <param name="methodName">The name of the method to execute within the instantiated script class.</param>
     /// <returns>The result object extracted from the dynamically invoked method's returned Task.</returns>
-    /// <exception cref="CompiledScriptWasTooLargeException">Thrown when the compiled script size exceeds the 5 MB limit.</exception>
     /// <exception cref="NoClassFoundInScriptFileException">Thrown when no non-abstract class implementing <see cref="IScriptVersion"/> exists in the assembly.</exception>
     /// <exception cref="MoreThanOneClassFoundInScriptExecutionException">Thrown when multiple valid script classes are found, making the target ambiguous.</exception>
     /// <exception cref="CouldNotFindMethodException">Thrown when the requested method name cannot be found or invoked on the script instance.</exception>
     /// <exception cref="ActionScriptTimeoutException">Thrown when the script execution exceeds the allotted timeout and is safely terminated.</exception>
     /// <exception cref="ActionScriptExecutionException">Thrown when a general exception or fault occurs during script invocation.</exception>
-    internal async Task<object> RunScriptExecution(byte[] compiledScript, IContext genContext, int? executionTime, string methodName)
+    internal async Task<object> RunScriptExecution(byte[] compiledScript, IContext context, int? executionTime, string methodName)
     {
         logger.LogTrace("Entered {MethodName} in {ClassName}.", nameof(RunScriptExecution), nameof(ScriptExecutor));
         int scriptTimeout = _scriptTimeout;
@@ -71,7 +70,7 @@ internal class ScriptExecutor(ILogger<ScriptExecutor> logger)
             System.Threading.Tasks.Task? resultTask;
             try
             {
-                resultTask = (Task)method.Invoke(scriptInstance, new object[] { genContext })!;
+                resultTask = (Task)method.Invoke(scriptInstance, new object[] { context })!;
             }
             catch (NullReferenceException ex)
             {
