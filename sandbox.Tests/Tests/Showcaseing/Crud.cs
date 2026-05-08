@@ -11,25 +11,20 @@ using Ember.Simulation;
 [TestClass]
 public class CrudDemos
 {
-    static IScriptManagerBaseExtended ScriptManager = InitScriptManager();
-    static ScriptManager InternalScriptManager = new ScriptManager(ScriptManager);
-    static EmberMethods em = new EmberMethods(ScriptManager);
+    static IScriptManagerBaseExtended _scriptManagerBase = InitScriptManager().Item2;
+    static IScriptManager _scriptManager = InitScriptManager().Item1;
+    static EmberMethods em = new EmberMethods(_scriptManagerBase);
 
     [TestInitialize]
     public async Task SetupAsync()
     {
-        // //this block is ecessary at least once in the code everytime you modify the init.sql else the db wont be initialized somehow
-        // using (var db = new EFModeling.EntityProperties.FluentAPI.Required.ScriptDbContext())
-        // {
-        //     await db.Database.EnsureDeletedAsync();
-        //     await db.Database.EnsureCreatedAsync();
-        // }
-        await ScriptManager.DeleteAllData();
+        await _scriptManagerBase.DeleteAllData();
     }
 
-    public static IScriptManagerBaseExtended InitScriptManager()
+    public static (IScriptManager, IScriptManagerBaseExtended) InitScriptManager()
     {
-        IScriptManagerBaseExtended scriptManager;
+        IScriptManager scriptManager;
+        IScriptManagerBaseExtended scriptManagerBase;
         ServiceCollection services = new ServiceCollection();
 
         LoggerForScripting logger = new LoggerForScripting();
@@ -45,13 +40,16 @@ public class CrudDemos
 
         var provider = services.BuildServiceProvider();
 
-        return scriptManager = provider.GetRequiredService<IScriptManagerBaseExtended>();
+        scriptManager = provider.GetRequiredService<IScriptManager>();
+        scriptManagerBase = provider.GetRequiredService<IScriptManagerBaseExtended>();
+
+        return (scriptManager, scriptManagerBase);
     }
     [TestMethod]
     public async Task Create()
     {
         string sourceCode = TestHelper.GetSC().sourceCodeActionV1;
-        CustomerScript script = await ScriptManager!.CreateScript(sourceCode!);
+        CustomerScript script = await _scriptManagerBase!.CreateScript(sourceCode!);
 
         Console.WriteLine("Name: " + script.ScriptName);
         Console.WriteLine("Type: " + script.ScriptType);
@@ -60,7 +58,7 @@ public class CrudDemos
     public async Task Read()
     {
         await Create();
-        CustomerScript script = await ScriptManager.GetScript<IActionScript>("AddPediatricTestsV2");  //
+        CustomerScript script = await _scriptManagerBase.GetScript<IActionScript>("AddPediatricTestsV2");  //
         Console.WriteLine("Name: " + script.ScriptName + ", ScriptType: " + script.ScriptType);
     }
     [TestMethod]
@@ -68,14 +66,14 @@ public class CrudDemos
     {
         await Create();
         string newSourceCode = TestHelper.GetSC().sourceCodeActionV3;
-        await ScriptManager.UpdateScript<IActionScript>("AddPediatricTestsV2", newSourceCode);
+        await _scriptManagerBase.UpdateScript<IActionScript>("AddPediatricTestsV2", newSourceCode);
     }
 
     [TestMethod]
     public async Task Delete()
     {
         await Create();
-        await ScriptManager.DeleteScript<IActionScript>("AddPediatricTestsV2");
+        await _scriptManagerBase.DeleteScript<IActionScript>("AddPediatricTestsV2");
     }
     [TestMethod]
     public async Task Execute()
@@ -87,7 +85,7 @@ public class CrudDemos
         DataAccess testDataAccess = new DataAccess();
 
         string sourceCode = TestHelper.GetSC().sourceCodeActionV1;
-        CustomerScript script = await ScriptManager!.CreateScript(sourceCode!);
+        CustomerScript script = await _scriptManagerBase!.CreateScript(sourceCode!);
 
 
         var services = new ServiceCollection();
@@ -102,10 +100,10 @@ public class CrudDemos
 
         RecentIGeneratorContext ctx = factory.CreateGeneratorContext(labOrder, vaccine);
 
-        RecentActionResult ar = (RecentActionResult)await InternalScriptManager!.ExecuteScript<IActionScript>
+        RecentActionResult ar = (RecentActionResult)await _scriptManager!.ExecuteScript<IActionScript>
         ("AddPediatricTestsV2", ctx, nameof(RecentIActionScript.ExecuteAsync));
 
-        ActionScript scriptInstance = InternalScriptManager.GetScript<ActionScript>(script.ScriptName!);
+        ActionScript scriptInstance = _scriptManager.GetScript<ActionScript>(script.ScriptName!);
 
         ar = await scriptInstance.ExecuteAsync(ctx);
         Assert.IsTrue(ar.ToString().Contains("[Message contains either failure or succes: ] Pediatric tests added"));
@@ -118,9 +116,9 @@ public class CrudDemos
 
 
         sourceCode = TestHelper.GetSC().sourceCodeMultiMethodScripts;
-        script = await ScriptManager!.CreateScript(sourceCode!);
+        script = await _scriptManagerBase!.CreateScript(sourceCode!);
 
-        scriptInstance = InternalScriptManager.GetScript<ActionScript>(script.ScriptName!);
+        scriptInstance = _scriptManager.GetScript<ActionScript>(script.ScriptName!);
         ar = await scriptInstance.Execute1(ctx);
 
         Assert.IsTrue(ar.ToString().Contains("[Message contains either failure or succes: ] ExecuteAction1 was called"));
@@ -167,7 +165,7 @@ public class CrudDemos
     [TestMethod]
     public async Task RenamedMethodTestAsync()
     {
-        ActionScript scriptInstance = await InternalScriptManager.CreateScript<ActionScript>(scriptSourceCode);
+        ActionScript scriptInstance = await _scriptManager.CreateScript<ActionScript>(scriptSourceCode);
 
         RecentActionResult ar = await scriptInstance.Execute1(TestHelper.GetContext());
 
@@ -176,15 +174,15 @@ public class CrudDemos
     [TestMethod]
     public async Task DeletedOldMethodTestAsync()
     {
-        CustomerScript script = await ScriptManager!.CreateScript(scriptSourceCode);
-        ActionScript scriptInstance = InternalScriptManager.GetScript<ActionScript>(script.ScriptName!);
+        CustomerScript script = await _scriptManagerBase!.CreateScript(scriptSourceCode);
+        ActionScript scriptInstance = _scriptManager.GetScript<ActionScript>(script.ScriptName!);
         // RecentActionResult ar = await scriptInstance.ExecuteMethodThatWasDeleted(TestHelper.GetContext());   //no way of calling it wont compile
     }
     [TestMethod]
     public async Task AddedNemMethodTestAsync()
     {
-        CustomerScript script = await ScriptManager!.CreateScript(scriptSourceCode);
-        ActionScript scriptInstance = InternalScriptManager.GetScript<ActionScript>(script.ScriptName!);
+        CustomerScript script = await _scriptManagerBase!.CreateScript(scriptSourceCode);
+        ActionScript scriptInstance = _scriptManager.GetScript<ActionScript>(script.ScriptName!);
         await Assert.ThrowsExceptionAsync<CouldNotFindMethodException>(async () =>
         {
             RecentActionResult ar = await scriptInstance.Execute2(TestHelper.GetContext()); //will throw because method doesnt exist in the script
