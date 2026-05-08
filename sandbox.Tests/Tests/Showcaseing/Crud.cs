@@ -23,8 +23,6 @@ public class CrudDemos
 
     public static (IScriptManager, IScriptManagerBaseExtended) InitScriptManager()
     {
-        IScriptManager scriptManager;
-        IScriptManagerBaseExtended scriptManagerBase;
         ServiceCollection services = new ServiceCollection();
 
         LoggerForScripting logger = new LoggerForScripting();
@@ -40,8 +38,8 @@ public class CrudDemos
 
         var provider = services.BuildServiceProvider();
 
-        scriptManager = provider.GetRequiredService<IScriptManager>();
-        scriptManagerBase = provider.GetRequiredService<IScriptManagerBaseExtended>();
+        IScriptManager scriptManager = provider.GetRequiredService<IScriptManager>();
+        IScriptManagerBaseExtended scriptManagerBase = provider.GetRequiredService<IScriptManagerBaseExtended>();
 
         return (scriptManager, scriptManagerBase);
     }
@@ -49,17 +47,28 @@ public class CrudDemos
     public async Task Create()
     {
         string sourceCode = TestHelper.GetSC().sourceCodeActionV1;
-        CustomerScript script = await _scriptManagerBase!.CreateScript(sourceCode!);
+
+        ActionScript scriptInstance = await _scriptManager.CreateScript<ActionScript>(sourceCode);  //To retrieve the Script facade instance
+
+        sourceCode = TestHelper.GetSC().sourceCodeActionV2;    //new source code as it will throw a duplicate exception else
+        CustomerScript script = await _scriptManagerBase!.CreateScript(sourceCode);    //To retrieve the more in depth MetaData
 
         Console.WriteLine("Name: " + script.ScriptName);
         Console.WriteLine("Type: " + script.ScriptType);
+        Assert.IsTrue(script.ScriptName == "AddPediatricTestsV3");
+        Assert.IsTrue(script.ScriptType == "IActionScript");
     }
     [TestMethod]
     public async Task Read()
     {
         await Create();
-        CustomerScript script = await _scriptManagerBase.GetScript<IActionScript>("AddPediatricTestsV2");  //
+
+        ActionScript scriptInstance = _scriptManager.GetScript<ActionScript>("AddPediatricTestsV2");    //To retrieve the script facade instance
+
+        CustomerScript script = await _scriptManagerBase.GetScript<IActionScript>("AddPediatricTestsV2");  //To retrieve the more in depth containing the byte[]
         Console.WriteLine("Name: " + script.ScriptName + ", ScriptType: " + script.ScriptType);
+        Assert.IsTrue(script.ScriptName == "AddPediatricTestsV2");
+        Assert.IsTrue(script.ScriptType == "IActionScript");
     }
     [TestMethod]
     public async Task Update()
@@ -67,6 +76,10 @@ public class CrudDemos
         await Create();
         string newSourceCode = TestHelper.GetSC().sourceCodeActionV3;
         await _scriptManagerBase.UpdateScript<IActionScript>("AddPediatricTestsV2", newSourceCode);
+        // await _scriptManagerBase.UpdateScriptAndCompile<IActionScript>("AddPediatricTestsV2", newSourceCode);   //same method including compilation step
+
+        CustomerScript script = await _scriptManagerBase.GetScript<IActionScript>("AddPediatricTestsV4");   //Name is automatically updated according to the new source code
+        Assert.IsTrue(script.SourceCode == newSourceCode);
     }
 
     [TestMethod]
@@ -74,6 +87,11 @@ public class CrudDemos
     {
         await Create();
         await _scriptManagerBase.DeleteScript<IActionScript>("AddPediatricTestsV2");
+
+        await Assert.ThrowsExceptionAsync<System.InvalidOperationException>(async () =>
+        {
+            CustomerScript script = await _scriptManagerBase.GetScript<IActionScript>("AddPediatricTestsV2");   //To retrieve the script facade instance
+        });
     }
     [TestMethod]
     public async Task Execute()
