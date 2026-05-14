@@ -61,11 +61,15 @@ public class EmberInternalFacadeTests
         // ActiveGeneratorContext ctx = new ActiveGeneratorContext(labOrder: obj.labOrder, vaccine: obj.vaccine);
 
         // var ctx = InternalScriptManager.CreateContext(_obj.labOrder, _obj.vaccine);
-        var ctx = TestHelper.GetContext();
 
+        var ctx = TestHelper.GetContext();
         ar = (RecentActionResult)await InternalScriptManager.ExecuteScript(id, ctx!, nameof(RecentIActionScript.ExecuteAsync));
 
+        id = (await _scriptManager.CreateScript(TestHelper.GetSC().sourceCodeActionV1!)).Id;
+        ar = (RecentActionResult)await InternalScriptManager.ExecuteScript(id, ctx!, nameof(RecentIActionScript.ExecuteAsync));
 
+        id = (await _scriptManager.CreateScript(TestHelper.GetSC().sourceCodeActionV3!)).Id;
+        ar = (RecentActionResult)await InternalScriptManager.ExecuteScript(id, ctx!, nameof(RecentIActionScript.ExecuteAsync));
 
         // Assert.IsTrue(ar.GetType() == typeof(ActionResultV3.ActionResult));
         Console.WriteLine("Type name: " + ar.GetType().FullName);
